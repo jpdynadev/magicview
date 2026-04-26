@@ -56,7 +56,7 @@ export function AuthCard() {
           type="button"
           onClick={() => setMode("signup")}
         >
-          Create account
+          Sign up
         </button>
         <button
           className={mode === "signin" ? "button" : "button ghost"}
