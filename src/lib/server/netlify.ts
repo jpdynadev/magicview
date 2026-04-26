@@ -1,8 +1,6 @@
 import type { HandlerEvent, HandlerResponse } from "@netlify/functions";
 
-import { verifyUserToken } from "@/lib/server/auth";
-import { queryOne } from "@/lib/server/db";
-import { mapUserRow } from "@/lib/server/serializers";
+import { getSession, getUserById } from "@/lib/server/data";
 import type { AppUser } from "@/lib/types";
 
 export class HttpError extends Error {
@@ -57,24 +55,18 @@ export async function requireUser(event: HandlerEvent): Promise<AppUser> {
   }
 
   const token = authorization.replace("Bearer ", "");
-  const payload = await verifyUserToken(token).catch(() =>
-    unauthorized("Invalid auth token."),
-  );
+  const session = await getSession(token);
 
-  const userRow = await queryOne<Record<string, unknown>>(
-    `
-      select id, email, created_at
-      from users
-      where id = $1 and email = $2
-    `,
-    [payload.sub, payload.email],
-  );
+  if (!session) {
+    unauthorized("Invalid auth token.");
+  }
 
-  if (!userRow) {
+  const user = await getUserById(session.user_id);
+  if (!user) {
     unauthorized("User account not found.");
   }
 
-  return mapUserRow(userRow);
+  return user;
 }
 
 export async function requireUserId(event: HandlerEvent): Promise<string> {
@@ -89,26 +81,6 @@ export function isPost(event: HandlerEvent): boolean {
 function normalizeUnexpectedError(error: unknown) {
   const rawMessage =
     error instanceof Error ? error.message : "Unexpected server error.";
-
-  if (
-    /DATABASE_URL|NETLIFY_DATABASE_URL|POSTGRES_URL|NEON_DATABASE_URL/i.test(
-      rawMessage,
-    )
-  ) {
-    return {
-      statusCode: 503,
-      message:
-        "MagicView is missing a Postgres database connection in this deployment. Add `DATABASE_URL` in Netlify before auth and saved deck features will work.",
-    };
-  }
-
-  if (/MAGICVIEW_JWT_SECRET/i.test(rawMessage)) {
-    return {
-      statusCode: 503,
-      message:
-        "MagicView is missing `MAGICVIEW_JWT_SECRET` in this deployment. Add it in Netlify before auth will work.",
-    };
-  }
 
   if (/OPENAI_API_KEY/i.test(rawMessage)) {
     return {

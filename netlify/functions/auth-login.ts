@@ -1,7 +1,7 @@
 import type { Handler } from "@netlify/functions";
 
-import { signUserToken, verifyPassword } from "../../src/lib/server/auth";
-import { queryOne } from "../../src/lib/server/db";
+import { verifyPassword } from "../../src/lib/server/auth";
+import { createSession, getUserByEmail } from "../../src/lib/server/data";
 import {
   badRequest,
   isPost,
@@ -9,7 +9,6 @@ import {
   parseJsonBody,
   withErrorBoundary,
 } from "../../src/lib/server/netlify";
-import { mapUserRow } from "../../src/lib/server/serializers";
 import { validateEmail, validatePassword } from "../../src/lib/server/validators";
 import type { AuthResponse } from "../../src/lib/types";
 
@@ -28,30 +27,23 @@ export const handler: Handler = async (event) =>
     const email = validateEmail(request.email);
     const password = validatePassword(request.password);
 
-    const userRow = await queryOne<Record<string, unknown>>(
-      `
-        select id, email, created_at, password_hash
-        from users
-        where email = $1
-      `,
-      [email],
-    );
-
-    if (!userRow?.password_hash) {
+    const storedUser = await getUserByEmail(email);
+    if (!storedUser) {
       badRequest("Invalid email or password.");
     }
 
-    const passwordMatches = await verifyPassword(
-      password,
-      String(userRow.password_hash),
-    );
+    const passwordMatches = await verifyPassword(password, storedUser.password_hash);
 
     if (!passwordMatches) {
       badRequest("Invalid email or password.");
     }
 
-    const user = mapUserRow(userRow);
-    const token = await signUserToken(user);
+    const user = {
+      id: storedUser.id,
+      email: storedUser.email,
+      created_at: storedUser.created_at,
+    };
+    const token = await createSession({ userId: user.id, email: user.email });
 
     const response: AuthResponse = {
       token,
@@ -60,4 +52,3 @@ export const handler: Handler = async (event) =>
 
     return jsonResponse(200, response);
   });
-

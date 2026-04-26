@@ -2,11 +2,9 @@ import { parseCardSignals } from "@/lib/card-tags";
 import { normalizeCardName } from "@/lib/decklist";
 import { serverEnv } from "@/lib/env";
 import { cardCompressionJsonSchema } from "@/lib/server/ai-schemas";
+import { getCachedCard, upsertCachedCard } from "@/lib/server/data";
 import { getOpenAIClient } from "@/lib/server/openai";
 import { getStructuredOutputText } from "@/lib/server/openai-structured";
-import { CARD_SELECT_COLUMNS } from "@/lib/server/queries";
-import { queryMany } from "@/lib/server/db";
-import { mapCachedCardRow } from "@/lib/server/serializers";
 import type { CachedCard } from "@/lib/types";
 
 interface ScryfallCardFace {
@@ -209,65 +207,23 @@ async function upsertCard(
     }
   }
 
-  const rows = await queryMany<Record<string, unknown>>(
-    `
-      insert into cards (
-        scryfall_id,
-        name,
-        name_normalized,
-        mana_value,
-        type_line,
-        oracle_text,
-        colors,
-        tags,
-        compact_summary,
-        primary_abilities,
-        secondary_abilities,
-        mulligan_relevance_score,
-        image_uri
-      )
-      values (
-        $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12, $13
-      )
-      on conflict (name_normalized) do update set
-        scryfall_id = excluded.scryfall_id,
-        name = excluded.name,
-        mana_value = excluded.mana_value,
-        type_line = excluded.type_line,
-        oracle_text = excluded.oracle_text,
-        colors = excluded.colors,
-        tags = excluded.tags,
-        compact_summary = excluded.compact_summary,
-        primary_abilities = excluded.primary_abilities,
-        secondary_abilities = excluded.secondary_abilities,
-        mulligan_relevance_score = excluded.mulligan_relevance_score,
-        image_uri = excluded.image_uri,
-        updated_at = timezone('utc', now())
-      returning ${CARD_SELECT_COLUMNS}
-    `,
-    [
-      record.scryfall_id,
-      record.name,
-      record.name_normalized,
-      record.mana_value,
-      record.type_line,
-      record.oracle_text,
-      record.colors,
-      JSON.stringify(record.tags),
-      record.compact_summary,
-      record.primary_abilities,
-      record.secondary_abilities,
-      record.mulligan_relevance_score,
-      record.image_uri,
-    ],
-  );
+  const cached: CachedCard = {
+    name: record.name,
+    name_normalized: record.name_normalized,
+    mana_value: record.mana_value,
+    type_line: record.type_line,
+    oracle_text: record.oracle_text,
+    colors: record.colors,
+    tags: record.tags,
+    compact_summary: record.compact_summary,
+    primary_abilities: record.primary_abilities,
+    secondary_abilities: record.secondary_abilities,
+    mulligan_relevance_score: record.mulligan_relevance_score,
+    image_uri: record.image_uri,
+  };
 
-  const row = rows[0];
-  if (!row) {
-    throw new Error(`Failed to cache card "${card.name}".`);
-  }
-
-  return mapCachedCardRow(row as Record<string, unknown>);
+  await upsertCachedCard(cached);
+  return cached;
 }
 
 async function batchMap<TInput, TResult>(
@@ -299,21 +255,15 @@ export async function ensureCardsCached(
     };
   }
 
-  const normalizedNames = uniqueNames.map((entry) => entry.normalized);
-  const existingRows = await queryMany<Record<string, unknown>>(
-    `
-      select ${CARD_SELECT_COLUMNS}
-      from cards
-      where name_normalized = any($1)
-    `,
-    [normalizedNames],
-  );
-
   const cards = new Map<string, CachedCard>();
-  for (const row of existingRows) {
-    const card = mapCachedCardRow(row);
-    cards.set(card.name_normalized, card);
-  }
+  await Promise.all(
+    uniqueNames.map(async (entry) => {
+      const cached = await getCachedCard(entry.normalized);
+      if (cached) {
+        cards.set(cached.name_normalized, cached);
+      }
+    }),
+  );
 
   const missing = uniqueNames.filter((entry) => !cards.has(entry.normalized));
   const unresolved: string[] = [];

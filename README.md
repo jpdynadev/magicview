@@ -6,30 +6,28 @@ MagicView is a deployable MVP for Magic: The Gathering Commander players. A user
 
 - Frontend: Next.js App Router
 - Backend: Netlify Functions
-- Database: Postgres via Neon-compatible connection string
-- Auth: Netlify Function-backed email/password auth with signed JWTs
+- Persistence: Netlify Blobs (zero database setup)
+- Auth: Email/password with server-stored session tokens (Bearer token)
 - Card data: Scryfall bulk data + named card API fallback
 - AI: OpenAI Responses API with structured JSON output
 
-The MVP does not require Supabase. It also does not require a storage service because the shipped flow uses text hand input only.
+This MVP does not require Supabase, Neon, or any Postgres connection string.
 
 ## MVP Features
 
 - Email/password signup and login
 - Dashboard with deck list and recent saved hands
 - Commander deck import by pasted decklist
-- Commander and bracket selection
+- Commander and bracket selection (1–5)
 - Game session creation
 - Opening-hand analysis for exactly 7 cards
-- Saved hand snapshots with keep or mulligan decision, confidence, reasoning, and turn plan
-- Cached card summaries with deterministic tags and optional AI compression
+- Saved hand snapshots with keep/mulligan decision, confidence, reasoning, and turn plan
+- Cached Scryfall cards with deterministic tags and optional AI compression
 
 ## Project Structure
 
 ```text
 magicview/
-├─ database/
-│  └─ schema.sql
 ├─ netlify/
 │  └─ functions/
 │     ├─ analyze-hand.ts
@@ -72,8 +70,9 @@ magicview/
 │     └─ server/
 │        ├─ ai-schemas.ts
 │        ├─ auth.ts
+│        ├─ blob-store.ts
 │        ├─ card-cache.ts
-│        ├─ db.ts
+│        ├─ data.ts
 │        ├─ deck-strategy.ts
 │        ├─ hand-analysis.ts
 │        ├─ netlify.ts
@@ -87,25 +86,19 @@ magicview/
 └─ package.json
 ```
 
-## Database Schema
+## Persistence Model (Blobs)
 
-The schema lives in [`database/schema.sql`](./database/schema.sql).
+The app uses a Netlify Blobs store named `magicview`.
 
-It creates:
+It stores:
 
-- `users`
-- `decks`
-- `deck_cards`
-- `cards`
-- `game_sessions`
-- `hand_snapshots`
-
-Notable schema decisions:
-
-- `users` stores `email` plus `password_hash`
-- `cards.tags` and `hand_snapshots.cards` use `jsonb`
-- `hand_snapshots.turn_plan` uses `jsonb`
-- `decks.updated_at` and `cards.updated_at` are maintained by triggers
+- Users keyed by `users/by-email/...` and `users/by-id/...` (passwords are hashed with bcrypt)
+- Sessions keyed by `sessions/by-token/...` (bearer tokens are opaque, server-validated)
+- Decks keyed by `decks/by-id/...` plus a per-user deck index
+- Deck cards keyed by `deck-cards/by-deck/...`
+- Cached cards keyed by `cards/by-name/...`
+- Game sessions keyed by `game-sessions/by-id/...` plus a per-deck session index
+- Hand snapshots keyed by `hand-snapshots/by-id/...` plus a per-session snapshot index
 
 ## Card Data Pipeline
 
@@ -113,15 +106,13 @@ Notable schema decisions:
 
 Deck import and hand analysis both call `ensureCardsCached()`.
 
-If a card is missing from the local `cards` cache:
+If a card is missing from the local cache:
 
 1. MagicView queries the Scryfall named-card API.
 2. It deterministically tags the card.
 3. It generates a fallback compact summary.
 4. It optionally compresses the card with OpenAI.
-5. It upserts the result into `cards`.
-
-This keeps the MVP usable before a full bulk sync is run.
+5. It stores the cached card in Netlify Blobs.
 
 ### Bulk ingest script
 
@@ -185,8 +176,8 @@ The response is forced through a strict JSON schema:
 
 ### Public functions
 
-- `auth-register`: creates a user, hashes the password, returns `{ token, user }`
-- `auth-login`: verifies credentials, returns `{ token, user }`
+- `auth-register`: creates a user and session, returns `{ token, user }`
+- `auth-login`: verifies credentials and returns `{ token, user }`
 
 ### Authenticated functions
 
@@ -195,37 +186,27 @@ The response is forced through a strict JSON schema:
 - `get-deck`: returns one deck with cards, sessions, and snapshots
 - `get-result`: returns one saved hand result with its deck and session
 - `upsert-deck`: parses a decklist, resolves cards, builds strategy summary, inserts or updates the deck
-- `start-session`: creates a `game_sessions` row for a deck the user owns
-- `analyze-hand`: resolves the seven cards, builds the AI payload, calls OpenAI, and stores the saved hand snapshot
+- `start-session`: creates a new game session for a deck
+- `analyze-hand`: resolves the seven cards, calls OpenAI, and stores the saved hand snapshot
 
 ## Local Setup
 
-1. Create a Neon project or any Postgres database reachable from Netlify Functions.
-2. Run [`database/schema.sql`](./database/schema.sql) against that database.
-3. Copy `.env.example` to `.env.local`.
-4. Fill in:
+1. Copy `.env.example` to `.env.local`.
+2. (Optional) Add OpenAI keys for hand analysis:
 
 ```bash
-DATABASE_URL=postgres://...
-MAGICVIEW_JWT_SECRET=replace-with-a-long-random-secret
 OPENAI_API_KEY=...
 OPENAI_MULLIGAN_MODEL=gpt-5.4-mini
 OPENAI_CARD_COMPRESSION_MODEL=gpt-5.4-nano
 ```
 
-5. Install dependencies:
+3. Install dependencies:
 
 ```bash
 npm install
 ```
 
-6. Start local development:
-
-```bash
-npm run dev
-```
-
-7. Optional: run through Netlify's local runtime:
+4. Run locally:
 
 ```bash
 npx netlify dev
@@ -249,7 +230,7 @@ curl -X POST http://localhost:8888/.netlify/functions/auth-register \
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/upsert-deck \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
   -d '{
     "name": "Tivit Turns",
     "commander": "Tivit, Seller of Secrets",
@@ -264,7 +245,7 @@ curl -X POST http://localhost:8888/.netlify/functions/upsert-deck \
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/start-session \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
   -d '{
     "deckId": "YOUR_DECK_UUID"
   }'
@@ -275,7 +256,7 @@ curl -X POST http://localhost:8888/.netlify/functions/start-session \
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/analyze-hand \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_SESSION_TOKEN" \
   -d '{
     "sessionId": "YOUR_SESSION_UUID",
     "openingHandText": "Command Tower\nIsland\nSol Ring\nArcane Signet\nRhystic Study\nSwords to Plowshares\nSmothering Tithe",
@@ -294,39 +275,23 @@ The repository already includes:
 
 ### Required environment variables
 
-Set these in Netlify before a production deploy:
+None for auth/decks/sessions/results.
+
+For AI mulligan analysis, set:
 
 ```bash
-DATABASE_URL=postgres://...
-MAGICVIEW_JWT_SECRET=replace-with-a-long-random-secret
 OPENAI_API_KEY=...
 OPENAI_MULLIGAN_MODEL=gpt-5.4-mini
 OPENAI_CARD_COMPRESSION_MODEL=gpt-5.4-nano
 ```
 
-The app also accepts these database env names if you already have them in Netlify:
-
-- `NETLIFY_DATABASE_URL`
-- `POSTGRES_URL`
-- `NEON_DATABASE_URL`
-
 ### Deploy commands
-
-Preview deploy:
-
-```bash
-npx netlify deploy --build
-```
-
-Production deploy:
 
 ```bash
 npx netlify deploy --build --prod
 ```
 
 ## Verification
-
-The repository currently passes:
 
 ```bash
 npm run typecheck
@@ -335,28 +300,9 @@ npm run build
 
 ## Post-MVP Roadmap
 
-### 1. Image recognition for hands
+- Image recognition for hands (upload + OCR + Scryfall matching)
+- Opponent tracking (pod meta, commanders seen, pace indicators)
+- Game outcome learning (label kept hands with outcomes)
+- Deck optimization suggestions (role coverage and curve gaps)
+- Similar hand detection (cluster by strategic roles, reuse prior evals)
 
-- Add image upload support
-- Run OCR plus Scryfall matching
-- Reuse the existing `analyze-hand` pipeline
-
-### 2. Opponent tracking
-
-- Add pod metadata, commanders seen, and pace indicators
-- Let mulligan logic adapt to table speed and interaction density
-
-### 3. Game outcome learning
-
-- Track whether a kept hand converted into a strong or weak game
-- Improve prompts and evaluations with outcome feedback
-
-### 4. Deck optimization suggestions
-
-- Surface repeated weak keep patterns
-- Suggest cuts and adds based on role coverage and curve gaps
-
-### 5. Similar hand detection
-
-- Cluster saved hands by strategic role instead of exact card match
-- Reuse prior evaluations to reduce cost and improve consistency

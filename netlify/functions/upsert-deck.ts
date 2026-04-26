@@ -3,7 +3,11 @@ import type { Handler } from "@netlify/functions";
 import { normalizeCardName, parseDecklist, splitCommanders } from "../../src/lib/decklist";
 import { buildDeckStrategySummary } from "../../src/lib/server/deck-strategy";
 import { ensureCardsCached } from "../../src/lib/server/card-cache";
-import { queryOne, getSql } from "../../src/lib/server/db";
+import {
+  getDeckById,
+  replaceDeckCards,
+  upsertDeck,
+} from "../../src/lib/server/data";
 import {
   badRequest,
   isPost,
@@ -68,68 +72,25 @@ export const handler: Handler = async (event) =>
       existingSummary: request.strategySummary,
     });
 
-    const sql = getSql();
     let deckId = request.deckId;
 
     if (deckId) {
-      const updatedDeck = await queryOne<Record<string, unknown>>(
-        `
-          update decks
-          set
-            name = $1,
-            commander = $2,
-            bracket = $3,
-            strategy_summary = $4
-          where id = $5 and user_id = $6
-          returning id
-        `,
-        [
-          request.name.trim(),
-          request.commander.trim(),
-          request.bracket,
-          strategySummary,
-          deckId,
-          user.id,
-        ],
-      );
-
-      if (!updatedDeck) {
+      const existing = await getDeckById(deckId);
+      if (!existing || existing.user_id !== user.id) {
         notFound("Deck not found.");
       }
-
-      await sql.query(
-        `
-          delete from deck_cards
-          where deck_id = $1
-        `,
-        [deckId],
-      );
-    } else {
-      const insertedDeck = await queryOne<Record<string, unknown>>(
-        `
-          insert into decks (user_id, name, commander, bracket, strategy_summary)
-          values ($1, $2, $3, $4, $5)
-          returning id
-        `,
-        [
-          user.id,
-          request.name.trim(),
-          request.commander.trim(),
-          request.bracket,
-          strategySummary,
-        ],
-      );
-
-      if (!insertedDeck) {
-        throw new Error("Failed to create deck.");
-      }
-
-      deckId = String(insertedDeck.id);
     }
 
-    if (!deckId) {
-      throw new Error("Deck ID was not resolved.");
-    }
+    const deck = await upsertDeck({
+      deckId,
+      userId: user.id,
+      name: request.name.trim(),
+      commander: request.commander.trim(),
+      bracket: request.bracket,
+      strategy_summary: strategySummary,
+    });
+
+    deckId = deck.id;
 
     const cardNames = parsedDecklist.map((entry) => {
       const cached = cachedCards.get(normalizeCardName(entry.cardName));
@@ -137,18 +98,13 @@ export const handler: Handler = async (event) =>
     });
     const quantities = parsedDecklist.map((entry) => entry.quantity);
 
-    if (cardNames.length) {
-      await sql.query(
-        `
-          insert into deck_cards (deck_id, card_name, quantity)
-          select
-            $1::uuid,
-            unnest($2::text[]),
-            unnest($3::integer[])
-        `,
-        [deckId, cardNames, quantities],
-      );
-    }
+    await replaceDeckCards({
+      deckId,
+      cards: cardNames.map((name, index) => ({
+        card_name: name,
+        quantity: quantities[index] ?? 1,
+      })),
+    });
 
     const response: UpsertDeckResponse = {
       deckId,
@@ -159,4 +115,3 @@ export const handler: Handler = async (event) =>
 
     return jsonResponse(200, response);
   });
-
