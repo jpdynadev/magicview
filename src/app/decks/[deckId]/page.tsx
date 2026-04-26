@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 
 import { RequireAuth } from "@/components/auth/require-auth";
 import { AppShell } from "@/components/layout/app-shell";
+import { callNetlifyFunction } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import type { Deck, DeckCard, GameSession, HandSnapshot } from "@/lib/types";
+import type { Deck, DeckCard, DeckDetailResponse, GameSession, HandSnapshot } from "@/lib/types";
 
 export default function DeckDetailPage() {
   const params = useParams<{ deckId: string }>();
@@ -28,58 +28,23 @@ export default function DeckDetailPage() {
 
       setLoading(true);
       setError(null);
-      const supabase = getSupabaseBrowserClient();
 
-      const [{ data: deckRow, error: deckError }, { data: deckCards, error: deckCardsError }, { data: sessionRows, error: sessionsError }] =
-        await Promise.all([
-          supabase
-            .from("decks")
-            .select("*")
-            .eq("id", params.deckId)
-            .eq("user_id", user.id)
-            .single(),
-          supabase
-            .from("deck_cards")
-            .select("*")
-            .eq("deck_id", params.deckId)
-            .order("card_name"),
-          supabase
-            .from("game_sessions")
-            .select("*")
-            .eq("deck_id", params.deckId)
-            .order("created_at", { ascending: false }),
-        ]);
+      try {
+        const response = await callNetlifyFunction<DeckDetailResponse>("get-deck", {
+          deckId: params.deckId,
+        });
 
-      if (deckError || deckCardsError || sessionsError) {
-        setError(deckError?.message || deckCardsError?.message || sessionsError?.message || "Failed to load deck.");
+        setDeck(response.deck);
+        setCards(response.cards);
+        setSessions(response.sessions);
+        setSnapshots(response.snapshots);
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error ? loadError.message : "Failed to load deck.",
+        );
+      } finally {
         setLoading(false);
-        return;
       }
-
-      setDeck(deckRow as Deck);
-      setCards((deckCards ?? []) as DeckCard[]);
-      setSessions((sessionRows ?? []) as GameSession[]);
-
-      if ((sessionRows ?? []).length) {
-        const { data: handRows, error: handError } = await supabase
-          .from("hand_snapshots")
-          .select("*")
-          .in(
-            "session_id",
-            (sessionRows ?? []).map((session) => session.id),
-          )
-          .order("created_at", { ascending: false });
-
-        if (handError) {
-          setError(handError.message);
-        } else {
-          setSnapshots((handRows ?? []) as HandSnapshot[]);
-        }
-      } else {
-        setSnapshots([]);
-      }
-
-      setLoading(false);
     };
 
     void loadDeck();
@@ -189,4 +154,3 @@ export default function DeckDetailPage() {
     </RequireAuth>
   );
 }
-

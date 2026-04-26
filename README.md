@@ -1,33 +1,44 @@
 # MagicView
 
-MagicView is a deployable MVP for Magic: The Gathering Commander players. It lets a user sign up, import a deck, start a game session, paste a 7-card opening hand, and receive a structured AI mulligan recommendation with confidence, reasoning, and a 3-turn plan.
+MagicView is a deployable MVP for Magic: The Gathering Commander players. A user can create an account, import a deck, start a game session, paste a 7-card opening hand, and get a structured AI mulligan recommendation with confidence, reasoning, and a turn plan.
 
 ## Stack
 
 - Frontend: Next.js App Router
 - Backend: Netlify Functions
-- Database/Auth/Storage: Supabase
+- Database: Postgres via Neon-compatible connection string
+- Auth: Netlify Function-backed email/password auth with signed JWTs
 - Card data: Scryfall bulk data + named card API fallback
 - AI: OpenAI Responses API with structured JSON output
 
+The MVP does not require Supabase. It also does not require a storage service because the shipped flow uses text hand input only.
+
 ## MVP Features
 
-- Email/password signup and login through Supabase Auth
-- Dashboard for deck creation and deck history
-- Commander deck import by pasted list
-- Commander selection and bracket selection (1-5)
+- Email/password signup and login
+- Dashboard with deck list and recent saved hands
+- Commander deck import by pasted decklist
+- Commander and bracket selection
 - Game session creation
 - Opening-hand analysis for exactly 7 cards
-- Saved hand snapshots with keep/mulligan decision, confidence, reasoning, and turn plan
-- Cached Scryfall cards with deterministic tags and optional AI compression
+- Saved hand snapshots with keep or mulligan decision, confidence, reasoning, and turn plan
+- Cached card summaries with deterministic tags and optional AI compression
 
-## Important Folders
+## Project Structure
 
 ```text
 magicview/
+├─ database/
+│  └─ schema.sql
 ├─ netlify/
 │  └─ functions/
 │     ├─ analyze-hand.ts
+│     ├─ auth-login.ts
+│     ├─ auth-register.ts
+│     ├─ get-deck.ts
+│     ├─ get-result.ts
+│     ├─ list-decks.ts
+│     ├─ me.ts
 │     ├─ start-session.ts
 │     └─ upsert-deck.ts
 ├─ scripts/
@@ -41,56 +52,60 @@ magicview/
 │  │  ├─ sessions/[sessionId]/result/page.tsx
 │  │  ├─ globals.css
 │  │  ├─ layout.tsx
-│  │  └─ page.tsx
+│  │  ├─ page.tsx
+│  │  └─ providers.tsx
 │  ├─ components/
-│  │  ├─ auth/
-│  │  ├─ dashboard/
-│  │  ├─ decks/
-│  │  ├─ layout/
-│  │  └─ session/
+│  │  ├─ auth/auth-card.tsx
+│  │  ├─ auth/require-auth.tsx
+│  │  ├─ dashboard/deck-list.tsx
+│  │  ├─ decks/deck-editor.tsx
+│  │  ├─ layout/app-shell.tsx
+│  │  └─ session/result-card.tsx
 │  └─ lib/
 │     ├─ api.ts
 │     ├─ auth-context.tsx
+│     ├─ auth-storage.ts
 │     ├─ card-tags.ts
 │     ├─ decklist.ts
 │     ├─ env.ts
-│     ├─ supabase-browser.ts
 │     ├─ types.ts
 │     └─ server/
 │        ├─ ai-schemas.ts
+│        ├─ auth.ts
 │        ├─ card-cache.ts
+│        ├─ db.ts
 │        ├─ deck-strategy.ts
 │        ├─ hand-analysis.ts
 │        ├─ netlify.ts
 │        ├─ openai-structured.ts
 │        ├─ openai.ts
-│        └─ supabase-admin.ts
-├─ supabase/
-│  └─ schema.sql
+│        ├─ queries.ts
+│        ├─ serializers.ts
+│        └─ validators.ts
 ├─ .env.example
 ├─ netlify.toml
-├─ next.config.ts
 └─ package.json
 ```
 
 ## Database Schema
 
-The full schema is in [`supabase/schema.sql`](./supabase/schema.sql).
+The schema lives in [`database/schema.sql`](./database/schema.sql).
 
 It creates:
 
-- `public.users`
-- `public.decks`
-- `public.deck_cards`
-- `public.cards`
-- `public.game_sessions`
-- `public.hand_snapshots`
+- `users`
+- `decks`
+- `deck_cards`
+- `cards`
+- `game_sessions`
+- `hand_snapshots`
 
-It also includes:
+Notable schema decisions:
 
-- auth user sync trigger from `auth.users` to `public.users`
-- row-level security policies for every player-owned table
-- a `hand-images` Supabase Storage bucket for future hand image uploads
+- `users` stores `email` plus `password_hash`
+- `cards.tags` and `hand_snapshots.cards` use `jsonb`
+- `hand_snapshots.turn_plan` uses `jsonb`
+- `decks.updated_at` and `cards.updated_at` are maintained by triggers
 
 ## Card Data Pipeline
 
@@ -100,17 +115,15 @@ Deck import and hand analysis both call `ensureCardsCached()`.
 
 If a card is missing from the local `cards` cache:
 
-1. MagicView hits the Scryfall named-card API
-2. It deterministically tags the card
-3. It generates a fallback summary
-4. It optionally compresses the card with OpenAI
-5. It upserts the result into `public.cards`
+1. MagicView queries the Scryfall named-card API.
+2. It deterministically tags the card.
+3. It generates a fallback compact summary.
+4. It optionally compresses the card with OpenAI.
+5. It upserts the result into `cards`.
 
-This means the MVP still works even before a full bulk sync is run.
+This keeps the MVP usable before a full bulk sync is run.
 
 ### Bulk ingest script
-
-Run the bulk ingest script when you want to preload the cache:
 
 ```bash
 npm run scryfall:sync -- --download
@@ -119,10 +132,10 @@ npm run scryfall:sync -- --download
 Useful variants:
 
 ```bash
-# Download + ingest first 500 cards with deterministic tags only
+# Download and ingest the first 500 cards with deterministic tags only
 npm run scryfall:sync -- --download --limit 500
 
-# Ingest from existing file and run AI compression
+# Ingest from an existing file and run AI compression
 npm run scryfall:sync -- --file data/scryfall/oracle-cards.json --limit 250 --ai
 
 # Resume later from an offset
@@ -150,7 +163,7 @@ The mulligan function sends a compact payload to OpenAI:
 }
 ```
 
-The AI response is forced through a strict JSON schema:
+The response is forced through a strict JSON schema:
 
 ```json
 {
@@ -170,42 +183,34 @@ The AI response is forced through a strict JSON schema:
 
 ## Netlify Functions
 
-### `upsert-deck`
+### Public functions
 
-- Verifies Supabase auth token
-- Parses the pasted decklist
-- Caches missing cards from Scryfall
-- Builds a deck strategy summary
-- Inserts or updates the deck and its card list
+- `auth-register`: creates a user, hashes the password, returns `{ token, user }`
+- `auth-login`: verifies credentials, returns `{ token, user }`
 
-### `start-session`
+### Authenticated functions
 
-- Verifies deck ownership
-- Creates a new `game_sessions` row
-
-### `analyze-hand`
-
-- Verifies session ownership
-- Resolves all 7 hand cards plus commander(s)
-- Builds the compact AI payload
-- Calls OpenAI with structured output
-- Persists the result into `hand_snapshots`
+- `me`: returns the current user from the bearer token
+- `list-decks`: returns all decks owned by the current user
+- `get-deck`: returns one deck with cards, sessions, and snapshots
+- `get-result`: returns one saved hand result with its deck and session
+- `upsert-deck`: parses a decklist, resolves cards, builds strategy summary, inserts or updates the deck
+- `start-session`: creates a `game_sessions` row for a deck the user owns
+- `analyze-hand`: resolves the seven cards, builds the AI payload, calls OpenAI, and stores the saved hand snapshot
 
 ## Local Setup
 
-1. Create a Supabase project.
-2. Run [`supabase/schema.sql`](./supabase/schema.sql) in the Supabase SQL editor.
+1. Create a Neon project or any Postgres database reachable from Netlify Functions.
+2. Run [`database/schema.sql`](./database/schema.sql) against that database.
 3. Copy `.env.example` to `.env.local`.
 4. Fill in:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=...
-NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...
+DATABASE_URL=postgres://...
+MAGICVIEW_JWT_SECRET=replace-with-a-long-random-secret
 OPENAI_API_KEY=...
 OPENAI_MULLIGAN_MODEL=gpt-5.4-mini
 OPENAI_CARD_COMPRESSION_MODEL=gpt-5.4-nano
-SUPABASE_HAND_IMAGES_BUCKET=hand-images
 ```
 
 5. Install dependencies:
@@ -220,7 +225,7 @@ npm install
 npm run dev
 ```
 
-7. Optional: run through Netlify’s local runtime:
+7. Optional: run through Netlify's local runtime:
 
 ```bash
 npx netlify dev
@@ -228,14 +233,23 @@ npx netlify dev
 
 ## Example API Calls
 
-These examples assume you already have a Supabase access token from a signed-in user.
+### Create an account
+
+```bash
+curl -X POST http://localhost:8888/.netlify/functions/auth-register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "you@playgroup.gg",
+    "password": "supersecret123"
+  }'
+```
 
 ### Create or import a deck
 
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/upsert-deck \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SUPABASE_ACCESS_TOKEN" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "name": "Tivit Turns",
     "commander": "Tivit, Seller of Secrets",
@@ -250,7 +264,7 @@ curl -X POST http://localhost:8888/.netlify/functions/upsert-deck \
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/start-session \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SUPABASE_ACCESS_TOKEN" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "deckId": "YOUR_DECK_UUID"
   }'
@@ -261,7 +275,7 @@ curl -X POST http://localhost:8888/.netlify/functions/start-session \
 ```bash
 curl -X POST http://localhost:8888/.netlify/functions/analyze-hand \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_SUPABASE_ACCESS_TOKEN" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -d '{
     "sessionId": "YOUR_SESSION_UUID",
     "openingHandText": "Command Tower\nIsland\nSol Ring\nArcane Signet\nRhystic Study\nSwords to Plowshares\nSmothering Tithe",
@@ -272,40 +286,47 @@ curl -X POST http://localhost:8888/.netlify/functions/analyze-hand \
 
 ## Netlify Deployment
 
-The repository already has:
+The repository already includes:
 
 - `netlify.toml`
 - Next.js production build config
-- a dedicated `netlify/functions` directory
+- `netlify/functions` for all serverless endpoints
 
-### Deploy steps
+### Required environment variables
 
-1. Push this repository to GitHub.
-2. In Netlify, create or link a site to this repo.
-3. Add the environment variables from `.env.example` in Netlify Site Settings.
-4. Deploy with either:
+Set these in Netlify before a production deploy:
+
+```bash
+DATABASE_URL=postgres://...
+MAGICVIEW_JWT_SECRET=replace-with-a-long-random-secret
+OPENAI_API_KEY=...
+OPENAI_MULLIGAN_MODEL=gpt-5.4-mini
+OPENAI_CARD_COMPRESSION_MODEL=gpt-5.4-nano
+```
+
+The app also accepts these database env names if you already have them in Netlify:
+
+- `NETLIFY_DATABASE_URL`
+- `POSTGRES_URL`
+- `NEON_DATABASE_URL`
+
+### Deploy commands
+
+Preview deploy:
 
 ```bash
 npx netlify deploy --build
 ```
 
-For production:
+Production deploy:
 
 ```bash
 npx netlify deploy --build --prod
 ```
 
-### Current CLI status
-
-- Netlify CLI is authenticated in this environment.
-- This repository is **not yet linked** to a Netlify site.
-- `npx netlify link --git-remote-url https://github.com/jpdynadev/magicview.git` returned **no matching project found**.
-
-That means the code is deployable now, but an actual Netlify site still needs to be created or linked before a real deploy can happen.
-
 ## Verification
 
-The current repository passes:
+The repository currently passes:
 
 ```bash
 npm run typecheck
@@ -316,8 +337,8 @@ npm run build
 
 ### 1. Image recognition for hands
 
-- Upload opening hand photos to Supabase Storage
-- Use OCR + card matching against Scryfall
+- Add image upload support
+- Run OCR plus Scryfall matching
 - Reuse the existing `analyze-hand` pipeline
 
 ### 2. Opponent tracking
@@ -327,15 +348,15 @@ npm run build
 
 ### 3. Game outcome learning
 
-- Track whether the kept hand won, lost, or stalled
-- Build feedback loops for prompt/eval improvement
+- Track whether a kept hand converted into a strong or weak game
+- Improve prompts and evaluations with outcome feedback
 
 ### 4. Deck optimization suggestions
 
 - Surface repeated weak keep patterns
-- Suggest cuts/adds by comparing weak hands with deck tags and curve signals
+- Suggest cuts and adds based on role coverage and curve gaps
 
 ### 5. Similar hand detection
 
-- Hash saved hands and cluster by card role rather than exact card names
+- Cluster saved hands by strategic role instead of exact card match
 - Reuse prior evaluations to reduce cost and improve consistency

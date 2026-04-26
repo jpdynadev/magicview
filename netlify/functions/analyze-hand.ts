@@ -2,15 +2,18 @@ import type { Handler } from "@netlify/functions";
 
 import { normalizeCardName, parseHandInput, splitCommanders } from "../../src/lib/decklist";
 import { ensureCardsCached } from "../../src/lib/server/card-cache";
-import { buildStoredHandCards, analyzeOpeningHand, alignCardsToInput } from "../../src/lib/server/hand-analysis";
+import { analyzeOpeningHand, alignCardsToInput, buildStoredHandCards } from "../../src/lib/server/hand-analysis";
+import { queryOne } from "../../src/lib/server/db";
 import {
+  badRequest,
   isPost,
   jsonResponse,
+  notFound,
   parseJsonBody,
-  requireUserId,
+  requireUser,
   withErrorBoundary,
 } from "../../src/lib/server/netlify";
-import { getSupabaseAdminClient } from "../../src/lib/server/supabase-admin";
+import { mapCachedCardRow } from "../../src/lib/server/serializers";
 import type {
   AnalyzeHandRequest,
   AnalyzeHandResponse,
@@ -24,53 +27,53 @@ export const handler: Handler = async (event) =>
       return jsonResponse(405, { error: "Method not allowed." });
     }
 
-    const userId = await requireUserId(event);
+    const user = await requireUser(event);
     const request = parseJsonBody<AnalyzeHandRequest>(event);
 
     if (!request.sessionId) {
-      throw new Error("Session ID is required.");
+      badRequest("Session ID is required.");
     }
 
     const handNames = parseHandInput(request.openingHandText);
     if (handNames.length !== 7) {
-      throw new Error("Opening hand must contain exactly 7 cards.");
+      badRequest("Opening hand must contain exactly 7 cards.");
     }
 
-    const supabase = getSupabaseAdminClient();
-    const { data: session, error: sessionError } = await supabase
-      .from("game_sessions")
-      .select("id,deck_id")
-      .eq("id", request.sessionId)
-      .single();
+    const sessionRow = await queryOne<Record<string, unknown>>(
+      `
+        select
+          gs.id,
+          gs.deck_id,
+          d.user_id,
+          d.commander,
+          d.bracket,
+          d.strategy_summary
+        from game_sessions gs
+        join decks d on d.id = gs.deck_id
+        where gs.id = $1 and d.user_id = $2
+      `,
+      [request.sessionId, user.id],
+    );
 
-    if (sessionError || !session) {
-      throw new Error("Game session not found.");
+    if (!sessionRow) {
+      notFound("Game session not found.");
     }
 
-    const { data: deckRow, error: deckError } = await supabase
-      .from("decks")
-      .select("id,user_id,commander,bracket,strategy_summary")
-      .eq("id", session.deck_id)
-      .eq("user_id", userId)
-      .single();
-
-    if (deckError || !deckRow) {
-      throw new Error("Deck not found for this session.");
-    }
-
-    const deck = deckRow as {
-      id: string;
-      user_id: string;
-      commander: string;
-      bracket: number;
-      strategy_summary: string | null;
+    const deck = {
+      id: String(sessionRow.deck_id),
+      user_id: String(sessionRow.user_id),
+      commander: String(sessionRow.commander),
+      bracket: Number(sessionRow.bracket),
+      strategy_summary:
+        sessionRow.strategy_summary == null
+          ? null
+          : String(sessionRow.strategy_summary),
     };
 
     const commanderNames = splitCommanders(deck.commander);
     const { cards: cachedCards, unresolved } = await ensureCardsCached(
       [...handNames, ...commanderNames],
       {
-        supabase,
         compressWithAi: true,
       },
     );
@@ -101,28 +104,40 @@ export const handler: Handler = async (event) =>
 
     const result = await analyzeOpeningHand(payload);
 
-    const { data, error } = await supabase
-      .from("hand_snapshots")
-      .insert({
-        session_id: request.sessionId,
-        mulligan_number: request.mulliganNumber,
-        seat_position: request.seatPosition,
-        cards: buildStoredHandCards(openingHandCards),
-        decision: result.decision,
-        confidence: result.confidence,
-        reasoning: result.reasoning,
-        turn_plan: result.turn_plan,
-      })
-      .select("id")
-      .single();
+    const snapshotRow = await queryOne<Record<string, unknown>>(
+      `
+        insert into hand_snapshots (
+          session_id,
+          mulligan_number,
+          seat_position,
+          cards,
+          decision,
+          confidence,
+          reasoning,
+          turn_plan
+        )
+        values ($1, $2, $3, $4::jsonb, $5, $6, $7, $8::jsonb)
+        returning id
+      `,
+      [
+        request.sessionId,
+        request.mulliganNumber,
+        request.seatPosition,
+        JSON.stringify(buildStoredHandCards(openingHandCards)),
+        result.decision,
+        result.confidence,
+        result.reasoning,
+        JSON.stringify(result.turn_plan),
+      ],
+    );
 
-    if (error || !data) {
+    if (!snapshotRow) {
       throw new Error("Failed to save hand snapshot.");
     }
 
     const response: AnalyzeHandResponse = {
       sessionId: request.sessionId,
-      snapshotId: data.id as string,
+      snapshotId: String(snapshotRow.id),
       result,
     };
 

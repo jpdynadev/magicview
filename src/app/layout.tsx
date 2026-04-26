@@ -19,7 +19,7 @@ const monoFont = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "MagicView",
-  description: "AI-powered Commander mulligan and deck analysis on Next.js, Supabase, and Netlify.",
+  description: "AI-powered Commander mulligan and deck analysis on Next.js, Netlify Functions, and Neon Postgres.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -31,4 +31,3 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 }
-

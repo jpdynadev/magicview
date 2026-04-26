@@ -1,17 +1,20 @@
 "use client";
 
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import { getStoredAuthToken } from "@/lib/auth-storage";
+
+interface FunctionCallOptions {
+  requireAuth?: boolean;
+  token?: string | null;
+}
 
 export async function callNetlifyFunction<TResponse>(
   functionName: string,
   payload: Record<string, unknown>,
+  options: FunctionCallOptions = {},
 ): Promise<TResponse> {
-  const supabase = getSupabaseBrowserClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const token = options.token ?? getStoredAuthToken();
 
-  if (!session?.access_token) {
+  if (options.requireAuth !== false && !token) {
     throw new Error("You must be signed in to perform this action.");
   }
 
@@ -19,7 +22,7 @@ export async function callNetlifyFunction<TResponse>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify(payload),
   });
@@ -33,3 +36,11 @@ export async function callNetlifyFunction<TResponse>(
   return body;
 }
 
+export async function callPublicNetlifyFunction<TResponse>(
+  functionName: string,
+  payload: Record<string, unknown>,
+) {
+  return callNetlifyFunction<TResponse>(functionName, payload, {
+    requireAuth: false,
+  });
+}

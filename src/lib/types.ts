@@ -2,6 +2,12 @@ export type MulliganDecision = "KEEP" | "MULLIGAN";
 
 export type SeatPosition = "first" | "middle" | "last";
 
+export interface AppUser {
+  id: string;
+  email: string;
+  created_at: string;
+}
+
 export interface Deck {
   id: string;
   user_id: string;
@@ -118,6 +124,15 @@ export interface StartSessionResponse {
   createdAt: string;
 }
 
+export interface AuthResponse {
+  token: string;
+  user: AppUser;
+}
+
+export interface MeResponse {
+  user: AppUser;
+}
+
 export interface AnalyzeHandRequest {
   sessionId: string;
   openingHandText: string;
@@ -135,5 +150,22 @@ export interface SessionDeckSummary {
   deck: Deck;
   cards: DeckCard[];
   recentHands: Array<HandSnapshot & { session_created_at?: string }>;
+}
+
+export interface ListDecksResponse {
+  decks: Deck[];
+}
+
+export interface DeckDetailResponse {
+  deck: Deck;
+  cards: DeckCard[];
+  sessions: GameSession[];
+  snapshots: HandSnapshot[];
+}
+
+export interface ResultDetailResponse {
+  session: GameSession;
+  deck: Deck;
+  snapshot: HandSnapshot;
 }
 

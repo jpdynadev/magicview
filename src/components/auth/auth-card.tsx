@@ -3,58 +3,33 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+import { callPublicNetlifyFunction } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import type { AuthResponse } from "@/lib/types";
 
 export function AuthCard() {
   const router = useRouter();
-  const { configError } = useAuth();
+  const { signIn } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
-    setMessage(null);
     setError(null);
 
     try {
-      const supabase = getSupabaseBrowserClient();
+      const functionName = mode === "signup" ? "auth-register" : "auth-login";
+      const response = await callPublicNetlifyFunction<AuthResponse>(functionName, {
+        email,
+        password,
+      });
 
-      if (mode === "signup") {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-        });
-
-        if (signUpError) {
-          throw signUpError;
-        }
-
-        if (data.session) {
-          router.replace("/dashboard");
-          return;
-        }
-
-        setMessage(
-          "Account created. If email confirmation is enabled in Supabase, confirm the email and then sign in.",
-        );
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (signInError) {
-          throw signInError;
-        }
-
-        router.replace("/dashboard");
-      }
+      signIn(response);
+      router.replace("/dashboard");
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : "Authentication failed.",
@@ -124,13 +99,9 @@ export function AuthCard() {
         </button>
       </form>
 
-      {configError ? (
-        <p className="notice error">
-          {configError} Add `NEXT_PUBLIC_SUPABASE_URL` and
-          `NEXT_PUBLIC_SUPABASE_ANON_KEY` in Netlify before auth will work.
-        </p>
-      ) : null}
-      {message ? <p className="notice success">{message}</p> : null}
+      <p className="muted-copy">
+        This deployment uses Netlify Functions plus Neon-backed Postgres auth.
+      </p>
       {error ? <p className="notice error">{error}</p> : null}
     </div>
   );

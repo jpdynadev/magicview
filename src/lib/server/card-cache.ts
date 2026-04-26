@@ -1,18 +1,17 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-
 import { parseCardSignals } from "@/lib/card-tags";
 import { normalizeCardName } from "@/lib/decklist";
 import { serverEnv } from "@/lib/env";
-import type { CachedCard } from "@/lib/types";
 import { cardCompressionJsonSchema } from "@/lib/server/ai-schemas";
-import { getStructuredOutputText } from "@/lib/server/openai-structured";
 import { getOpenAIClient } from "@/lib/server/openai";
-import { getSupabaseAdminClient } from "@/lib/server/supabase-admin";
+import { getStructuredOutputText } from "@/lib/server/openai-structured";
+import { CARD_SELECT_COLUMNS } from "@/lib/server/queries";
+import { queryMany } from "@/lib/server/db";
+import { mapCachedCardRow } from "@/lib/server/serializers";
+import type { CachedCard } from "@/lib/types";
 
 interface ScryfallCardFace {
   oracle_text?: string;
   type_line?: string;
-  mana_cost?: string;
 }
 
 interface ScryfallCard {
@@ -188,7 +187,6 @@ async function compressCardRecord(
 }
 
 async function upsertCard(
-  supabase: SupabaseClient,
   card: ReturnType<typeof baseCardRecord>,
   options?: { compressWithAi?: boolean },
 ): Promise<CachedCard> {
@@ -207,25 +205,69 @@ async function upsertCard(
         tags: Array.from(new Set([...record.tags, ...compressed.strategic_tags])).sort(),
       };
     } catch {
-      // Fallback remains deterministic so deck import still works.
+      // Deterministic fallback still provides useful cache coverage.
     }
   }
 
-  const { data, error } = await supabase
-    .from("cards")
-    .upsert(record, {
-      onConflict: "name_normalized",
-    })
-    .select(
-      "name,name_normalized,mana_value,type_line,oracle_text,colors,tags,compact_summary,primary_abilities,secondary_abilities,mulligan_relevance_score,image_uri",
-    )
-    .single();
+  const rows = await queryMany<Record<string, unknown>>(
+    `
+      insert into cards (
+        scryfall_id,
+        name,
+        name_normalized,
+        mana_value,
+        type_line,
+        oracle_text,
+        colors,
+        tags,
+        compact_summary,
+        primary_abilities,
+        secondary_abilities,
+        mulligan_relevance_score,
+        image_uri
+      )
+      values (
+        $1, $2, $3, $4, $5, $6, $7, $8::jsonb, $9, $10, $11, $12, $13
+      )
+      on conflict (name_normalized) do update set
+        scryfall_id = excluded.scryfall_id,
+        name = excluded.name,
+        mana_value = excluded.mana_value,
+        type_line = excluded.type_line,
+        oracle_text = excluded.oracle_text,
+        colors = excluded.colors,
+        tags = excluded.tags,
+        compact_summary = excluded.compact_summary,
+        primary_abilities = excluded.primary_abilities,
+        secondary_abilities = excluded.secondary_abilities,
+        mulligan_relevance_score = excluded.mulligan_relevance_score,
+        image_uri = excluded.image_uri,
+        updated_at = timezone('utc', now())
+      returning ${CARD_SELECT_COLUMNS}
+    `,
+    [
+      record.scryfall_id,
+      record.name,
+      record.name_normalized,
+      record.mana_value,
+      record.type_line,
+      record.oracle_text,
+      record.colors,
+      JSON.stringify(record.tags),
+      record.compact_summary,
+      record.primary_abilities,
+      record.secondary_abilities,
+      record.mulligan_relevance_score,
+      record.image_uri,
+    ],
+  );
 
-  if (error || !data) {
+  const row = rows[0];
+  if (!row) {
     throw new Error(`Failed to cache card "${card.name}".`);
   }
 
-  return data as CachedCard;
+  return mapCachedCardRow(row as Record<string, unknown>);
 }
 
 async function batchMap<TInput, TResult>(
@@ -246,9 +288,8 @@ async function batchMap<TInput, TResult>(
 
 export async function ensureCardsCached(
   names: string[],
-  options?: { compressWithAi?: boolean; supabase?: SupabaseClient },
+  options?: { compressWithAi?: boolean },
 ): Promise<EnsureCardsResult> {
-  const supabase = options?.supabase ?? getSupabaseAdminClient();
   const uniqueNames = dedupeNames(names);
 
   if (!uniqueNames.length) {
@@ -259,20 +300,19 @@ export async function ensureCardsCached(
   }
 
   const normalizedNames = uniqueNames.map((entry) => entry.normalized);
-  const { data: existingRows, error } = await supabase
-    .from("cards")
-    .select(
-      "name,name_normalized,mana_value,type_line,oracle_text,colors,tags,compact_summary,primary_abilities,secondary_abilities,mulligan_relevance_score,image_uri",
-    )
-    .in("name_normalized", normalizedNames);
-
-  if (error) {
-    throw new Error("Failed to query cached cards.");
-  }
+  const existingRows = await queryMany<Record<string, unknown>>(
+    `
+      select ${CARD_SELECT_COLUMNS}
+      from cards
+      where name_normalized = any($1)
+    `,
+    [normalizedNames],
+  );
 
   const cards = new Map<string, CachedCard>();
-  for (const row of (existingRows ?? []) as CachedCard[]) {
-    cards.set(row.name_normalized, row);
+  for (const row of existingRows) {
+    const card = mapCachedCardRow(row);
+    cards.set(card.name_normalized, card);
   }
 
   const missing = uniqueNames.filter((entry) => !cards.has(entry.normalized));
@@ -281,11 +321,7 @@ export async function ensureCardsCached(
   await batchMap(missing, 6, async (entry) => {
     try {
       const scryfallCard = await fetchScryfallCard(entry.original);
-      const cached = await upsertCard(
-        supabase,
-        baseCardRecord(scryfallCard),
-        options,
-      );
+      const cached = await upsertCard(baseCardRecord(scryfallCard), options);
       cards.set(cached.name_normalized, cached);
     } catch {
       unresolved.push(entry.original);
@@ -300,8 +336,7 @@ export async function ensureCardsCached(
 
 export async function ingestScryfallCard(
   rawCard: ScryfallCard,
-  options?: { compressWithAi?: boolean; supabase?: SupabaseClient },
+  options?: { compressWithAi?: boolean },
 ): Promise<CachedCard> {
-  const supabase = options?.supabase ?? getSupabaseAdminClient();
-  return upsertCard(supabase, baseCardRecord(rawCard), options);
+  return upsertCard(baseCardRecord(rawCard), options);
 }

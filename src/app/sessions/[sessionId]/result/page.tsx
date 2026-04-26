@@ -7,9 +7,9 @@ import { useEffect, useState } from "react";
 import { RequireAuth } from "@/components/auth/require-auth";
 import { AppShell } from "@/components/layout/app-shell";
 import { ResultCard } from "@/components/session/result-card";
+import { callNetlifyFunction } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import type { Deck, GameSession, HandSnapshot } from "@/lib/types";
+import type { Deck, GameSession, HandSnapshot, ResultDetailResponse } from "@/lib/types";
 
 export default function ResultPage() {
   const params = useParams<{ sessionId: string }>();
@@ -30,43 +30,26 @@ export default function ResultPage() {
 
       setLoading(true);
       setError(null);
-      const supabase = getSupabaseBrowserClient();
 
-      const { data: sessionRow, error: sessionError } = await supabase
-        .from("game_sessions")
-        .select("*")
-        .eq("id", params.sessionId)
-        .single();
+      try {
+        const response = await callNetlifyFunction<ResultDetailResponse>(
+          "get-result",
+          {
+            sessionId: params.sessionId,
+            snapshotId,
+          },
+        );
 
-      if (sessionError || !sessionRow) {
-        setError(sessionError?.message || "Session not found.");
+        setSession(response.session);
+        setDeck(response.deck);
+        setSnapshot(response.snapshot);
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error ? loadError.message : "Result not found.",
+        );
+      } finally {
         setLoading(false);
-        return;
       }
-
-      const { data: deckRow, error: deckError } = await supabase
-        .from("decks")
-        .select("*")
-        .eq("id", sessionRow.deck_id)
-        .eq("user_id", user.id)
-        .single();
-
-      const { data: snapshotRow, error: snapshotError } = await supabase
-        .from("hand_snapshots")
-        .select("*")
-        .eq("id", snapshotId)
-        .eq("session_id", params.sessionId)
-        .single();
-
-      if (deckError || snapshotError || !deckRow || !snapshotRow) {
-        setError(deckError?.message || snapshotError?.message || "Result not found.");
-      } else {
-        setSession(sessionRow as GameSession);
-        setDeck(deckRow as Deck);
-        setSnapshot(snapshotRow as HandSnapshot);
-      }
-
-      setLoading(false);
     };
 
     void loadResult();

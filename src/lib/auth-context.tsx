@@ -7,74 +7,91 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Session, User } from "@supabase/supabase-js";
 
-import { hasSupabasePublicEnv } from "@/lib/env";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
+import {
+  clearStoredAuthToken,
+  getStoredAuthToken,
+  setStoredAuthToken,
+} from "@/lib/auth-storage";
+import { callNetlifyFunction } from "@/lib/api";
+import type { AppUser, AuthResponse, MeResponse } from "@/lib/types";
 
 interface AuthContextValue {
-  configError: string | null;
   loading: boolean;
-  session: Session | null;
-  user: User | null;
+  token: string | null;
+  user: AppUser | null;
+  signIn: (auth: AuthResponse) => void;
+  signOut: () => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
-  configError: null,
   loading: true,
-  session: null,
+  token: null,
   user: null,
+  signIn: () => undefined,
+  signOut: () => undefined,
+  refreshUser: async () => undefined,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [configError, setConfigError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
 
-  useEffect(() => {
-    if (!hasSupabasePublicEnv()) {
-      setConfigError(
-        "MagicView is missing Supabase public environment variables in this deployment.",
-      );
+  const signOut = () => {
+    clearStoredAuthToken();
+    setToken(null);
+    setUser(null);
+  };
+
+  const signIn = (auth: AuthResponse) => {
+    setStoredAuthToken(auth.token);
+    setToken(auth.token);
+    setUser(auth.user);
+  };
+
+  const refreshUser = async () => {
+    const currentToken = getStoredAuthToken();
+
+    if (!currentToken) {
+      setToken(null);
+      setUser(null);
       setLoading(false);
       return;
     }
 
-    const supabase = getSupabaseBrowserClient();
-    let mounted = true;
+    setToken(currentToken);
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!mounted) {
-        return;
-      }
-
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+    try {
+      const response = await callNetlifyFunction<MeResponse>(
+        "me",
+        {},
+        {
+          token: currentToken,
+        },
+      );
+      setUser(response.user);
+    } catch {
+      signOut();
+    } finally {
       setLoading(false);
-    });
+    }
+  };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+  useEffect(() => {
+    void refreshUser();
   }, []);
 
   return (
     <AuthContext.Provider
       value={{
-        configError,
         loading,
-        session,
+        token,
         user,
+        signIn,
+        signOut,
+        refreshUser,
       }}
     >
       {children}

@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "@netlify/functions": "^5.2.0",
-    "@supabase/supabase-js": "^2.104.1",
+    "@neondatabase/serverless": "^1.0.1",
+    "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.3",
+    "jose": "^6.1.0",
     "next": "^16.2.4",
     "openai": "^6.34.0",
     "react": "^19.2.5",
@@ -27,4 +29,3 @@
     "typescript": "^6.0.3"
   }
 }
-

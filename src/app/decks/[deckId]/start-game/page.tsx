@@ -8,10 +8,10 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { AppShell } from "@/components/layout/app-shell";
 import { callNetlifyFunction } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import type {
   AnalyzeHandResponse,
   Deck,
+  DeckDetailResponse,
   SeatPosition,
   StartSessionResponse,
 } from "@/lib/types";
@@ -45,21 +45,20 @@ export default function StartGamePage() {
       }
 
       setLoadingDeck(true);
-      const supabase = getSupabaseBrowserClient();
-      const { data, error: queryError } = await supabase
-        .from("decks")
-        .select("*")
-        .eq("id", params.deckId)
-        .eq("user_id", user.id)
-        .single();
+      setError(null);
 
-      if (queryError) {
-        setError(queryError.message);
-      } else {
-        setDeck(data as Deck);
+      try {
+        const response = await callNetlifyFunction<DeckDetailResponse>("get-deck", {
+          deckId: params.deckId,
+        });
+        setDeck(response.deck);
+      } catch (loadError) {
+        setError(
+          loadError instanceof Error ? loadError.message : "Failed to load deck.",
+        );
+      } finally {
+        setLoadingDeck(false);
       }
-
-      setLoadingDeck(false);
     };
 
     void loadDeck();

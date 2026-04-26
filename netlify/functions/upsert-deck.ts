@@ -1,16 +1,18 @@
 import type { Handler } from "@netlify/functions";
 
-import { splitCommanders, normalizeCardName, parseDecklist } from "../../src/lib/decklist";
+import { normalizeCardName, parseDecklist, splitCommanders } from "../../src/lib/decklist";
 import { buildDeckStrategySummary } from "../../src/lib/server/deck-strategy";
+import { ensureCardsCached } from "../../src/lib/server/card-cache";
+import { queryOne, getSql } from "../../src/lib/server/db";
 import {
+  badRequest,
   isPost,
   jsonResponse,
+  notFound,
   parseJsonBody,
-  requireUserId,
+  requireUser,
   withErrorBoundary,
 } from "../../src/lib/server/netlify";
-import { ensureCardsCached } from "../../src/lib/server/card-cache";
-import { getSupabaseAdminClient } from "../../src/lib/server/supabase-admin";
 import type { CachedCard, UpsertDeckRequest, UpsertDeckResponse } from "../../src/lib/types";
 
 export const handler: Handler = async (event) =>
@@ -19,26 +21,25 @@ export const handler: Handler = async (event) =>
       return jsonResponse(405, { error: "Method not allowed." });
     }
 
-    const userId = await requireUserId(event);
+    const user = await requireUser(event);
     const request = parseJsonBody<UpsertDeckRequest>(event);
 
     if (!request.name?.trim()) {
-      throw new Error("Deck name is required.");
+      badRequest("Deck name is required.");
     }
 
     if (!request.commander?.trim()) {
-      throw new Error("Commander field is required.");
+      badRequest("Commander field is required.");
     }
 
     if (!request.decklistText?.trim()) {
-      throw new Error("Decklist is required.");
+      badRequest("Decklist is required.");
     }
 
     if (request.bracket < 1 || request.bracket > 5) {
-      throw new Error("Bracket must be between 1 and 5.");
+      badRequest("Bracket must be between 1 and 5.");
     }
 
-    const supabase = getSupabaseAdminClient();
     const parsedDecklist = parseDecklist(request.decklistText);
     const commanderNames = splitCommanders(request.commander);
     const allLookupNames = [
@@ -49,7 +50,6 @@ export const handler: Handler = async (event) =>
     const { cards: cachedCards, unresolved } = await ensureCardsCached(
       allLookupNames,
       {
-        supabase,
         compressWithAi: true,
       },
     );
@@ -68,67 +68,86 @@ export const handler: Handler = async (event) =>
       existingSummary: request.strategySummary,
     });
 
+    const sql = getSql();
     let deckId = request.deckId;
 
     if (deckId) {
-      const { error: updateError } = await supabase
-        .from("decks")
-        .update({
-          name: request.name.trim(),
-          commander: request.commander.trim(),
-          bracket: request.bracket,
-          strategy_summary: strategySummary,
-        })
-        .eq("id", deckId)
-        .eq("user_id", userId);
+      const updatedDeck = await queryOne<Record<string, unknown>>(
+        `
+          update decks
+          set
+            name = $1,
+            commander = $2,
+            bracket = $3,
+            strategy_summary = $4
+          where id = $5 and user_id = $6
+          returning id
+        `,
+        [
+          request.name.trim(),
+          request.commander.trim(),
+          request.bracket,
+          strategySummary,
+          deckId,
+          user.id,
+        ],
+      );
 
-      if (updateError) {
-        throw new Error("Failed to update deck.");
+      if (!updatedDeck) {
+        notFound("Deck not found.");
       }
 
-      const { error: deleteError } = await supabase
-        .from("deck_cards")
-        .delete()
-        .eq("deck_id", deckId);
-
-      if (deleteError) {
-        throw new Error("Failed to refresh deck cards.");
-      }
+      await sql.query(
+        `
+          delete from deck_cards
+          where deck_id = $1
+        `,
+        [deckId],
+      );
     } else {
-      const { data, error: insertError } = await supabase
-        .from("decks")
-        .insert({
-          user_id: userId,
-          name: request.name.trim(),
-          commander: request.commander.trim(),
-          bracket: request.bracket,
-          strategy_summary: strategySummary,
-        })
-        .select("id")
-        .single();
+      const insertedDeck = await queryOne<Record<string, unknown>>(
+        `
+          insert into decks (user_id, name, commander, bracket, strategy_summary)
+          values ($1, $2, $3, $4, $5)
+          returning id
+        `,
+        [
+          user.id,
+          request.name.trim(),
+          request.commander.trim(),
+          request.bracket,
+          strategySummary,
+        ],
+      );
 
-      if (insertError || !data) {
+      if (!insertedDeck) {
         throw new Error("Failed to create deck.");
       }
 
-      deckId = data.id as string;
+      deckId = String(insertedDeck.id);
     }
 
-    const deckCardRows = parsedDecklist.map((entry) => {
+    if (!deckId) {
+      throw new Error("Deck ID was not resolved.");
+    }
+
+    const cardNames = parsedDecklist.map((entry) => {
       const cached = cachedCards.get(normalizeCardName(entry.cardName));
-      return {
-        deck_id: deckId,
-        card_name: cached?.name ?? entry.cardName,
-        quantity: entry.quantity,
-      };
+      return cached?.name ?? entry.cardName;
     });
+    const quantities = parsedDecklist.map((entry) => entry.quantity);
 
-    const { error: cardsInsertError } = await supabase
-      .from("deck_cards")
-      .insert(deckCardRows);
-
-    if (cardsInsertError) {
-      throw new Error("Failed to save deck cards.");
+    if (cardNames.length) {
+      await sql.query(
+        `
+          insert into deck_cards (deck_id, card_name, quantity)
+          select
+            $1::uuid,
+            unnest($2::text[]),
+            unnest($3::integer[])
+        `,
+        [deckId, cardNames, quantities],
+      );
     }
 
     const response: UpsertDeckResponse = {

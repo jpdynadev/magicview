@@ -4,7 +4,6 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
-import { getSupabaseAdminClient } from "../src/lib/server/supabase-admin";
 import { ingestScryfallCard } from "../src/lib/server/card-cache";
 
 interface ScryfallBulkDataItem {
@@ -90,7 +89,6 @@ async function main() {
   const content = await readFile(filePath, "utf8");
   const cards = (JSON.parse(content) as ScryfallOracleCard[]).filter(isCommanderRelevant);
   const slice = cards.slice(offset, limit ? offset + limit : undefined);
-  const supabase = getSupabaseAdminClient();
 
   console.log(
     `Ingesting ${slice.length} cards from ${path.relative(process.cwd(), filePath)}...`,
@@ -100,7 +98,6 @@ async function main() {
   for (const card of slice) {
     completed += 1;
     await ingestScryfallCard(card, {
-      supabase,
       compressWithAi: values.ai,
     });
 

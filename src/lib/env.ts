@@ -6,24 +6,30 @@ function required(name: string): string {
   return value;
 }
 
-export const publicEnv = {
-  supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
-  supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "",
-};
+function requiredAny(names: string[]): string {
+  for (const name of names) {
+    const value = process.env[name];
+    if (value) {
+      return value;
+    }
+  }
 
-export function hasSupabasePublicEnv(): boolean {
-  return Boolean(publicEnv.supabaseUrl && publicEnv.supabaseAnonKey);
+  throw new Error(
+    `Missing required environment variable. Set one of: ${names.join(", ")}`,
+  );
 }
 
 export const serverEnv = {
-  get supabaseUrl() {
-    return required("NEXT_PUBLIC_SUPABASE_URL");
+  get databaseUrl() {
+    return requiredAny([
+      "DATABASE_URL",
+      "NETLIFY_DATABASE_URL",
+      "POSTGRES_URL",
+      "NEON_DATABASE_URL",
+    ]);
   },
-  get supabaseAnonKey() {
-    return required("NEXT_PUBLIC_SUPABASE_ANON_KEY");
-  },
-  get supabaseServiceRoleKey() {
-    return required("SUPABASE_SERVICE_ROLE_KEY");
+  get jwtSecret() {
+    return required("MAGICVIEW_JWT_SECRET");
   },
   get openAiApiKey() {
     return required("OPENAI_API_KEY");
@@ -33,8 +39,5 @@ export const serverEnv = {
   },
   get cardCompressionModel() {
     return process.env.OPENAI_CARD_COMPRESSION_MODEL ?? "gpt-5.4-nano";
-  },
-  get handImagesBucket() {
-    return process.env.SUPABASE_HAND_IMAGES_BUCKET ?? "hand-images";
   },
 };

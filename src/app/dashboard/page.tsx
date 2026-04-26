@@ -7,9 +7,9 @@ import { RequireAuth } from "@/components/auth/require-auth";
 import { DeckList } from "@/components/dashboard/deck-list";
 import { DeckEditor } from "@/components/decks/deck-editor";
 import { AppShell } from "@/components/layout/app-shell";
+import { callNetlifyFunction } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
-import type { Deck } from "@/lib/types";
+import type { Deck, ListDecksResponse } from "@/lib/types";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -26,20 +26,19 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
 
-    const supabase = getSupabaseBrowserClient();
-    const { data, error: queryError } = await supabase
-      .from("decks")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (queryError) {
-      setError(queryError.message);
-    } else {
-      setDecks((data ?? []) as Deck[]);
+    try {
+      const response = await callNetlifyFunction<ListDecksResponse>(
+        "list-decks",
+        {},
+      );
+      setDecks(response.decks);
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error ? loadError.message : "Failed to load decks.",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -66,4 +65,3 @@ export default function DashboardPage() {
     </RequireAuth>
   );
 }
-

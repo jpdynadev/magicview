@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 import { useAuth } from "@/lib/auth-context";
-import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 interface AppShellProps {
   title: string;
@@ -17,10 +16,10 @@ interface AppShellProps {
 export function AppShell({ title, subtitle, children, actions }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
-  const handleSignOut = async () => {
-    await getSupabaseBrowserClient().auth.signOut();
+  const handleSignOut = () => {
+    signOut();
     router.replace("/auth");
   };
 
@@ -59,4 +58,3 @@ export function AppShell({ title, subtitle, children, actions }: AppShellProps) 
     </main>
   );
 }
-
