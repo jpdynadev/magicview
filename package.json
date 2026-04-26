@@ -1,0 +1,30 @@
+{
+  "name": "magicview",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "scryfall:sync": "tsx scripts/sync-scryfall.ts"
+  },
+  "dependencies": {
+    "@netlify/functions": "^5.2.0",
+    "@supabase/supabase-js": "^2.104.1",
+    "dotenv": "^17.2.3",
+    "next": "^16.2.4",
+    "openai": "^6.34.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}
+

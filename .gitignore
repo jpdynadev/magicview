@@ -1,0 +1,12 @@
+node_modules
+.next
+.netlify
+.env
+.env.local
+.env.*.local
+dist
+coverage
+data/scryfall
+npm-debug.log*
+*.tsbuildinfo
+
