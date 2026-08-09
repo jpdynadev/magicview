@@ -1,0 +1,6 @@
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "plane" is null
+	at forge.adventure.util.Config.getPlanePath(Config.java:133)
+	at forge.adventure.util.Config.<init>(Config.java:105)
+	at forge.adventure.util.Config.instance(Config.java:57)
+	at forge.app.GameLauncher.<init>(GameLauncher.java:105)
+	at forge.app.Main.main(Main.java:30)

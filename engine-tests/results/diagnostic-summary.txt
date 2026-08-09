@@ -1,0 +1,6 @@
+=== Winner-like lines ===
+
+=== Error / unsupported / deck lines ===
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.startsWith(String)" because "plane" is null
+
+=== Kinnan / combo mentions ===
