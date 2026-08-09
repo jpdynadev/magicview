@@ -79,7 +79,7 @@ jobs:
           cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
           ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
 
-      - name: Run 5 real Forge Commander games
+      - name: Run 1 real Forge Commander diagnostic
         id: sim
         continue-on-error: true
         run: |
@@ -89,32 +89,32 @@ jobs:
             xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
               -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
               -f commander \
-              -n 5 \
-              -c 120
-          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-5game-diagnostic.log"
+              -n 1 \
+              -c 30
+          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-quick-diagnostic.log"
 
       - name: Extract useful diagnostics
         if: always()
         run: |
           {
             echo '=== Winner-like lines ==='
-            grep -Ei 'winner| wins|victory|match result|game over' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
+            grep -Ei 'winner| wins|victory|match result|game over|draw' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null || true
             echo
             echo '=== Error / unsupported / deck lines ==='
-            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
+            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null | tail -300 || true
             echo
             echo '=== Kinnan / combo mentions ==='
-            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
+            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null | tail -300 || true
             echo
-            echo '=== Last 200 lines ==='
-            tail -200 engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
-          } | tee engine-tests/results/diagnostic-summary.txt
+            echo '=== Last 250 lines ==='
+            tail -250 engine-tests/results/forge-quick-diagnostic.log 2>/dev/null || true
+          } | tee engine-tests/results/quick-diagnostic-summary.txt
 
       - name: Upload raw Forge results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-forge-diagnostic-${{ github.sha }}
+          name: kinnan-forge-quick-${{ github.sha }}
           path: engine-tests/results/
           if-no-files-found: warn
           retention-days: 7
