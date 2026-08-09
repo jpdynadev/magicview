@@ -79,7 +79,7 @@ jobs:
           cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
           ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
 
-      - name: Run 1 real Forge Commander diagnostic
+      - name: Run 5 real Forge Commander confirmation games
         id: sim
         continue-on-error: true
         run: |
@@ -89,32 +89,32 @@ jobs:
             xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
               -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
               -f commander \
-              -n 1 \
-              -c 30
-          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-quick-diagnostic.log"
+              -n 5 \
+              -c 15
+          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-confirmation.log"
 
       - name: Extract useful diagnostics
         if: always()
         run: |
           {
-            echo '=== Winner-like lines ==='
-            grep -Ei 'winner| wins|victory|match result|game over|draw' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null || true
+            echo '=== Game results ==='
+            grep -Ei 'Stopping slow match as draw|Game Result:|Match Result:' engine-tests/results/forge-confirmation.log 2>/dev/null || true
             echo
             echo '=== Error / unsupported / deck lines ==='
-            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null | tail -300 || true
+            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-confirmation.log 2>/dev/null | tail -300 || true
             echo
             echo '=== Kinnan / combo mentions ==='
-            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-quick-diagnostic.log 2>/dev/null | tail -300 || true
+            grep -Ei 'Kinnan Test B|Kinnan, Bonder Prodigy|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios|Trophy Mage|Agatha' engine-tests/results/forge-confirmation.log 2>/dev/null | tail -500 || true
             echo
-            echo '=== Last 250 lines ==='
-            tail -250 engine-tests/results/forge-quick-diagnostic.log 2>/dev/null || true
-          } | tee engine-tests/results/quick-diagnostic-summary.txt
+            echo '=== Last 300 lines ==='
+            tail -300 engine-tests/results/forge-confirmation.log 2>/dev/null || true
+          } | tee engine-tests/results/confirmation-summary.txt
 
       - name: Upload raw Forge results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-forge-quick-${{ github.sha }}
+          name: kinnan-forge-confirmation-${{ github.sha }}
           path: engine-tests/results/
           if-no-files-found: warn
           retention-days: 7
