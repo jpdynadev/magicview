@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "bash engine-tests/netlify-forge.sh; npm run build"
 
 [functions]
   directory = "netlify/functions"
