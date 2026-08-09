@@ -1,4 +1,4 @@
-name: Kinnan Manabrew interactive diagnostic
+name: Kinnan Manabrew state-aware pilot
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  manabrew-smoke:
+  manabrew-pilot:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -65,35 +65,38 @@ jobs:
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
 
-      - name: Run interactive Commander smoke test
+      - name: Run three external-pilot Commander games
+        continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          python3 engine-tests/manabrew_smoke.py \
+          timeout 900 python3 engine-tests/manabrew_pilot.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
-            /tmp/manabrew/forge/forge-gui/
+            /tmp/manabrew/forge/forge-gui/ \
+            101 202 303 | tee engine-tests/results/pilot-console.log
 
-      - name: Print captured prompt summary
+      - name: Print pilot summary
         if: always()
         run: |
           python3 - <<'PY'
           import json
           from pathlib import Path
-          p=Path('engine-tests/results/manabrew-smoke-summary.json')
+          p=Path('engine-tests/results/pilot-summary.json')
           if p.exists():
-              x=json.loads(p.read_text())
-              print('PROMPT:')
-              print(json.dumps(x.get('prompt'), indent=2)[:12000])
-              print('SNAPSHOT KEYS:', list(x.get('snapshot',{}).keys()) if isinstance(x.get('snapshot'),dict) else type(x.get('snapshot')))
+              data=json.loads(p.read_text())
+              print(json.dumps(data, indent=2))
           else:
-              print('No smoke summary produced')
+              print('No pilot summary produced')
+          for e in sorted(Path('engine-tests/results').glob('pilot-errors-*.json')):
+              print('\nERROR FILE', e)
+              print(e.read_text()[:12000])
           PY
 
-      - name: Upload Manabrew diagnostic
+      - name: Upload Manabrew pilot results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-smoke-${{ github.sha }}
+          name: kinnan-manabrew-pilot-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
