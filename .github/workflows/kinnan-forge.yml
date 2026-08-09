@@ -1,4 +1,4 @@
-name: Kinnan Manabrew phase-aware benchmark v5
+name: Kinnan Manabrew phase-aware benchmark v6
 
 on:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Install Maven
         run: sudo apt-get update && sudo apt-get install -y maven
-      - name: Validate Commander decks
+      - name: Validate exact Commander decks
         run: |
           python3 - <<'PY'
           from pathlib import Path
@@ -44,13 +44,12 @@ jobs:
                       n += int(s.split(' ',1)[0])
               print(p.name, n)
               assert n == 100, (p, n)
+          k=Path('engine-tests/decks/Kinnan_TestB.dck').read_text()
+          assert '\n1 Prophet of Distortion\n' in k
+          assert '\n1 Goblin Cannon\n' in k
+          assert '\n1 Force of Negation\n' not in k
+          assert '\n1 Mindbreak Trap\n' not in k
           PY
-      - name: Assert exact Kinnan benchmark slots
-        run: |
-          grep -q '^1 Prophet of Distortion$' engine-tests/decks/Kinnan_TestB.dck
-          grep -q '^1 Goblin Cannon$' engine-tests/decks/Kinnan_TestB.dck
-          ! grep -q '^1 Force of Negation$' engine-tests/decks/Kinnan_TestB.dck
-          ! grep -q '^1 Mindbreak Trap$' engine-tests/decks/Kinnan_TestB.dck
       - name: Clone Manabrew and Forge submodule
         run: |
           rm -rf /tmp/manabrew
@@ -63,12 +62,12 @@ jobs:
           cd /tmp/manabrew
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
-      - name: Run three phase-aware Commander benchmark games
+      - name: Run three recursion-safe phase-aware benchmark games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot_v5.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v6.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 303 | tee engine-tests/results/pilot-console.log
@@ -87,14 +86,14 @@ jobs:
               try:
                   x=json.loads(t.read_text())
                   print('\nTRACE', t.name, 'prompts=',len(x))
-                  print(json.dumps(x[-16:], indent=2)[:36000])
+                  print(json.dumps(x[-20:], indent=2)[:42000])
               except Exception as exc: print('trace read failed', t, exc)
           PY
       - name: Upload Manabrew benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-v5-${{ github.sha }}
+          name: kinnan-manabrew-v6-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
