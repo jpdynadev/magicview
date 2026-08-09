@@ -1,0 +1,1 @@
+Trigger Forge diagnostic workflow after workflow file exists on the PR branch.
