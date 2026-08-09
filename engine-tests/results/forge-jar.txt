@@ -1,1 +1,1 @@
-Using Forge jar: /tmp/forge-extract/forge-gui-mobile-dev-2.0.14-SNAPSHOT-jar-with-dependencies.jar
+Using Forge desktop jar: /tmp/forge-extract/forge-gui-desktop-2.0.14-SNAPSHOT-jar-with-dependencies.jar
