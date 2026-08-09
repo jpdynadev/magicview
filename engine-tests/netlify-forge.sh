@@ -7,13 +7,15 @@ ROOT="$(pwd)"
 OUT="$ROOT/public/engine-tests"
 WORK="/tmp/kinnan-forge"
 SITE_ID="${NETLIFY_SITE_ID:-71e319da-e5e4-4d65-883e-f4c2a56d19c2}"
+ACCOUNT_ID="68dd77f53b061e007de461d0"
+RESULT_KEY="FORGE_DIAGNOSTIC_RESULT_B64"
 rm -rf "$WORK"
 mkdir -p "$OUT" "$WORK/forge"
 
 handoff_result() {
-  # The ChatGPT Netlify connector can read site env vars, unlike arbitrary
-  # deploy-preview files. Use a DEV-context variable as a temporary result bus
-  # so this does not alter deploy-preview/production runtime behavior.
+  # ChatGPT's Netlify connector can read site environment variables. Store a
+  # temporary DEV-context result value through Netlify's REST API, then remove
+  # it after retrieval. DEV context keeps it out of preview/production runtime.
   if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
     echo "NETLIFY_AUTH_TOKEN unavailable; env handoff skipped" >> "$OUT/handoff.log"
     return 0
@@ -36,11 +38,32 @@ handoff_result() {
     return 0
   fi
 
-  NETLIFY_SITE_ID="$SITE_ID" NETLIFY_AUTH_TOKEN="$NETLIFY_AUTH_TOKEN" \
-    npx --yes netlify-cli@latest env:set FORGE_DIAGNOSTIC_RESULT_B64 "$RESULT_B64" \
-      --context dev --scope builds --site "$SITE_ID" \
-      >> "$OUT/handoff.log" 2>&1
-  echo "handoff_status=$?" >> "$OUT/handoff.log"
+  API_BASE="https://api.netlify.com/api/v1/accounts/$ACCOUNT_ID/env"
+  AUTH_HEADER="Authorization: Bearer $NETLIFY_AUTH_TOKEN"
+
+  # Clean stale result first. Ignore 404/no-existing-variable responses.
+  curl -sS -X DELETE -H "$AUTH_HEADER" \
+    "$API_BASE/$RESULT_KEY?site_id=$SITE_ID" \
+    >> "$OUT/handoff.log" 2>&1 || true
+
+  python3 - "$RESULT_B64" > "$OUT/handoff-request.json" <<'PY'
+import json, sys
+value = sys.argv[1]
+print(json.dumps([{
+    "key": "FORGE_DIAGNOSTIC_RESULT_B64",
+    "scopes": ["builds"],
+    "values": [{"value": value, "context": "dev"}],
+    "is_secret": False,
+}]))
+PY
+
+  curl -sS --fail-with-body -X POST \
+    -H "$AUTH_HEADER" \
+    -H 'Content-Type: application/json' \
+    --data-binary @"$OUT/handoff-request.json" \
+    "$API_BASE?site_id=$SITE_ID" \
+    >> "$OUT/handoff.log" 2>&1
+  echo "rest_handoff_status=$?" >> "$OUT/handoff.log"
 }
 
 {
