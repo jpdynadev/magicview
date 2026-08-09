@@ -1,4 +1,4 @@
-name: Kinnan Manabrew state-aware pilot
+name: Kinnan Manabrew state-aware pilot v2
 
 on:
   pull_request:
@@ -65,24 +65,12 @@ jobs:
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
 
-      - name: Patch Manabrew action transport
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('engine-tests/manabrew_pilot.py')
-          s = p.read_text()
-          old = "rpc(proc,{'command':'submitAction','sessionId':sid,'action':json.dumps(ans,separators=(',',':'))})"
-          new = "rpc(proc,{'command':'submitAction','sessionId':sid,'payload':json.dumps(ans,separators=(',',':'))})"
-          assert old in s, 'submitAction call not found'
-          p.write_text(s.replace(old, new))
-          PY
-
-      - name: Run three external-pilot Commander games
+      - name: Run three globally-routed external-pilot Commander games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v2.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 303 | tee engine-tests/results/pilot-console.log
@@ -95,20 +83,25 @@ jobs:
           from pathlib import Path
           p=Path('engine-tests/results/pilot-summary.json')
           if p.exists():
-              data=json.loads(p.read_text())
-              print(json.dumps(data, indent=2))
+              print(json.dumps(json.loads(p.read_text()), indent=2))
           else:
               print('No pilot summary produced')
           for e in sorted(Path('engine-tests/results').glob('pilot-errors-*.json')):
               print('\nERROR FILE', e)
-              print(e.read_text()[:12000])
+              print(e.read_text()[:16000])
+          for t in sorted(Path('engine-tests/results').glob('pilot-trace-*.json')):
+              try:
+                  x=json.loads(t.read_text())
+                  print('\nTRACE', t.name, 'prompts=',len(x),'last=',json.dumps(x[-5:], indent=2)[:12000])
+              except Exception as exc:
+                  print('trace read failed', t, exc)
           PY
 
       - name: Upload Manabrew pilot results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-pilot-${{ github.sha }}
+          name: kinnan-manabrew-pilot-v2-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
