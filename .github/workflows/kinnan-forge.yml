@@ -50,6 +50,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          rm -rf /tmp/forge-download /tmp/forge-extract
           mkdir -p /tmp/forge-download /tmp/forge-extract engine-tests/results
           gh release download daily-snapshots -R Card-Forge/forge -p '*.tar.bz2' -D /tmp/forge-download
           ls -lah /tmp/forge-download | tee engine-tests/results/downloaded-assets.txt
@@ -59,33 +60,38 @@ jobs:
           done
           find /tmp/forge-extract -maxdepth 5 -type f | sort | tee engine-tests/results/extracted-files.txt
 
-      - name: Locate Forge jar
+      - name: Locate Forge desktop jar
         id: forge
         run: |
-          JAR=$(find /tmp/forge-extract -type f -name 'forge*.jar' | grep -v 'installer' | head -n 1 || true)
+          JAR=$(find /tmp/forge-extract -type f -name 'forge-gui-desktop-*-jar-with-dependencies.jar' | head -n 1 || true)
           if [ -z "$JAR" ]; then
-            JAR=$(find /tmp/forge-extract -type f -name '*.jar' | head -n 1 || true)
-          fi
-          if [ -z "$JAR" ]; then
-            echo 'No runnable Forge jar found after extraction.' | tee engine-tests/results/engine-error.txt
+            echo 'No Forge desktop jar found after extraction.' | tee engine-tests/results/engine-error.txt
             exit 1
           fi
           echo "forge_jar=$JAR" >> "$GITHUB_OUTPUT"
-          echo "Using Forge jar: $JAR" | tee engine-tests/results/forge-jar.txt
+          echo "forge_dir=$(dirname "$JAR")" >> "$GITHUB_OUTPUT"
+          echo "Using Forge desktop jar: $JAR" | tee engine-tests/results/forge-jar.txt
           java -version 2>&1 | tee engine-tests/results/java-version.txt
+
+      - name: Install test decks into Forge Commander directory
+        run: |
+          mkdir -p "$HOME/.forge/decks/commander"
+          cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
+          ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
 
       - name: Run 5 real Forge Commander games
         id: sim
         continue-on-error: true
         run: |
           set -o pipefail
-          xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
-            -D "$GITHUB_WORKSPACE/engine-tests/decks" \
-            -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
-            -f commander \
-            -n 5 \
-            -c 120 \
-            2>&1 | tee engine-tests/results/forge-5game-diagnostic.log
+          (
+            cd '${{ steps.forge.outputs.forge_dir }}'
+            xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
+              -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
+              -f commander \
+              -n 5 \
+              -c 120
+          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-5game-diagnostic.log"
 
       - name: Extract useful diagnostics
         if: always()
@@ -95,10 +101,13 @@ jobs:
             grep -Ei 'winner| wins|victory|match result|game over' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
             echo
             echo '=== Error / unsupported / deck lines ==='
-            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -200 || true
+            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
             echo
-            echo '=== Kinnan / Basalt mentions ==='
-            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -200 || true
+            echo '=== Kinnan / combo mentions ==='
+            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
+            echo
+            echo '=== Last 200 lines ==='
+            tail -200 engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
           } | tee engine-tests/results/diagnostic-summary.txt
 
       - name: Upload raw Forge results
