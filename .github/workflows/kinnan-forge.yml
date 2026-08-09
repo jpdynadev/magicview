@@ -1,4 +1,4 @@
-name: Kinnan Manabrew state-aware pilot v3
+name: Kinnan Manabrew state-aware pilot v4
 
 on:
   pull_request:
@@ -65,12 +65,12 @@ jobs:
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
 
-      - name: Run three payment-safe external-pilot Commander games
+      - name: Run three valid-color external-pilot Commander games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot_v3.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v4.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 303 | tee engine-tests/results/pilot-console.log
@@ -98,7 +98,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-pilot-v3-${{ github.sha }}
+          name: kinnan-manabrew-pilot-v4-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
