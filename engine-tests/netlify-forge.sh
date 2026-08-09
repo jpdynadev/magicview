@@ -16,8 +16,8 @@ handoff_result() {
   # ChatGPT's Netlify connector can read site environment variables. Store a
   # temporary DEV-context result value through Netlify's REST API, then remove
   # it after retrieval. DEV context keeps it out of preview/production runtime.
-  if [ -z "${NETLIFY_AUTH_TOKEN:-}" ]; then
-    echo "NETLIFY_AUTH_TOKEN unavailable; env handoff skipped" >> "$OUT/handoff.log"
+  if [ -z "${FORGE_HANDOFF_TOKEN:-}" ]; then
+    echo "FORGE_HANDOFF_TOKEN unavailable; env handoff skipped" >> "$OUT/handoff.log"
     return 0
   fi
 
@@ -39,7 +39,7 @@ handoff_result() {
   fi
 
   API_BASE="https://api.netlify.com/api/v1/accounts/$ACCOUNT_ID/env"
-  AUTH_HEADER="Authorization: Bearer $NETLIFY_AUTH_TOKEN"
+  AUTH_HEADER="Authorization: Bearer $FORGE_HANDOFF_TOKEN"
 
   # Clean stale result first. Ignore 404/no-existing-variable responses.
   curl -sS -X DELETE -H "$AUTH_HEADER" \
