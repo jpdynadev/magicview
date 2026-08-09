@@ -76,6 +76,12 @@ jobs:
           echo "Using Forge desktop jar: $JAR" | tee engine-tests/results/forge-jar.txt
           java -version 2>&1 | tee engine-tests/results/java-version.txt
 
+      - name: Install test decks into Forge Commander directory
+        run: |
+          mkdir -p "$HOME/.forge/decks/commander"
+          cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
+          ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
+
       - name: Run 5 real Forge Commander games
         id: sim
         continue-on-error: true
@@ -84,7 +90,6 @@ jobs:
           (
             cd '${{ steps.forge.outputs.forge_dir }}'
             xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
-              -D "$GITHUB_WORKSPACE/engine-tests/decks" \
               -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
               -f commander \
               -n 5 \
@@ -104,8 +109,8 @@ jobs:
             echo '=== Kinnan / combo mentions ==='
             grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
             echo
-            echo '=== Last 160 lines ==='
-            tail -160 engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
+            echo '=== Last 200 lines ==='
+            tail -200 engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
           } | tee engine-tests/results/diagnostic-summary.txt
 
       - name: Commit results back to test branch
