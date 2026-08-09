@@ -1,4 +1,4 @@
-name: Kinnan Forge engine diagnostic
+name: Kinnan Manabrew interactive diagnostic
 
 on:
   pull_request:
@@ -11,110 +11,92 @@ permissions:
   contents: read
 
 jobs:
-  forge-sim:
+  manabrew-smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Checkout test branch
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
-      - name: Install runtime helpers
-        run: sudo apt-get update && sudo apt-get install -y xvfb bzip2
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
-      - name: Validate Commander deck sizes
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Maven
+        run: sudo apt-get update && sudo apt-get install -y maven
+
+      - name: Validate Commander decks
         run: |
           python3 - <<'PY'
           from pathlib import Path
           for p in sorted(Path('engine-tests/decks').glob('*.dck')):
-              sec=None; commanders=[]; main=[]
+              sec=None; n=0
               for raw in p.read_text().splitlines():
                   s=raw.strip()
                   if s.startswith('[') and s.endswith(']'):
                       sec=s.lower(); continue
-                  if s and s[0].isdigit() and ' ' in s:
-                      _, card=s.split(' ',1)
-                      card=card.split('|',1)[0].strip()
-                      if sec=='[commander]': commanders.append(card)
-                      elif sec=='[main]': main.append(card)
-              print(f'{p.name}: commanders={len(commanders)} main={len(main)} total={len(commanders)+len(main)}')
-              assert len(commanders)+len(main)==100, p
+                  if sec in ('[commander]','[main]') and s and s[0].isdigit() and ' ' in s:
+                      n += int(s.split(' ',1)[0])
+              print(p.name, n)
+              assert n == 100, (p, n)
           PY
 
-      - name: Download latest Forge desktop snapshot
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Clone Manabrew and Forge submodule
         run: |
-          rm -rf /tmp/forge-download /tmp/forge-extract
-          mkdir -p /tmp/forge-download /tmp/forge-extract engine-tests/results
-          gh release download daily-snapshots -R Card-Forge/forge -p '*.tar.bz2' -D /tmp/forge-download
-          ls -lah /tmp/forge-download | tee engine-tests/results/downloaded-assets.txt
-          for f in /tmp/forge-download/*.tar.bz2; do
-            echo "Extracting $f"
-            tar -xjf "$f" -C /tmp/forge-extract || true
-          done
-          find /tmp/forge-extract -maxdepth 5 -type f | sort | tee engine-tests/results/extracted-files.txt
+          rm -rf /tmp/manabrew
+          git clone --depth 1 --recurse-submodules --shallow-submodules https://github.com/witchesofthehill/manabrew.git /tmp/manabrew
+          cd /tmp/manabrew
+          git rev-parse HEAD | tee "$GITHUB_WORKSPACE/engine-tests/results-manabrew-revision.txt"
+          git submodule status | tee -a "$GITHUB_WORKSPACE/engine-tests/results-manabrew-revision.txt"
 
-      - name: Locate Forge desktop jar
-        id: forge
+      - name: Build Manabrew Forge harness
         run: |
-          JAR=$(find /tmp/forge-extract -type f -name 'forge-gui-desktop-*-jar-with-dependencies.jar' | head -n 1 || true)
-          if [ -z "$JAR" ]; then
-            echo 'No Forge desktop jar found after extraction.' | tee engine-tests/results/engine-error.txt
-            exit 1
-          fi
-          echo "forge_jar=$JAR" >> "$GITHUB_OUTPUT"
-          echo "forge_dir=$(dirname "$JAR")" >> "$GITHUB_OUTPUT"
-          echo "Using Forge desktop jar: $JAR" | tee engine-tests/results/forge-jar.txt
-          java -version 2>&1 | tee engine-tests/results/java-version.txt
+          cd /tmp/manabrew
+          node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
+          test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
 
-      - name: Install test decks into Forge Commander directory
+      - name: Run interactive Commander smoke test
         run: |
-          mkdir -p "$HOME/.forge/decks/commander"
-          cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
-          ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
+          rm -rf engine-tests/results
+          mkdir -p engine-tests/results
+          python3 engine-tests/manabrew_smoke.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/
 
-      - name: Run 5 real Forge Commander confirmation games
-        id: sim
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          (
-            cd '${{ steps.forge.outputs.forge_dir }}'
-            xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
-              -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
-              -f commander \
-              -n 5 \
-              -c 15
-          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-confirmation.log"
-
-      - name: Extract useful diagnostics
+      - name: Print captured prompt summary
         if: always()
         run: |
-          {
-            echo '=== Game results ==='
-            grep -Ei 'Stopping slow match as draw|Game Result:|Match Result:' engine-tests/results/forge-confirmation.log 2>/dev/null || true
-            echo
-            echo '=== Error / unsupported / deck lines ==='
-            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-confirmation.log 2>/dev/null | tail -300 || true
-            echo
-            echo '=== Kinnan / combo mentions ==='
-            grep -Ei 'Kinnan Test B|Kinnan, Bonder Prodigy|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios|Trophy Mage|Agatha' engine-tests/results/forge-confirmation.log 2>/dev/null | tail -500 || true
-            echo
-            echo '=== Last 300 lines ==='
-            tail -300 engine-tests/results/forge-confirmation.log 2>/dev/null || true
-          } | tee engine-tests/results/confirmation-summary.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('engine-tests/results/manabrew-smoke-summary.json')
+          if p.exists():
+              x=json.loads(p.read_text())
+              print('PROMPT:')
+              print(json.dumps(x.get('prompt'), indent=2)[:12000])
+              print('SNAPSHOT KEYS:', list(x.get('snapshot',{}).keys()) if isinstance(x.get('snapshot'),dict) else type(x.get('snapshot')))
+          else:
+              print('No smoke summary produced')
+          PY
 
-      - name: Upload raw Forge results
+      - name: Upload Manabrew diagnostic
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-forge-confirmation-${{ github.sha }}
-          path: engine-tests/results/
+          name: kinnan-manabrew-smoke-${{ github.sha }}
+          path: |
+            engine-tests/results/
+            engine-tests/manabrew-build.log
+            engine-tests/results-manabrew-revision.txt
           if-no-files-found: warn
           retention-days: 7
