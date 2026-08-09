@@ -1,4 +1,4 @@
-name: Kinnan Manabrew phase-aware benchmark v6
+name: Kinnan Manabrew combo-aware benchmark v7
 
 on:
   pull_request:
@@ -62,12 +62,12 @@ jobs:
           cd /tmp/manabrew
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
-      - name: Run three recursion-safe phase-aware benchmark games
+      - name: Run three activation-safe combo-aware benchmark games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot_v6.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v7.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 303 | tee engine-tests/results/pilot-console.log
@@ -81,19 +81,19 @@ jobs:
           if p.exists(): print(json.dumps(json.loads(p.read_text()), indent=2))
           else: print('No pilot summary produced')
           for e in sorted(Path('engine-tests/results').glob('pilot-errors-*.json')):
-              print('\nERROR FILE', e); print(e.read_text()[:20000])
+              print('\nERROR FILE', e); print(e.read_text()[:22000])
           for t in sorted(Path('engine-tests/results').glob('pilot-trace-*.json')):
               try:
                   x=json.loads(t.read_text())
                   print('\nTRACE', t.name, 'prompts=',len(x))
-                  print(json.dumps(x[-20:], indent=2)[:42000])
+                  print(json.dumps(x[-24:], indent=2)[:48000])
               except Exception as exc: print('trace read failed', t, exc)
           PY
       - name: Upload Manabrew benchmark results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-v6-${{ github.sha }}
+          name: kinnan-manabrew-v7-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
