@@ -1,4 +1,4 @@
-name: Kinnan Manabrew state-aware pilot v2
+name: Kinnan Manabrew state-aware pilot v3
 
 on:
   pull_request:
@@ -65,12 +65,12 @@ jobs:
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
 
-      - name: Run three globally-routed external-pilot Commander games
+      - name: Run three payment-safe external-pilot Commander games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot_v2.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v3.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 303 | tee engine-tests/results/pilot-console.log
@@ -82,26 +82,23 @@ jobs:
           import json
           from pathlib import Path
           p=Path('engine-tests/results/pilot-summary.json')
-          if p.exists():
-              print(json.dumps(json.loads(p.read_text()), indent=2))
-          else:
-              print('No pilot summary produced')
+          if p.exists(): print(json.dumps(json.loads(p.read_text()), indent=2))
+          else: print('No pilot summary produced')
           for e in sorted(Path('engine-tests/results').glob('pilot-errors-*.json')):
-              print('\nERROR FILE', e)
-              print(e.read_text()[:16000])
+              print('\nERROR FILE', e); print(e.read_text()[:20000])
           for t in sorted(Path('engine-tests/results').glob('pilot-trace-*.json')):
               try:
                   x=json.loads(t.read_text())
-                  print('\nTRACE', t.name, 'prompts=',len(x),'last=',json.dumps(x[-5:], indent=2)[:12000])
-              except Exception as exc:
-                  print('trace read failed', t, exc)
+                  print('\nTRACE', t.name, 'prompts=',len(x))
+                  print(json.dumps(x[-12:], indent=2)[:30000])
+              except Exception as exc: print('trace read failed', t, exc)
           PY
 
       - name: Upload Manabrew pilot results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-pilot-v2-${{ github.sha }}
+          name: kinnan-manabrew-pilot-v3-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
