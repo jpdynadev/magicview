@@ -20,8 +20,10 @@ def payment_action_kind(action):
 
 def choose_productive_payment(inp):
     # Confirm immediately once the pool can satisfy the remaining cost.
+    # In Manabrew, auto=False is the UI's Confirm action; auto=True means
+    # ask the engine to auto-tap additional mana sources.
     if inp.get('canConfirmFromPool'):
-        return {'type':'payManaCost','output':{'type':'pay','auto':True}}, False
+        return {'type':'payManaCost','output':{'type':'pay','auto':False}}, False
 
     actions=inp.get('actions',[]) or []
     productive=[]
