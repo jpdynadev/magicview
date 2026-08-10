@@ -1,4 +1,4 @@
-name: Kinnan B0-B2 v8.3 200-pair screen
+name: Kinnan B0-B2 v8.3.1 200-pair screen
 
 on:
   pull_request:
@@ -17,7 +17,61 @@ env:
   SHARDS: 10
 
 jobs:
+  card-name-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Maven and test policy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          (cd engine-tests && python3 -m unittest -v test_kinnan_policy_v8.py)
+
+      - name: Build pinned Forge harness with audited adapter patch
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/engine-tests/results"
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply --check "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+
+      - name: Reproduce formerly crashing Demonic Consultation scenario
+        run: |
+          for variant in B0 B2; do
+            python3 engine-tests/manabrew_pilot_v8.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant "$variant" --seeds 100163 --seat-offset 3 \
+              --max-round 4 --max-prompts 3500 --max-seconds 180
+          done
+
+      - name: Upload regression trace
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v831-card-name-regression
+          path: engine-tests/results/
+          if-no-files-found: error
+          retention-days: 90
+
   simulate:
+    needs: card-name-regression
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     strategy:
@@ -52,10 +106,13 @@ jobs:
           git fetch --depth 1 origin "$MANABREW_REF"
           git checkout --detach FETCH_HEAD
           git submodule update --init --recursive --depth 1
+          git apply --check "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
           node scripts/harness.mjs build
           {
             echo "MANABREW_COMMIT=$(git rev-parse HEAD)"
             echo "FORGE_COMMIT=$(git -C forge rev-parse HEAD)"
+            echo "MANABREW_PATCH_SHA256=$(sha256sum "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch" | cut -d' ' -f1)"
           } > "$GITHUB_WORKSPACE/engine-tests/results/engine-pins-${{ matrix.shard }}.env"
 
       - name: Run paired scenarios in deterministic shard
@@ -81,7 +138,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v83-screen-shard-${{ matrix.shard }}
+          name: v831-screen-shard-${{ matrix.shard }}
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -95,7 +152,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: v83-screen-shard-*
+          pattern: v831-screen-shard-*
           path: artifacts
           merge-multiple: true
 
@@ -107,7 +164,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: kinnan-v83-screen-200-report
+          name: kinnan-v831-screen-200-report
           path: report/
           if-no-files-found: error
           retention-days: 90
