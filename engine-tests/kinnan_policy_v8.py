@@ -382,7 +382,13 @@ def choose_selection(inp: dict[str, Any], deck: str) -> list[int]:
 def primary_failure(result: dict[str, Any]) -> str | None:
     if result.get("status") in {"crash", "unsupported_prompt"}:
         return "ENGINE_ERROR"
-    if result.get("status") in {"idle_timeout", "stale_prompt_timeout", "prompt_cap", "round_cap"}:
+    if result.get("status") in {
+        "idle_timeout",
+        "stale_prompt_timeout",
+        "wall_timeout",
+        "prompt_cap",
+        "round_cap",
+    }:
         return "TIMEOUT"
     if result.get("kinnanWon"):
         return None
