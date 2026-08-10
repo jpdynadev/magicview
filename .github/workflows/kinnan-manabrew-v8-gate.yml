@@ -89,13 +89,13 @@ jobs:
           python3 engine-tests/manabrew_pilot_v8.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
-            --variant B0 --seeds 100008 --seat-offset 0 --max-round 4 --max-prompts 3500
+            --variant B0 --seeds 100005 --seat-offset 1 --max-round 4 --max-prompts 3500
           b0_status=$?
 
           python3 engine-tests/manabrew_pilot_v8.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
-            --variant B2 --seeds 100008 --seat-offset 0 --max-round 4 --max-prompts 3500
+            --variant B2 --seeds 100005 --seat-offset 1 --max-round 4 --max-prompts 3500
           b2_status=$?
           set -e
 
