@@ -22,7 +22,7 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.3.0"
+PILOT_VERSION = "v8.4.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
@@ -396,6 +396,9 @@ def run_game(
         session_id = start["sessionId"]
         last_prompt_id = None
         last_progress_at = time.monotonic()
+        last_answer: dict[str, Any] | None = None
+        last_submit_at = 0.0
+        repeated_pass_retries = 0
         result: dict[str, Any] = {
             "pilotVersion": PILOT_VERSION,
             "variant": variant,
@@ -416,6 +419,7 @@ def run_game(
             "globalTurn": None,
             "round": 0,
             "prompts": 0,
+            "promptRetries": 0,
         }
 
         while result["prompts"] < max_prompts:
@@ -432,6 +436,23 @@ def run_game(
             prompt = json.loads(raw)
             prompt_id = prompt.get("promptId")
             if prompt_id == last_prompt_id:
+                output = (last_answer or {}).get("output") or {}
+                if (
+                    output.get("type") == "pass"
+                    and repeated_pass_retries < 3
+                    and time.monotonic() - last_submit_at >= 1.0
+                ):
+                    base.rpc(
+                        proc,
+                        {
+                            "command": "submitAction",
+                            "sessionId": session_id,
+                            "payload": json.dumps(last_answer, separators=(",", ":")),
+                        },
+                    )
+                    repeated_pass_retries += 1
+                    result["promptRetries"] += 1
+                    last_submit_at = time.monotonic()
                 if time.monotonic() - last_progress_at > 60:
                     result["status"] = "stale_prompt_timeout"
                     break
@@ -439,6 +460,7 @@ def run_game(
                 continue
             last_progress_at = time.monotonic()
             last_prompt_id = prompt_id
+            repeated_pass_retries = 0
 
             deciding = prompt.get("decidingPlayerId") or "player-0"
             player = policy.player_index(deciding)
@@ -569,6 +591,10 @@ def run_game(
                         "payload": json.dumps(answer, separators=(",", ":")),
                     },
                 )
+                last_answer = answer
+                last_submit_at = time.monotonic()
+            else:
+                last_answer = None
 
         if final_snapshot.get("gameOver"):
             result["winnerSeat"] = policy.authoritative_winner(final_snapshot)
