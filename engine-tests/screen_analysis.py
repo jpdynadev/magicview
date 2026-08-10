@@ -95,7 +95,7 @@ def main() -> int:
     summary: dict[str, Any] = {
         "stage": "screening",
         "inferentialClaim": False,
-        "pilotVersion": "v8.1.0",
+        "pilotVersion": "v8.2.0",
         "expectedPairs": args.expected_pairs,
         "observedRows": len(rows),
         "completePairs": len(pairs),
