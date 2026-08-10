@@ -1,2 +1,2 @@
-Kinnan B0/B2 pilot v8.4.0 + manabrew-card-name-runaway-2 fixed-N 200-pair screen.
-Mandatory seed 100163 seat 3 Consultation regression with bounded pass-only stale-prompt retries and a 240-second external cap; only then run seeds 100000-100199. Descriptive screening only.
+Kinnan B0/B2 pilot v8.5.0 + manabrew-card-name-runaway-2 fixed-N 200-pair screen.
+Mandatory seed 100163 seat 3 Consultation regression now refreshes the authoritative Forge snapshot when the last prompt remains visible; terminal gameOver/horizon state must be observed before seeds 100000-100199 run. Descriptive screening only.
