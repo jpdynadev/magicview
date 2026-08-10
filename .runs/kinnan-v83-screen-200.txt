@@ -1,2 +1,2 @@
 Kinnan B0/B2 v8.3.0 + manabrew-card-name-runaway-2 fixed-N 200-pair screen.
-Mandatory seed 100163 seat 3 regression, externally capped at 240 seconds per game, then seeds 100000-100199; descriptive screening only.
+Corrected patch hunk. Mandatory seed 100163 seat 3 regression, externally capped at 240 seconds per game, then seeds 100000-100199; descriptive screening only.
