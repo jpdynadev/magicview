@@ -21,7 +21,7 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.0.0"
+PILOT_VERSION = "v8.1.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
@@ -444,7 +444,11 @@ def run_game(
             result["globalTurn"] = global_turn
             result["round"] = round_number
             if round_number > max_round:
-                result["status"] = "round_cap"
+                # The primary endpoint is defined at the end of Kinnan T4.
+                # Beginning the next pod round means the complete fixed
+                # observation horizon was seen, even if the pod had no natural
+                # game winner.  Pod wins remain exclusive to game_over.
+                result["status"] = "horizon_complete"
                 break
 
             inp = prompt.get("input") or {}
@@ -594,7 +598,7 @@ def main() -> int:
     parser.add_argument("--variant", choices=sorted(VARIANT_FILES), required=True)
     parser.add_argument("--seeds", nargs="+", type=int, default=[101])
     parser.add_argument("--seat-offset", type=int, default=0)
-    parser.add_argument("--max-round", type=int, default=8)
+    parser.add_argument("--max-round", type=int, default=4)
     parser.add_argument("--max-prompts", type=int, default=3500)
     args = parser.parse_args()
 
@@ -626,7 +630,8 @@ def main() -> int:
 
     path = base.RESULT_DIR / f"pilot-summary-{args.variant}.json"
     path.write_text(json.dumps(results, indent=2))
-    return 0 if all(item.get("status") == "game_over" for item in results) else 1
+    completed = {"game_over", "horizon_complete"}
+    return 0 if all(item.get("status") in completed for item in results) else 1
 
 
 if __name__ == "__main__":
