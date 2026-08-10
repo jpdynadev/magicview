@@ -303,6 +303,10 @@ def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
         action
         for action in (inp.get("actions", []) or [])
         if action.get("type") in {"activateManaAbility", "useResource", "payLife"}
+        # A filter such as Energy Refractor's {2}: add one mana cannot make
+        # progress toward the outer payment.  Selecting it makes Forge offer
+        # the same action forever once ordinary sources are exhausted.
+        and not re.search(r"\{(?:\d+|[WUBRGCX])\}", str(action.get("cost") or "").upper())
     ]
     if not productive:
         return "cancel", None
