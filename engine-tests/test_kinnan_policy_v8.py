@@ -38,6 +38,18 @@ class PolicyTests(unittest.TestCase):
         self.assertIn("Kinnan + Basalt", policy.deterministic_line(snapshot, 2))
         self.assertIsNone(policy.deterministic_line(snapshot, 0))
 
+    def test_kinnan_basalt_is_deterministic_via_exhaustive_activations(self):
+        snapshot = {
+            "zones": [
+                {
+                    "ownerId": "player-0",
+                    "zone": "battlefield",
+                    "cards": [card("k", "Kinnan, Bonder Prodigy"), card("b", "Basalt Monolith")],
+                }
+            ]
+        }
+        self.assertIn("exhaustive Kinnan activations", policy.deterministic_line(snapshot, 0))
+
     def test_attackers_are_legal_and_kinnan_engines_stay_home(self):
         snapshot = {
             "players": [
