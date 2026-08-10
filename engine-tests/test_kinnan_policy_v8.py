@@ -164,6 +164,25 @@ class PolicyTests(unittest.TestCase):
         }
         self.assertEqual(policy.choose_payment_action(inp), ("cancel", None))
 
+    def test_payment_rejects_unannotated_convoke_or_filter_action(self):
+        inp = {
+            "manaCost": "{G}{G}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "tap:creature",
+                    "type": "activateManaAbility",
+                    "description": "Rograkh, Son of Rohgahh",
+                },
+                {
+                    "id": "tap:refractor",
+                    "type": "activateManaAbility",
+                    "description": "Energy Refractor",
+                },
+            ],
+        }
+        self.assertEqual(policy.choose_payment_action(inp), ("cancel", None))
+
 
 if __name__ == "__main__":
     unittest.main()
