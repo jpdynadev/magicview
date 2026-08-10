@@ -1,4 +1,4 @@
-name: Kinnan B0-B2 v8.3.2 200-pair screen
+name: Kinnan B0-B2 v8.4 200-pair screen
 
 on:
   pull_request:
@@ -66,7 +66,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v832-card-name-regression
+          name: v84-card-name-regression
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -140,7 +140,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v832-screen-shard-${{ matrix.shard }}
+          name: v84-screen-shard-${{ matrix.shard }}
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -154,7 +154,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: v832-screen-shard-*
+          pattern: v84-screen-shard-*
           path: artifacts
           merge-multiple: true
 
@@ -166,7 +166,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: kinnan-v832-screen-200-report
+          name: kinnan-v84-screen-200-report
           path: report/
           if-no-files-found: error
           retention-days: 90
