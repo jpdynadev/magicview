@@ -1,4 +1,4 @@
-name: Kinnan B0-B2 v8.3.1 200-pair screen
+name: Kinnan B0-B2 v8.3.2 200-pair screen
 
 on:
   pull_request:
@@ -54,7 +54,8 @@ jobs:
       - name: Reproduce formerly crashing Demonic Consultation scenario
         run: |
           for variant in B0 B2; do
-            python3 engine-tests/manabrew_pilot_v8.py \
+            timeout --signal=TERM --kill-after=10s 240s \
+              python3 engine-tests/manabrew_pilot_v8.py \
               /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
               /tmp/manabrew/forge/forge-gui/ \
               --variant "$variant" --seeds 100163 --seat-offset 3 \
@@ -65,7 +66,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v831-card-name-regression
+          name: v832-card-name-regression
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -124,7 +125,8 @@ jobs:
             seed=$((SEED_START + index))
             seat=$((index % 4))
             for variant in B0 B2; do
-              python3 engine-tests/manabrew_pilot_v8.py \
+              timeout --signal=TERM --kill-after=10s 240s \
+                python3 engine-tests/manabrew_pilot_v8.py \
                 /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
                 /tmp/manabrew/forge/forge-gui/ \
                 --variant "$variant" --seeds "$seed" --seat-offset "$seat" \
@@ -138,7 +140,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v831-screen-shard-${{ matrix.shard }}
+          name: v832-screen-shard-${{ matrix.shard }}
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -152,7 +154,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: v831-screen-shard-*
+          pattern: v832-screen-shard-*
           path: artifacts
           merge-multiple: true
 
@@ -164,7 +166,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: kinnan-v831-screen-200-report
+          name: kinnan-v832-screen-200-report
           path: report/
           if-no-files-found: error
           retention-days: 90
