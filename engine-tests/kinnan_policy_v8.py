@@ -302,7 +302,13 @@ def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
     productive = [
         action
         for action in (inp.get("actions", []) or [])
-        if action.get("type") in {"activateManaAbility", "useResource", "payLife"}
+        if (
+            action.get("type") in {"useResource", "payLife"}
+            or (
+                action.get("type") == "activateManaAbility"
+                and bool(action.get("producedMana"))
+            )
+        )
         # A filter such as Energy Refractor's {2}: add one mana cannot make
         # progress toward the outer payment.  Selecting it makes Forge offer
         # the same action forever once ordinary sources are exhausted.
