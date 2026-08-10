@@ -99,6 +99,11 @@ def deterministic_line(snapshot: dict[str, Any], kinnan_seat: int) -> str | None
     if {"Kinnan, Bonder Prodigy", "Basalt Monolith"} <= battlefield:
         if available & OUTLETS:
             return "Kinnan + Basalt + deterministic outlet"
+        # Both locked lists contain Thrasios and Ballista. Infinite colorless can
+        # activate Kinnan through every finite top-five block until Thrasios is
+        # found, then Thrasios draws Ballista for a lethal cast. This is not a
+        # one-shot random Kinnan hit: the finite library is exhaustively covered.
+        return "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista"
 
     if {"Grim Monolith", "Power Artifact"} <= battlefield:
         if available & OUTLETS:
