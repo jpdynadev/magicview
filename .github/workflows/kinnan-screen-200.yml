@@ -18,6 +18,7 @@ env:
 
 jobs:
   simulate:
+    if: github.event.pull_request.head.sha == '2abae84cb1fe5c567efd2d8873c69a75c0fe25b3'
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     strategy:
@@ -87,7 +88,7 @@ jobs:
 
   analyze:
     needs: simulate
-    if: always()
+    if: ${{ always() && needs.simulate.result != 'skipped' }}
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
