@@ -25,7 +25,8 @@ def load_results() -> list[dict]:
 
 def main() -> int:
     rows = load_results()
-    complete = [row for row in rows if row.get("status") == "game_over"]
+    complete_statuses = {"game_over", "horizon_complete"}
+    complete = [row for row in rows if row.get("status") in complete_statuses]
     report = {
         "stage": "two-game-engineering-gate",
         "inferentialClaim": False,
