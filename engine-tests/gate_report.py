@@ -36,7 +36,8 @@ def main() -> int:
         "gatePassed": len(rows) == 2 and len(complete) == 2,
         "engineErrors": sum(row.get("status") in {"crash", "unsupported_prompt"} for row in rows),
         "timeouts": sum(
-            row.get("status") in {"idle_timeout", "stale_prompt_timeout", "prompt_cap", "round_cap"}
+            row.get("status")
+            in {"idle_timeout", "stale_prompt_timeout", "wall_timeout", "prompt_cap", "round_cap"}
             for row in rows
         ),
         "games": rows,
