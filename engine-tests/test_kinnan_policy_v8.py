@@ -149,6 +149,21 @@ class PolicyTests(unittest.TestCase):
     def test_payment_confirms_satisfied_pool(self):
         self.assertEqual(policy.choose_payment_action({"canConfirmFromPool": True}), ("confirm", None))
 
+    def test_payment_rejects_net_negative_filter(self):
+        inp = {
+            "manaCost": "{2}{U}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "tap:refractor:U",
+                    "type": "activateManaAbility",
+                    "cost": "{2}",
+                    "producedMana": [{"color": "U", "amount": 1}],
+                }
+            ],
+        }
+        self.assertEqual(policy.choose_payment_action(inp), ("cancel", None))
+
 
 if __name__ == "__main__":
     unittest.main()
