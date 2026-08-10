@@ -1,6 +1,21 @@
 diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
 --- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
 +++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
+@@ -1551,6 +1551,15 @@ public final class ManaBrewInteractiveController extends PlayerController {
+     @Override
+     public String chooseCardName(final SpellAbility sa, final Predicate<ICardFace> cpp, final String valid, final String message) {
++        // The frozen RogSi policy casts Consultation as the second half of the
++        // Oracle line.  Naming a known-absent card is legal and lets Forge
++        // perform the actual exile/trigger resolution without materializing
++        // the entire card database as a protocol option list.
++        if (sa != null && sa.getHostCard() != null
++                && "Demonic Consultation".equals(sa.getHostCard().getName())) {
++            return "Black Lotus";
++        }
+         final List<ICardFace> faces = filterCardFaces(sa, cpp, valid);
+         return chooseCardName(sa, faces, message);
+     }
+ 
 @@ -2551,7 +2551,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
          forge.StaticData.instance().getCommonCards().streamAllFaces()
                  .filter(faceFilter)
