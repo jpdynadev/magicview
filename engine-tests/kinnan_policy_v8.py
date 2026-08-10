@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from itertools import product
 from typing import Any, Iterable
 
@@ -242,13 +243,76 @@ def choose_boolean(inp: dict[str, Any], deck: str, combo_ready: bool) -> bool:
             str(inp.get("confirmLabel") or ""),
         ]
     ).lower()
-    if any(token in text for token in ("pay buyback", "additional cost", "unless you pay")):
+    # Optional riders are policy choices.  Required costs are not: once the
+    # controller has selected the advertised spell/ability, declining a fetch
+    # land's life payment (or Mana Confluence's) merely returns to the same
+    # prompt and creates an infinite action/decision loop.
+    if any(
+        token in text
+        for token in (
+            "pay buyback",
+            "kicker",
+            "multikicker",
+            "replicate",
+            "additional optional cost",
+            "unless you pay",
+        )
+    ):
         return combo_ready
+    if any(
+        token in text
+        for token in (
+            "pay 1 life",
+            "pay 2 life",
+            "pay 3 life",
+            "pay 4 life",
+            "sacrifice this",
+            "discard this",
+            "exile this",
+        )
+    ):
+        return True
     if any(token in text for token in ("search", "draw", "untap", "copy", "counter", "use this ability")):
         return True
     if any(token in text for token in ("sacrifice", "discard", "lose life")):
         return combo_ready
     return False
+
+
+def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
+    """Choose a color-correct, engine-advertised mana action.
+
+    Returns ``("confirm", None)``, ``("act", action_id)``, or
+    ``("cancel", None)``.  The engine still owns legality and the remaining
+    cost; this function only prevents an arbitrary first-color choice such as
+    asking Mana Confluence for white while paying ``{B}``.
+    """
+
+    if inp.get("canConfirmFromPool"):
+        return "confirm", None
+
+    symbols = re.findall(r"\{([^}]+)\}", str(inp.get("manaCost") or "").upper())
+    required_colors = {symbol for symbol in symbols if symbol in {"W", "U", "B", "R", "G", "C"}}
+    productive = [
+        action
+        for action in (inp.get("actions", []) or [])
+        if action.get("type") in {"activateManaAbility", "useResource", "payLife"}
+    ]
+    if not productive:
+        return "cancel", None
+
+    def score(action: dict[str, Any]) -> tuple[int, int, str]:
+        produced = {
+            str(item.get("color") or "").upper()
+            for item in (action.get("producedMana", []) or [])
+        }
+        exact = len(required_colors & produced)
+        colored = len(produced & {"W", "U", "B", "R", "G"})
+        kind = 2 if action.get("type") == "activateManaAbility" else 1
+        return exact * 100 + colored * 10 + (1 if "C" in produced else 0), kind, str(action.get("id") or "")
+
+    chosen = max(productive, key=score)
+    return "act", str(chosen.get("id"))
 
 
 def _option_score(option: dict[str, Any], deck: str) -> int:
