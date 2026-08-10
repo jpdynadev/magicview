@@ -226,9 +226,15 @@ def choose_blockers(
             if toughness > attacker_power and engine_penalty == 0:
                 safe.append((score, blocker_id))
 
-        required = int(attacker.get("minBlockers", 1) or 1) if attacker.get("mustBeBlocked") else 0
-        pool = safe if safe else emergency if (required or low_life) else []
-        take = max(required, 1 if (pool and (safe or low_life)) else 0)
+        minimum = max(1, int(attacker.get("minBlockers", 1) or 1))
+        required = minimum if attacker.get("mustBeBlocked") else 0
+        pool = safe if len(safe) >= minimum else emergency if (required or low_life) else []
+        # Menace-like restrictions make a one-blocker assignment illegal even
+        # when blocking is optional.  Omit the block unless the advertised
+        # minimum can be satisfied; otherwise Forge repeats chooseBlockers.
+        take = max(required, minimum if len(pool) >= minimum and (safe or low_life) else 0)
+        if len(pool) < take:
+            take = 0
         for _, blocker_id in sorted(pool, reverse=True)[:take]:
             assignments.append({"blockerId": blocker_id, "attackerId": attacker_id})
             available.discard(blocker_id)
@@ -266,9 +272,9 @@ def choose_boolean(inp: dict[str, Any], deck: str, combo_ready: bool) -> bool:
             "pay 2 life",
             "pay 3 life",
             "pay 4 life",
-            "sacrifice this",
-            "discard this",
-            "exile this",
+            "sacrifice ",
+            "discard ",
+            "exile ",
         )
     ):
         return True
