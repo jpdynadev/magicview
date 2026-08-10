@@ -8,6 +8,7 @@ advertised by Manabrew and records the final GameViewDto winnerId.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import time
@@ -358,6 +359,10 @@ def run_game(
     max_round: int = 8,
 ) -> dict[str, Any]:
     decks = configure_decks(variant, kinnan_seat)
+    deck_hashes = [
+        hashlib.sha256((base.DECK_DIR / filename).read_bytes()).hexdigest()
+        for _, filename in decks
+    ]
     trace: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
     failed_cast_states: set[tuple[Any, ...]] = set()
@@ -395,6 +400,8 @@ def run_game(
             "seed": seed,
             "kinnanSeat": kinnan_seat,
             "seatDecks": [name for name, _ in decks],
+            "seatDeckSha256s": deck_hashes,
+            "variantDeckSha256": deck_hashes[kinnan_seat],
             "status": "prompt_limit",
             "winnerSeat": None,
             "kinnanWon": False,
@@ -460,7 +467,11 @@ def run_game(
                 mulligans[str(player)] = max(
                     mulligans[str(player)], int(inp.get("mulliganCount", 0) or 0)
                 )
-            if str(player) not in kept_hands and prompt_type not in {"mulligan", "mulliganPutBack"}:
+            if (
+                str(player) not in kept_hands
+                and hand
+                and prompt_type not in {"mulligan", "mulliganPutBack"}
+            ):
                 kept_hands[str(player)] = hand
 
             line = policy.deterministic_line(snapshot, kinnan_seat)
