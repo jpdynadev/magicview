@@ -22,7 +22,7 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.1.0"
+PILOT_VERSION = "v8.2.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
@@ -357,6 +357,7 @@ def run_game(
     kinnan_seat: int,
     max_prompts: int = 3500,
     max_round: int = 8,
+    max_seconds: int = 180,
 ) -> dict[str, Any]:
     decks = configure_decks(variant, kinnan_seat)
     deck_hashes = [
@@ -366,6 +367,7 @@ def run_game(
     trace: list[dict[str, Any]] = []
     errors: list[dict[str, Any]] = []
     failed_cast_states: set[tuple[Any, ...]] = set()
+    attempted_action_states: set[tuple[str, int, str]] = set()
     opening_hands: dict[str, list[str]] = {}
     kept_hands: dict[str, list[str]] = {}
     mulligans: dict[str, int] = {str(index): 0 for index in range(4)}
@@ -393,7 +395,7 @@ def run_game(
         )
         session_id = start["sessionId"]
         last_prompt_id = None
-        idle = 0
+        last_progress_at = time.monotonic()
         result: dict[str, Any] = {
             "pilotVersion": PILOT_VERSION,
             "variant": variant,
@@ -416,25 +418,26 @@ def run_game(
             "prompts": 0,
         }
 
-        for _ in range(max_prompts * 4):
+        while result["prompts"] < max_prompts:
+            if time.monotonic() - started > max_seconds:
+                result["status"] = "wall_timeout"
+                break
             raw = base.rpc(proc, {"command": "getPrompt", "sessionId": session_id, "playerIndex": 0})
             if not raw:
-                idle += 1
-                if idle > 1500:
+                if time.monotonic() - last_progress_at > 60:
                     result["status"] = "idle_timeout"
                     break
-                time.sleep(0.005)
+                time.sleep(0.01)
                 continue
             prompt = json.loads(raw)
             prompt_id = prompt.get("promptId")
             if prompt_id == last_prompt_id:
-                idle += 1
-                if idle > 1500:
+                if time.monotonic() - last_progress_at > 60:
                     result["status"] = "stale_prompt_timeout"
                     break
-                time.sleep(0.003)
+                time.sleep(0.01)
                 continue
-            idle = 0
+            last_progress_at = time.monotonic()
             last_prompt_id = prompt_id
 
             deciding = prompt.get("decidingPlayerId") or "player-0"
@@ -479,7 +482,7 @@ def run_game(
                 result["firstAssemblyTurn"] = round_number
                 result["comboLine"] = line
 
-            battlefield_signature = tuple(sorted(base.battlefield_names(snapshot, player)))
+            state_hash = policy.visible_state_hash(snapshot)
             answer = None
             canceled_unpayable = False
             try:
@@ -487,19 +490,16 @@ def run_game(
                     answer, canceled_unpayable = choose_productive_payment_v8(inp)
                     if canceled_unpayable and inp.get("cardId"):
                         failed_cast_states.add(
-                            (global_turn, snapshot.get("step"), player, inp.get("cardId"), battlefield_signature)
+                            (global_turn, snapshot.get("step"), player, inp.get("cardId"))
                         )
                 elif prompt_type == "chooseAction":
                     filtered = []
                     for action in inp.get("actions", []) or []:
-                        key = (
-                            global_turn,
-                            snapshot.get("step"),
-                            player,
-                            action.get("cardId"),
-                            battlefield_signature,
-                        )
-                        if action.get("type") == "cast" and key in failed_cast_states:
+                        cast_key = (global_turn, snapshot.get("step"), player, action.get("cardId"))
+                        action_key = (state_hash, player, str(action.get("id") or ""))
+                        if action.get("type") == "cast" and cast_key in failed_cast_states:
+                            continue
+                        if action_key in attempted_action_states:
                             continue
                         filtered.append(action)
                     patched_prompt = dict(prompt)
@@ -518,6 +518,8 @@ def run_game(
                 break
 
             chosen = _chosen_action(inp, answer) if prompt_type == "chooseAction" else None
+            if chosen:
+                attempted_action_states.add((state_hash, player, str(chosen.get("id") or "")))
             if player == kinnan_seat and result["firstAttemptTurn"] is None:
                 if _is_attempt_action(line, chosen, snapshot, kinnan_seat):
                     result["firstAttemptTurn"] = round_number
@@ -539,7 +541,7 @@ def run_game(
                     "step": snapshot.get("step"),
                     "activePlayerId": snapshot.get("activePlayerId"),
                     "priorityPlayerId": snapshot.get("priorityPlayerId"),
-                    "stateHash": policy.visible_state_hash(snapshot),
+                    "stateHash": state_hash,
                     "legalActionHash": policy.legal_action_hash(actions),
                     "legalActionCount": len(actions),
                     "prompt": v3.summarize_prompt(inp),
@@ -611,6 +613,7 @@ def main() -> int:
     parser.add_argument("--seat-offset", type=int, default=0)
     parser.add_argument("--max-round", type=int, default=4)
     parser.add_argument("--max-prompts", type=int, default=3500)
+    parser.add_argument("--max-seconds", type=int, default=180)
     args = parser.parse_args()
 
     results = []
@@ -625,6 +628,7 @@ def main() -> int:
                 kinnan_seat,
                 max_prompts=args.max_prompts,
                 max_round=args.max_round,
+                max_seconds=args.max_seconds,
             )
         except Exception as exc:
             result = {
