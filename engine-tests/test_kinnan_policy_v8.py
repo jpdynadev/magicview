@@ -99,6 +99,34 @@ class PolicyTests(unittest.TestCase):
         inp = {"presentation": {"title": "Pay 1 life", "targets": []}}
         self.assertTrue(policy.choose_boolean(inp, "Kinnan", combo_ready=False))
 
+    def test_boolean_accepts_fetchland_sacrifice(self):
+        inp = {"presentation": {"title": "Sacrifice Flooded Strand", "targets": []}}
+        self.assertTrue(policy.choose_boolean(inp, "Kinnan", combo_ready=False))
+
+    def test_blockers_respect_minimum_blocker_count(self):
+        snapshot = {
+            "players": [{"id": "player-0", "life": 40}],
+            "zones": [
+                {
+                    "ownerId": "player-0",
+                    "zone": "battlefield",
+                    "cards": [card("b", "Rograkh, Son of Rohgahh", power="0", toughness="1")],
+                }
+            ],
+        }
+        inp = {
+            "availableBlockerIds": ["b"],
+            "attackers": [
+                {
+                    "attackerId": "a",
+                    "validBlockerIds": ["b"],
+                    "minBlockers": 2,
+                    "mustBeBlocked": False,
+                }
+            ],
+        }
+        self.assertEqual(policy.choose_blockers(inp, snapshot, 0, "RogSi"), [])
+
     def test_payment_prefers_required_color(self):
         inp = {
             "manaCost": "{B}",
