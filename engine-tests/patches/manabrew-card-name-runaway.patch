@@ -1,0 +1,15 @@
+diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
+--- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
++++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
+@@ -2551,7 +2551,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
+         forge.StaticData.instance().getCommonCards().streamAllFaces()
+                 .filter(faceFilter)
+                 .filter(face -> {
+-                    if (valid == null || valid.isEmpty()) {
++                    // "Card" is ChooseCardNameEffect's unconstrained default.  The
++                    // face predicate already accepts it, so constructing a live Card
++                    // for every printed face only consumes Forge game IDs.
++                    if (valid == null || valid.isEmpty() || "Card".equals(valid)) {
+                         return true;
+                     }
+                     final PaperCard cp = forge.StaticData.instance().getCommonCards().getCard(face.getName());
