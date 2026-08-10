@@ -1,7 +1,7 @@
 diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
 --- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
 +++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveController.java
-@@ -1551,6 +1551,15 @@ public final class ManaBrewInteractiveController extends PlayerController {
+@@ -1551,6 +1551,14 @@ public final class ManaBrewInteractiveController extends PlayerController {
      @Override
      public String chooseCardName(final SpellAbility sa, final Predicate<ICardFace> cpp, final String valid, final String message) {
 +        // The frozen RogSi policy casts Consultation as the second half of the
