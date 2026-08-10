@@ -9,6 +9,10 @@ on:
       - ".github/workflows/kinnan-manabrew-v8-gate.yml"
   workflow_dispatch:
 
+concurrency:
+  group: kinnan-v8-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -62,10 +66,12 @@ jobs:
       - name: Clone pinned Manabrew and Forge submodule
         run: |
           mkdir -p "$GITHUB_WORKSPACE/engine-tests/results"
-          git clone --recurse-submodules https://github.com/witchesofthehill/manabrew.git /tmp/manabrew
+          git init /tmp/manabrew
           cd /tmp/manabrew
-          git checkout "$MANABREW_REF"
-          git submodule update --init --recursive
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
           {
             echo "MANABREW_COMMIT=$(git rev-parse HEAD)"
             echo "FORGE_COMMIT=$(git -C forge rev-parse HEAD)"
