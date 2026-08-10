@@ -95,6 +95,32 @@ class PolicyTests(unittest.TestCase):
         self.assertFalse(policy.choose_boolean(inp, "Kinnan", combo_ready=False))
         self.assertTrue(policy.choose_boolean(inp, "Kinnan", combo_ready=True))
 
+    def test_boolean_accepts_required_life_payment(self):
+        inp = {"presentation": {"title": "Pay 1 life", "targets": []}}
+        self.assertTrue(policy.choose_boolean(inp, "Kinnan", combo_ready=False))
+
+    def test_payment_prefers_required_color(self):
+        inp = {
+            "manaCost": "{B}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "tap:land:W",
+                    "type": "activateManaAbility",
+                    "producedMana": [{"color": "W", "amount": 1}],
+                },
+                {
+                    "id": "tap:land:B",
+                    "type": "activateManaAbility",
+                    "producedMana": [{"color": "B", "amount": 1}],
+                },
+            ],
+        }
+        self.assertEqual(policy.choose_payment_action(inp), ("act", "tap:land:B"))
+
+    def test_payment_confirms_satisfied_pool(self):
+        self.assertEqual(policy.choose_payment_action({"canConfirmFromPool": True}), ("confirm", None))
+
 
 if __name__ == "__main__":
     unittest.main()
