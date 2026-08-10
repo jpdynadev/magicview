@@ -1,11 +1,11 @@
-name: Kinnan B0-B2 200-pair screen
+name: Kinnan B0-B2 v8.3 200-pair screen
 
 on:
   pull_request:
     branches:
-      - agent/kinnan-engine-tests
+      - agent/kinnan-v8-certification
     paths:
-      - ".runs/kinnan-screen-200.txt"
+      - ".runs/kinnan-v83-screen-200.txt"
 
 permissions:
   contents: read
@@ -18,7 +18,6 @@ env:
 
 jobs:
   simulate:
-    if: github.event.pull_request.head.sha == '2abae84cb1fe5c567efd2d8873c69a75c0fe25b3'
     runs-on: ubuntu-24.04
     timeout-minutes: 350
     strategy:
@@ -72,7 +71,8 @@ jobs:
                 /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
                 /tmp/manabrew/forge/forge-gui/ \
                 --variant "$variant" --seeds "$seed" --seat-offset "$seat" \
-                --max-round 4 --max-prompts 3500 || failures=$((failures + 1))
+                --max-round 4 --max-prompts 3500 --max-seconds 180 \
+                || failures=$((failures + 1))
             done
           done
           test "$failures" = 0
@@ -81,7 +81,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: screen-shard-${{ matrix.shard }}
+          name: v83-screen-shard-${{ matrix.shard }}
           path: engine-tests/results/
           if-no-files-found: error
           retention-days: 90
@@ -95,7 +95,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: screen-shard-*
+          pattern: v83-screen-shard-*
           path: artifacts
           merge-multiple: true
 
@@ -107,7 +107,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: kinnan-screen-200-report
+          name: kinnan-v83-screen-200-report
           path: report/
           if-no-files-found: error
           retention-days: 90
