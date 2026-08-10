@@ -316,6 +316,18 @@ def smart_response(
 base.response_for = smart_response
 
 
+def choose_productive_payment_v8(inp: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    disposition, action_id = policy.choose_payment_action(inp)
+    if disposition == "confirm":
+        return {"type": "payManaCost", "output": {"type": "pay", "auto": False}}, False
+    if disposition == "act" and action_id:
+        return {
+            "type": "payManaCost",
+            "output": {"type": "act", "actionId": action_id},
+        }, False
+    return {"type": "payManaCost", "output": {"type": "cancel"}}, True
+
+
 def _chosen_action(inp: dict[str, Any], answer: dict[str, Any] | None) -> dict[str, Any] | None:
     try:
         action_id = answer["output"]["actionId"]
@@ -457,7 +469,7 @@ def run_game(
             canceled_unpayable = False
             try:
                 if prompt_type == "payManaCost":
-                    answer, canceled_unpayable = v3.choose_productive_payment(inp)
+                    answer, canceled_unpayable = choose_productive_payment_v8(inp)
                     if canceled_unpayable and inp.get("cardId"):
                         failed_cast_states.add(
                             (global_turn, snapshot.get("step"), player, inp.get("cardId"), battlefield_signature)
