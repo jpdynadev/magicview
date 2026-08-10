@@ -1,0 +1,10 @@
+stage=screening
+pairs=200
+seed_start=100000
+seed_end=100199
+shards=10
+pilot_version=v8.2.0
+invalidated_predecessor_run=31410755448
+regression_gate_run=31413842356
+manabrew_commit=8a1380e5a59986ea3fed143b85f710f9ee3888dc
+forge_commit=1b900c62af9340f4f73109012083d179f8a48ff6
