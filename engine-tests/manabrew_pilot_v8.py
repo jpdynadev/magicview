@@ -22,7 +22,7 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.5.0"
+PILOT_VERSION = "v8.6.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
@@ -399,6 +399,7 @@ def run_game(
         last_answer: dict[str, Any] | None = None
         last_submit_at = 0.0
         last_snapshot_poll_at = 0.0
+        terminal_seen_at: float | None = None
         repeated_pass_retries = 0
         result: dict[str, Any] = {
             "pilotVersion": PILOT_VERSION,
@@ -443,28 +444,44 @@ def run_game(
                     viewer = policy.player_index(deciding)
                     if viewer is None or not 0 <= viewer < 4:
                         viewer = 0
-                    repeated_snapshot = json.loads(
-                        base.rpc(
-                            proc,
-                            {
-                                "command": "getSnapshot",
-                                "sessionId": session_id,
-                                "viewer": viewer,
-                            },
+                    game_over = str(
+                        base.rpc(proc, {"command": "getGameOver", "sessionId": session_id})
+                    ).lower() == "true"
+                    if game_over and terminal_seen_at is None:
+                        terminal_seen_at = now
+                    repeated_snapshot = None
+                    try:
+                        repeated_snapshot = json.loads(
+                            base.rpc(
+                                proc,
+                                {
+                                    "command": "getSnapshot",
+                                    "sessionId": session_id,
+                                    "viewer": viewer,
+                                },
+                            )
                         )
-                    )
+                    except (RuntimeError, json.JSONDecodeError):
+                        # Snapshot extraction reads Forge's mutable zone lists.
+                        # A concurrent game-thread update can transiently throw;
+                        # getGameOver remains the stable terminal signal.
+                        repeated_snapshot = None
                     last_snapshot_poll_at = now
-                    final_snapshot = repeated_snapshot
-                    global_turn = repeated_snapshot.get("turn")
-                    round_number = v3.round_from_global_turn(global_turn)
-                    result["globalTurn"] = global_turn
-                    result["round"] = round_number
-                    if repeated_snapshot.get("gameOver"):
-                        result["status"] = "game_over"
-                        result["winnerSeat"] = policy.authoritative_winner(repeated_snapshot)
-                        break
-                    if round_number > max_round:
-                        result["status"] = "horizon_complete"
+                    if isinstance(repeated_snapshot, dict):
+                        final_snapshot = repeated_snapshot
+                        global_turn = repeated_snapshot.get("turn")
+                        round_number = v3.round_from_global_turn(global_turn)
+                        result["globalTurn"] = global_turn
+                        result["round"] = round_number
+                        if game_over or repeated_snapshot.get("gameOver"):
+                            result["status"] = "game_over"
+                            result["winnerSeat"] = policy.authoritative_winner(repeated_snapshot)
+                            break
+                        if round_number > max_round:
+                            result["status"] = "horizon_complete"
+                            break
+                    elif terminal_seen_at is not None and now - terminal_seen_at > 5.0:
+                        result["status"] = "terminal_snapshot_timeout"
                         break
                 output = (last_answer or {}).get("output") or {}
                 if (
