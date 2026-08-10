@@ -1,46 +1,536 @@
 === Winner-like lines ===
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 1 Ai(4)-RogThras 2026: 0 
+Add To Stack: Ai(3)-Blue Farm 2026 cast Voice of Victory
+Resolve Stack: Voice of Victory - Creature 1 / 3
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Silas Renn, Seeker Adept (249), Tymna the Weaver (303), Esper Sentinel (241) and Voice of Victory (243) to attack Ai(2)-RogSi 2026.
+Ai(2)-RogSi 2026 didn't block Voice of Victory (243).
+Damage: Voice of Victory (243) deals 1 combat damage to Ai(2)-RogSi 2026.
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 2 Ai(4)-RogThras 2026: 0 
+Add To Stack: Ai(3)-Blue Farm 2026 cast Voice of Victory
+Resolve Stack: Voice of Victory - Creature 1 / 3
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 3 Ai(4)-RogThras 2026: 0 
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 4 Ai(4)-RogThras 2026: 0 
+Add To Stack: Ai(3)-Blue Farm 2026 cast Voice of Victory
+Resolve Stack: Voice of Victory - Creature 1 / 3
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218), Tymna the Weaver (303), Makdee and Itla, Skysnarers (224), Voice of Victory (243), Esper Sentinel (241) and Birds of Paradise (86) to attack Ai(1)-Kinnan Test B.
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Resolve Stack: Mobilize 2 (When this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.) [Attacker: Voice of Victory (243)]
+Resolve Stack: Mobilize 2 (When this creature attacks, create two tapped and attacking 1/1 red Warrior creature tokens. Sacrifice them at the beginning of the next end step.) [Attacker: Voice of Victory (243)]
+Ai(1)-Kinnan Test B didn't block Voice of Victory (243).
+Damage: Voice of Victory (243) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218), Tymna the Weaver (303), Makdee and Itla, Skysnarers (224), Voice of Victory (243) and Esper Sentinel (241) to attack Ai(4)-RogThras 2026.
+Ai(4)-RogThras 2026 didn't block Voice of Victory (243).
+Damage: Voice of Victory (243) deals 1 combat damage to Ai(4)-RogThras 2026.
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 5 Ai(4)-RogThras 2026: 0 
 
 === Error / unsupported / deck lines ===
 Error handling registered!
-No deck found in /home/runner/.forge/decks/commander/
-Could not load deck - Kinnan_TestB.dck, match cannot start
+java.lang.InterruptedException
+java.lang.InterruptedException
 
 === Kinnan / combo mentions ===
-Could not load deck - Kinnan_TestB.dck, match cannot start
+Life: Life: Ai(1)-Kinnan Test B 19 > 17
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Kraum, Ludevic's Opus
+Add To Stack: Ai(1)-Kinnan Test B cast Swan Song targeting [Smothering Tithe]
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Kraum, Ludevic's Opus
+Turn: Turn 29 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Add To Stack: Ai(4)-RogThras 2026 activated Thrasios, Triton Hero
+Resolve Stack: Thrasios, Triton Hero (404) - Ai(4)-RogThras 2026 scries 1. Ai(4)-RogThras 2026 reveals the top card of their library. Ai(4)-RogThras 2026 draws a card. 
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Add To Stack: Ai(1)-Kinnan Test B cast Lightning Greaves
+Resolve Stack: Whenever an opponent casts a noncreature spell, create a Food token. (It's an artifact with "{2}, {T}, Sacrifice this token: You gain 3 life.") [Card: Lightning Greaves (39), Activator: Ai(1)-Kinnan Test B, SpellAbility: Lightning Greaves]
+Add To Stack: Ai(1)-Kinnan Test B activated Lightning Greaves targeting [Kinnan, Bonder Prodigy (100)]
+Resolve Stack: Lightning Greaves (39) -  Attach to Kinnan, Bonder Prodigy (100)
+Add To Stack: Ai(1)-Kinnan Test B cast Arcane Signet
+Resolve Stack: Whenever an opponent casts a noncreature spell, create a Food token. (It's an artifact with "{2}, {T}, Sacrifice this token: You gain 3 life.") [Card: Arcane Signet (41), Activator: Ai(1)-Kinnan Test B, SpellAbility: Arcane Signet]
+Resolve Stack: Whenever an opponent casts their second spell each turn, draw a card. [Card: Arcane Signet (41), Activator: Ai(1)-Kinnan Test B, SpellAbility: Arcane Signet]
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Combat: Ai(1)-Kinnan Test B assigned Bird Token (408) to attack Ai(4)-RogThras 2026.
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Kraum, Ludevic's Opus
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Rhystic Study
+Add To Stack: Ai(1)-Kinnan Test B triggered Kraum, Ludevic's Opus
+Add To Stack: Ai(1)-Kinnan Test B cast Chord of Calling
+Add To Stack: Ai(1)-Kinnan Test B activated Horseshoe Crab
+Player Control: Ai(1)-Kinnan Test B has restored control over themself
+Game Outcome: Ai(1)-Kinnan Test B has won because all opponents have lost
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 4 Ai(4)-RogThras 2026: 0 
+Warning: default (ie. inherited from base class) implementation of confirmAction is used by Kinnan, Bonder Prodigy for forge.ai.ability.PermanentCreatureAi. Consider declaring an overloaded method
+Mulligan: Ai(1)-Kinnan Test B has kept a hand of 7 cards
+Turn: Turn 1 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Land: Ai(1)-Kinnan Test B played Hydroelectric Laboratory (43)
+Add To Stack: Ai(1)-Kinnan Test B cast Lotus Petal
+Add To Stack: Ai(1)-Kinnan Test B cast Mox Opal
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Prophet of Distortion
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Turn: Turn 5 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Combat: Ai(1)-Kinnan Test B assigned Prophet of Distortion (82) to attack Ai(2)-RogSi 2026.
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Sol Ring
+Add To Stack: Ai(1)-Kinnan Test B cast Defense Grid
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Add To Stack: Ai(4)-RogThras 2026 cast Thrasios, Triton Hero
+Resolve Stack: Thrasios, Triton Hero - Creature 1 / 3
+Turn: Turn 9 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Add To Stack: Ai(1)-Kinnan Test B cast Mox Diamond
+Discard: Ai(1)-Kinnan Test B discards Mana Confluence (28).
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B activated Prophet of Distortion
+Resolve Stack: Prophet of Distortion (82) - Ai(1)-Kinnan Test B draws a card.
+Land: Ai(1)-Kinnan Test B played Barkchannel Pathway (14)
+Add To Stack: Ai(1)-Kinnan Test B cast Kinnan, Bonder Prodigy
+Resolve Stack: Kinnan, Bonder Prodigy - Creature 2 / 2
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Add To Stack: Ai(2)-RogSi 2026 cast Deadly Rollick targeting [Kinnan, Bonder Prodigy (100)]
+Zone Change: Kinnan, Bonder Prodigy (100) was put into Exile from Battlefield.
+Resolve Stack: Deadly Rollick (150) - Exile Kinnan, Bonder Prodigy (100).
+Turn: Turn 13 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B activated Prophet of Distortion
+Resolve Stack: Prophet of Distortion (82) - Ai(1)-Kinnan Test B draws a card.
+Add To Stack: Ai(1)-Kinnan Test B cast Incubation Druid
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Tymna the Weaver (303), Delney, Streetwise Lookout (218) and Ragavan, Nimble Pilferer (286) to attack Ai(1)-Kinnan Test B.
+Combat: Ai(1)-Kinnan Test B didn't block Kraum, Ludevic's Opus (301).
+Ai(1)-Kinnan Test B didn't block Tymna the Weaver (303).
+Ai(1)-Kinnan Test B didn't block Delney, Streetwise Lookout (218).
+Ai(1)-Kinnan Test B didn't block Ragavan, Nimble Pilferer (286).
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(1)-Kinnan Test B.
+Damage: Tymna the Weaver (303) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Ragavan, Nimble Pilferer (286) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Life: Life: Ai(1)-Kinnan Test B 40 > 30
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Combat: Ai(4)-RogThras 2026 assigned Dryad Arbor (376) and Thrasios, Triton Hero (404) to attack Ai(3)-Blue Farm 2026.
+Ai(3)-Blue Farm 2026 didn't block Thrasios, Triton Hero (404).
+Damage: Thrasios, Triton Hero (404) deals 1 combat damage to Ai(3)-Blue Farm 2026.
+Turn: Turn 17 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Add To Stack: Ai(1)-Kinnan Test B activated Incubation Druid
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Combat: Ai(1)-Kinnan Test B assigned Incubation Druid (44) and Prophet of Distortion (82) to attack Ai(3)-Blue Farm 2026.
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Mystic Remora
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Tymna the Weaver (303), Delney, Streetwise Lookout (218) and Ragavan, Nimble Pilferer (286) to attack Ai(1)-Kinnan Test B.
+Combat: Ai(1)-Kinnan Test B didn't block Kraum, Ludevic's Opus (301).
+Ai(1)-Kinnan Test B didn't block Tymna the Weaver (303).
+Ai(1)-Kinnan Test B didn't block Delney, Streetwise Lookout (218).
+Ai(1)-Kinnan Test B didn't block Ragavan, Nimble Pilferer (286).
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(1)-Kinnan Test B.
+Damage: Tymna the Weaver (303) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Ragavan, Nimble Pilferer (286) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Life: Life: Ai(1)-Kinnan Test B 30 > 20
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Combat: Ai(4)-RogThras 2026 assigned Dryad Arbor (376) and Thrasios, Triton Hero (404) to attack Ai(3)-Blue Farm 2026.
+Ai(3)-Blue Farm 2026 didn't block Thrasios, Triton Hero (404).
+Damage: Thrasios, Triton Hero (404) deals 1 combat damage to Ai(3)-Blue Farm 2026.
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Turn: Turn 21 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Resolve Stack: Cumulative upkeep {1} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.) [Phase: Ai(1)-Kinnan Test B]
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Combat: Ai(1)-Kinnan Test B assigned Incubation Druid (44) and Prophet of Distortion (82) to attack Ai(3)-Blue Farm 2026.
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Walking Ballista
+Add To Stack: Ai(1)-Kinnan Test B activated Walking Ballista targeting [Tymna the Weaver (303)]
+Add To Stack: Ai(1)-Kinnan Test B activated Walking Ballista targeting [Tymna the Weaver (303)]
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218) and Ragavan, Nimble Pilferer (286) to attack Ai(1)-Kinnan Test B.
+Combat: Ai(1)-Kinnan Test B didn't block Kraum, Ludevic's Opus (301).
+Ai(1)-Kinnan Test B didn't block Delney, Streetwise Lookout (218).
+Ai(1)-Kinnan Test B didn't block Ragavan, Nimble Pilferer (286).
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(1)-Kinnan Test B.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Ragavan, Nimble Pilferer (286) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Life: Life: Ai(1)-Kinnan Test B 20 > 12
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Resolve Stack: Whenever Ragavan, Nimble Pilferer deals combat damage to a player, create a Treasure token and exile the top card of that player's library. Until end of turn, you may cast that card. [Damage Source: Ragavan, Nimble Pilferer (286), Damaged: Ai(1)-Kinnan Test B, Amount: 2]
+Turn: Turn 25 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Resolve Stack: Cumulative upkeep {1} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.) [Phase: Ai(1)-Kinnan Test B]
+Phase: Ai(1)-Kinnan Test B's Draw step
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Combat: Ai(1)-Kinnan Test B assigned Incubation Druid (44) to attack Ai(3)-Blue Farm 2026.
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Enduring Vitality
+Add To Stack: Ai(1)-Kinnan Test B cast Concordant Crossroads
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: Concordant Crossroads (3), Activator: Ai(1)-Kinnan Test B, SpellAbility: Concordant Crossroads]
+Resolve Stack: Whenever an opponent casts their second spell each turn, draw a card. [Card: Concordant Crossroads (3), Activator: Ai(1)-Kinnan Test B, SpellAbility: Concordant Crossroads]
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218), Ragavan, Nimble Pilferer (286), Tymna the Weaver (303) and Makdee and Itla, Skysnarers (224) to attack Ai(1)-Kinnan Test B.
+Combat: Ai(1)-Kinnan Test B didn't block Kraum, Ludevic's Opus (301).
+Ai(1)-Kinnan Test B didn't block Delney, Streetwise Lookout (218).
+Ai(1)-Kinnan Test B assigned Prophet of Distortion (82) to block Ragavan, Nimble Pilferer (286).
+Ai(1)-Kinnan Test B didn't block Tymna the Weaver (303).
+Ai(1)-Kinnan Test B didn't block Makdee and Itla, Skysnarers (224).
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(1)-Kinnan Test B.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Tymna the Weaver (303) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Makdee and Itla, Skysnarers (224) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Life: Life: Ai(1)-Kinnan Test B 12 > 2
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Turn: Turn 29 (Ai(1)-Kinnan Test B)
+Phase: Ai(1)-Kinnan Test B's Untap step
+Phase: Ai(1)-Kinnan Test B's Upkeep step
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Resolve Stack: Cumulative upkeep {1} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.) [Phase: Ai(1)-Kinnan Test B]
+Phase: Ai(1)-Kinnan Test B's Draw step
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(1)-Kinnan Test B]
+Phase: Ai(1)-Kinnan Test B's Main phase, precombat
+Land: Ai(1)-Kinnan Test B played Breeding Pool (26)
+Add To Stack: Ai(1)-Kinnan Test B cast Kinnan, Bonder Prodigy
+Resolve Stack: Kinnan, Bonder Prodigy - Creature 2 / 2
+Phase: Ai(1)-Kinnan Test B's Beginning of Combat Step
+Phase: Ai(1)-Kinnan Test B's Declare Attackers Step
+Phase: Ai(1)-Kinnan Test B's Declare Blockers Step
+Phase: Ai(1)-Kinnan Test B's First Strike Damage Step
+Phase: Ai(1)-Kinnan Test B's Combat Damage Step
+Phase: Ai(1)-Kinnan Test B's End of Combat Step
+Phase: Ai(1)-Kinnan Test B's Main phase, postcombat
+Add To Stack: Ai(1)-Kinnan Test B cast Machine God's Effigy
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: Machine God's Effigy (30), Activator: Ai(1)-Kinnan Test B, SpellAbility: Machine God's Effigy]
+Resolve Stack: Whenever an opponent casts their second spell each turn, draw a card. [Card: Machine God's Effigy (30), Activator: Ai(1)-Kinnan Test B, SpellAbility: Machine God's Effigy]
+Add To Stack: Ai(1)-Kinnan Test B triggered Mystic Remora
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(1)-Kinnan Test B]
+Phase: Ai(1)-Kinnan Test B's End step
+Phase: Ai(1)-Kinnan Test B's Cleanup step
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218), Tymna the Weaver (303), Makdee and Itla, Skysnarers (224), Voice of Victory (243), Esper Sentinel (241) and Birds of Paradise (86) to attack Ai(1)-Kinnan Test B.
+Combat: Ai(1)-Kinnan Test B didn't block Kraum, Ludevic's Opus (301).
+Ai(1)-Kinnan Test B didn't block Delney, Streetwise Lookout (218).
+Ai(1)-Kinnan Test B didn't block Tymna the Weaver (303).
+Ai(1)-Kinnan Test B didn't block Makdee and Itla, Skysnarers (224).
+Ai(1)-Kinnan Test B didn't block Voice of Victory (243).
+Ai(1)-Kinnan Test B didn't block Esper Sentinel (241).
+Ai(1)-Kinnan Test B didn't block Birds of Paradise (86).
+Ai(1)-Kinnan Test B didn't block Warrior Token (511).
+Ai(1)-Kinnan Test B didn't block Warrior Token (512).
+Ai(1)-Kinnan Test B didn't block Warrior Token (514).
+Ai(1)-Kinnan Test B didn't block Warrior Token (515).
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(1)-Kinnan Test B.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Tymna the Weaver (303) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Makdee and Itla, Skysnarers (224) deals 2 combat damage to Ai(1)-Kinnan Test B.
+Damage: Voice of Victory (243) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Damage: Esper Sentinel (241) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Damage: Warrior Token (511) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Damage: Warrior Token (512) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Damage: Warrior Token (514) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Damage: Warrior Token (515) deals 1 combat damage to Ai(1)-Kinnan Test B.
+Life: Life: Ai(1)-Kinnan Test B 2 > -14
+Combat: Ai(4)-RogThras 2026 assigned Lotus Cobra (322) and Thrasios, Triton Hero (404) to attack Ai(3)-Blue Farm 2026.
+Ai(3)-Blue Farm 2026 didn't block Thrasios, Triton Hero (404).
+Damage: Thrasios, Triton Hero (404) deals 1 combat damage to Ai(3)-Blue Farm 2026.
+Player Control: Ai(1)-Kinnan Test B has restored control over themself
+Game Outcome: Ai(1)-Kinnan Test B has lost because life total reached 0
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 5 Ai(4)-RogThras 2026: 0 
 
-=== Last 160 lines ===
-Error handling registered!
-13:54:39 [INFO ] GuiBase: ##########################################
-13:54:39 [INFO ] GuiBase: APP: Forge v.2.0.14-SNAPSHOT-08.08
-13:54:39 [INFO ] GuiBase: Java: 17.0.19 (Eclipse Adoptium)
-13:54:39 [INFO ] GuiBase: OS: Linux 6.17.0-1020-azure amd64
-13:54:39 [INFO ] GuiBase: RAM: 3072 MB max, 2 CPUs
-13:54:39 [INFO ] GuiBase: ##########################################
-Language 'en-US' loaded successfully.
-(ThreadUtil first call): Running with priority 5
-Read cards: 33617 archived files in 1 ms (25 parts) using thread pool
-Upcoming set Star Trek (TRK) dated in the future. All `upcoming` cards will be added to this set with unknown rarity.
-The card A-Alrund's Epiphany was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Baba Lysaga, Night Witch was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Divide by Zero was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Esika's Chariot was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Faceless Haven was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Fires of Invention was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Goldspan Dragon was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Hullbreaker Horror was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Kumano Faces Kakkazan was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Luminarch Aspirant was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Monster Manual was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Omnath, Locus of Creation was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-The Meathook Massacre was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card A-Unholy Heat was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card Blinding Radiance was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card Goblin Bruiser was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card Ogre Painbringer was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card Titanic Pelagosaur was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-The card Treetop Recluse was not assigned to any set. Adding it to UNKNOWN set... to fix see res/editions/ folder. 
-Upcoming set Star Trek (TRK) dated in the future. All `upcoming` cards will be added to this set with unknown rarity.
-Read cards: 836 files in 0 ms (8 parts) using thread pool
-Simulation mode
-No deck found in /home/runner/.forge/decks/commander/
-Could not load deck - Kinnan_TestB.dck, match cannot start
+=== Last 200 lines ===
+Phase: Ai(3)-Blue Farm 2026's End of Combat Step
+Phase: Ai(3)-Blue Farm 2026's Main phase, postcombat
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Tymna the Weaver
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Tymna the Weaver
+Life: Life: Ai(3)-Blue Farm 2026 15 > 14
+Resolve Stack: At the beginning of each of your postcombat main phases, you may pay X life, where X is the number of opponents that were dealt combat damage this turn. If you do, draw X cards. [Phase: Ai(3)-Blue Farm 2026]
+Life: Life: Ai(3)-Blue Farm 2026 14 > 13
+Resolve Stack: At the beginning of each of your postcombat main phases, you may pay X life, where X is the number of opponents that were dealt combat damage this turn. If you do, draw X cards. [Phase: Ai(3)-Blue Farm 2026]
+Phase: Ai(3)-Blue Farm 2026's End step
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Voice of Victory
+Zone Change: Warrior Token (514) was put into Graveyard from Battlefield.
+Zone Change: Warrior Token (515) was put into Graveyard from Battlefield.
+Resolve Stack: Sacrifice Warrior Token (514) and Warrior Token (515) at the beginning of the next end step. ([Warrior Token (514), Warrior Token (515)]) [Phase: Ai(3)-Blue Farm 2026]
+Zone Change: Warrior Token (511) was put into Graveyard from Battlefield.
+Zone Change: Warrior Token (512) was put into Graveyard from Battlefield.
+Resolve Stack: Sacrifice Warrior Token (511) and Warrior Token (512) at the beginning of the next end step. ([Warrior Token (511), Warrior Token (512)]) [Phase: Ai(3)-Blue Farm 2026]
+Phase: Ai(3)-Blue Farm 2026's Cleanup step
+Turn: Turn 32 (Ai(4)-RogThras 2026)
+Phase: Ai(4)-RogThras 2026's Untap step
+Phase: Ai(4)-RogThras 2026's Upkeep step
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Mana: Hedge Maze (342) - {T}: Add {G}.
+Mana: Emergence Zone (385) - {T}: Add {C}.
+Mana: Dryad Arbor (376) - {T}: Add {G}.
+Resolve Stack: Cumulative upkeep {1} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.) [Phase: Ai(4)-RogThras 2026]
+Phase: Ai(4)-RogThras 2026's Draw step
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Smothering Tithe
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(4)-RogThras 2026]
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (519)]
+Phase: Ai(4)-RogThras 2026's Main phase, precombat
+Land: Ai(4)-RogThras 2026 played Gaea's Cradle (400)
+Add To Stack: Ai(4)-RogThras 2026 triggered Lotus Cobra
+Resolve Stack: Landfall — Whenever a land you control enters, add one mana of any color. [Zone Changer: Gaea's Cradle (400)]
+Mana: Delighted Halfling (397) - {T}: Add {C}.
+Mana: Gaea's Cradle (400) - {T}: Add {G} for each creature you control.
+Add To Stack: Ai(4)-RogThras 2026 cast This Town Ain't Big Enough targeting [Kraum, Ludevic's Opus (301), Tymna the Weaver (303)]
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Esper Sentinel
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Esper Sentinel
+Resolve Stack: Whenever an opponent casts their first noncreature spell each turn, draw a card unless that player pays {X}, where X is Esper Sentinel's power. [Card: This Town Ain't Big Enough (357), Activator: Ai(4)-RogThras 2026, SpellAbility: Return up to two target nonland permanents to their owner's hands.]
+Resolve Stack: Whenever an opponent casts their first noncreature spell each turn, draw a card unless that player pays {X}, where X is Esper Sentinel's power. [Card: This Town Ain't Big Enough (357), Activator: Ai(4)-RogThras 2026, SpellAbility: Return up to two target nonland permanents to their owner's hands.]
+Mana: Volcanic Island (153) - {T}: Add {U}.
+Mana: Sol Ring (162) - {T}: Add {C}{C}.
+Add To Stack: Ai(2)-RogSi 2026 cast Daze targeting [Return up to two target nonland permanents to their owner's hands.]
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Esper Sentinel
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Esper Sentinel
+Resolve Stack: Whenever an opponent casts their first noncreature spell each turn, draw a card unless that player pays {X}, where X is Esper Sentinel's power. [Card: Daze (136), Activator: Ai(2)-RogSi 2026, SpellAbility: Counter target spell unless its controller pays {1}.]
+Mana: Watery Grave (167) - {T}: Add {B}.
+Resolve Stack: Whenever an opponent casts their first noncreature spell each turn, draw a card unless that player pays {X}, where X is Esper Sentinel's power. [Card: Daze (136), Activator: Ai(2)-RogSi 2026, SpellAbility: Counter target spell unless its controller pays {1}.]
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: Daze (136), Activator: Ai(2)-RogSi 2026, SpellAbility: Counter target spell unless its controller pays {1}.]
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Smothering Tithe
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(4)-RogThras 2026]
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (523)]
+Zone Change: Send countered spell to Graveyard
+Resolve Stack: Daze (136) - Counter This Town Ain't Big Enough (357) unless its controller pays {1}.
+Phase: Ai(4)-RogThras 2026's Beginning of Combat Step
+Phase: Ai(4)-RogThras 2026's Declare Attackers Step
+Combat: Ai(4)-RogThras 2026 assigned Lotus Cobra (322) and Thrasios, Triton Hero (404) to attack Ai(3)-Blue Farm 2026.
+Phase: Ai(4)-RogThras 2026's Declare Blockers Step
+Combat: Ai(3)-Blue Farm 2026 didn't block Lotus Cobra (322).
+Ai(3)-Blue Farm 2026 didn't block Thrasios, Triton Hero (404).
+Phase: Ai(4)-RogThras 2026's First Strike Damage Step
+Phase: Ai(4)-RogThras 2026's Combat Damage Step
+Damage: Lotus Cobra (322) deals 2 combat damage to Ai(3)-Blue Farm 2026.
+Damage: Thrasios, Triton Hero (404) deals 1 combat damage to Ai(3)-Blue Farm 2026.
+Life: Life: Ai(3)-Blue Farm 2026 13 > 10
+Phase: Ai(4)-RogThras 2026's End of Combat Step
+Phase: Ai(4)-RogThras 2026's Main phase, postcombat
+Phase: Ai(4)-RogThras 2026's End step
+Phase: Ai(4)-RogThras 2026's Cleanup step
+Discard: Ai(4)-RogThras 2026 discards Wild Growth (319).
+Discard: Ai(4)-RogThras 2026 discards Springleaf Drum (312).
+Turn: Turn 33 (Ai(2)-RogSi 2026)
+Phase: Ai(2)-RogSi 2026's Untap step
+Phase: Ai(2)-RogSi 2026's Upkeep step
+Phase: Ai(2)-RogSi 2026's Draw step
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Smothering Tithe
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(2)-RogSi 2026]
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (527)]
+Phase: Ai(2)-RogSi 2026's Main phase, precombat
+Phase: Ai(2)-RogSi 2026's Beginning of Combat Step
+Phase: Ai(2)-RogSi 2026's Declare Attackers Step
+Combat: Ai(2)-RogSi 2026 assigned Silas Renn, Seeker Adept (200) to attack Ai(3)-Blue Farm 2026.
+Phase: Ai(2)-RogSi 2026's Declare Blockers Step
+Combat: Ai(3)-Blue Farm 2026 didn't block Silas Renn, Seeker Adept (200).
+Phase: Ai(2)-RogSi 2026's First Strike Damage Step
+Phase: Ai(2)-RogSi 2026's Combat Damage Step
+Damage: Silas Renn, Seeker Adept (200) deals 2 combat damage to Ai(3)-Blue Farm 2026.
+Life: Life: Ai(3)-Blue Farm 2026 10 > 8
+Phase: Ai(2)-RogSi 2026's End of Combat Step
+Phase: Ai(2)-RogSi 2026's Main phase, postcombat
+Phase: Ai(2)-RogSi 2026's End step
+Phase: Ai(2)-RogSi 2026's Cleanup step
+Turn: Turn 34 (Ai(3)-Blue Farm 2026)
+Phase: Ai(3)-Blue Farm 2026's Untap step
+Phase: Ai(3)-Blue Farm 2026's Upkeep step
+Phase: Ai(3)-Blue Farm 2026's Draw step
+Mana: Chrome Mox (266) - {T}: Add one mana of any of the exiled card's colors.
+Mana: Sacred Foundry (227) - {T}: Add {R}.
+Add To Stack: Ai(3)-Blue Farm 2026 cast Dress Down
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Mana: Scrubland (212) - {T}: Add {B}.
+Mana: Tundra (296) - {T}: Add {U}.
+Mana: Watery Grave (271) - {T}: Add {B}.
+Mana: Volcanic Island (258) - {T}: Add {R}.
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: Dress Down (268), Activator: Ai(3)-Blue Farm 2026, SpellAbility: Dress Down]
+Resolve Stack: Dress Down
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Dress Down
+Resolve Stack: When Dress Down enters, draw a card. [Zone Changer: Dress Down (268)]
+Phase: Ai(3)-Blue Farm 2026's Main phase, precombat
+Land: Ai(3)-Blue Farm 2026 played Underground Sea (289)
+Mana: Mox Diamond (290) - {T}: Add one mana of any color.
+Mana: Underground Sea (289) - {T}: Add {B}.
+Mana: Talisman of Dominance (203) - {T}: Add {C}.
+Add To Stack: Ai(3)-Blue Farm 2026 cast Jeska's Will
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Damage: Ancient Tomb (225) deals 2 non-combat damage to Ai(3)-Blue Farm 2026.
+Life: Life: Ai(3)-Blue Farm 2026 8 > 6
+Mana: Ancient Tomb (225) - {T}: Add {C}{C}. Ancient Tomb deals 2 damage to you. 
+Mana: Talisman of Indulgence (248) - {T}: Add {C}.
+Mana: Talisman of Progress (251) - {T}: Add {C}.
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: Jeska's Will (256), Activator: Ai(3)-Blue Farm 2026, SpellAbility: Choose one If you control a commander as you cast this spell, you may choose both.
+• Add {R} for each card in target opponent's hand.
+• Exile the top three cards of your library. You may play them this turn.
+
+ Exile the top three cards of your library. You may play them this turn.  ]
+Mana: Volcanic Island (153) - {T}: Add {U}.
+Add To Stack: Ai(2)-RogSi 2026 cast An Offer You Can't Refuse targeting [Choose one If you control a commander as you cast this spell, you may choose both.
+• Add {R} for each card in target opponent's hand.
+• Exile the top three cards of your library. You may play them this turn.
+
+ Exile the top three cards of your library. You may play them this turn.  ]
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Mana: Sol Ring (162) - {T}: Add {C}{C}.
+Mana: Watery Grave (167) - {T}: Add {B}.
+Mana: Phyrexian Tower (122) - {T}: Add {C}.
+Resolve Stack: Whenever an opponent casts a noncreature spell, you may draw a card unless that player pays {4}. [Card: An Offer You Can't Refuse (145), Activator: Ai(2)-RogSi 2026, SpellAbility: Counter target noncreature spell. Its controller creates two Treasure tokens. (They're artifacts with "{T}, Sacrifice this token: Add one mana of any color.")]
+Zone Change: Send countered spell to Graveyard
+Resolve Stack: An Offer You Can't Refuse (145) - Counter Jeska's Will (256). Its controller creates two Treasure tokens.
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (530)]
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (529)]
+Phase: Ai(3)-Blue Farm 2026's Beginning of Combat Step
+Phase: Ai(3)-Blue Farm 2026's Declare Attackers Step
+Combat: Ai(3)-Blue Farm 2026 assigned Kraum, Ludevic's Opus (301), Delney, Streetwise Lookout (218), Tymna the Weaver (303), Makdee and Itla, Skysnarers (224), Voice of Victory (243) and Esper Sentinel (241) to attack Ai(4)-RogThras 2026.
+Phase: Ai(3)-Blue Farm 2026's Declare Blockers Step
+Combat: Ai(4)-RogThras 2026 didn't block Kraum, Ludevic's Opus (301).
+Ai(4)-RogThras 2026 didn't block Delney, Streetwise Lookout (218).
+Ai(4)-RogThras 2026 didn't block Tymna the Weaver (303).
+Ai(4)-RogThras 2026 didn't block Makdee and Itla, Skysnarers (224).
+Ai(4)-RogThras 2026 didn't block Voice of Victory (243).
+Ai(4)-RogThras 2026 didn't block Esper Sentinel (241).
+Phase: Ai(3)-Blue Farm 2026's First Strike Damage Step
+Phase: Ai(3)-Blue Farm 2026's Combat Damage Step
+Damage: Kraum, Ludevic's Opus (301) deals 4 combat damage to Ai(4)-RogThras 2026.
+Damage: Delney, Streetwise Lookout (218) deals 2 combat damage to Ai(4)-RogThras 2026.
+Damage: Tymna the Weaver (303) deals 2 combat damage to Ai(4)-RogThras 2026.
+Damage: Makdee and Itla, Skysnarers (224) deals 2 combat damage to Ai(4)-RogThras 2026.
+Damage: Voice of Victory (243) deals 1 combat damage to Ai(4)-RogThras 2026.
+Damage: Esper Sentinel (241) deals 1 combat damage to Ai(4)-RogThras 2026.
+Life: Life: Ai(4)-RogThras 2026 37 > 25
+Phase: Ai(3)-Blue Farm 2026's End of Combat Step
+Phase: Ai(3)-Blue Farm 2026's Main phase, postcombat
+Phase: Ai(3)-Blue Farm 2026's End step
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Dress Down
+Zone Change: Dress Down (268) was put into Graveyard from Battlefield.
+Resolve Stack: At the beginning of the end step, sacrifice Dress Down. [Phase: Ai(3)-Blue Farm 2026]
+Phase: Ai(3)-Blue Farm 2026's Cleanup step
+Turn: Turn 35 (Ai(4)-RogThras 2026)
+Phase: Ai(4)-RogThras 2026's Untap step
+Phase: Ai(4)-RogThras 2026's Upkeep step
+Add To Stack: Ai(4)-RogThras 2026 triggered Mystic Remora
+Mana: Hedge Maze (342) - {T}: Add {G}.
+Mana: Emergence Zone (385) - {T}: Add {C}.
+Mana: Dryad Arbor (376) - {T}: Add {G}.
+Mana: Delighted Halfling (397) - {T}: Add {C}.
+Resolve Stack: Cumulative upkeep {1} (At the beginning of your upkeep, put an age counter on this permanent, then sacrifice it unless you pay its upkeep cost for each age counter on it.) [Phase: Ai(4)-RogThras 2026]
+Phase: Ai(4)-RogThras 2026's Draw step
+Add To Stack: Ai(3)-Blue Farm 2026 triggered Smothering Tithe
+Resolve Stack: Whenever an opponent draws a card, that player may pay {2}. If the player doesn't, you create a Treasure token. (It's an artifact with "{T}, Sacrifice this token: Add one mana of any color.") [Player: Ai(4)-RogThras 2026]
+Add To Stack: Ai(2)-RogSi 2026 triggered Grinding Station
+Resolve Stack: Whenever an artifact enters, you may untap Grinding Station. [Zone Changer: Treasure Token (534)]
+Player Control: Ai(1)-Kinnan Test B has restored control over themself
+Player Control: Ai(2)-RogSi 2026 has restored control over themself
+Player Control: Ai(3)-Blue Farm 2026 has restored control over themself
+Player Control: Ai(4)-RogThras 2026 has restored control over themself
+Game Outcome: Turn 18
+Game Outcome: Ai(1)-Kinnan Test B has lost because life total reached 0
+Game Outcome: Ai(2)-RogSi 2026 has won because all opponents have lost
+Game Outcome: Ai(3)-Blue Farm 2026 has won because all opponents have lost
+Game Outcome: Ai(4)-RogThras 2026 has won because all opponents have lost
+Match Result: Ai(1)-Kinnan Test B: 0 Ai(2)-RogSi 2026: 0 Ai(3)-Blue Farm 2026: 5 Ai(4)-RogThras 2026: 0 
+
+Game Result: Game 5 ended in 120006 ms. Ai(3)-Blue Farm 2026 has won!
+

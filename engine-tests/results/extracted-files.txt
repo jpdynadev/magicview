@@ -97,8 +97,8 @@
 /tmp/forge-extract/forge-adventure.command
 /tmp/forge-extract/forge-adventure.exe
 /tmp/forge-extract/forge-adventure.sh
-/tmp/forge-extract/forge-gui-desktop-2.0.14-SNAPSHOT-jar-with-dependencies.jar
-/tmp/forge-extract/forge-gui-mobile-dev-2.0.14-SNAPSHOT-jar-with-dependencies.jar
+/tmp/forge-extract/forge-gui-desktop-2.0.15-SNAPSHOT-jar-with-dependencies.jar
+/tmp/forge-extract/forge-gui-mobile-dev-2.0.15-SNAPSHOT-jar-with-dependencies.jar
 /tmp/forge-extract/forge.cmd
 /tmp/forge-extract/forge.command
 /tmp/forge-extract/forge.exe
@@ -6887,6 +6887,7 @@
 /tmp/forge-extract/res/tokenscripts/mowu.txt
 /tmp/forge-extract/res/tokenscripts/munitions.txt
 /tmp/forge-extract/res/tokenscripts/nalaar_aetherjet.txt
+/tmp/forge-extract/res/tokenscripts/new_planet.txt
 /tmp/forge-extract/res/tokenscripts/ornithopter.txt
 /tmp/forge-extract/res/tokenscripts/phobos.txt
 /tmp/forge-extract/res/tokenscripts/plaguebearer_of_nurgle.txt
