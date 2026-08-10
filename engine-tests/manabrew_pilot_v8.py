@@ -22,7 +22,7 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.2.0"
+PILOT_VERSION = "v8.3.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
