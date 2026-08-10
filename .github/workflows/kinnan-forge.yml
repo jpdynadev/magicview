@@ -1,4 +1,4 @@
-name: Kinnan Manabrew combo-aware benchmark v7
+name: Kinnan Manabrew combo-aware benchmark v8
 
 on:
   pull_request:
@@ -62,12 +62,12 @@ jobs:
           cd /tmp/manabrew
           node scripts/harness.mjs build 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/manabrew-build.log"
           test -f forge-harness/target/forge-harness-jar-with-dependencies.jar
-      - name: Run two activation-safe combo-aware benchmark games
+      - name: Run two v8 corrected combo-aware benchmark games
         continue-on-error: true
         run: |
           rm -rf engine-tests/results
           mkdir -p engine-tests/results
-          timeout 900 python3 engine-tests/manabrew_pilot_v7.py \
+          timeout 900 python3 engine-tests/manabrew_pilot_v8.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             101 202 | tee engine-tests/results/pilot-console.log
@@ -93,7 +93,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: kinnan-manabrew-v7-two-games-${{ github.sha }}
+          name: kinnan-manabrew-v8-two-games-${{ github.sha }}
           path: |
             engine-tests/results/
             engine-tests/manabrew-build.log
