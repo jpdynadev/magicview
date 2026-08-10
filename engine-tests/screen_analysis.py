@@ -96,6 +96,7 @@ def main() -> int:
         "stage": "screening",
         "inferentialClaim": False,
         "pilotVersion": "v8.3.0",
+        "engineAdapterPatch": "manabrew-card-name-runaway-1",
         "expectedPairs": args.expected_pairs,
         "observedRows": len(rows),
         "completePairs": len(pairs),
