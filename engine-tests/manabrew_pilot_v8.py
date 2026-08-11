@@ -22,10 +22,11 @@ import manabrew_pilot_v5 as v5
 import kinnan_policy_v8 as policy
 
 
-PILOT_VERSION = "v8.6.0"
+PILOT_VERSION = "v8.7.0"
 CURRENT_KINNAN_SEAT = 0
 _COLOR_SAFE_RESPONSE = base.response_for
 _ORIGINAL_TARGET_SCORE = base.kinnan_target_score
+PAYMENT_COLOR_PREFERENCES: dict[int, list[str]] = {}
 
 FLEX_BLUE = {"Hydroelectric Specimen", "Sink into Stupor"}
 ONE_G_DORKS = {
@@ -58,6 +59,7 @@ def _infinite_at(snapshot: dict[str, Any], seat: int) -> bool:
         pieces <= battlefield
         for pieces in (
             {"Kinnan, Bonder Prodigy", "Basalt Monolith"},
+            {"Basalt Monolith", "Power Artifact"},
             {"Grim Monolith", "Power Artifact"},
             {"Kinnan, Bonder Prodigy", "Grim Monolith", "Forensic Gadgeteer"},
         )
@@ -180,6 +182,7 @@ def configure_decks(variant: str, kinnan_seat: int) -> list[tuple[str, str]]:
     if kinnan_seat not in range(4):
         raise ValueError(f"invalid Kinnan seat {kinnan_seat}")
     CURRENT_KINNAN_SEAT = kinnan_seat
+    PAYMENT_COLOR_PREFERENCES.clear()
     opponents = list(BASE_POD[1:])
     ordered = opponents[:]
     ordered.insert(kinnan_seat, ("Kinnan", VARIANT_FILES[variant]))
@@ -204,24 +207,21 @@ def v8_action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any],
     own_main = own_turn and snapshot.get("step") in {"main1", "main2"}
     stack_text = json.dumps(snapshot.get("stack", []) or []).lower()
     battlefield = policy.names_in(snapshot, player, "battlefield")
-    pool = base.mana_total(snapshot, player)
     infinite = {"Kinnan, Bonder Prodigy", "Basalt Monolith"} <= battlefield
 
     if infinite and action_type == "activateAbility":
         description = str(action.get("description") or "").lower()
         if name == "Basalt Monolith":
-            if pool < 7:
-                if "untap" in description and pool >= 3:
-                    return 4200
-                if action.get("isManaAbility") or "add" in description:
-                    return 4190
-            return -4000
+            if "untap" in description:
+                return 5400
+            if action.get("isManaAbility") or "add" in description:
+                return 5350
         if name == "Kinnan, Bonder Prodigy":
-            return 5000 if pool >= 7 else -1500
+            return 5700
         if name == "Thrasios, Triton Hero":
-            return 5200 if pool >= 4 else -1500
+            return 5900
         if name == "Staff of Domination":
-            return 5150 if pool >= 5 else -1500
+            return 5850
     if infinite and action_type == "cast" and name in policy.OUTLETS:
         return 5050
 
@@ -311,21 +311,35 @@ def smart_response(
             "type": "chooseFromSelection",
             "output": {"type": "selectionDecision", "chosenIndices": chosen},
         }
+    if prompt_type == "chooseColor":
+        preferred = PAYMENT_COLOR_PREFERENCES.get(player, [])
+        color = policy.choose_payment_color(inp, preferred)
+        if color in preferred:
+            preferred.remove(color)
+        return {
+            "type": "chooseColor",
+            "output": {"type": "colorDecision", "chosenColors": {color: 1}},
+        }
     return _COLOR_SAFE_RESPONSE(prompt, snapshot, deck, player)
 
 
 base.response_for = smart_response
 
 
-def choose_productive_payment_v8(inp: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+def choose_productive_payment_v8(
+    inp: dict[str, Any], player: int
+) -> tuple[dict[str, Any], bool]:
+    PAYMENT_COLOR_PREFERENCES[player] = policy.required_payment_colors(inp)
     disposition, action_id = policy.choose_payment_action(inp)
     if disposition == "confirm":
+        PAYMENT_COLOR_PREFERENCES.pop(player, None)
         return {"type": "payManaCost", "output": {"type": "pay", "auto": False}}, False
     if disposition == "act" and action_id:
         return {
             "type": "payManaCost",
             "output": {"type": "act", "actionId": action_id},
         }, False
+    PAYMENT_COLOR_PREFERENCES.pop(player, None)
     return {"type": "payManaCost", "output": {"type": "cancel"}}, True
 
 
@@ -343,9 +357,49 @@ def _is_attempt_action(
     if not line or not action:
         return False
     name = _action_card(action, snapshot)
-    return action.get("type") == "activateAbility" or name in (
-        policy.OUTLETS
-        | {"Basalt Monolith", "Grim Monolith", "Power Artifact", "Forensic Gadgeteer"}
+    return policy.is_attempt_action(line, name, action)
+
+
+def _combo_action_response(
+    inp: dict[str, Any],
+    snapshot: dict[str, Any],
+    line: str | None,
+    powered_monolith: bool,
+    monolith_actions: int,
+) -> dict[str, Any] | None:
+    """Choose a legal action that advances a recognized combo, if one exists."""
+
+    ranked: list[tuple[int, str]] = []
+    for action in inp.get("actions", []) or []:
+        name = _action_card(action, snapshot)
+        # Ballista is always legally castable for X=0.  Do not mistake that for
+        # a lethal outlet; first bank a conservative 150+ net mana from the
+        # advertised monolith loop (300 tap/untap actions at worst).
+        if (
+            name == "Walking Ballista"
+            and action.get("type") == "cast"
+            and monolith_actions < 300
+        ):
+            continue
+        score = policy.combo_action_score(line, name, action)
+        if powered_monolith and name in policy.OUTLETS:
+            if action.get("type") in {"cast", "activateAbility"}:
+                score = max(score, 9_000)
+        if score >= 0 and action.get("id"):
+            ranked.append((score, str(action["id"])))
+    if not ranked:
+        return None
+    _, action_id = max(ranked)
+    return {"type": "chooseAction", "output": {"type": "act", "actionId": action_id}}
+
+
+def _is_monolith_loop_action(action: dict[str, Any] | None, snapshot: dict[str, Any]) -> bool:
+    if not action or action.get("type") != "activateAbility":
+        return False
+    name = _action_card(action, snapshot)
+    text = str(action.get("description") or "").lower()
+    return name in policy.MONOLITHS and (
+        bool(action.get("isManaAbility")) or "add" in text or "untap" in text
     )
 
 
@@ -368,6 +422,10 @@ def run_game(
     errors: list[dict[str, Any]] = []
     failed_cast_states: set[tuple[Any, ...]] = set()
     attempted_action_states: set[tuple[str, int, str]] = set()
+    pass_signature_counts: dict[tuple[Any, ...], int] = {}
+    monolith_loop_counts: dict[tuple[Any, ...], int] = {}
+    capped_monolith_states: set[tuple[Any, ...]] = set()
+    powered_monolith_ids: set[str] = set()
     opening_hands: dict[str, list[str]] = {}
     kept_hands: dict[str, list[str]] = {}
     mulligans: dict[str, int] = {str(index): 0 for index in range(4)}
@@ -422,6 +480,9 @@ def run_game(
             "round": 0,
             "prompts": 0,
             "promptRetries": 0,
+            "passRecoveries": 0,
+            "manaLoopCaps": 0,
+            "comboActionCount": 0,
         }
 
         while result["prompts"] < max_prompts:
@@ -547,6 +608,22 @@ def run_game(
                 kept_hands[str(player)] = hand
 
             line = policy.deterministic_line(snapshot, kinnan_seat)
+            if not line and powered_monolith_ids:
+                visible = base.all_visible_cards(snapshot)
+                powered_names = {
+                    policy.card_name(visible.get(card_id, {}))
+                    for card_id in powered_monolith_ids
+                } & policy.MONOLITHS
+                battlefield = policy.names_in(snapshot, kinnan_seat, "battlefield")
+                available = battlefield | policy.names_in(snapshot, kinnan_seat, "hand")
+                if powered_names and (
+                    "Kinnan, Bonder Prodigy" in battlefield or available & policy.OUTLETS
+                ):
+                    monolith = sorted(powered_names)[0]
+                    line = (
+                        f"{monolith} observed net-positive loop -> "
+                        "Kinnan/deterministic outlet"
+                    )
             if line and result["firstAssemblyTurn"] is None:
                 result["firstAssemblyTurn"] = round_number
                 result["comboLine"] = line
@@ -554,9 +631,17 @@ def run_game(
             state_hash = policy.visible_state_hash(snapshot)
             answer = None
             canceled_unpayable = False
+            pass_recovery = False
+            pass_repeat_count = 0
+            protocol_stall = False
             try:
                 if prompt_type == "payManaCost":
-                    answer, canceled_unpayable = choose_productive_payment_v8(inp)
+                    card_name = str(inp.get("cardName") or "")
+                    mana_cost = str(inp.get("manaCost") or "")
+                    if card_name in policy.MONOLITHS and mana_cost in {"{0}", "{1}", "{2}"}:
+                        if inp.get("cardId"):
+                            powered_monolith_ids.add(str(inp["cardId"]))
+                    answer, canceled_unpayable = choose_productive_payment_v8(inp, player)
                     if canceled_unpayable and inp.get("cardId"):
                         failed_cast_states.add(
                             (global_turn, snapshot.get("step"), player, inp.get("cardId"))
@@ -570,12 +655,36 @@ def run_game(
                             continue
                         if action_key in attempted_action_states:
                             continue
+                        loop_key = (
+                            global_turn,
+                            snapshot.get("step"),
+                            player,
+                            str(action.get("cardId") or ""),
+                        )
+                        if (
+                            not line
+                            and _is_monolith_loop_action(action, snapshot)
+                            and monolith_loop_counts.get(loop_key, 0) >= 12
+                        ):
+                            if loop_key not in capped_monolith_states:
+                                capped_monolith_states.add(loop_key)
+                                result["manaLoopCaps"] += 1
+                            continue
                         filtered.append(action)
                     patched_prompt = dict(prompt)
                     patched_input = dict(inp)
                     patched_input["actions"] = filtered
                     patched_prompt["input"] = patched_input
-                    answer = base.response_for(patched_prompt, snapshot, deck, player)
+                    if player == kinnan_seat:
+                        answer = _combo_action_response(
+                            patched_input,
+                            snapshot,
+                            line,
+                            bool(powered_monolith_ids),
+                            sum(monolith_loop_counts.values()),
+                        )
+                    if answer is None:
+                        answer = base.response_for(patched_prompt, snapshot, deck, player)
                 else:
                     answer = base.response_for(prompt, snapshot, deck, player)
             except Exception as exc:
@@ -589,6 +698,18 @@ def run_game(
             chosen = _chosen_action(inp, answer) if prompt_type == "chooseAction" else None
             if chosen:
                 attempted_action_states.add((state_hash, player, str(chosen.get("id") or "")))
+                if _is_monolith_loop_action(chosen, snapshot):
+                    loop_key = (
+                        global_turn,
+                        snapshot.get("step"),
+                        player,
+                        str(chosen.get("cardId") or ""),
+                    )
+                    monolith_loop_counts[loop_key] = monolith_loop_counts.get(loop_key, 0) + 1
+                if player == kinnan_seat and policy.combo_action_score(
+                    line, _action_card(chosen, snapshot), chosen
+                ) >= 0:
+                    result["comboActionCount"] += 1
             if player == kinnan_seat and result["firstAttemptTurn"] is None:
                 if _is_attempt_action(line, chosen, snapshot, kinnan_seat):
                     result["firstAttemptTurn"] = round_number
@@ -599,6 +720,28 @@ def run_game(
                     )
 
             actions = inp.get("actions", []) or [] if prompt_type == "chooseAction" else []
+            legal_hash = policy.legal_action_hash(actions)
+            output = (answer or {}).get("output") or {}
+            if prompt_type == "chooseAction" and output.get("type") == "pass":
+                pass_signature = (
+                    global_turn,
+                    snapshot.get("step"),
+                    snapshot.get("activePlayerId"),
+                    player,
+                    state_hash,
+                    legal_hash,
+                )
+                pass_repeat_count = pass_signature_counts.get(pass_signature, 0) + 1
+                pass_signature_counts[pass_signature] = pass_repeat_count
+                if snapshot.get("stack") or pass_repeat_count >= 2:
+                    answer = {
+                        "type": "chooseAction",
+                        "output": policy.recovered_pass_output(snapshot),
+                    }
+                    pass_recovery = True
+                    result["passRecoveries"] += 1
+                if pass_repeat_count >= 8:
+                    protocol_stall = True
             trace.append(
                 {
                     "seq": result["prompts"],
@@ -611,16 +754,21 @@ def run_game(
                     "activePlayerId": snapshot.get("activePlayerId"),
                     "priorityPlayerId": snapshot.get("priorityPlayerId"),
                     "stateHash": state_hash,
-                    "legalActionHash": policy.legal_action_hash(actions),
+                    "legalActionHash": legal_hash,
                     "legalActionCount": len(actions),
                     "prompt": v3.summarize_prompt(inp),
                     "answer": answer,
                     "chosenCard": _action_card(chosen, snapshot) if chosen else None,
                     "comboLine": line,
                     "canceledUnpayable": canceled_unpayable,
+                    "passRecovery": pass_recovery,
+                    "passRepeatCount": pass_repeat_count,
                 }
             )
             result["prompts"] += 1
+            if protocol_stall:
+                result["status"] = "protocol_stall"
+                break
             if result["prompts"] >= max_prompts:
                 result["status"] = "prompt_cap"
                 break
