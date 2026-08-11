@@ -183,6 +183,93 @@ class PolicyTests(unittest.TestCase):
         }
         self.assertEqual(policy.choose_payment_action(inp), ("cancel", None))
 
+    def test_payment_accepts_command_tower_without_produced_mana_metadata(self):
+        inp = {
+            "manaCost": "{2}{U}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "tap:tower:0",
+                    "type": "activateManaAbility",
+                    "description": "Command Tower",
+                    "isManaAbility": True,
+                    "cost": "{T}",
+                }
+            ],
+        }
+        self.assertEqual(policy.choose_payment_action(inp), ("act", "tap:tower:0"))
+
+    def test_payment_color_follows_remaining_colored_cost(self):
+        inp = {"availableColors": ["W", "U", "B", "R", "G"]}
+        self.assertEqual(policy.choose_payment_color(inp, ["G", "U"]), "G")
+
+    def test_repeated_main_phase_pass_targets_begin_combat(self):
+        snapshot = {
+            "activePlayerId": "player-1",
+            "step": "main1",
+            "stack": [],
+            "players": [{"id": f"player-{index}"} for index in range(4)],
+        }
+        self.assertEqual(
+            policy.recovered_pass_output(snapshot),
+            {
+                "type": "pass",
+                "exhaustStack": False,
+                "until": {"playerId": "player-1", "phase": "combatBegin"},
+            },
+        )
+
+    def test_stack_pass_uses_documented_exhaust_mode(self):
+        snapshot = {"activePlayerId": "player-1", "step": "main1", "stack": [{"id": 7}]}
+        self.assertEqual(
+            policy.recovered_pass_output(snapshot),
+            {"type": "pass", "exhaustStack": True},
+        )
+
+    def test_combo_executor_prefers_basalt_untap_to_unrelated_cast(self):
+        line = "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista"
+        untap = {"type": "activateAbility", "description": "{3}: Untap this artifact."}
+        trophy = {"type": "cast", "label": "Cast Trophy Mage"}
+        self.assertGreater(
+            policy.combo_action_score(line, "Basalt Monolith", untap),
+            policy.combo_action_score(line, "Trophy Mage", trophy),
+        )
+
+    def test_attempt_requires_outlet_or_engine_activation(self):
+        line = "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista"
+        self.assertFalse(
+            policy.is_attempt_action(line, "Basalt Monolith", {"type": "activateAbility"})
+        )
+        self.assertFalse(policy.is_attempt_action(line, "Trophy Mage", {"type": "cast"}))
+        self.assertTrue(
+            policy.is_attempt_action(
+                line, "Kinnan, Bonder Prodigy", {"type": "activateAbility"}
+            )
+        )
+
+    def test_basalt_power_needs_an_outlet_for_deterministic_label(self):
+        snapshot = {
+            "zones": [
+                {
+                    "ownerId": "player-0",
+                    "zone": "battlefield",
+                    "cards": [
+                        card("b", "Basalt Monolith"),
+                        card("p", "Power Artifact"),
+                    ],
+                }
+            ]
+        }
+        self.assertIsNone(policy.deterministic_line(snapshot, 0))
+        snapshot["zones"].append(
+            {
+                "ownerId": "player-0",
+                "zone": "hand",
+                "cards": [card("w", "Walking Ballista")],
+            }
+        )
+        self.assertIn("Basalt Monolith + Power Artifact", policy.deterministic_line(snapshot, 0))
+
 
 if __name__ == "__main__":
     unittest.main()
