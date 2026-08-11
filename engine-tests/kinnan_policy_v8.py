@@ -49,6 +49,24 @@ ENGINE_CREATURES = {
     "Thrasios, Triton Hero",
 }
 
+TURN_STEPS = (
+    "untap",
+    "upkeep",
+    "draw",
+    "main1",
+    "combatBegin",
+    "combatDeclareAttackers",
+    "combatDeclareBlockers",
+    "combatFirstStrikeDamage",
+    "combatDamage",
+    "combatEnd",
+    "main2",
+    "endOfTurn",
+    "cleanup",
+)
+
+MONOLITHS = {"Basalt Monolith", "Grim Monolith"}
+
 
 def card_name(card: dict[str, Any] | None) -> str:
     return str(((card or {}).get("identity") or {}).get("name") or "")
@@ -106,13 +124,19 @@ def deterministic_line(snapshot: dict[str, Any], kinnan_seat: int) -> str | None
         # one-shot random Kinnan hit: the finite library is exhaustively covered.
         return "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista"
 
+    if {"Kinnan, Bonder Prodigy", "Grim Monolith", "Power Artifact"} <= battlefield:
+        return "Kinnan + Grim + Power Artifact -> exhaustive Kinnan activations -> Thrasios -> Ballista"
+
     if {"Grim Monolith", "Power Artifact"} <= battlefield:
         if available & OUTLETS:
             return "Grim Monolith + Power Artifact + deterministic outlet"
 
-    if {"Kinnan, Bonder Prodigy", "Grim Monolith", "Forensic Gadgeteer"} <= battlefield:
+    if {"Basalt Monolith", "Power Artifact"} <= battlefield:
         if available & OUTLETS:
-            return "Kinnan + Grim + Forensic Gadgeteer + deterministic outlet"
+            return "Basalt Monolith + Power Artifact + deterministic outlet"
+
+    if {"Kinnan, Bonder Prodigy", "Grim Monolith", "Forensic Gadgeteer"} <= battlefield:
+        return "Kinnan + Grim + Forensic Gadgeteer -> exhaustive Kinnan activations -> Thrasios -> Ballista"
 
     for card in zone_cards(snapshot, kinnan_seat, "battlefield"):
         if card_name(card) != "Devoted Druid":
@@ -139,6 +163,102 @@ def visible_state_hash(snapshot: dict[str, Any]) -> str:
 def legal_action_hash(actions: Iterable[dict[str, Any]]) -> str:
     payload = json.dumps(list(actions), sort_keys=True, separators=(",", ":")).encode()
     return hashlib.sha256(payload).hexdigest()
+
+
+def next_step_target(snapshot: dict[str, Any]) -> dict[str, str] | None:
+    """Return a protocol-valid next-phase fast-forward target.
+
+    This is only used after the same pass-only priority state repeats.  Legal
+    actions are still offered once before the pilot asks the pinned harness to
+    advance, so normal interaction windows are preserved.
+    """
+
+    step = str(snapshot.get("step") or "")
+    active = str(snapshot.get("activePlayerId") or "")
+    if step not in TURN_STEPS or not active:
+        return None
+    index = TURN_STEPS.index(step)
+    if index + 1 < len(TURN_STEPS):
+        return {"playerId": active, "phase": TURN_STEPS[index + 1]}
+    active_index = player_index(active)
+    players = [
+        player_index(item.get("id"))
+        for item in (snapshot.get("players", []) or [])
+        if not item.get("hasLost") and not item.get("lost")
+    ]
+    live = sorted(item for item in players if item is not None)
+    if active_index is None or not live:
+        return None
+    later = [item for item in live if item > active_index]
+    next_player = min(later) if later else min(live)
+    return {"playerId": f"player-{next_player}", "phase": "untap"}
+
+
+def recovered_pass_output(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Build the documented safe-pass response for a repeated priority state."""
+
+    if snapshot.get("stack"):
+        return {"type": "pass", "exhaustStack": True}
+    output: dict[str, Any] = {"type": "pass", "exhaustStack": False}
+    target = next_step_target(snapshot)
+    if target:
+        output["until"] = target
+    return output
+
+
+def combo_action_score(line: str | None, name: str, action: dict[str, Any]) -> int:
+    """Score only actions that advance an already recognized deterministic line.
+
+    Forge's advertised action IDs remain the legality authority.  In
+    particular, no mana-pool estimate is used: if an untap or outlet action is
+    advertised, it is legal to select and complete its payment prompt.
+    """
+
+    if not line:
+        return -1
+    action_type = str(action.get("type") or "")
+    description = str(action.get("description") or action.get("label") or "").lower()
+    if action_type == "cast" and name in OUTLETS:
+        return 10_000
+    if action_type != "activateAbility":
+        return -1
+    if name == "Thrasios, Triton Hero":
+        return 9_900
+    if name == "Staff of Domination":
+        if "draw a card" in description:
+            return 9_950
+        if "untap" in description and "staff" in description:
+            return 9_925
+        return 9_000
+    if name == "Walking Ballista" and any(
+        token in description for token in ("damage", "remove a +1/+1 counter")
+    ):
+        return 10_050
+    if name == "Kinnan, Bonder Prodigy":
+        return 9_700
+    if name in MONOLITHS:
+        if "untap" in description:
+            return 9_600
+        if action.get("isManaAbility") or "add" in description:
+            return 9_500
+    if name == "Forensic Gadgeteer" and "untap" in description:
+        return 9_400
+    return -1
+
+
+def is_attempt_action(line: str | None, name: str, action: dict[str, Any] | None) -> bool:
+    """Require an outlet or engine activation, not generic post-assembly activity."""
+
+    if not line or not action:
+        return False
+    action_type = str(action.get("type") or "")
+    if action_type == "cast" and name in OUTLETS:
+        return True
+    return action_type == "activateAbility" and name in {
+        "Kinnan, Bonder Prodigy",
+        "Thrasios, Triton Hero",
+        "Staff of Domination",
+    }
 
 
 def _life_by_player(snapshot: dict[str, Any]) -> dict[str, int]:
@@ -299,6 +419,26 @@ def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
 
     symbols = re.findall(r"\{([^}]+)\}", str(inp.get("manaCost") or "").upper())
     required_colors = {symbol for symbol in symbols if symbol in {"W", "U", "B", "R", "G", "C"}}
+
+    def safe_unannotated_mana(action: dict[str, Any]) -> bool:
+        if action.get("type") != "activateManaAbility" or not action.get("isManaAbility"):
+            return False
+        text = " ".join(
+            str(action.get(key) or "")
+            for key in ("description", "label", "cardName")
+        ).lower()
+        return any(
+            token in text
+            for token in (
+                "add one mana",
+                "command tower",
+                "city of brass",
+                "mana confluence",
+                "colors among legendary",
+                "exiled card's colors",
+            )
+        )
+
     productive = [
         action
         for action in (inp.get("actions", []) or [])
@@ -306,7 +446,7 @@ def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
             action.get("type") in {"useResource", "payLife"}
             or (
                 action.get("type") == "activateManaAbility"
-                and bool(action.get("producedMana"))
+                and (bool(action.get("producedMana")) or safe_unannotated_mana(action))
             )
         )
         # A filter such as Energy Refractor's {2}: add one mana cannot make
@@ -322,13 +462,39 @@ def choose_payment_action(inp: dict[str, Any]) -> tuple[str, str | None]:
             str(item.get("color") or "").upper()
             for item in (action.get("producedMana", []) or [])
         }
-        exact = len(required_colors & produced)
+        text = " ".join(
+            str(action.get(key) or "")
+            for key in ("description", "label", "cardName")
+        ).lower()
+        flexible = not produced and any(
+            token in text
+            for token in ("any color", "command tower", "city of brass", "mana confluence")
+        )
+        exact = len(required_colors & produced) + (1 if required_colors and flexible else 0)
         colored = len(produced & {"W", "U", "B", "R", "G"})
         kind = 2 if action.get("type") == "activateManaAbility" else 1
         return exact * 100 + colored * 10 + (1 if "C" in produced else 0), kind, str(action.get("id") or "")
 
     chosen = max(productive, key=score)
     return "act", str(chosen.get("id"))
+
+
+def required_payment_colors(inp: dict[str, Any]) -> list[str]:
+    """Return colored requirements in deterministic protocol-choice order."""
+
+    symbols = re.findall(r"\{([^}]+)\}", str(inp.get("manaCost") or "").upper())
+    return [symbol for symbol in symbols if symbol in {"W", "U", "B", "R", "G", "C"}]
+
+
+def choose_payment_color(inp: dict[str, Any], preferred: list[str]) -> str:
+    available = [
+        str(item).upper()
+        for item in (inp.get("availableColors") or inp.get("colors") or [])
+    ]
+    for color in preferred:
+        if color in available:
+            return color
+    return available[0] if available else (preferred[0] if preferred else "U")
 
 
 def _option_score(option: dict[str, Any], deck: str) -> int:
@@ -388,6 +554,8 @@ def choose_selection(inp: dict[str, Any], deck: str) -> list[int]:
 def primary_failure(result: dict[str, Any]) -> str | None:
     if result.get("status") in {"crash", "unsupported_prompt"}:
         return "ENGINE_ERROR"
+    if result.get("status") == "protocol_stall":
+        return "PROTOCOL_STALL"
     if result.get("status") in {
         "idle_timeout",
         "stale_prompt_timeout",
@@ -399,7 +567,7 @@ def primary_failure(result: dict[str, Any]) -> str | None:
     if result.get("kinnanWon"):
         return None
     if result.get("firstAttemptTurn") is not None:
-        return "COUNTERWAR"
+        return "UNRESOLVED_ATTEMPT"
     if result.get("firstAssemblyTurn") is not None:
-        return "PROTECTION"
+        return "PILOT_ERROR"
     return "NONDETERMINISTIC_ONLY"
