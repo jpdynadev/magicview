@@ -1,0 +1,305 @@
+name: Kinnan F10 precision search
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-2k-search]
+    paths: [.runs/kinnan-f10-precision.txt]
+
+concurrency:
+  group: kinnan-f10-precision
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build pinned Manabrew/Forge once
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: precision-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [P00_F10, P01_MISCAST, P02_GSZ, P03_ELDRITCH, P04_TRIBUTE, P05_SEEDBORN, P06_HULLBREAKER, P07_M30_MICRO]
+        seat: [0,1,2,3]
+        block: [0,1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: precision-runtime
+          path: runtime
+      - name: Restore runtime and generate precision decks
+        run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+      - name: Run 100 paired games as two 50-game lanes
+        run: |
+          BASE=$((970000 + ${{ matrix.block }} * 100))
+          START=$BASE
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-a
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-b
+          (
+            cd /tmp/lane-a
+            python3 engine-tests/manabrew_pilot_precision.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+49))) \
+              --seat-offset '${{ matrix.seat }}' --max-round 4 --max-prompts 3500 --max-seconds 90 || true
+          ) & P1=$!
+          (
+            cd /tmp/lane-b
+            python3 engine-tests/manabrew_pilot_precision.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' --seeds $(seq $((START+50)) $((START+99))) \
+              --seat-offset '${{ matrix.seat }}' --max-round 4 --max-prompts 3500 --max-seconds 90 || true
+          ) & P2=$!
+          wait $P1 || true; wait $P2 || true
+          mkdir -p out
+          python3 - <<'PY'
+          import json, os
+          v='${{ matrix.variant }}'; games=[]
+          for lane in ('/tmp/lane-a','/tmp/lane-b'):
+              p=f'{lane}/engine-tests/results/pilot-summary-{v}.json'
+              if os.path.exists(p): games += json.load(open(p))
+          json.dump(games,open('out/${{ matrix.variant }}-seat${{ matrix.seat }}-block${{ matrix.block }}.json','w'),indent=2)
+          print('games',len(games))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prec-${{ matrix.variant }}-seat${{ matrix.seat }}-block${{ matrix.block }}
+          path: out/*.json
+          if-no-files-found: warn
+          retention-days: 10
+
+  rank:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    outputs:
+      confirm: ${{ steps.rank.outputs.confirm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: prec-*
+          path: all
+          merge-multiple: true
+      - id: rank
+        run: |
+          python3 - <<'PY'
+          import csv, glob, json, math, os, re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}
+          by=defaultdict(list); keyed=defaultdict(dict)
+          for p in glob.glob('all/*.json'):
+              m=re.match(r'(.+)-seat([0-3])-block([01])\.json$',os.path.basename(p))
+              if not m: continue
+              v,seat=m.group(1),int(m.group(2))
+              try: games=json.load(open(p))
+              except Exception: continue
+              for g in games:
+                  by[v].append(g)
+                  if g.get('status') in completed:
+                      key=(seat,g.get('seed'))
+                      keyed[v][key]=g
+          rows=[]
+          for v,games in by.items():
+              valid=[g for g in games if g.get('status') in completed]; n=len(valid)
+              r={'variant':v,'valid':n,'errors':len(games)-n,
+                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
+                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
+                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid),
+                 'naturalWins':sum(bool(g.get('naturalWinAfterAttempt')) for g in valid)}
+              for k in ('assembly','attempt','protected','naturalWins'): r[k+'Rate']=r[k]/max(n,1)
+              rows.append(r)
+          base=keyed.get('P00_F10',{})
+          def exact_two_sided(b,c):
+              n=b+c
+              if not n: return 1.0
+              k=min(b,c)
+              tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
+              return min(1.0,2*tail)
+          for r in rows:
+              v=r['variant']; b=c=0; pairs=0
+              for key,g0 in base.items():
+                  g1=keyed.get(v,{}).get(key)
+                  if not g1: continue
+                  pairs+=1; a=bool(g0.get('protectedAttempt')); d=bool(g1.get('protectedAttempt'))
+                  if (not a) and d: b+=1
+                  elif a and (not d): c+=1
+              r['pairedN']=pairs; r['f10Loss_candidateWin']=b; r['f10Win_candidateLoss']=c; r['pairedProtectedP']=exact_two_sided(b,c)
+          rows.sort(key=lambda r:(r['protectedRate'],r['attemptRate'],r['assemblyRate'],r['valid']),reverse=True)
+          challengers=[r['variant'] for r in rows if r['variant']!='P00_F10'][:2]
+          confirm=['P00_F10']+challengers
+          json.dump({'ranking':rows,'confirm':confirm},open('precision-screen-ranking.json','w'),indent=2)
+          fields=list(rows[0].keys()) if rows else []
+          with open('precision-screen-ranking.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(rows)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write('confirm='+json.dumps(confirm,separators=(',',':'))+'\n')
+          print(json.dumps(rows,indent=2)); print('CONFIRM',confirm)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: precision-screen-ranking
+          path: precision-screen-ranking.*
+          retention-days: 10
+
+  adversarial:
+    needs: [build, rank]
+    if: ${{ always() && needs.rank.outputs.confirm != '' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: ${{ fromJSON(needs.rank.outputs.confirm) }}
+        pod: [balanced, turbo, midrange, mixed]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: precision-runtime
+          path: runtime
+      - run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+      - name: Run 50 adversarial paired games as two 25-game lanes
+        env:
+          CEDH_POD: ${{ matrix.pod }}
+        run: |
+          case '${{ matrix.pod }}' in balanced) BASE=980000;; turbo) BASE=981000;; midrange) BASE=982000;; mixed) BASE=983000;; esac
+          START=$((BASE + ${{ matrix.seat }} * 50))
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-a
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-b
+          (
+            cd /tmp/lane-a
+            CEDH_POD='${{ matrix.pod }}' python3 engine-tests/manabrew_pilot_precision_adv.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+24))) --seat-offset '${{ matrix.seat }}' \
+              --max-round 5 --max-prompts 4500 --max-seconds 120 || true
+          ) & P1=$!
+          (
+            cd /tmp/lane-b
+            CEDH_POD='${{ matrix.pod }}' python3 engine-tests/manabrew_pilot_precision_adv.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' --seeds $(seq $((START+25)) $((START+49))) --seat-offset '${{ matrix.seat }}' \
+              --max-round 5 --max-prompts 4500 --max-seconds 120 || true
+          ) & P2=$!
+          wait $P1 || true; wait $P2 || true
+          mkdir -p out
+          python3 - <<'PY'
+          import json, os
+          v='${{ matrix.variant }}'; games=[]
+          for lane in ('/tmp/lane-a','/tmp/lane-b'):
+              p=f'{lane}/engine-tests/results/pilot-summary-{v}.json'
+              if os.path.exists(p): games += json.load(open(p))
+          json.dump(games,open('out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}.json','w'),indent=2)
+          print('games',len(games))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: precadv-${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}
+          path: out/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  final:
+    needs: [rank, adversarial]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: precadv-*
+          path: adv
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: precision-screen-ranking
+          path: screen
+      - name: Aggregate final precision confirmation
+        run: |
+          python3 - <<'PY'
+          import csv, glob, json, os, re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}; by=defaultdict(list); detail=[]
+          for p in glob.glob('adv/*.json'):
+              m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
+              if not m: continue
+              v,pod,seat=m.group(1),m.group(2),int(m.group(3)); games=json.load(open(p)); valid=[g for g in games if g.get('status') in completed]
+              r={'variant':v,'pod':pod,'seat':seat,'valid':len(valid),'errors':len(games)-len(valid),
+                 'wins':sum(bool(g.get('kinnanWon') or g.get('naturalWinAfterAttempt')) for g in valid),
+                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
+                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
+                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid)}
+              detail.append(r); by[v].append(r)
+          totals=[]
+          for v,rs in by.items():
+              n=sum(x['valid'] for x in rs); wins=sum(x['wins'] for x in rs); ass=sum(x['assembly'] for x in rs); att=sum(x['attempt'] for x in rs); prot=sum(x['protected'] for x in rs)
+              totals.append({'variant':v,'valid':n,'errors':sum(x['errors'] for x in rs),'wins':wins,'assembly':ass,'attempt':att,'protected':prot,
+                'winRate':wins/max(n,1),'assemblyRate':ass/max(n,1),'attemptRate':att/max(n,1),'protectedRate':prot/max(n,1)})
+          totals.sort(key=lambda x:(x['winRate'],x['protectedRate'],x['attemptRate'],x['assemblyRate']),reverse=True)
+          screen=json.load(open('screen/precision-screen-ranking.json'))
+          json.dump({'ranking':totals,'byPodSeat':detail,'screen':screen},open('precision-final.json','w'),indent=2)
+          fields=['variant','valid','errors','wins','assembly','attempt','protected','winRate','assemblyRate','attemptRate','protectedRate']
+          with open('precision-final.csv','w',newline='') as f: w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(totals)
+          print(json.dumps(totals,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-f10-precision-final
+          path: precision-final.*
+          retention-days: 14
