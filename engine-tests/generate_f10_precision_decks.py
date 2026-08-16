@@ -34,6 +34,9 @@ SPECS={
  # share of recent top-list staples. Isolate it against the same Nature's Rhythm
  # flex slot before considering any two-card crossover with High Fae.
  'P13_UNAGI_NATURE': (["Nature's Rhythm"],['The Unagi of Kyoshi Island']),
+ # Current large-event Kinnan staples show Commandeer and Misdirection at similar
+ # adoption. Isolate free-interaction identity without changing interaction density.
+ 'P14_COMMANDEER_MISD': (['Misdirection'],['Commandeer']),
 }
 
 def parse(text):
