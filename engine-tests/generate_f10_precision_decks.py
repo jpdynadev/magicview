@@ -26,6 +26,10 @@ SPECS={
  # Cryptolith Rite appears in recent high-finishing Kinnan lists. Test the card
  # itself without importing the broader untapper package.
  'P10_RITE_NATURE': (["Nature's Rhythm"],['Cryptolith Rite']),
+ # Next-wave 2026 tournament-derived value/flash tests. cEDHStats currently
+ # shows both cards as high-adoption Kinnan signatures; keep each change isolated.
+ 'P11_WAN_NATURE': (["Nature's Rhythm"],['Wan Shi Tong, Librarian']),
+ 'P12_HIGHFAE_BORNE': (['Borne Upon a Wind'],['High Fae Trickster']),
 }
 
 def parse(text):
