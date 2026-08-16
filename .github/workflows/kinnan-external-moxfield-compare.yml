@@ -1,0 +1,393 @@
+name: Kinnan external Moxfield comparison
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-external-moxfield-compare]
+    paths:
+      - ".github/workflows/kinnan-external-moxfield-compare.yml"
+      - ".runs/kinnan-external-moxfield-compare.txt"
+
+concurrency:
+  group: kinnan-external-moxfield-compare
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  import-decks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Import both public Moxfield lists
+        run: |
+          mkdir -p imported
+          python3 - <<'PY'
+          import json, pathlib, requests
+
+          decks = {
+              'EXT_SPEED': ('clmfAa8xNXqMT6HS18Trlg', 'Speed Kinnan'),
+              'EXT_NE_CEDH': ('sm7wlPMZj0C0fxf0sjlpOg', 'Kinnan - North East CEDH Aug'),
+          }
+          browser_headers = {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+              'Accept': 'application/json, text/plain, */*',
+              'Accept-Language': 'en-US,en;q=0.9',
+              'Referer': 'https://moxfield.com/',
+              'Origin': 'https://moxfield.com',
+              'Sec-Fetch-Mode': 'cors',
+              'Sec-Fetch-Site': 'same-site',
+          }
+
+          def fetch_deck(deck_id):
+              urls = [
+                  f'https://mtg-collection-api.ur-advisor.workers.dev/api?site=moxfield&action=deck&id={deck_id}',
+                  f'https://api2.moxfield.com/v3/decks/all/{deck_id}',
+                  f'https://api2.moxfield.com/v2/decks/all/{deck_id}',
+                  f'https://api.moxfield.com/v2/decks/all/{deck_id}',
+              ]
+              errors=[]
+              for url in urls:
+                  try:
+                      headers = {} if 'workers.dev' in url else browser_headers
+                      r=requests.get(url,headers=headers,timeout=30)
+                      if r.ok:
+                          data=r.json()
+                          if isinstance(data,dict) and (data.get('boards') or data.get('mainboard')):
+                              return data,url
+                      errors.append(f'{url} -> {r.status_code} {r.text[:120]!r}')
+                  except Exception as e:
+                      errors.append(f'{url} -> {type(e).__name__}: {e}')
+              raise RuntimeError('Moxfield import failed:\n'+'\n'.join(errors))
+
+          def board_cards(data, board):
+              obj=None
+              if isinstance(data.get('boards'),dict):
+                  obj=(data['boards'].get(board) or {}).get('cards')
+              if obj is None:
+                  obj=data.get(board)
+              if obj is None:
+                  return []
+              vals=obj.values() if isinstance(obj,dict) else obj
+              out=[]
+              for entry in vals:
+                  if not isinstance(entry,dict): continue
+                  qty=int(entry.get('quantity') or entry.get('qty') or 1)
+                  card=entry.get('card') if isinstance(entry.get('card'),dict) else entry
+                  name=card.get('name') or entry.get('name')
+                  if not name: continue
+                  # Forge deck files in this harness use the front-face name for MDFCs.
+                  name=name.split(' // ',1)[0].strip()
+                  out.extend([name]*qty)
+              return out
+
+          meta={}
+          for key,(deck_id,fallback_title) in decks.items():
+              data,source=fetch_deck(deck_id)
+              commanders=board_cards(data,'commanders')
+              main=board_cards(data,'mainboard')
+              if not commanders:
+                  commanders=['Kinnan, Bonder Prodigy']
+              commander=commanders[0]
+              if commander in main and len(main)==100:
+                  main.remove(commander)
+              if commander != 'Kinnan, Bonder Prodigy':
+                  raise RuntimeError(f'{key}: unexpected commander {commander!r}')
+              if len(main) != 99:
+                  raise RuntimeError(f'{key}: expected 99 mainboard cards, got {len(main)}')
+              title=data.get('name') or fallback_title
+              path=pathlib.Path('imported')/f'Kinnan_{key}.dck'
+              path.write_text('[metadata]\nName='+title+'\n[Commander]\n1 Kinnan, Bonder Prodigy\n[Main]\n'+'\n'.join('1 '+c for c in main)+'\n')
+              meta[key]={'id':deck_id,'title':title,'source':source,'mainCount':len(main),'uniqueMain':len(set(main)),'cards':main}
+              print(key,title,'cards',len(main),'unique',len(set(main)),'source',source)
+          pathlib.Path('imported/import-meta.json').write_text(json.dumps(meta,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: imported-kinnan-decks
+          path: imported/
+          retention-days: 14
+
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build pinned Manabrew/Forge once
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: external-compare-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  screen:
+    needs: [build, import-decks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [P00_F10, EXT_SPEED, EXT_NE_CEDH]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: external-compare-runtime
+          path: runtime
+      - uses: actions/download-artifact@v4
+        with:
+          name: imported-kinnan-decks
+          path: imported
+      - name: Restore runtime and decks
+        run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+          cp imported/Kinnan_EXT_*.dck engine-tests/decks/
+          cat > /tmp/external_screen.py <<'PY'
+          import manabrew_pilot_v89
+          import manabrew_pilot_v8 as runner
+          runner.PILOT_VERSION='external-kinnan-compare-screen-v1'
+          runner.VARIANT_FILES['P00_F10']='Kinnan_PREC_P00_F10.dck'
+          runner.VARIANT_FILES['EXT_SPEED']='Kinnan_EXT_SPEED.dck'
+          runner.VARIANT_FILES['EXT_NE_CEDH']='Kinnan_EXT_NE_CEDH.dck'
+          raise SystemExit(runner.main())
+          PY
+      - name: Run 50 paired T4 screen games
+        run: |
+          START=$((994000 + ${{ matrix.seat }} * 50))
+          python3 /tmp/external_screen.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+49))) \
+            --seat-offset '${{ matrix.seat }}' --max-round 4 --max-prompts 3500 --max-seconds 90 || true
+          mkdir -p out
+          cp "engine-tests/results/pilot-summary-${{ matrix.variant }}.json" "out/${{ matrix.variant }}-seat${{ matrix.seat }}.json" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: extscreen-${{ matrix.variant }}-seat${{ matrix.seat }}
+          path: out/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  screen-rank:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: extscreen-*
+          path: all
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: imported-kinnan-decks
+          path: imported
+      - run: |
+          python3 engine-tests/generate_f10_precision_decks.py
+          python3 - <<'PY'
+          import csv, glob, json, math, os, re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}
+          by=defaultdict(list); keyed=defaultdict(dict)
+          for p in glob.glob('all/*.json'):
+              m=re.match(r'(.+)-seat([0-3])\.json$',os.path.basename(p))
+              if not m: continue
+              v,seat=m.group(1),int(m.group(2)); games=json.load(open(p))
+              for g in games:
+                  by[v].append(g)
+                  if g.get('status') in completed: keyed[v][(seat,g.get('seed'))]=g
+          rows=[]
+          for v,games in by.items():
+              valid=[g for g in games if g.get('status') in completed]; n=len(valid)
+              r={'variant':v,'valid':n,'errors':len(games)-n,
+                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
+                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
+                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid),
+                 'naturalWins':sum(bool(g.get('naturalWinAfterAttempt')) for g in valid)}
+              for k in ('assembly','attempt','protected','naturalWins'): r[k+'Rate']=r[k]/max(n,1)
+              rows.append(r)
+          base=keyed.get('P00_F10',{})
+          def exact_two_sided(b,c):
+              n=b+c
+              if not n:return 1.0
+              k=min(b,c); tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
+              return min(1.0,2*tail)
+          for r in rows:
+              v=r['variant']; b=c=pairs=0
+              for key,g0 in base.items():
+                  g1=keyed.get(v,{}).get(key)
+                  if not g1: continue
+                  pairs+=1; a=bool(g0.get('protectedAttempt')); d=bool(g1.get('protectedAttempt'))
+                  if (not a) and d:b+=1
+                  elif a and (not d):c+=1
+              r.update({'pairedN':pairs,'f10Loss_candidateWin':b,'f10Win_candidateLoss':c,'pairedProtectedP':exact_two_sided(b,c)})
+          rows.sort(key=lambda r:(r['protectedRate'],r['attemptRate'],r['assemblyRate']),reverse=True)
+
+          def read_dck(path):
+              lines=open(path).read().splitlines(); i=lines.index('[Main]')+1
+              return [line.split(' ',1)[1] for line in lines[i:] if line.strip()]
+          f10=set(read_dck('engine-tests/decks/Kinnan_PREC_P00_F10.dck'))
+          meta=json.load(open('imported/import-meta.json'))
+          diffs={}
+          for v in ('EXT_SPEED','EXT_NE_CEDH'):
+              cards=set(meta[v]['cards'])
+              diffs[v]={'title':meta[v]['title'],'onlyCandidate':sorted(cards-f10),'onlyF10':sorted(f10-cards),'overlap':len(cards&f10)}
+          out={'ranking':rows,'diffsVsF10':diffs,'importMeta':{k:{x:y for x,y in v.items() if x!='cards'} for k,v in meta.items()}}
+          json.dump(out,open('external-screen-ranking.json','w'),indent=2)
+          if rows:
+              with open('external-screen-ranking.csv','w',newline='') as f:
+                  w=csv.DictWriter(f,fieldnames=list(rows[0].keys())); w.writeheader(); w.writerows(rows)
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: external-screen-ranking
+          path: external-screen-ranking.*
+          retention-days: 14
+
+  adversarial:
+    needs: [build, import-decks]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [P00_F10, EXT_SPEED, EXT_NE_CEDH]
+        pod: [balanced, turbo, midrange, mixed]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: external-compare-runtime
+          path: runtime
+      - uses: actions/download-artifact@v4
+        with:
+          name: imported-kinnan-decks
+          path: imported
+      - name: Restore runtime and decks
+        run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+          cp imported/Kinnan_EXT_*.dck engine-tests/decks/
+          cat > /tmp/external_adv.py <<'PY'
+          import manabrew_pilot_v91_adversarial
+          import manabrew_pilot_v8 as runner
+          runner.PILOT_VERSION='external-kinnan-compare-adversarial-v1'
+          runner.VARIANT_FILES['P00_F10']='Kinnan_PREC_P00_F10.dck'
+          runner.VARIANT_FILES['EXT_SPEED']='Kinnan_EXT_SPEED.dck'
+          runner.VARIANT_FILES['EXT_NE_CEDH']='Kinnan_EXT_NE_CEDH.dck'
+          raise SystemExit(runner.main())
+          PY
+      - name: Run 10 adversarial games
+        env:
+          CEDH_POD: ${{ matrix.pod }}
+        run: |
+          case '${{ matrix.pod }}' in balanced) BASE=995000;; turbo) BASE=996000;; midrange) BASE=997000;; mixed) BASE=998000;; esac
+          START=$((BASE + ${{ matrix.seat }} * 10))
+          CEDH_POD='${{ matrix.pod }}' python3 /tmp/external_adv.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+9))) \
+            --seat-offset '${{ matrix.seat }}' --max-round 5 --max-prompts 4500 --max-seconds 120 || true
+          mkdir -p out
+          cp "engine-tests/results/pilot-summary-${{ matrix.variant }}.json" "out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}.json" 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: extadv-${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}
+          path: out/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  final:
+    needs: [screen-rank, adversarial]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: extadv-*
+          path: adv
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: external-screen-ranking
+          path: screen
+      - name: Aggregate external comparison
+        run: |
+          python3 - <<'PY'
+          import csv, glob, json, os, re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}; by=defaultdict(list); detail=[]
+          for p in glob.glob('adv/*.json'):
+              m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
+              if not m: continue
+              v,pod,seat=m.group(1),m.group(2),int(m.group(3)); games=json.load(open(p)); valid=[g for g in games if g.get('status') in completed]
+              r={'variant':v,'pod':pod,'seat':seat,'valid':len(valid),'errors':len(games)-len(valid),
+                 'wins':sum(bool(g.get('kinnanWon') or g.get('naturalWinAfterAttempt')) for g in valid),
+                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
+                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
+                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid)}
+              detail.append(r); by[v].append(r)
+          totals=[]
+          for v,rs in by.items():
+              n=sum(x['valid'] for x in rs); wins=sum(x['wins'] for x in rs); ass=sum(x['assembly'] for x in rs); att=sum(x['attempt'] for x in rs); prot=sum(x['protected'] for x in rs)
+              totals.append({'variant':v,'valid':n,'errors':sum(x['errors'] for x in rs),'wins':wins,'assembly':ass,'attempt':att,'protected':prot,
+                'winRate':wins/max(n,1),'assemblyRate':ass/max(n,1),'attemptRate':att/max(n,1),'protectedRate':prot/max(n,1)})
+          totals.sort(key=lambda x:(x['winRate'],x['protectedRate'],x['attemptRate'],x['assemblyRate']),reverse=True)
+          screen=json.load(open('screen/external-screen-ranking.json'))
+          out={'ranking':totals,'byPodSeat':detail,'screen':screen}
+          json.dump(out,open('external-final.json','w'),indent=2)
+          if totals:
+              fields=list(totals[0].keys())
+              with open('external-final.csv','w',newline='') as f:
+                  w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(totals)
+          print(json.dumps(out,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-external-comparison-final
+          path: external-final.*
+          retention-days: 14
