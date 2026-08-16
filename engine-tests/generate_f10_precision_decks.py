@@ -27,18 +27,14 @@ SPECS={
  'P12_HIGHFAE_BORNE': (['Borne Upon a Wind'],['High Fae Trickster']),
  'P13_UNAGI_NATURE': (["Nature's Rhythm"],['The Unagi of Kyoshi Island']),
  'P14_COMMANDEER_MISD': (['Misdirection'],['Commandeer']),
- # Crossover suggested by repeated 2026 tournament co-adoption. Test whether
- # High Fae's permanent flash plus Wan's tutor-punish/value engine is synergistic
- # even though High Fae alone tied F10 in the latest ~800-game confirmation.
  'P15_HIGHFAE_WAN': (['Borne Upon a Wind',"Nature's Rhythm"],['High Fae Trickster','Wan Shi Tong, Librarian']),
- # Gene Pollinator is a tournament-supported Kinnan-specific mana converter.
- # Compare it directly to Springleaf Drum to keep the role/CMC nearly constant.
  'P16_GENE_DRUM': (['Springleaf Drum'],['Gene Pollinator']),
- # P14 showed that replacing Misdirection with Commandeer was a bad trade.
- # Successful current Kinnan shells frequently keep Misdirection and Commandeer
- # together, so isolate the question of whether a second free blue permission
- # spell is better than the narrower one-mana Dispel slot.
  'P17_COMMANDEER_DISPEL': (['Dispel'],['Commandeer']),
+ # Flesh Duplicate is repeated in recent top-finishing Kinnan lists and is a
+ # Kinnan hit / flexible clone. Energy Refractor is absent from those shells.
+ # This isolates whether a low-connectivity mana-smoothing artifact is better
+ # spent on a flexible creature-copy node without disturbing tutor density.
+ 'P18_FLESH_REFRACTOR': (['Energy Refractor'],['Flesh Duplicate']),
 }
 
 def parse(text):
