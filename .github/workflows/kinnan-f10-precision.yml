@@ -56,7 +56,7 @@ jobs:
       fail-fast: false
       max-parallel: 12
       matrix:
-        variant: [P00_F10, P11_WAN_NATURE, P12_HIGHFAE_BORNE]
+        variant: [P00_F10, P12_HIGHFAE_BORNE, P13_UNAGI_NATURE]
         seat: [0,1,2,3]
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
           python3 engine-tests/generate_f10_precision_decks.py
       - name: Run 50 paired screen games
         run: |
-          START=$((1006000 + ${{ matrix.seat }} * 50))
+          START=$((1011000 + ${{ matrix.seat }} * 50))
           set +e
           python3 engine-tests/manabrew_pilot_precision.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
@@ -153,7 +153,8 @@ jobs:
               r.update({'pairedN':pairs,'f10Loss_candidateWin':b,'f10Win_candidateLoss':c,'pairedProtectedP':exact(b,c)})
           rows.sort(key=lambda r:(r['protectedRate'],r['attemptRate'],r['assemblyRate']),reverse=True)
           challenger=next(r['variant'] for r in rows if r['variant']!='P00_F10')
-          confirm=['P00_F10',challenger]
+          confirm=['P00_F10','P12_HIGHFAE_BORNE']
+          if challenger not in confirm: confirm.append(challenger)
           json.dump({'ranking':rows,'confirm':confirm},open('copy-screen-ranking.json','w'),indent=2)
           print(json.dumps(rows,indent=2));print('CONFIRM',confirm)
           with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('confirm='+json.dumps(confirm,separators=(',',':'))+'\n')
@@ -167,7 +168,7 @@ jobs:
   adversarial:
     needs: [build, rank]
     runs-on: ubuntu-24.04
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       max-parallel: 16
@@ -190,17 +191,17 @@ jobs:
           mkdir -p /tmp/manabrew
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
           python3 engine-tests/generate_f10_precision_decks.py
-      - name: Run 25 adversarial paired games
+      - name: Run 50 adversarial paired games
         env:
           CEDH_POD: ${{ matrix.pod }}
         run: |
-          case '${{ matrix.pod }}' in balanced) BASE=1007000;; turbo) BASE=1008000;; midrange) BASE=1009000;; mixed) BASE=1010000;; esac
-          START=$((BASE + ${{ matrix.seat }} * 25))
+          case '${{ matrix.pod }}' in balanced) BASE=1012000;; turbo) BASE=1013000;; midrange) BASE=1014000;; mixed) BASE=1015000;; esac
+          START=$((BASE + ${{ matrix.seat }} * 50))
           set +e
           python3 engine-tests/manabrew_pilot_precision_adv.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
-            --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+24))) \
+            --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+49))) \
             --seat-offset '${{ matrix.seat }}' --max-round 5 --max-prompts 4500 --max-seconds 120
           PILOT_RC=$?
           set -e
@@ -210,7 +211,7 @@ jobs:
           python3 - "$SRC" "$PILOT_RC" <<'PY'
           import json,sys
           games=json.load(open(sys.argv[1])); rc=int(sys.argv[2])
-          if len(games)!=25: raise SystemExit(f'expected 25 game records, got {len(games)} (pilot rc={rc})')
+          if len(games)!=50: raise SystemExit(f'expected 50 game records, got {len(games)} (pilot rc={rc})')
           print('validated records',len(games),'pilot_rc',rc)
           PY
           cp "$SRC" "out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}.json"
@@ -244,7 +245,7 @@ jobs:
               m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
               if not m:continue
               v,pod,seat=m.group(1),m.group(2),int(m.group(3)); games=json.load(open(p))
-              if len(games)!=25:raise SystemExit(f'{p}: expected 25 records, got {len(games)}')
+              if len(games)!=50:raise SystemExit(f'{p}: expected 50 records, got {len(games)}')
               valid=[g for g in games if g.get('status') in completed]
               r={'variant':v,'pod':pod,'seat':seat,'valid':len(valid),'errors':len(games)-len(valid),
                  'wins':sum(bool(g.get('kinnanWon') or g.get('naturalWinAfterAttempt')) for g in valid),
