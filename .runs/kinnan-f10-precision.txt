@@ -1,1 +1,1 @@
-trigger 2026-08-15 precision search
+2026-08-16 Copy Enchantment precision sweep: P00_F10 vs P08_COPY_MOCK (Mockingbird -> Copy Enchantment) vs P09_COPY_NATURE (Nature's Rhythm -> Copy Enchantment). Hard-fail result validation enabled.
