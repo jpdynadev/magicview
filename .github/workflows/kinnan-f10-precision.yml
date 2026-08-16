@@ -54,9 +54,9 @@ jobs:
     timeout-minutes: 180
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 16
       matrix:
-        variant: [P00_F10, P08_COPY_MOCK, P09_COPY_NATURE]
+        variant: [P00_F10, P08_COPY_MOCK, P09_COPY_NATURE, P10_RITE_NATURE]
         seat: [0,1,2,3]
     steps:
       - uses: actions/checkout@v4
@@ -76,19 +76,22 @@ jobs:
       - name: Run 50 paired screen games
         run: |
           START=$((1001000 + ${{ matrix.seat }} * 50))
+          set +e
           python3 engine-tests/manabrew_pilot_precision.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+49))) \
             --seat-offset '${{ matrix.seat }}' --max-round 4 --max-prompts 3500 --max-seconds 90
+          PILOT_RC=$?
+          set -e
           mkdir -p out
           SRC="engine-tests/results/pilot-summary-${{ matrix.variant }}.json"
           test -s "$SRC"
-          python3 - "$SRC" <<'PY'
+          python3 - "$SRC" "$PILOT_RC" <<'PY'
           import json,sys
-          p=sys.argv[1]; games=json.load(open(p))
-          if len(games)!=50: raise SystemExit(f'expected 50 game records, got {len(games)}')
-          print('validated records',len(games))
+          p=sys.argv[1]; rc=int(sys.argv[2]); games=json.load(open(p))
+          if len(games)!=50: raise SystemExit(f'expected 50 game records, got {len(games)} (pilot rc={rc})')
+          print('validated records',len(games),'pilot_rc',rc)
           PY
           cp "$SRC" "out/${{ matrix.variant }}-seat${{ matrix.seat }}.json"
       - uses: actions/upload-artifact@v4
@@ -193,19 +196,22 @@ jobs:
         run: |
           case '${{ matrix.pod }}' in balanced) BASE=1002000;; turbo) BASE=1003000;; midrange) BASE=1004000;; mixed) BASE=1005000;; esac
           START=$((BASE + ${{ matrix.seat }} * 25))
+          set +e
           python3 engine-tests/manabrew_pilot_precision_adv.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             --variant '${{ matrix.variant }}' --seeds $(seq "$START" $((START+24))) \
             --seat-offset '${{ matrix.seat }}' --max-round 5 --max-prompts 4500 --max-seconds 120
+          PILOT_RC=$?
+          set -e
           mkdir -p out
           SRC="engine-tests/results/pilot-summary-${{ matrix.variant }}.json"
           test -s "$SRC"
-          python3 - "$SRC" <<'PY'
+          python3 - "$SRC" "$PILOT_RC" <<'PY'
           import json,sys
-          games=json.load(open(sys.argv[1]))
-          if len(games)!=25: raise SystemExit(f'expected 25 game records, got {len(games)}')
-          print('validated records',len(games))
+          games=json.load(open(sys.argv[1])); rc=int(sys.argv[2])
+          if len(games)!=25: raise SystemExit(f'expected 25 game records, got {len(games)} (pilot rc={rc})')
+          print('validated records',len(games),'pilot_rc',rc)
           PY
           cp "$SRC" "out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}.json"
       - uses: actions/upload-artifact@v4
@@ -228,7 +234,7 @@ jobs:
         with:
           name: copy-screen-ranking
           path: screen
-      - name: Aggregate Copy Enchantment confirmation
+      - name: Aggregate confirmation
         run: |
           python3 - <<'PY'
           import glob,json,os,re
@@ -253,10 +259,10 @@ jobs:
               totals.append(row)
           totals.sort(key=lambda r:(r['protectedRate'],r['attemptRate'],r['assemblyRate'],r['winsRate']),reverse=True)
           out={'ranking':totals,'byPodSeat':detail,'screen':json.load(open('screen/copy-screen-ranking.json'))}
-          json.dump(out,open('copy-enchantment-final.json','w'),indent=2);print(json.dumps(totals,indent=2))
+          json.dump(out,open('precision-final.json','w'),indent=2);print(json.dumps(totals,indent=2))
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: kinnan-copy-enchantment-final
-          path: copy-enchantment-final.json
+          name: kinnan-precision-final
+          path: precision-final.json
           retention-days: 14
