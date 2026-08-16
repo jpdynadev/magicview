@@ -9,8 +9,8 @@ BASE=DECKS/'Kinnan_TestB.dck'
 F10_CUT=['Faerie Mastermind','Prophet of Distortion','Seedborn Muse','Hullbreaker Horror']
 F10_ADD=['Reshape','Trinket Mage','Spellseeker','Mystical Tutor']
 
-# Precision mutations. Keep the prior experiments for reproducibility and add
-# tournament-derived Copy Enchantment slot tests as new IDs.
+# Precision mutations. Keep prior experiments for reproducibility and add
+# tournament-derived candidates as isolated one-card tests.
 SPECS={
  'P00_F10': ([],[]),
  'P01_MISCAST': (['Dispel'],['Miscast']),
@@ -20,9 +20,12 @@ SPECS={
  'P05_SEEDBORN': (["Nature's Rhythm"],['Seedborn Muse']),
  'P06_HULLBREAKER': (['Mockingbird'],['Hullbreaker Horror']),
  'P07_M30_MICRO': (['Dispel','Mockingbird'],['Miscast','Consecrated Sphinx']),
- # 2026 tournament-derived candidate. Test the card while isolating slot cost.
+ # 2026 tournament-derived Copy Enchantment slot tests.
  'P08_COPY_MOCK': (['Mockingbird'],['Copy Enchantment']),
  'P09_COPY_NATURE': (["Nature's Rhythm"],['Copy Enchantment']),
+ # Cryptolith Rite appears in recent high-finishing Kinnan lists. Test the card
+ # itself without importing the broader untapper package.
+ 'P10_RITE_NATURE': (["Nature's Rhythm"],['Cryptolith Rite']),
 }
 
 def parse(text):
