@@ -49,6 +49,15 @@ def apply(cards,cuts,adds,label):
     return cards
 
 def main():
+    # The external-comparison workflow writes tiny wrapper scripts into /tmp.
+    # Python resolves imports relative to that wrapper location, so expose the
+    # engine-test modules there on this isolated comparison branch.
+    tmp=Path('/tmp')
+    for module in ROOT.glob('*.py'):
+        target=tmp/module.name
+        if not target.exists():
+            target.symlink_to(module)
+
     header,base=parse(BASE.read_text())
     f10=apply(base,F10_CUT,F10_ADD,'F10')
     for key,(cuts,adds) in SPECS.items():
