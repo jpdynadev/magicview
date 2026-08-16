@@ -30,6 +30,10 @@ SPECS={
  # shows both cards as high-adoption Kinnan signatures; keep each change isolated.
  'P11_WAN_NATURE': (["Nature's Rhythm"],['Wan Shi Tong, Librarian']),
  'P12_HIGHFAE_BORNE': (['Borne Upon a Wind'],['High Fae Trickster']),
+ # Unagi is increasingly concentrated in Kinnan and appears in a substantial
+ # share of recent top-list staples. Isolate it against the same Nature's Rhythm
+ # flex slot before considering any two-card crossover with High Fae.
+ 'P13_UNAGI_NATURE': (["Nature's Rhythm"],['The Unagi of Kyoshi Island']),
 }
 
 def parse(text):
