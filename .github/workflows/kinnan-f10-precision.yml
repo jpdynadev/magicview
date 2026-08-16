@@ -118,6 +118,9 @@ jobs:
           import glob,json,math,os,re
           from collections import defaultdict
           completed={'game_over','horizon_complete'}
+          def protected_t4(g):
+              t=g.get('firstAttemptTurn')
+              return bool(g.get('protectedAttempt')) and bool(g.get('certifiedDeterministicAttempt') or (g.get('deterministicT4') and t is not None and t<=4))
           by=defaultdict(list); keyed=defaultdict(dict)
           for p in glob.glob('all/*.json'):
               m=re.match(r'(.+)-seat([0-3])\.json$',os.path.basename(p))
@@ -133,7 +136,7 @@ jobs:
               rows.append({'variant':v,'valid':n,'errors':len(games)-n,
                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
-                'protected':sum(bool(g.get('protectedAttempt')) for g in valid),
+                'protected':sum(protected_t4(g) for g in valid),
                 'naturalWins':sum(bool(g.get('naturalWinAfterAttempt')) for g in valid)})
           base=keyed['P00_F10']
           def exact(b,c):
@@ -147,7 +150,7 @@ jobs:
               for key,g0 in base.items():
                   g1=keyed[r['variant']].get(key)
                   if not g1:continue
-                  pairs+=1;a=bool(g0.get('protectedAttempt'));d=bool(g1.get('protectedAttempt'))
+                  pairs+=1;a=protected_t4(g0);d=protected_t4(g1)
                   if not a and d:b+=1
                   elif a and not d:c+=1
               r.update({'pairedN':pairs,'f10Loss_candidateWin':b,'f10Win_candidateLoss':c,'pairedProtectedP':exact(b,c)})
@@ -240,7 +243,11 @@ jobs:
           python3 - <<'PY'
           import glob,json,os,re
           from collections import defaultdict
-          completed={'game_over','horizon_complete'}; by=defaultdict(list); detail=[]
+          completed={'game_over','horizon_complete'}
+          def protected_t4(g):
+              t=g.get('firstAttemptTurn')
+              return bool(g.get('protectedAttempt')) and bool(g.get('certifiedDeterministicAttempt') or (g.get('deterministicT4') and t is not None and t<=4))
+          by=defaultdict(list); detail=[]
           for p in glob.glob('adv/*.json'):
               m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
               if not m:continue
@@ -251,7 +258,7 @@ jobs:
                  'wins':sum(bool(g.get('kinnanWon') or g.get('naturalWinAfterAttempt')) for g in valid),
                  'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
                  'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
-                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid)}
+                 'protected':sum(protected_t4(g) for g in valid)}
               detail.append(r);by[v].append(r)
           totals=[]
           for v,rs in by.items():
