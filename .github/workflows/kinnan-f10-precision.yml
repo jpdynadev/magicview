@@ -54,9 +54,9 @@ jobs:
     timeout-minutes: 180
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 12
       matrix:
-        variant: [P00_F10, P08_COPY_MOCK, P09_COPY_NATURE, P10_RITE_NATURE]
+        variant: [P00_F10, P11_WAN_NATURE, P12_HIGHFAE_BORNE]
         seat: [0,1,2,3]
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +75,7 @@ jobs:
           python3 engine-tests/generate_f10_precision_decks.py
       - name: Run 50 paired screen games
         run: |
-          START=$((1001000 + ${{ matrix.seat }} * 50))
+          START=$((1006000 + ${{ matrix.seat }} * 50))
           set +e
           python3 engine-tests/manabrew_pilot_precision.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
@@ -194,7 +194,7 @@ jobs:
         env:
           CEDH_POD: ${{ matrix.pod }}
         run: |
-          case '${{ matrix.pod }}' in balanced) BASE=1002000;; turbo) BASE=1003000;; midrange) BASE=1004000;; mixed) BASE=1005000;; esac
+          case '${{ matrix.pod }}' in balanced) BASE=1007000;; turbo) BASE=1008000;; midrange) BASE=1009000;; mixed) BASE=1010000;; esac
           START=$((BASE + ${{ matrix.seat }} * 25))
           set +e
           python3 engine-tests/manabrew_pilot_precision_adv.py \
