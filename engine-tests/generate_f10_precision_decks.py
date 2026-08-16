@@ -31,6 +31,11 @@ SPECS={
  # High Fae's permanent flash plus Wan's tutor-punish/value engine is synergistic
  # even though High Fae alone tied F10 in the latest ~800-game confirmation.
  'P15_HIGHFAE_WAN': (['Borne Upon a Wind',"Nature's Rhythm"],['High Fae Trickster','Wan Shi Tong, Librarian']),
+ # Gene Pollinator is a tournament-supported Kinnan-specific mana converter.
+ # Compare it directly to Springleaf Drum to keep the role/CMC nearly constant:
+ # both turn an untapped permanent/creature into mana, but Pollinator is itself
+ # a Kinnan hit, green pitch card, artifact creature, and receives Kinnan's mana bonus.
+ 'P16_GENE_DRUM': (['Springleaf Drum'],['Gene Pollinator']),
 }
 
 def parse(text):
