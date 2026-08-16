@@ -32,10 +32,13 @@ SPECS={
  # even though High Fae alone tied F10 in the latest ~800-game confirmation.
  'P15_HIGHFAE_WAN': (['Borne Upon a Wind',"Nature's Rhythm"],['High Fae Trickster','Wan Shi Tong, Librarian']),
  # Gene Pollinator is a tournament-supported Kinnan-specific mana converter.
- # Compare it directly to Springleaf Drum to keep the role/CMC nearly constant:
- # both turn an untapped permanent/creature into mana, but Pollinator is itself
- # a Kinnan hit, green pitch card, artifact creature, and receives Kinnan's mana bonus.
+ # Compare it directly to Springleaf Drum to keep the role/CMC nearly constant.
  'P16_GENE_DRUM': (['Springleaf Drum'],['Gene Pollinator']),
+ # P14 showed that replacing Misdirection with Commandeer was a bad trade.
+ # Successful current Kinnan shells frequently keep Misdirection and Commandeer
+ # together, so isolate the question of whether a second free blue permission
+ # spell is better than the narrower one-mana Dispel slot.
+ 'P17_COMMANDEER_DISPEL': (['Dispel'],['Commandeer']),
 }
 
 def parse(text):
