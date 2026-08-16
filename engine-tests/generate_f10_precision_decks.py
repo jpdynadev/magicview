@@ -9,22 +9,20 @@ BASE=DECKS/'Kinnan_TestB.dck'
 F10_CUT=['Faerie Mastermind','Prophet of Distortion','Seedborn Muse','Hullbreaker Horror']
 F10_ADD=['Reshape','Trinket Mage','Spellseeker','Mystical Tutor']
 
-# Precision mutations: mostly one-card deltas from F10, deliberately chosen to
-# isolate interaction quality, tutor identity, and whether restoring a premium
-# Kinnan/value hit improves real conversion without undoing the tutor package.
+# Precision mutations. Keep the prior experiments for reproducibility and add
+# tournament-derived Copy Enchantment slot tests as new IDs.
 SPECS={
  'P00_F10': ([],[]),
- # One-card interaction substitution; Miscast was part of the strong M2K0030/F14 signal.
  'P01_MISCAST': (['Dispel'],['Miscast']),
- # One-card tutor identity substitutions around the four-tutor sweet spot.
  'P02_GSZ': (['Mystical Tutor'],["Green Sun's Zenith"]),
  'P03_ELDRITCH': (['Mystical Tutor'],['Eldritch Evolution']),
  'P04_TRIBUTE': (['Mystical Tutor'],['Tribute Mage']),
- # Restore value/engine cards F10 cut, using lower-connectivity flex slots.
  'P05_SEEDBORN': (["Nature's Rhythm"],['Seedborn Muse']),
  'P06_HULLBREAKER': (['Mockingbird'],['Hullbreaker Horror']),
- # Best-looking two-card crossover from the M2K0030/F14 direction.
  'P07_M30_MICRO': (['Dispel','Mockingbird'],['Miscast','Consecrated Sphinx']),
+ # 2026 tournament-derived candidate. Test the card while isolating slot cost.
+ 'P08_COPY_MOCK': (['Mockingbird'],['Copy Enchantment']),
+ 'P09_COPY_NATURE': (["Nature's Rhythm"],['Copy Enchantment']),
 }
 
 def parse(text):
