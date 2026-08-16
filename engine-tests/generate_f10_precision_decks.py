@@ -10,7 +10,7 @@ F10_CUT=['Faerie Mastermind','Prophet of Distortion','Seedborn Muse','Hullbreake
 F10_ADD=['Reshape','Trinket Mage','Spellseeker','Mystical Tutor']
 
 # Precision mutations. Keep prior experiments for reproducibility and add
-# tournament-derived candidates as isolated one-card tests.
+# tournament-derived candidates as small, interpretable tests.
 SPECS={
  'P00_F10': ([],[]),
  'P01_MISCAST': (['Dispel'],['Miscast']),
@@ -20,23 +20,17 @@ SPECS={
  'P05_SEEDBORN': (["Nature's Rhythm"],['Seedborn Muse']),
  'P06_HULLBREAKER': (['Mockingbird'],['Hullbreaker Horror']),
  'P07_M30_MICRO': (['Dispel','Mockingbird'],['Miscast','Consecrated Sphinx']),
- # 2026 tournament-derived Copy Enchantment slot tests.
  'P08_COPY_MOCK': (['Mockingbird'],['Copy Enchantment']),
  'P09_COPY_NATURE': (["Nature's Rhythm"],['Copy Enchantment']),
- # Cryptolith Rite appears in recent high-finishing Kinnan lists. Test the card
- # itself without importing the broader untapper package.
  'P10_RITE_NATURE': (["Nature's Rhythm"],['Cryptolith Rite']),
- # Next-wave 2026 tournament-derived value/flash tests. cEDHStats currently
- # shows both cards as high-adoption Kinnan signatures; keep each change isolated.
  'P11_WAN_NATURE': (["Nature's Rhythm"],['Wan Shi Tong, Librarian']),
  'P12_HIGHFAE_BORNE': (['Borne Upon a Wind'],['High Fae Trickster']),
- # Unagi is increasingly concentrated in Kinnan and appears in a substantial
- # share of recent top-list staples. Isolate it against the same Nature's Rhythm
- # flex slot before considering any two-card crossover with High Fae.
  'P13_UNAGI_NATURE': (["Nature's Rhythm"],['The Unagi of Kyoshi Island']),
- # Current large-event Kinnan staples show Commandeer and Misdirection at similar
- # adoption. Isolate free-interaction identity without changing interaction density.
  'P14_COMMANDEER_MISD': (['Misdirection'],['Commandeer']),
+ # Crossover suggested by repeated 2026 tournament co-adoption. Test whether
+ # High Fae's permanent flash plus Wan's tutor-punish/value engine is synergistic
+ # even though High Fae alone tied F10 in the latest ~800-game confirmation.
+ 'P15_HIGHFAE_WAN': (['Borne Upon a Wind',"Nature's Rhythm"],['High Fae Trickster','Wan Shi Tong, Librarian']),
 }
 
 def parse(text):
