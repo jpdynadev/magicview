@@ -58,6 +58,9 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
     if not cards:
         return
     card_set = set(cards)
+    # Longest-first avoids a shorter card name consuming text that is part of a
+    # longer one; escaped literals make punctuation/apostrophes harmless.
+    prompt_matcher = re.compile("|".join(re.escape(card) for card in sorted(cards, key=len, reverse=True)))
     original_run = runner.run_game
 
     def tracked_run_game(*args: Any, **kwargs: Any) -> dict[str, Any]:
@@ -82,9 +85,8 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
             raw = original_rpc(proc, request)
             if request.get("command") == "getPrompt" and raw:
                 text = str(raw)
-                for card in cards:
-                    if card in text:
-                        mark(card, "prompt")
+                for match in prompt_matcher.finditer(text):
+                    mark(match.group(0), "prompt")
             return raw
 
         runner.base.zone_cards = zone_cards
@@ -105,8 +107,6 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
-    # Distinguish early-stopping/instrumented results from the compatibility
-    # worker even when the underlying pilot/deck/seed are identical.
     os.environ.setdefault("SIM_V2_PROFILE", "ultra-v2")
 
     mode = _arg_value("--mode", "screen")
@@ -124,25 +124,15 @@ def main() -> int:
     trace_enabled = os.getenv("SIM_V2_TRACE", "0").lower() in {"1", "true", "yes"}
     early_success = os.getenv("SIM_V2_EARLY_SUCCESS", "1").lower() not in {"0", "false", "no"}
     exact_deadline = os.getenv("SIM_V2_EXACT_DEADLINE", "1").lower() not in {"0", "false", "no"}
-    meta = install(
-        config.runner,
-        early_success=early_success,
-        trace_enabled=trace_enabled,
-        exact_deadline=exact_deadline,
-    )
+    meta = install(config.runner, early_success=early_success, trace_enabled=trace_enabled, exact_deadline=exact_deadline)
 
     requested_exposure = _arg_values("--exposure-card")
     deck_path = config.runner.base.DECK_DIR / config.runner.VARIANT_FILES[variant]
     observation_universe = sorted(set(_deck_card_names(deck_path)) | set(requested_exposure))
     _install_observation_tracker(config.runner, observation_universe)
-    print(
-        "SIM_V2_HOTPATCH "
-        + json.dumps({**meta, "observationUniverse": len(observation_universe)}, sort_keys=True),
-        flush=True,
-    )
+    print("SIM_V2_HOTPATCH " + json.dumps({**meta, "observationUniverse": len(observation_universe)}, sort_keys=True), flush=True)
 
     import sim_v2_worker
-
     original_compact = sim_v2_worker.compact_result
 
     def compact_with_events(result: dict[str, Any], cards: list[str]) -> dict[str, Any]:
