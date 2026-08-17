@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
-"""Ultra entrypoint: validated v2 worker plus pilot hot-path optimizations.
+"""Persistent-JVM v2 entrypoint with reusable exposure instrumentation.
 
-Adds lightweight generic card-observation instrumentation without retaining the
-full prompt trace. The cache records which cards from the Kinnan 99 were seen in
-Kinnan's live zones or appeared in a *small, concrete* Forge choice pool. Broad
-library/tutor/action payloads are intentionally excluded: a selected tutor card
-will subsequently be observed in hand/battlefield, while Kinnan top-five and
-other genuinely constrained choice pools remain visible for exposure analysis.
+The trusted path deliberately preserves the validated pilot's trace semantics.
+Earlier ultra profiles replaced the pilot trace with a sink; seeded equivalence
+proved that transformation can change endpoint bookkeeping (seed 1720003 lost
+its T4 firstAssemblyTurn). Persistent JVM reuse and observation tracking remain,
+but semantic AST rewrites are disabled unless they are revalidated separately.
+
+The cache records which cards from the Kinnan 99 were seen in Kinnan's live
+zones or appeared in a small, concrete Forge choice pool. Broad library/tutor/
+action payloads are intentionally excluded.
 """
 from __future__ import annotations
 
@@ -59,13 +62,9 @@ def _prompt_choice_objects(prompt: dict[str, Any], max_pool: int = 16) -> list[A
 
     Manabrew can serialize a full library, broad tutor search, or action catalog
     inside a prompt. Counting those as exposure makes essentially the entire 99
-    look observed. For conditional slot analysis we instead count:
-
-    * cards that actually reach Kinnan's live zones (tracked separately), and
-    * cards in small explicit selection pools such as Kinnan's top-five reveal.
-
-    Broad tutor choices are not counted merely for being legal; if a card is
-    actually selected, the subsequent zone observation captures it.
+    look observed. For conditional slot analysis we instead count cards that
+    actually reach Kinnan's live zones and cards in small explicit selection
+    pools such as Kinnan's top-five reveal.
     """
     inp = (prompt or {}).get("input") or {}
     out: list[Any] = []
@@ -78,8 +77,6 @@ def _prompt_choice_objects(prompt: dict[str, Any], max_pool: int = 16) -> list[A
             if 0 < len(value) <= max_pool:
                 out.extend(value)
         elif isinstance(value, dict):
-            # Small mapping-style selectors are fine; reject large serialized
-            # catalogs that are effectively hidden/full-deck metadata.
             if 0 < len(value) <= max_pool:
                 out.append(value)
     return out
@@ -142,10 +139,10 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
-    # Execution semantics changed: neither early-exit path is trusted until it
-    # independently clears seeded cold-vs-persistent equivalence. Bump the
-    # profile so no cached row from the earlier semantics can be reused.
-    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v5")
+    # ultra-v6 changes execution semantics relative to v5: the validated pilot's
+    # trace is preserved. Optimizer fingerprinting also invalidates v5 rows, but
+    # the explicit profile makes the compatibility boundary obvious in results.
+    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v6")
 
     mode = _arg_value("--mode", "screen")
     variant = _arg_value("--variant", "")
@@ -157,23 +154,30 @@ def main() -> int:
     if variant not in config.runner.VARIANT_FILES:
         raise SystemExit(f"unknown variant {variant}; known={sorted(config.runner.VARIANT_FILES)}")
 
-    from sim_v2_hotpatch import install
-
-    trace_enabled = os.getenv("SIM_V2_TRACE", "0").lower() in {"1", "true", "yes"}
-    # Positive early-success termination is opt-in: the latest seeded persistent
-    # gate still diverged from restart-per-game execution while it was enabled.
-    early_success = os.getenv("SIM_V2_EARLY_SUCCESS", "0").lower() not in {"0", "false", "no"}
-    # The first exact-deadline implementation was proven non-equivalent on seed
-    # 1720003 because it exited before the legacy runner recorded T4 assembly.
-    # Keep it opt-in until a future implementation passes seeded equivalence.
-    exact_deadline = os.getenv("SIM_V2_EXACT_DEADLINE", "0").lower() not in {"0", "false", "no"}
-    meta = install(config.runner, early_success=early_success, trace_enabled=trace_enabled, exact_deadline=exact_deadline)
+    # No semantic AST hotpatch is installed on the trusted v6 path. The only
+    # execution optimization is Forge JVM reuse in sim_v2_worker.ForgeJvmPool.
+    # Keep explicit flags in the output contract so a future reintroduction of
+    # early exits cannot be mistaken for this validated profile.
+    config.runner._SIM_V2_HOTPATCH_META = {
+        "earlySuccess": False,
+        "exactDeadline": False,
+        "traceEnabled": True,
+        "traceInitializersReplaced": 0,
+        "earlyExitSitesInserted": 0,
+        "deadlineExitSitesInserted": 0,
+        "metricWrapperPreserved": True,
+        "optimizedSource": None,
+    }
 
     requested_exposure = _arg_values("--exposure-card")
     deck_path = config.runner.base.DECK_DIR / config.runner.VARIANT_FILES[variant]
     observation_universe = sorted(set(_deck_card_names(deck_path)) | set(requested_exposure))
     _install_observation_tracker(config.runner, observation_universe)
-    print("SIM_V2_HOTPATCH " + json.dumps({**meta, "observationUniverse": len(observation_universe)}, sort_keys=True), flush=True)
+    print(
+        "SIM_V2_HOTPATCH "
+        + json.dumps({**config.runner._SIM_V2_HOTPATCH_META, "observationUniverse": len(observation_universe)}, sort_keys=True),
+        flush=True,
+    )
 
     import sim_v2_worker
     original_compact = sim_v2_worker.compact_result
@@ -190,8 +194,8 @@ def main() -> int:
         item["exposureCards"] = exposed
         item["slotExposed"] = bool(exposed)
         item["exposureEvents"] = [e for e in events if e.get("card") in requested]
-        item["v2EarlyExit"] = bool(result.get("v2EarlyExit"))
-        item["v2DeadlineExit"] = bool(result.get("v2DeadlineExit"))
+        item["v2EarlyExit"] = False
+        item["v2DeadlineExit"] = False
         return item
 
     sim_v2_worker.compact_result = compact_with_events
