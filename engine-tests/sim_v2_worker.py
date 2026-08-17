@@ -5,7 +5,7 @@ Key goals:
 - reuse one Forge JVM for several games instead of spawning one JVM per game;
 - cap heap aggressively but configurably;
 - cache completed game results by deterministic simulation key;
-- include the full four-deck pod in cache identity, not only the Kinnan deck;
+- include the full four-deck pod and optimizer code fingerprint in cache identity;
 - keep exposure observations generic so cached games can be relabeled for new
   singleton/package hypotheses without rerunning Forge;
 - keep full traces only for explicitly requested audit/debug runs;
@@ -96,7 +96,6 @@ class ForgeJvmPool:
             tuned[1:1] = [f"-Xms{self.xms}", f"-Xmx{self.xmx}", "-XX:+UseG1GC"]
 
         spawn_kwargs = dict(kwargs)
-        # A long-lived JVM must never block because nobody drains stderr.
         spawn_kwargs["stderr"] = subprocess.DEVNULL
         proc = self.original_popen(tuned, **spawn_kwargs)
         self.starts += 1
@@ -121,6 +120,24 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def optimizer_fingerprint() -> str:
+    """Fingerprint the execution wrapper so code changes invalidate old cache.
+
+    The validated pilot identifies its own version separately. These files are
+    the layers that can alter stopping, pooling, compact instrumentation or cache
+    semantics without changing that pilot version.
+    """
+
+    names = ["sim_v2_worker.py", "sim_v2_hotpatch.py", "sim_v2_worker_ultra.py"]
+    h = hashlib.sha256()
+    for name in names:
+        path = HERE / name
+        if path.exists():
+            h.update(name.encode())
+            h.update(path.read_bytes())
+    return h.hexdigest()
+
+
 def strict_pt4(result: dict[str, Any]) -> bool:
     t = result.get("firstAttemptTurn")
     certified = bool(
@@ -131,13 +148,7 @@ def strict_pt4(result: dict[str, Any]) -> bool:
 
 
 def relabel_exposure(item: dict[str, Any], exposure_cards: list[str]) -> dict[str, Any]:
-    """Relabel cached generic observations for the current mutation/package.
-
-    Ultra workers persist ``observedCards`` independent of the requested test.
-    This means a previously computed game can answer a later exposure question
-    without invoking Forge again. Older cache entries fall back to their original
-    exposure fields and are still safe for deck-level metrics.
-    """
+    """Relabel cached generic observations for the current mutation/package."""
 
     if "observedCards" in item:
         observed = set(item.get("observedCards") or [])
@@ -145,6 +156,8 @@ def relabel_exposure(item: dict[str, Any], exposure_cards: list[str]) -> dict[st
         item = dict(item)
         item["exposureCards"] = exposed
         item["slotExposed"] = bool(exposed)
+        generic_events = item.get("observedCardEvents") or []
+        item["exposureEvents"] = [e for e in generic_events if e.get("card") in set(exposure_cards)]
     return item
 
 
@@ -155,11 +168,7 @@ def compact_result(result: dict[str, Any], exposure_cards: list[str]) -> dict[st
     combo = str(result.get("comboLine") or "")
     protection = set(result.get("protectionAvailable") or [])
     observed = set(result.get("v2ObservedCards") or []) | opening | kept | protection
-    exposed = sorted(
-        card
-        for card in exposure_cards
-        if card in observed or card in combo
-    )
+    exposed = sorted(card for card in exposure_cards if card in observed or card in combo)
     return {
         "pilotVersion": result.get("pilotVersion"),
         "variant": result.get("variant"),
@@ -196,8 +205,10 @@ def pod_signature(runner: Any, variant: str, seat: int) -> tuple[str, list[str]]
 
     ordered = runner.configure_decks(variant, seat)
     hashes = [sha256_file(runner.base.DECK_DIR / filename) for _, filename in ordered]
-    payload = [{"seat": i, "name": name, "file": filename, "sha256": hashes[i]}
-               for i, (name, filename) in enumerate(ordered)]
+    payload = [
+        {"seat": i, "name": name, "file": filename, "sha256": hashes[i]}
+        for i, (name, filename) in enumerate(ordered)
+    ]
     digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
     return digest, hashes
 
@@ -206,6 +217,8 @@ def cache_key(
     *,
     engine_id: str,
     pilot_version: str,
+    optimizer_id: str,
+    execution_profile: str,
     deck_sha: str,
     pod_sha: str,
     mode: str,
@@ -217,6 +230,8 @@ def cache_key(
     payload = {
         "engine": engine_id,
         "pilot": pilot_version,
+        "optimizer": optimizer_id,
+        "profile": execution_profile,
         "deck": deck_sha,
         "podDecks": pod_sha,
         "mode": mode,
@@ -224,19 +239,12 @@ def cache_key(
         "seed": seed,
         "seat": seat,
         "maxRound": max_round,
-        "schema": 3,
+        "schema": 4,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
-def cleanup_game_files(
-    runner: Any,
-    variant: str,
-    seed: int,
-    seat: int,
-    *,
-    keep_trace: bool,
-) -> None:
+def cleanup_game_files(runner: Any, variant: str, seed: int, seat: int, *, keep_trace: bool) -> None:
     suffix = f"{variant}-{seed}-s{seat}"
     result_dir = runner.base.RESULT_DIR
     for p in result_dir.glob(f"pilot-result-{suffix}.json"):
@@ -282,6 +290,8 @@ def main() -> int:
     deck_path = runner.base.DECK_DIR / runner.VARIANT_FILES[args.variant]
     deck_sha = sha256_file(deck_path)
     pilot_version = str(runner.PILOT_VERSION)
+    optimizer_id = optimizer_fingerprint()
+    execution_profile = os.getenv("SIM_V2_PROFILE", "legacy-v2")
     pod = os.getenv("CEDH_POD", "balanced" if args.mode == "adversarial" else "screen")
     pod_sha, seat_deck_hashes = pod_signature(runner, args.variant, args.fixed_seat)
 
@@ -302,6 +312,8 @@ def main() -> int:
             key = cache_key(
                 engine_id=args.engine_id,
                 pilot_version=pilot_version,
+                optimizer_id=optimizer_id,
+                execution_profile=execution_profile,
                 deck_sha=deck_sha,
                 pod_sha=pod_sha,
                 mode=args.mode,
@@ -351,6 +363,8 @@ def main() -> int:
                 "pod": pod,
                 "podDeckSha256": pod_sha,
                 "seatDeckSha256s": seat_deck_hashes,
+                "optimizerId": optimizer_id,
+                "executionProfile": execution_profile,
             })
             cache_path.write_text(json.dumps(item, separators=(",", ":")))
             results.append(item)
@@ -376,6 +390,8 @@ def main() -> int:
         "mode": args.mode,
         "pod": pod,
         "podDeckSha256": pod_sha,
+        "optimizerId": optimizer_id,
+        "executionProfile": execution_profile,
         "seat": args.fixed_seat,
         "games": len(results),
         "completed": completed,
