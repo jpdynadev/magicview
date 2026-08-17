@@ -30,15 +30,14 @@ SPECS={
  'P15_HIGHFAE_WAN': (['Borne Upon a Wind',"Nature's Rhythm"],['High Fae Trickster','Wan Shi Tong, Librarian']),
  'P16_GENE_DRUM': (['Springleaf Drum'],['Gene Pollinator']),
  'P17_COMMANDEER_DISPEL': (['Dispel'],['Commandeer']),
- # Flesh Duplicate is repeated in recent top-finishing Kinnan lists and is a
- # Kinnan hit / flexible clone. Energy Refractor is absent from those shells.
- # This isolates whether a low-connectivity mana-smoothing artifact is better
- # spent on a flexible creature-copy node without disturbing tutor density.
  'P18_FLESH_REFRACTOR': (['Energy Refractor'],['Flesh Duplicate']),
- # Cleaner clone-for-clone follow-up. P18's screen was directionally positive
- # versus F10 but lost promotion to P15; replacing Mockingbird controls role
- # more tightly and asks whether Flesh Duplicate is the superior clone slot.
  'P19_FLESH_MOCK': (['Mockingbird'],['Flesh Duplicate']),
+ # Outlet-redundancy test. High Fae has repeatedly shown a neutral-to-positive
+ # signal and appears in current successful Kinnan lists. Staff is an outlet /
+ # conversion piece overlapping Thrasios, Ballista, Goblin Cannon and Kinnan.
+ # This asks whether trading one redundant outlet for a flash/value Kinnan hit
+ # improves protected T4 conversion while preserving Borne and Nature's Rhythm.
+ 'P20_HIGHFAE_STAFF': (['Staff of Domination'],['High Fae Trickster']),
 }
 
 def parse(text):
