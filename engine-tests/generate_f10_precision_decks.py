@@ -34,9 +34,11 @@ SPECS={
  'P19_FLESH_MOCK': (['Mockingbird'],['Flesh Duplicate']),
  'P20_HIGHFAE_STAFF': (['Staff of Domination'],['High Fae Trickster']),
  'P21_WAN_STAFF': (['Staff of Domination'],['Wan Shi Tong, Librarian']),
- # Staff redundancy follow-up: keep F10's flash/tutor package intact and
- # replace the redundant mana-conversion outlet with a high-adoption clone.
  'P22_FLESH_STAFF': (['Staff of Domination'],['Flesh Duplicate']),
+ # Tournament-derived mana-engine test. Keep Staff and tutor density intact;
+ # compare a low-connectivity smoothing artifact to a Kinnan-hit creature
+ # that doubles creature mana production.
+ 'P23_BADGER_REFRACTOR': (['Energy Refractor'],['Badgermole Cub']),
 }
 
 def parse(text):
