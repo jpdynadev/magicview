@@ -1,0 +1,229 @@
+name: Kinnan sim v2 ultra smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/sim-v2-overopt]
+    paths:
+      - ".github/workflows/kinnan-sim-v2-ultra-smoke.yml"
+      - "engine-tests/sim_v2_hotpatch.py"
+      - "engine-tests/sim_v2_worker_ultra.py"
+      - "engine-tests/sim_v2_parallel.py"
+      - "engine-tests/sim_v2_heap_tune.py"
+
+concurrency:
+  group: kinnan-sim-v2-ultra-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: "21"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" \
+            forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-v2-ultra-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  validate:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: "21"}
+      - uses: actions/download-artifact@v4
+        with: {name: sim-v2-ultra-runtime, path: runtime}
+      - name: Restore runtime and precision decks
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+
+      - name: Legacy cold control
+        run: |
+          /usr/bin/time -v python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1710000 1710011) \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 1 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/ultra-control --retain-traces none \
+            --engine-id "$MANABREW_REF:control" \
+            --output out/control.json 2>&1 | tee out/control.log
+
+      - name: Persistent JVM without endpoint hotpatch
+        run: |
+          /usr/bin/time -v python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1710000 1710011) \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 6 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/ultra-reuse --retain-traces none \
+            --engine-id "$MANABREW_REF:reuse" \
+            --output out/reuse.json 2>&1 | tee out/reuse.log
+
+      - name: Verify JVM reuse exact equivalence
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/control.json')); b=json.load(open('out/reuse.json'))
+          fields=('seed','kinnanSeat','status','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','kinnanWon','primaryFailureCode')
+          bad=[]
+          for x,y in zip(a,b):
+              d={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if d: bad.append({'seed':x.get('seed'),'diff':d})
+          print(json.dumps({'reuseMismatches':bad},indent=2))
+          if bad: raise SystemExit(f'JVM reuse changed {len(bad)} seeded outcomes')
+          PY
+
+      - name: Ultra hotpatch single worker
+        env:
+          SIM_V2_EARLY_SUCCESS: "1"
+          SIM_V2_TRACE: "0"
+        run: |
+          /usr/bin/time -v python3 engine-tests/sim_v2_worker_ultra.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1710000 1710011) \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 6 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/ultra-hot --retain-traces none \
+            --engine-id "$MANABREW_REF:ultra-v1" \
+            --exposure-card 'Staff of Domination' \
+            --output out/ultra.json 2>&1 | tee out/ultra.log
+
+      - name: Verify hotpatch primary-endpoint equivalence
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/control.json')); b=json.load(open('out/ultra.json'))
+          fields=('seed','kinnanSeat','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')
+          bad=[]
+          for x,y in zip(a,b):
+              d={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if d: bad.append({'seed':x.get('seed'),'diff':d})
+          print(json.dumps({'hotpatchMismatches':bad,'earlyExits':sum(bool(x.get('v2EarlyExit')) for x in b)},indent=2))
+          if bad: raise SystemExit(f'hotpatch changed {len(bad)} primary endpoints')
+          PY
+
+      - name: Ultra dual-worker execution
+        env:
+          SIM_V2_EARLY_SUCCESS: "1"
+          SIM_V2_TRACE: "0"
+        run: |
+          /usr/bin/time -v python3 engine-tests/sim_v2_parallel.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1710000 1710011) --workers 2 \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 6 --xmx 1536m --xms 192m \
+            --cache-dir .sim-cache/ultra-dual --retain-traces none \
+            --engine-id "$MANABREW_REF:ultra-v1" \
+            --output out/dual.json 2>&1 | tee out/dual.log
+
+      - name: Verify dual-worker deterministic equivalence
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/ultra.json')); b=json.load(open('out/dual.json'))
+          fields=('seed','kinnanSeat','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')
+          bad=[]
+          for x,y in zip(a,b):
+              d={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if d: bad.append({'seed':x.get('seed'),'diff':d})
+          print(json.dumps({'dualMismatches':bad},indent=2))
+          if bad: raise SystemExit(f'dual local workers changed {len(bad)} primary endpoints')
+          PY
+
+      - name: Verify cache replay starts zero JVMs
+        env:
+          SIM_V2_EARLY_SUCCESS: "1"
+          SIM_V2_TRACE: "0"
+        run: |
+          python3 engine-tests/sim_v2_parallel.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1710000 1710011) --workers 2 \
+            --jvm-reuse 6 --xmx 1536m --xms 192m \
+            --cache-dir .sim-cache/ultra-dual --retain-traces none \
+            --engine-id "$MANABREW_REF:ultra-v1" \
+            --output out/dual-cached.json | tee out/cached.log
+          grep -q '"cacheHits": 12' out/cached.log
+          grep -q '"jvmStarts": 0' out/cached.log
+
+      - name: Auto-tune heap
+        run: |
+          python3 engine-tests/sim_v2_heap_tune.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --games 4 --seed-base 1711000 \
+            --output out/heap-tune.json | tee out/heap-tune.log
+
+      - name: Compare performance summaries
+        run: |
+          python3 - <<'PY'
+          import json,re
+          def summary(path,prefix):
+              text=open(path).read().splitlines()
+              rows=[]
+              for line in text:
+                  if prefix in line:
+                      try: rows.append(json.loads(line.split(prefix,1)[1].strip()))
+                      except Exception: pass
+              return rows[-1] if rows else {}
+          out={
+            'control':summary('out/control.log','SIM_V2_SUMMARY '),
+            'reuse':summary('out/reuse.log','SIM_V2_SUMMARY '),
+            'ultra':summary('out/ultra.log','SIM_V2_SUMMARY '),
+            'dual':summary('out/dual.log','SIM_V2_PARALLEL_SUMMARY '),
+            'heapTune':json.load(open('out/heap-tune.json')),
+          }
+          open('out/performance.json','w').write(json.dumps(out,indent=2))
+          print(json.dumps(out,indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-v2-ultra-smoke-results
+          path: out/
+          retention-days: 14
