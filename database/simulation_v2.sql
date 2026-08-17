@@ -1,6 +1,9 @@
 -- Durable simulation cache/control-plane schema for MagicView simulation v2.
 -- GitHub Actions remains the compute layer; Neon stores experiment intent and
--- immutable game results so compatible baseline games are never recomputed.
+-- immutable game results so compatible games are never recomputed.
+--
+-- Deliberately no trigger functions: workers/control-plane update updated_at
+-- explicitly, which keeps this migration simple and portable.
 
 create table if not exists sim_experiments (
   id uuid primary key default gen_random_uuid(),
@@ -31,7 +34,11 @@ create table if not exists sim_game_results (
   cache_key text primary key,
   engine_id text not null,
   pilot_version text not null,
+  optimizer_id text not null,
+  execution_profile text not null,
   deck_sha256 text not null,
+  pod_deck_sha256 text not null,
+  seat_deck_sha256s text[] not null default '{}',
   mode text not null check (mode in ('screen','adversarial')),
   pod text not null,
   seed bigint not null,
@@ -53,8 +60,10 @@ create table if not exists sim_game_results (
   mulligans integer,
   opening_hand jsonb not null default '[]'::jsonb,
   kept_hand jsonb not null default '[]'::jsonb,
-  exposure_cards text[] not null default '{}',
-  slot_exposed boolean not null default false,
+  observed_cards text[] not null default '{}',
+  observed_card_events jsonb not null default '[]'::jsonb,
+  v2_positive_early_exit boolean not null default false,
+  v2_deadline_early_exit boolean not null default false,
   audit jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default timezone('utc', now())
 );
@@ -64,6 +73,7 @@ create table if not exists sim_experiment_games (
   variant_id uuid not null references sim_variants(id) on delete cascade,
   cache_key text not null references sim_game_results(cache_key) on delete restrict,
   stage text not null check (stage in ('screen','confirm','deep','exposure')),
+  exposure_cards text[] not null default '{}',
   created_at timestamptz not null default timezone('utc', now()),
   primary key (experiment_id, variant_id, cache_key, stage)
 );
@@ -80,6 +90,9 @@ create table if not exists sim_shards (
   seed_end bigint not null check (seed_end >= seed_start),
   requested_games integer not null check (requested_games > 0),
   completed_games integer not null default 0 check (completed_games >= 0),
+  cache_hits integer not null default 0 check (cache_hits >= 0),
+  jvm_starts integer not null default 0 check (jvm_starts >= 0),
+  wall_ms bigint,
   status text not null default 'queued' check (status in ('queued','running','complete','failed','cancelled')),
   github_run_id bigint,
   github_job_id bigint,
@@ -89,34 +102,14 @@ create table if not exists sim_shards (
 );
 
 create index if not exists idx_sim_results_lookup
-  on sim_game_results (engine_id, pilot_version, deck_sha256, mode, pod, seat, seed, max_round);
+  on sim_game_results (engine_id, pilot_version, optimizer_id, execution_profile, deck_sha256, pod_deck_sha256, mode, pod, seat, seed, max_round);
 create index if not exists idx_sim_results_deck
-  on sim_game_results (deck_sha256, mode, pod, seat);
+  on sim_game_results (deck_sha256, pod_deck_sha256, mode, pod, seat);
 create index if not exists idx_sim_results_pt4
   on sim_game_results (strict_protected_t4) where strict_protected_t4 = true;
-create index if not exists idx_sim_results_exposure
-  on sim_game_results (slot_exposed) where slot_exposed = true;
+create index if not exists idx_sim_results_observed_cards
+  on sim_game_results using gin (observed_cards);
 create index if not exists idx_sim_experiment_games_exp
   on sim_experiment_games (experiment_id, variant_id, stage);
 create index if not exists idx_sim_shards_exp_status
   on sim_shards (experiment_id, status);
-
-create or replace function set_sim_updated_at()
-returns trigger
-language plpgsql
-as $$
-begin
-  new.updated_at = timezone('utc', now());
-  return new;
-end;
-$$;
-
-drop trigger if exists set_sim_experiments_updated_at on sim_experiments;
-create trigger set_sim_experiments_updated_at
-before update on sim_experiments
-for each row execute procedure set_sim_updated_at();
-
-drop trigger if exists set_sim_shards_updated_at on sim_shards;
-create trigger set_sim_shards_updated_at
-before update on sim_shards
-for each row execute procedure set_sim_updated_at();
