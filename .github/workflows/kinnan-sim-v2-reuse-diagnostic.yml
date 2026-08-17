@@ -53,35 +53,40 @@ jobs:
           mkdir -p /tmp/manabrew out
           tar -C /tmp/manabrew -xzf manabrew-runtime.tgz
           python3 engine-tests/generate_f10_precision_decks.py
+
       - name: Cold target seed
         run: |
           python3 engine-tests/sim_v2_worker.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds 1720003 \
             --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 4 --max-seconds 90 \
-            --cache-dir .sim-cache/diag-cold --engine-id "$MANABREW_REF:diag-cold" --retain-traces none --output out/cold.json
-      - name: Persistent target seed first
+            --cache-dir .sim-cache/diag-v7-cold --engine-id "$MANABREW_REF:diag-v7-cold" --retain-traces none --output out/cold.json
+
+      - name: Ultra-v7 target seed first
         run: |
-          python3 engine-tests/sim_v2_worker.py \
+          python3 engine-tests/sim_v2_worker_ultra.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds 1720003 \
             --jvm-reuse 4 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
-            --cache-dir .sim-cache/diag-first --engine-id "$MANABREW_REF:diag-first" --retain-traces none --output out/first.json
-      - name: Persistent target after prior games
+            --cache-dir .sim-cache/diag-v7-first --engine-id "$MANABREW_REF:diag-v7-first" --retain-traces none --output out/first.json
+
+      - name: Ultra-v7 target after prior games
         run: |
-          python3 engine-tests/sim_v2_worker.py \
+          python3 engine-tests/sim_v2_worker_ultra.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds 1720000 1720002 1720003 \
             --jvm-reuse 4 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
-            --cache-dir .sim-cache/diag-seq --engine-id "$MANABREW_REF:diag-seq" --retain-traces none --output out/sequence.json
-      - name: Persistent target after one prior game
+            --cache-dir .sim-cache/diag-v7-seq --engine-id "$MANABREW_REF:diag-v7-seq" --retain-traces none --output out/sequence.json
+
+      - name: Ultra-v7 target after one prior game
         run: |
-          python3 engine-tests/sim_v2_worker.py \
+          python3 engine-tests/sim_v2_worker_ultra.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds 1720002 1720003 \
             --jvm-reuse 4 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
-            --cache-dir .sim-cache/diag-oneprior --engine-id "$MANABREW_REF:diag-oneprior" --retain-traces none --output out/oneprior.json
-      - name: Classify reuse effect
+            --cache-dir .sim-cache/diag-v7-oneprior --engine-id "$MANABREW_REF:diag-v7-oneprior" --retain-traces none --output out/oneprior.json
+
+      - name: Classify lifecycle/reuse effect
         run: |
           python3 - <<'PY'
           import json
@@ -91,22 +96,24 @@ jobs:
           rows={k:target(v) for k,v in {
               'cold':'out/cold.json','first':'out/first.json','sequence':'out/sequence.json','oneprior':'out/oneprior.json'
           }.items()}
-          fields=('firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','status','primaryFailureCode','prompts')
+          fields=('firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','status','primaryFailureCode','prompts','v2SessionCleanup','v2SessionCleanupError')
           report={k:{f:r.get(f) for f in fields} for k,r in rows.items()}
+          cold_ep={f:rows['cold'].get(f) for f in ('firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')}
+          comparisons={k:{f:(cold_ep[f], rows[k].get(f)) for f in cold_ep if rows[k].get(f)!=cold_ep[f]}
+                       for k in ('first','sequence','oneprior')}
+          report['endpointDiffs']=comparisons
+          report['allPersistentEndpointsEquivalent']=all(not d for d in comparisons.values())
+          report['allUltraCleanupSucceeded']=all(rows[k].get('v2SessionCleanup') is True for k in ('first','sequence','oneprior'))
           print(json.dumps(report,indent=2))
           json.dump(report,open('out/report.json','w'),indent=2)
-          cold={f:rows['cold'].get(f) for f in ('firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')}
-          first={f:rows['first'].get(f) for f in cold}
-          seq={f:rows['sequence'].get(f) for f in cold}
-          if first != cold:
-              print('CLASSIFICATION: persistence changes target even when it is first game')
-          elif seq != cold:
-              print('CLASSIFICATION: cross-game reuse contamination confirmed')
-          else:
-              print('CLASSIFICATION: target matched; prior failure may involve ultra hotpatch/parallel layer')
+          if not report['allPersistentEndpointsEquivalent']:
+              raise SystemExit('ultra-v7 persistent endpoint mismatch remains')
+          if not report['allUltraCleanupSucceeded']:
+              raise SystemExit('ultra-v7 session cleanup did not succeed for every probe')
           PY
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: sim-v2-reuse-diagnostic
+          name: sim-v2-reuse-diagnostic-v7
           path: out/
           retention-days: 14
