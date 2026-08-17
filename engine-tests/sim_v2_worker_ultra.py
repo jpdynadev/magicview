@@ -2,8 +2,8 @@
 """Ultra entrypoint: validated v2 worker plus pilot hot-path optimizations.
 
 Adds lightweight generic card-observation instrumentation without retaining the
-full prompt trace.  The cache records which cards from the Kinnan 99 were seen in
-Kinnan's live zones or appeared in Forge prompts/selections.  A later experiment
+full prompt trace. The cache records which cards from the Kinnan 99 were seen in
+Kinnan's live zones or appeared in Forge prompts/selections. A later experiment
 can therefore relabel exposure for a new singleton/package from cached games
 without rerunning Forge.
 """
@@ -82,10 +82,6 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
             raw = original_rpc(proc, request)
             if request.get("command") == "getPrompt" and raw:
                 text = str(raw)
-                # This is intentionally a simple string membership pass over the
-                # 100-card universe. Prompt payloads are tiny relative to Forge
-                # game work, and it captures tutor/Kinnan-hit card choices without
-                # materializing the full prompt trace.
                 for card in cards:
                     if card in text:
                         mark(card, "prompt")
@@ -109,6 +105,10 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
+    # Distinguish early-stopping/instrumented results from the compatibility
+    # worker even when the underlying pilot/deck/seed are identical.
+    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v2")
+
     mode = _arg_value("--mode", "screen")
     variant = _arg_value("--variant", "")
     if mode == "adversarial":
