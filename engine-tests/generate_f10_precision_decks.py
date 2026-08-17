@@ -35,10 +35,10 @@ SPECS={
  'P20_HIGHFAE_STAFF': (['Staff of Domination'],['High Fae Trickster']),
  'P21_WAN_STAFF': (['Staff of Domination'],['Wan Shi Tong, Librarian']),
  'P22_FLESH_STAFF': (['Staff of Domination'],['Flesh Duplicate']),
- # Tournament-derived mana-engine test. Keep Staff and tutor density intact;
- # compare a low-connectivity smoothing artifact to a Kinnan-hit creature
- # that doubles creature mana production.
  'P23_BADGER_REFRACTOR': (['Energy Refractor'],['Badgermole Cub']),
+ # Very high-adoption Kinnan combo-node test: preserve artifact density while
+ # replacing a low-connectivity color-smoothing artifact with a copy engine.
+ 'P24_MIRROR_REFRACTOR': (['Energy Refractor'],['Mirage Mirror']),
 }
 
 def parse(text):
