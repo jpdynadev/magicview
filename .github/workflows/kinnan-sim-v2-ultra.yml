@@ -29,7 +29,7 @@ on:
         default: '6'
         type: string
       exposure_cards:
-        description: 'Comma-separated mutation/package cards to instrument'
+        description: 'Comma-separated mutation/package cards to label from generic observations'
         required: false
         default: ''
         type: string
@@ -46,8 +46,9 @@ env:
   PYTHONUNBUFFERED: "1"
   SHARD_GAMES: 25
   SIM_V2_EARLY_SUCCESS: "1"
+  SIM_V2_EXACT_DEADLINE: "1"
   SIM_V2_TRACE: "0"
-  SIM_ENGINE_ID: 8a1380e5a59986ea3fed143b85f710f9ee3888dc:ultra-v1
+  SIM_ENGINE_ID: 8a1380e5a59986ea3fed143b85f710f9ee3888dc:ultra-v2
 
 jobs:
   build:
@@ -114,8 +115,7 @@ jobs:
             python3 engine-tests/sim_v2_heap_tune.py \
               /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
               /tmp/manabrew/forge/forge-gui/ \
-              --games 4 --seed-base 3099000 \
-              --output .sim-tuning/heap.json
+              --games 4 --seed-base 3099000 --output .sim-tuning/heap.json
           fi
           XMX=$(python3 -c "import json;print(json.load(open('.sim-tuning/heap.json'))['selected'])")
           STATUS=$(python3 -c "import json;print(json.load(open('.sim-tuning/heap.json'))['status'])")
@@ -158,7 +158,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .sim-cache/v2
-          key: ultra-screen-${{ env.SIM_ENGINE_ID }}-${{ hashFiles('engine-tests/sim_v2_worker.py','engine-tests/sim_v2_hotpatch.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/kinnan_policy_v8.py','engine-tests/decks/Kinnan_PREC_*.dck') }}-${{ matrix.variant }}-s${{ matrix.seat }}-${{ steps.seeds.outputs.start }}-${{ steps.seeds.outputs.end }}
+          key: ultra-screen-${{ env.SIM_ENGINE_ID }}-${{ hashFiles('engine-tests/sim_v2_worker.py','engine-tests/sim_v2_hotpatch.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/kinnan_policy_v8.py','engine-tests/generate_f10_precision_decks.py') }}-${{ matrix.variant }}-s${{ matrix.seat }}-${{ steps.seeds.outputs.start }}-${{ steps.seeds.outputs.end }}
       - name: Run canonical screen shard
         env:
           XMX: ${{ needs.tune.outputs.xmx }}
@@ -174,7 +174,7 @@ jobs:
             --workers '${{ inputs.local_workers }}' --jvm-reuse '${{ inputs.jvm_reuse }}' \
             --xmx "$XMX" --xms 192m --max-round 4 --max-prompts 3000 --max-seconds 75 \
             --cache-dir .sim-cache/v2 --engine-id "$SIM_ENGINE_ID" \
-            --retain-traces failures --audit-every 200 "${EXTRA[@]}" \
+            --retain-traces none --audit-every 0 "${EXTRA[@]}" \
             --output 'out/${{ matrix.variant }}-screen-seat${{ matrix.seat }}.json'
           python3 - <<'PY'
           import glob,json
@@ -201,8 +201,8 @@ jobs:
         with: {pattern: sim-v2-ultra-screen-*, path: screen, merge-multiple: true}
       - id: rank
         run: |
-          python3 engine-tests/sim_v2_rank.py 'screen/*.json' \
-            --baseline P00_F10 --output screen-ranking.json --github-output "$GITHUB_OUTPUT"
+          python3 engine-tests/sim_v2_rank.py 'screen/*.json' --baseline P00_F10 \
+            --stage screen --output screen-ranking.json --github-output "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with: {name: sim-v2-ultra-screen-ranking, path: screen-ranking.json, retention-days: 30}
 
@@ -239,7 +239,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: .sim-cache/v2
-          key: ultra-adv-${{ env.SIM_ENGINE_ID }}-${{ hashFiles('engine-tests/sim_v2_worker.py','engine-tests/sim_v2_hotpatch.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/manabrew_pilot_v91_adversarial.py','engine-tests/kinnan_policy_v8.py','engine-tests/decks/Kinnan_PREC_*.dck') }}-${{ matrix.variant }}-${{ matrix.pod }}-s${{ matrix.seat }}-${{ steps.seeds.outputs.start }}-${{ steps.seeds.outputs.end }}
+          key: ultra-adv-${{ env.SIM_ENGINE_ID }}-${{ hashFiles('engine-tests/sim_v2_worker.py','engine-tests/sim_v2_hotpatch.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/manabrew_pilot_v91_adversarial.py','engine-tests/kinnan_policy_v8.py','engine-tests/generate_f10_precision_decks.py') }}-${{ matrix.variant }}-${{ matrix.pod }}-s${{ matrix.seat }}-${{ steps.seeds.outputs.start }}-${{ steps.seeds.outputs.end }}
       - name: Run adversarial wave shard
         env:
           CEDH_POD: ${{ matrix.pod }}
@@ -256,7 +256,7 @@ jobs:
             --workers '${{ inputs.local_workers }}' --jvm-reuse '${{ inputs.jvm_reuse }}' \
             --xmx "$XMX" --xms 192m --max-round 4 --max-prompts 4000 --max-seconds 100 \
             --cache-dir .sim-cache/v2 --engine-id "$SIM_ENGINE_ID" \
-            --retain-traces failures --audit-every 200 "${EXTRA[@]}" \
+            --retain-traces none --audit-every 0 "${EXTRA[@]}" \
             --output 'out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}-wave'"${WAVE_INDEX:-0}"'.json'
           python3 - <<'PY'
           import glob,json
@@ -285,6 +285,7 @@ jobs:
       - id: rank
         run: |
           python3 engine-tests/sim_v2_rank.py 'waves/*.json' --baseline P00_F10 \
+            --stage confirmation --look "$CHECKPOINT" --max-looks 4 \
             --output checkpoint.json --github-output "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
