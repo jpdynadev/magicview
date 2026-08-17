@@ -1,0 +1,56 @@
+{
+  "baseline": "F10_BLUE/P00_F10",
+  "created": "2026-08-17",
+  "promotion_gate": {
+    "primary_endpoint": "strict protected deterministic attempt by end of Kinnan T4",
+    "paired_seeds": true,
+    "balanced_seats": true,
+    "pods": ["balanced", "turbo", "midrange", "mixed"],
+    "screen_is_rejection_only": true,
+    "promotion_requires_adversarial_confirmation": true
+  },
+  "architectures": [
+    {
+      "id": "ARCH_COPY_CORE",
+      "class": "architecture",
+      "hypothesis": "A denser self-contained clone/copy shell increases deterministic-node redundancy without requiring opponent permanents.",
+      "cuts": ["Nature's Rhythm", "Energy Refractor", "Dispel", "Springleaf Drum"],
+      "adds": ["Copy Enchantment", "Copy Artifact", "Flesh Duplicate", "Mirage Mirror"],
+      "exposure_cards": ["Copy Enchantment", "Copy Artifact", "Flesh Duplicate", "Mirage Mirror"],
+      "notes": "Keep Mockingbird already present in F10. Measure copied-target classes separately when target instrumentation is available; deck-level endpoint remains primary."
+    },
+    {
+      "id": "ARCH_COPY_CREATURE",
+      "class": "architecture",
+      "hypothesis": "Creature-heavy clone density better exploits Kinnan hits and creature tutors than enchantment/artifact-heavy copy density.",
+      "cuts": ["Nature's Rhythm", "Energy Refractor", "Dispel"],
+      "adds": ["Flesh Duplicate", "Clever Impersonator", "Gene Pollinator"],
+      "exposure_cards": ["Flesh Duplicate", "Clever Impersonator", "Gene Pollinator"],
+      "notes": "Mockingbird remains. This package is structurally different from ARCH_COPY_CORE and should be compared as an architecture, not inferred from singleton prevalence."
+    },
+    {
+      "id": "ARCH_DRUID_EFFIGY",
+      "class": "architecture",
+      "hypothesis": "Devoted Druid plus Machine God's Effigy creates an additional compact deterministic mana node that connects to existing Kinnan outlets/tutors.",
+      "cuts": ["Nature's Rhythm", "Energy Refractor", "Dispel"],
+      "adds": ["Devoted Druid", "Machine God's Effigy", "Gene Pollinator"],
+      "exposure_cards": ["Devoted Druid", "Machine God's Effigy", "Gene Pollinator"],
+      "notes": "Forge rules/pilot already contain explicit Effigy-copy-of-Devoted-Druid deterministic-state handling; verify current card support before scheduling the full screen."
+    },
+    {
+      "id": "ARCH_COPY_DRUID_HYBRID",
+      "class": "architecture",
+      "hypothesis": "Combining clone redundancy with the Druid/Effigy node creates more cross-connected deterministic paths than either package alone.",
+      "cuts": ["Nature's Rhythm", "Energy Refractor", "Dispel", "Springleaf Drum", "Misdirection"],
+      "adds": ["Devoted Druid", "Machine God's Effigy", "Flesh Duplicate", "Copy Enchantment", "Gene Pollinator"],
+      "exposure_cards": ["Devoted Druid", "Machine God's Effigy", "Flesh Duplicate", "Copy Enchantment", "Gene Pollinator"],
+      "notes": "Only escalate if either pure architecture survives its first controlled screen; do not spend confirmation compute on this hybrid otherwise."
+    }
+  ],
+  "retirement_rules": [
+    "Retire architecture early for materially worse paired strict-protected-T4 performance with no compensating pod/seat signal.",
+    "Do not promote from tournament prevalence or 100-200 paired games.",
+    "Only derive 2-6 card packages after an architecture shows a credible signal.",
+    "Singleton screens remain rejection-only and require exposure-conditioned reporting."
+  ]
+}
