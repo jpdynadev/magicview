@@ -142,8 +142,10 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
-    # Profile bump intentionally invalidates earlier exposure-tainted cache rows.
-    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v4")
+    # Execution semantics changed: neither early-exit path is trusted until it
+    # independently clears seeded cold-vs-persistent equivalence. Bump the
+    # profile so no cached row from the earlier semantics can be reused.
+    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v5")
 
     mode = _arg_value("--mode", "screen")
     variant = _arg_value("--variant", "")
@@ -158,7 +160,9 @@ def main() -> int:
     from sim_v2_hotpatch import install
 
     trace_enabled = os.getenv("SIM_V2_TRACE", "0").lower() in {"1", "true", "yes"}
-    early_success = os.getenv("SIM_V2_EARLY_SUCCESS", "1").lower() not in {"0", "false", "no"}
+    # Positive early-success termination is opt-in: the latest seeded persistent
+    # gate still diverged from restart-per-game execution while it was enabled.
+    early_success = os.getenv("SIM_V2_EARLY_SUCCESS", "0").lower() not in {"0", "false", "no"}
     # The first exact-deadline implementation was proven non-equivalent on seed
     # 1720003 because it exited before the legacy runner recorded T4 assembly.
     # Keep it opt-in until a future implementation passes seeded equivalence.
