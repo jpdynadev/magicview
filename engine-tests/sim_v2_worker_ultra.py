@@ -3,9 +3,9 @@
 
 Adds lightweight generic card-observation instrumentation without retaining the
 full prompt trace. The cache records which cards from the Kinnan 99 were seen in
-Kinnan's live zones or appeared in Forge prompts/selections. A later experiment
-can therefore relabel exposure for a new singleton/package from cached games
-without rerunning Forge.
+Kinnan's live zones or appeared as legal card choices in Forge prompts. A later
+experiment can therefore relabel exposure for a new singleton/package from
+cached games without rerunning Forge.
 """
 from __future__ import annotations
 
@@ -53,13 +53,34 @@ def _deck_card_names(path: Path) -> list[str]:
     return names
 
 
+def _prompt_choice_objects(prompt: dict[str, Any]) -> list[Any]:
+    """Return only legal choice payloads, never whole prompt/deck metadata.
+
+    Some Manabrew prompts contain serialized hidden/full-deck state outside the
+    actual choice arrays. Scanning the entire RPC response made every card look
+    exposed. Exposure should mean the changed slot reached a live zone or was a
+    legal choice (tutor/Kinnan-hit/target selection), so inspect only known
+    choice-bearing input fields.
+    """
+    inp = (prompt or {}).get("input") or {}
+    out: list[Any] = []
+    for key in (
+        "cards", "candidates", "options", "actions", "choices", "targets",
+        "validCards", "availableCards", "selectableCards",
+    ):
+        value = inp.get(key)
+        if isinstance(value, (list, tuple)):
+            out.extend(value)
+        elif isinstance(value, dict):
+            out.append(value)
+    return out
+
+
 def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
     cards = tuple(dict.fromkeys(tracked_cards))
     if not cards:
         return
     card_set = set(cards)
-    # Longest-first avoids a shorter card name consuming text that is part of a
-    # longer one; escaped literals make punctuation/apostrophes harmless.
     prompt_matcher = re.compile("|".join(re.escape(card) for card in sorted(cards, key=len, reverse=True)))
     original_run = runner.run_game
 
@@ -84,9 +105,16 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
         def rpc(proc: Any, request: dict[str, Any]):
             raw = original_rpc(proc, request)
             if request.get("command") == "getPrompt" and raw:
-                text = str(raw)
-                for match in prompt_matcher.finditer(text):
-                    mark(match.group(0), "prompt")
+                try:
+                    prompt = json.loads(raw)
+                except Exception:
+                    prompt = {}
+                # Only legal-choice subtrees are scanned. This captures tutor and
+                # Kinnan-hit exposure while excluding serialized deck metadata.
+                for choice in _prompt_choice_objects(prompt):
+                    text = json.dumps(choice, separators=(",", ":"), ensure_ascii=False)
+                    for match in prompt_matcher.finditer(text):
+                        mark(match.group(0), "prompt_choice")
             return raw
 
         runner.base.zone_cards = zone_cards
@@ -107,7 +135,7 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
-    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v2")
+    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v3")
 
     mode = _arg_value("--mode", "screen")
     variant = _arg_value("--variant", "")
@@ -123,7 +151,10 @@ def main() -> int:
 
     trace_enabled = os.getenv("SIM_V2_TRACE", "0").lower() in {"1", "true", "yes"}
     early_success = os.getenv("SIM_V2_EARLY_SUCCESS", "1").lower() not in {"0", "false", "no"}
-    exact_deadline = os.getenv("SIM_V2_EXACT_DEADLINE", "1").lower() not in {"0", "false", "no"}
+    # The first exact-deadline implementation was proven non-equivalent on seed
+    # 1720003 because it exited before the legacy runner recorded T4 assembly.
+    # Keep it opt-in until a future implementation passes seeded equivalence.
+    exact_deadline = os.getenv("SIM_V2_EXACT_DEADLINE", "0").lower() not in {"0", "false", "no"}
     meta = install(config.runner, early_success=early_success, trace_enabled=trace_enabled, exact_deadline=exact_deadline)
 
     requested_exposure = _arg_values("--exposure-card")
