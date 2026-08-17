@@ -5,13 +5,12 @@ Key goals:
 - reuse one Forge JVM for several games instead of spawning one JVM per game;
 - cap heap aggressively but configurably;
 - cache completed game results by deterministic simulation key;
-- keep full traces only for failures/audit samples;
+- include the full four-deck pod in cache identity, not only the Kinnan deck;
+- keep exposure observations generic so cached games can be relabeled for new
+  singleton/package hypotheses without rerunning Forge;
+- keep full traces only for explicitly requested audit/debug runs;
 - emit compact JSON suitable for long-lived result storage;
 - run a fixed seat per shard for cleaner pairing and easier caching.
-
-This intentionally wraps the proven v8 pilot instead of replacing its decision
-logic. That lets us validate performance/behavior equivalence before touching
-the large rules-aware pilot.
 """
 from __future__ import annotations
 
@@ -37,12 +36,7 @@ class _NullStderr:
 
 
 class _BorrowedProc:
-    """Proxy whose lifecycle methods are no-ops.
-
-    manabrew_pilot_v8.run_game() owns the process it creates and terminates it
-    in a finally block. For v2 we lend it a shared process and suppress those
-    per-game lifecycle calls. The pool itself restarts/terminates the real JVM.
-    """
+    """Proxy whose lifecycle methods are no-ops for a pooled JVM."""
 
     def __init__(self, proc: subprocess.Popen[str]):
         self._proc = proc
@@ -59,19 +53,12 @@ class _BorrowedProc:
     def kill(self) -> None:
         return None
 
-    def wait(self, timeout: float | None = None) -> int:
+    def wait(self, timeout: float | None = None) -> int:  # noqa: ARG002
         return 0
 
 
 class ForgeJvmPool:
-    def __init__(
-        self,
-        original_popen: Any,
-        *,
-        reuse_games: int,
-        xmx: str,
-        xms: str,
-    ) -> None:
+    def __init__(self, original_popen: Any, *, reuse_games: int, xmx: str, xms: str) -> None:
         self.original_popen = original_popen
         self.reuse_games = max(1, reuse_games)
         self.xmx = xmx
@@ -108,19 +95,15 @@ class ForgeJvmPool:
         if not inserted_memory and tuned and tuned[0] == "java":
             tuned[1:1] = [f"-Xms{self.xms}", f"-Xmx{self.xmx}", "-XX:+UseG1GC"]
 
-        # Never allow stderr to fill a PIPE during a long-lived JVM.
         spawn_kwargs = dict(kwargs)
+        # A long-lived JVM must never block because nobody drains stderr.
         spawn_kwargs["stderr"] = subprocess.DEVNULL
         proc = self.original_popen(tuned, **spawn_kwargs)
         self.starts += 1
         return proc
 
     def popen(self, args: list[str], **kwargs: Any) -> _BorrowedProc:
-        if (
-            self.proc is None
-            or self.proc.poll() is not None
-            or self.games_on_proc >= self.reuse_games
-        ):
+        if self.proc is None or self.proc.poll() is not None or self.games_on_proc >= self.reuse_games:
             self._close()
             self.proc = self._spawn(list(args), kwargs)
         self.games_on_proc += 1
@@ -147,16 +130,35 @@ def strict_pt4(result: dict[str, Any]) -> bool:
     return bool(result.get("protectedAttempt")) and certified
 
 
+def relabel_exposure(item: dict[str, Any], exposure_cards: list[str]) -> dict[str, Any]:
+    """Relabel cached generic observations for the current mutation/package.
+
+    Ultra workers persist ``observedCards`` independent of the requested test.
+    This means a previously computed game can answer a later exposure question
+    without invoking Forge again. Older cache entries fall back to their original
+    exposure fields and are still safe for deck-level metrics.
+    """
+
+    if "observedCards" in item:
+        observed = set(item.get("observedCards") or [])
+        exposed = sorted(card for card in exposure_cards if card in observed)
+        item = dict(item)
+        item["exposureCards"] = exposed
+        item["slotExposed"] = bool(exposed)
+    return item
+
+
 def compact_result(result: dict[str, Any], exposure_cards: list[str]) -> dict[str, Any]:
     seat = str(result.get("kinnanSeat"))
     opening = set((result.get("openingHands") or {}).get(seat, []) or [])
     kept = set((result.get("keptHands") or {}).get(seat, []) or [])
     combo = str(result.get("comboLine") or "")
     protection = set(result.get("protectionAvailable") or [])
+    observed = set(result.get("v2ObservedCards") or []) | opening | kept | protection
     exposed = sorted(
         card
         for card in exposure_cards
-        if card in opening or card in kept or card in protection or card in combo
+        if card in observed or card in combo
     )
     return {
         "pilotVersion": result.get("pilotVersion"),
@@ -181,9 +183,23 @@ def compact_result(result: dict[str, Any], exposure_cards: list[str]) -> dict[st
         "mulligans": (result.get("mulligans") or {}).get(seat),
         "openingHand": sorted(opening),
         "keptHand": sorted(kept),
+        "observedCards": sorted(observed),
         "exposureCards": exposed,
         "slotExposed": bool(exposed),
+        "v2EarlyExit": bool(result.get("v2EarlyExit")),
+        "v2DeadlineExit": bool(result.get("v2DeadlineExit")),
     }
+
+
+def pod_signature(runner: Any, variant: str, seat: int) -> tuple[str, list[str]]:
+    """Hash all four deck files in seat order for safe result reuse."""
+
+    ordered = runner.configure_decks(variant, seat)
+    hashes = [sha256_file(runner.base.DECK_DIR / filename) for _, filename in ordered]
+    payload = [{"seat": i, "name": name, "file": filename, "sha256": hashes[i]}
+               for i, (name, filename) in enumerate(ordered)]
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return digest, hashes
 
 
 def cache_key(
@@ -191,6 +207,7 @@ def cache_key(
     engine_id: str,
     pilot_version: str,
     deck_sha: str,
+    pod_sha: str,
     mode: str,
     pod: str,
     seed: int,
@@ -201,12 +218,13 @@ def cache_key(
         "engine": engine_id,
         "pilot": pilot_version,
         "deck": deck_sha,
+        "podDecks": pod_sha,
         "mode": mode,
         "pod": pod,
         "seed": seed,
         "seat": seat,
         "maxRound": max_round,
-        "schema": 2,
+        "schema": 3,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
@@ -248,11 +266,7 @@ def main() -> int:
     ap.add_argument("--output", required=True)
     ap.add_argument("--engine-id", default=os.getenv("MANABREW_REF", "unknown-engine"))
     ap.add_argument("--exposure-card", action="append", default=[])
-    ap.add_argument(
-        "--retain-traces",
-        choices=("none", "failures", "all"),
-        default="failures",
-    )
+    ap.add_argument("--retain-traces", choices=("none", "failures", "all"), default="failures")
     ap.add_argument("--audit-every", type=int, default=50)
     args = ap.parse_args()
 
@@ -269,6 +283,7 @@ def main() -> int:
     deck_sha = sha256_file(deck_path)
     pilot_version = str(runner.PILOT_VERSION)
     pod = os.getenv("CEDH_POD", "balanced" if args.mode == "adversarial" else "screen")
+    pod_sha, seat_deck_hashes = pod_signature(runner, args.variant, args.fixed_seat)
 
     cache_dir = Path(args.cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -276,12 +291,7 @@ def main() -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     original_popen = runner.subprocess.Popen
-    pool = ForgeJvmPool(
-        original_popen,
-        reuse_games=args.jvm_reuse,
-        xmx=args.xmx,
-        xms=args.xms,
-    )
+    pool = ForgeJvmPool(original_popen, reuse_games=args.jvm_reuse, xmx=args.xmx, xms=args.xms)
     runner.subprocess.Popen = pool.popen
 
     results: list[dict[str, Any]] = []
@@ -293,6 +303,7 @@ def main() -> int:
                 engine_id=args.engine_id,
                 pilot_version=pilot_version,
                 deck_sha=deck_sha,
+                pod_sha=pod_sha,
                 mode=args.mode,
                 pod=pod,
                 seed=seed,
@@ -302,7 +313,7 @@ def main() -> int:
             cache_path = cache_dir / f"{key}.json"
             if cache_path.exists():
                 try:
-                    item = json.loads(cache_path.read_text())
+                    item = relabel_exposure(json.loads(cache_path.read_text()), args.exposure_card)
                     results.append(item)
                     cache_hits += 1
                     print(json.dumps({"cacheHit": True, "seed": seed, "key": key}), flush=True)
@@ -334,7 +345,13 @@ def main() -> int:
                 }
 
             item = compact_result(raw, args.exposure_card)
-            item.update({"cacheKey": key, "mode": args.mode, "pod": pod})
+            item.update({
+                "cacheKey": key,
+                "mode": args.mode,
+                "pod": pod,
+                "podDeckSha256": pod_sha,
+                "seatDeckSha256s": seat_deck_hashes,
+            })
             cache_path.write_text(json.dumps(item, separators=(",", ":")))
             results.append(item)
 
@@ -344,13 +361,7 @@ def main() -> int:
                 args.retain_traces == "all"
                 or (args.retain_traces == "failures" and (is_failure or audit))
             )
-            cleanup_game_files(
-                runner,
-                args.variant,
-                seed,
-                args.fixed_seat,
-                keep_trace=keep_trace,
-            )
+            cleanup_game_files(runner, args.variant, seed, args.fixed_seat, keep_trace=keep_trace)
             print(json.dumps(item, sort_keys=True), flush=True)
     finally:
         runner.subprocess.Popen = original_popen
@@ -364,6 +375,7 @@ def main() -> int:
         "variant": args.variant,
         "mode": args.mode,
         "pod": pod,
+        "podDeckSha256": pod_sha,
         "seat": args.fixed_seat,
         "games": len(results),
         "completed": completed,
