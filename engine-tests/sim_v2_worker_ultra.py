@@ -3,9 +3,10 @@
 
 Adds lightweight generic card-observation instrumentation without retaining the
 full prompt trace. The cache records which cards from the Kinnan 99 were seen in
-Kinnan's live zones or appeared as legal card choices in Forge prompts. A later
-experiment can therefore relabel exposure for a new singleton/package from
-cached games without rerunning Forge.
+Kinnan's live zones or appeared in a *small, concrete* Forge choice pool. Broad
+library/tutor/action payloads are intentionally excluded: a selected tutor card
+will subsequently be observed in hand/battlefield, while Kinnan top-five and
+other genuinely constrained choice pools remain visible for exposure analysis.
 """
 from __future__ import annotations
 
@@ -53,26 +54,34 @@ def _deck_card_names(path: Path) -> list[str]:
     return names
 
 
-def _prompt_choice_objects(prompt: dict[str, Any]) -> list[Any]:
-    """Return only legal choice payloads, never whole prompt/deck metadata.
+def _prompt_choice_objects(prompt: dict[str, Any], max_pool: int = 16) -> list[Any]:
+    """Return only constrained card-choice payloads.
 
-    Some Manabrew prompts contain serialized hidden/full-deck state outside the
-    actual choice arrays. Scanning the entire RPC response made every card look
-    exposed. Exposure should mean the changed slot reached a live zone or was a
-    legal choice (tutor/Kinnan-hit/target selection), so inspect only known
-    choice-bearing input fields.
+    Manabrew can serialize a full library, broad tutor search, or action catalog
+    inside a prompt. Counting those as exposure makes essentially the entire 99
+    look observed. For conditional slot analysis we instead count:
+
+    * cards that actually reach Kinnan's live zones (tracked separately), and
+    * cards in small explicit selection pools such as Kinnan's top-five reveal.
+
+    Broad tutor choices are not counted merely for being legal; if a card is
+    actually selected, the subsequent zone observation captures it.
     """
     inp = (prompt or {}).get("input") or {}
     out: list[Any] = []
     for key in (
-        "cards", "candidates", "options", "actions", "choices", "targets",
+        "cards", "candidates", "choices", "targets",
         "validCards", "availableCards", "selectableCards",
     ):
         value = inp.get(key)
         if isinstance(value, (list, tuple)):
-            out.extend(value)
+            if 0 < len(value) <= max_pool:
+                out.extend(value)
         elif isinstance(value, dict):
-            out.append(value)
+            # Small mapping-style selectors are fine; reject large serialized
+            # catalogs that are effectively hidden/full-deck metadata.
+            if 0 < len(value) <= max_pool:
+                out.append(value)
     return out
 
 
@@ -109,12 +118,10 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
                     prompt = json.loads(raw)
                 except Exception:
                     prompt = {}
-                # Only legal-choice subtrees are scanned. This captures tutor and
-                # Kinnan-hit exposure while excluding serialized deck metadata.
                 for choice in _prompt_choice_objects(prompt):
                     text = json.dumps(choice, separators=(",", ":"), ensure_ascii=False)
                     for match in prompt_matcher.finditer(text):
-                        mark(match.group(0), "prompt_choice")
+                        mark(match.group(0), "prompt_small_choice")
             return raw
 
         runner.base.zone_cards = zone_cards
@@ -135,7 +142,8 @@ def _install_observation_tracker(runner: Any, tracked_cards: list[str]) -> None:
 
 
 def main() -> int:
-    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v3")
+    # Profile bump intentionally invalidates earlier exposure-tainted cache rows.
+    os.environ.setdefault("SIM_V2_PROFILE", "ultra-v4")
 
     mode = _arg_value("--mode", "screen")
     variant = _arg_value("--variant", "")
