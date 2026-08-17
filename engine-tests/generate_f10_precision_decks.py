@@ -35,6 +35,10 @@ SPECS={
  # This isolates whether a low-connectivity mana-smoothing artifact is better
  # spent on a flexible creature-copy node without disturbing tutor density.
  'P18_FLESH_REFRACTOR': (['Energy Refractor'],['Flesh Duplicate']),
+ # Cleaner clone-for-clone follow-up. P18's screen was directionally positive
+ # versus F10 but lost promotion to P15; replacing Mockingbird controls role
+ # more tightly and asks whether Flesh Duplicate is the superior clone slot.
+ 'P19_FLESH_MOCK': (['Mockingbird'],['Flesh Duplicate']),
 }
 
 def parse(text):
