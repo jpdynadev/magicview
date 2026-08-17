@@ -23,7 +23,7 @@ permissions:
 env:
   MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
   PYTHONUNBUFFERED: "1"
-  SIM_V2_EARLY_SUCCESS: "1"
+  SIM_V2_EARLY_SUCCESS: "0"
   SIM_V2_EXACT_DEADLINE: "0"
   SIM_V2_TRACE: "0"
 
@@ -75,7 +75,7 @@ jobs:
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
             --workers 2 --jvm-reuse 3 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
-            --cache-dir .sim-cache/gate-ultra --engine-id "$MANABREW_REF:ultra-v3" --retain-traces none \
+            --cache-dir .sim-cache/gate-ultra --engine-id "$MANABREW_REF:ultra-v5" --retain-traces none \
             --exposure-card 'Staff of Domination' --output out/ultra.json | tee out/ultra.log
       - name: Verify primary endpoint equivalence and reusable observation schema
         run: |
@@ -99,6 +99,7 @@ jobs:
           }
           print(json.dumps(report,indent=2))
           if bad: raise SystemExit(f'primary endpoint mismatch on {len(bad)} seeds')
+          if report['positiveEarlyExits'] != 0: raise SystemExit('unsafe positive early exit unexpectedly active')
           if report['deadlineEarlyExits'] != 0: raise SystemExit('unsafe deadline exit unexpectedly active')
           PY
       - name: Verify cached replay can relabel exposure with zero JVM starts
@@ -107,7 +108,7 @@ jobs:
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
             --workers 2 --jvm-reuse 3 --xmx 1280m --xms 192m --max-round 4 \
-            --cache-dir .sim-cache/gate-ultra --engine-id "$MANABREW_REF:ultra-v3" --retain-traces none \
+            --cache-dir .sim-cache/gate-ultra --engine-id "$MANABREW_REF:ultra-v5" --retain-traces none \
             --exposure-card 'Mystical Tutor' --output out/cached.json | tee out/cached.log
           grep -q '"cacheHits": 6' out/cached.log
           grep -q '"jvmStarts": 0' out/cached.log
