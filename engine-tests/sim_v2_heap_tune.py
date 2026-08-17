@@ -2,9 +2,9 @@
 """Choose the smallest stable Forge heap on the current runner image.
 
 The tuner uses a tiny canonical F10 micro-benchmark and never reuses result cache
-between heap candidates.  It prefers the smallest heap that completes every game
-without engine/pilot errors.  Among equally small stable candidates it records
-wall time for observability, but memory safety wins over tiny speed differences.
+between heap candidates. Until persistent-JVM execution clears seeded equivalence,
+each game receives a fresh Forge JVM. This keeps heap tuning from accidentally
+certifying a memory configuration on an execution path with known order effects.
 """
 from __future__ import annotations
 
@@ -54,14 +54,16 @@ def main() -> int:
                 "--max-round", "4",
                 "--max-prompts", "3000",
                 "--max-seconds", "75",
-                "--jvm-reuse", str(args.games),
+                # Cold JVM is the currently validated semantic path. Do not tune
+                # memory against persistent reuse until the equivalence gate passes.
+                "--jvm-reuse", "1",
                 "--xmx", heap,
                 "--xms", "128m",
                 "--cache-dir", str(cache),
                 "--retain-traces", "none",
                 "--audit-every", "0",
                 "--output", str(out),
-                "--engine-id", os.getenv("MANABREW_REF", "heap-tune"),
+                "--engine-id", os.getenv("MANABREW_REF", "heap-tune") + ":cold-equivalent",
             ]
             started = time.monotonic()
             proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -84,13 +86,14 @@ def main() -> int:
                 "games": len(payload),
                 "errors": sum(g.get("status") not in COMPLETED for g in payload),
                 "wallMs": elapsed,
+                "jvmReuse": 1,
             }
             results.append(row)
             print("HEAP_CANDIDATE " + json.dumps(row, sort_keys=True), flush=True)
             if stable and selected is None:
                 selected = heap
-                # We deliberately stop at the first stable heap: the candidate
-                # list is ascending, and lower memory allows more local workers.
+                # Candidate list is ascending; memory safety wins over tiny speed
+                # differences because lower heap permits more cold parallel workers.
                 break
 
     if selected is None:
@@ -98,7 +101,7 @@ def main() -> int:
         status = "FALLBACK"
     else:
         status = "TUNED"
-    report = {"selected": selected, "status": status, "candidates": results}
+    report = {"selected": selected, "status": status, "executionPath": "cold-equivalent", "candidates": results}
     Path(args.output).write_text(json.dumps(report, indent=2))
     github_output = args.github_output or os.getenv("GITHUB_OUTPUT")
     if github_output:
