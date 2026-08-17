@@ -4,6 +4,8 @@
 Splits one canonical seed shard across N local worker processes.  Each child owns
 its own persistent Forge JVM, so no RPC streams are shared across processes.  The
 merged output is sorted back into canonical seed order for deterministic pairing.
+All children share the same deterministic cache directory; seeds are disjoint, so
+writes are collision-free and cache reuse survives changes in local worker count.
 """
 from __future__ import annotations
 
@@ -50,13 +52,14 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.parent / (out.stem + ".parts")
     tmp.mkdir(parents=True, exist_ok=True)
+    shared_cache = Path(args.cache_dir)
+    shared_cache.mkdir(parents=True, exist_ok=True)
 
     procs: list[tuple[subprocess.Popen[str], Path, Path, list[int]]] = []
     started = time.monotonic()
     for idx, seeds in enumerate(buckets):
         part = tmp / f"part-{idx}.json"
         log = tmp / f"part-{idx}.log"
-        child_cache = Path(args.cache_dir) / f"worker-{idx}"
         cmd = [
             sys.executable,
             str(HERE / "sim_v2_worker_ultra.py"),
@@ -72,7 +75,7 @@ def main() -> int:
             "--jvm-reuse", str(args.jvm_reuse),
             "--xmx", args.xmx,
             "--xms", args.xms,
-            "--cache-dir", str(child_cache),
+            "--cache-dir", str(shared_cache),
             "--output", str(part),
             "--engine-id", args.engine_id,
             "--retain-traces", args.retain_traces,
@@ -133,6 +136,7 @@ def main() -> int:
         "childWallMs": sum(int(s.get("wallMs", 0)) for s in summaries),
         "outerWallMs": round((time.monotonic() - started) * 1000),
         "strictProtectedT4": sum(bool(g.get("strictProtectedT4")) for g in merged),
+        "earlyExits": sum(bool(g.get("v2EarlyExit")) for g in merged),
         "errors": sum(g.get("status") not in {"game_over", "horizon_complete"} for g in merged),
     }
     print("SIM_V2_PARALLEL_SUMMARY " + json.dumps(summary, sort_keys=True), flush=True)
