@@ -75,10 +75,11 @@ jobs:
           CEDH_POD: ${{ matrix.pod }}
           SIM_V2_PROFILE: extended-control-v1
         run: |
+          S0='${{ matrix.seed0 }}'; S1=$((S0+1))
           python3 engine-tests/sim_v2_worker.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
             --mode '${{ matrix.mode }}' --variant P00_F10 --fixed-seat '${{ matrix.seat }}' \
-            --seeds '${{ matrix.seed0 }}' '$((${{ matrix.seed0 }}+1))' \
+            --seeds "$S0" "$S1" \
             --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 4 --max-prompts 4000 --max-seconds 120 \
             --cache-dir .sim-cache/extended-control --engine-id "$MANABREW_REF:extended-control" \
             --retain-traces none --output out/control.json
