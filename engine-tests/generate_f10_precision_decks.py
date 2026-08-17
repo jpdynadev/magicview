@@ -32,12 +32,11 @@ SPECS={
  'P17_COMMANDEER_DISPEL': (['Dispel'],['Commandeer']),
  'P18_FLESH_REFRACTOR': (['Energy Refractor'],['Flesh Duplicate']),
  'P19_FLESH_MOCK': (['Mockingbird'],['Flesh Duplicate']),
- # Outlet-redundancy tests. Staff overlaps Thrasios, Ballista, Goblin Cannon
- # and Kinnan as a way to convert infinite mana. P20/P21 ask whether replacing
- # that redundant outlet with a current high-adoption Kinnan hit improves
- # protected T4 conversion while preserving Borne and Nature's Rhythm.
  'P20_HIGHFAE_STAFF': (['Staff of Domination'],['High Fae Trickster']),
  'P21_WAN_STAFF': (['Staff of Domination'],['Wan Shi Tong, Librarian']),
+ # Staff redundancy follow-up: keep F10's flash/tutor package intact and
+ # replace the redundant mana-conversion outlet with a high-adoption clone.
+ 'P22_FLESH_STAFF': (['Staff of Domination'],['Flesh Duplicate']),
 }
 
 def parse(text):
