@@ -5,3 +5,4 @@
 2026-08-18 retrigger with bridge per-record SQL support
 2026-08-18 retrigger after bridge INSERT syntax allowlist fix
 2026-08-18 bridge-only ingestion after historical cache dedupe
+2026-08-18 retrigger after literal-card-name-safe SQL guard
