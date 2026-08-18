@@ -1,0 +1,414 @@
+{
+  "found": true,
+  "checkedAt": "2026-08-18T23:20:17Z",
+  "runId": 32193352761,
+  "runNumber": 5,
+  "event": "push",
+  "headSha": "fac669ef0874ca47d945198cec9251c2af802d70",
+  "status": "queued",
+  "conclusion": null,
+  "createdAt": "2026-08-18T22:34:46Z",
+  "updatedAt": "2026-08-18T22:35:05Z",
+  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32193352761",
+  "jobsTotal": 49,
+  "jobsCompleted": 6,
+  "jobsInProgress": 16,
+  "jobsQueued": 27,
+  "jobsSuccess": 6,
+  "jobsFailure": 0,
+  "jobsCancelled": 0,
+  "jobSummary": [
+    {
+      "id": 95892241721,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:34:55Z",
+      "completed_at": "2026-08-18T22:35:04Z"
+    },
+    {
+      "id": 95892310836,
+      "name": "screen (F10, 2)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:42Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310839,
+      "name": "screen (COPY_CREATURE, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:21Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310840,
+      "name": "screen (COPY_CORE, 3)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:35:46Z",
+      "completed_at": "2026-08-18T23:18:35Z"
+    },
+    {
+      "id": 95892310858,
+      "name": "screen (COPY_CORE, 1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:36:28Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310878,
+      "name": "screen (F10, 1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:44Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310879,
+      "name": "screen (F10, 3)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:37:23Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310901,
+      "name": "screen (COPY_CREATURE, 3)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:35:14Z",
+      "completed_at": "2026-08-18T23:17:50Z"
+    },
+    {
+      "id": 95892310907,
+      "name": "screen (DRUID_EFFIGY, 2)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:36:39Z",
+      "completed_at": "2026-08-18T23:18:45Z"
+    },
+    {
+      "id": 95892310911,
+      "name": "screen (DRUID_EFFIGY, 1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:36:48Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310914,
+      "name": "screen (DRUID_EFFIGY, 3)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:37:21Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310943,
+      "name": "screen (COPY_CORE, 2)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:37:32Z",
+      "completed_at": "2026-08-18T23:19:57Z"
+    },
+    {
+      "id": 95892310957,
+      "name": "screen (COPY_CREATURE, 2)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:37:28Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310961,
+      "name": "screen (COPY_CORE, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:39:14Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892310966,
+      "name": "screen (COPY_DRUID, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:38:14Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311016,
+      "name": "screen (F10, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:38:53Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311018,
+      "name": "screen (COPY_DRUID, 1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:38:50Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311022,
+      "name": "screen (COPY_HEAVY, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311023,
+      "name": "screen (DRUID_EFFIGY, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:38:34Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311035,
+      "name": "screen (COPY_HEAVY, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311039,
+      "name": "screen (COPY_ARTIFACT, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311042,
+      "name": "screen (COPY_PROTECTED, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311056,
+      "name": "screen (COPY_HEAVY, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311059,
+      "name": "screen (COPY_HEAVY, 0)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T23:20:15Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311066,
+      "name": "screen (COPY_DRUID, 2)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-18T22:39:12Z",
+      "completed_at": "2026-08-18T23:20:02Z"
+    },
+    {
+      "id": 95892311071,
+      "name": "screen (COPY_CREATURE, 1)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:38:55Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311076,
+      "name": "screen (COPY_DRUID, 3)",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:39:40Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311082,
+      "name": "screen (COPY_ARTIFACT, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311083,
+      "name": "screen (COPY_ARTIFACT, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311094,
+      "name": "screen (COPY_PROTECTED, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892311119,
+      "name": "screen (COPY_ARTIFACT, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312100,
+      "name": "screen (COPY_PROTECTED, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312113,
+      "name": "screen (DRUID_TUTOR, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312126,
+      "name": "screen (COPY_PROTECTED, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312133,
+      "name": "screen (DRUID_TUTOR, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312178,
+      "name": "screen (DRUID_TUTOR, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312358,
+      "name": "screen (TUTOR_DENSE, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312367,
+      "name": "screen (TUTOR_DENSE, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312392,
+      "name": "screen (TUTOR_DENSE, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312404,
+      "name": "screen (DRUID_TUTOR, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892312487,
+      "name": "screen (TUTOR_DENSE, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313266,
+      "name": "screen (COPY_VALUE, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313274,
+      "name": "screen (NODE_DENSE, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313279,
+      "name": "screen (NODE_DENSE, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313292,
+      "name": "screen (NODE_DENSE, 0)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313303,
+      "name": "screen (COPY_VALUE, 1)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313326,
+      "name": "screen (NODE_DENSE, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313334,
+      "name": "screen (COPY_VALUE, 2)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    },
+    {
+      "id": 95892313619,
+      "name": "screen (COPY_VALUE, 3)",
+      "status": "queued",
+      "conclusion": null,
+      "started_at": "2026-08-18T22:35:05Z",
+      "completed_at": null
+    }
+  ]
+}
