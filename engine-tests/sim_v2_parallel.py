@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 """Parallel shard launcher for sim-v2.
 
-Splits one canonical seed shard across N local worker processes.  Each child owns
-its own persistent Forge JVM, so no RPC streams are shared across processes.  The
-merged output is sorted back into canonical seed order for deterministic pairing.
-All children share the same deterministic cache directory; seeds are disjoint, so
-writes are collision-free and cache reuse survives changes in local worker count.
+Splits one canonical seed shard across N local worker processes. Each child owns
+its own Forge JVM, so no RPC streams are shared across processes. The merged
+output is sorted back into canonical seed order for deterministic pairing.
+
+SAFETY INTERLOCK: persistent JVM reuse is not a trusted production optimization
+until seeded equivalence clears. Ordinary callers are therefore forced to
+jvm_reuse=1 even if they request a higher number. The explicit diagnostic/gate
+engine IDs containing ``persistent-experimental`` or ``extended-ultra`` may test
+reuse without allowing it into deck-promotion compute.
 """
 from __future__ import annotations
 
@@ -18,6 +22,12 @@ import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+
+
+def persistence_allowed(engine_id: str) -> bool:
+    explicit = os.getenv("SIM_V2_ALLOW_PERSISTENCE", "0").lower() in {"1", "true", "yes"}
+    diagnostic = any(marker in engine_id for marker in ("persistent-experimental", "extended-ultra"))
+    return explicit or diagnostic
 
 
 def main() -> int:
@@ -42,6 +52,24 @@ def main() -> int:
     ap.add_argument("--retain-traces", choices=("none", "failures", "all"), default="failures")
     ap.add_argument("--audit-every", type=int, default=200)
     args = ap.parse_args()
+
+    requested_reuse = max(1, args.jvm_reuse)
+    allow_persistence = persistence_allowed(args.engine_id)
+    effective_reuse = requested_reuse if allow_persistence else 1
+    if effective_reuse != requested_reuse:
+        print(
+            "SIM_V2_PERSISTENCE_INTERLOCK "
+            + json.dumps(
+                {
+                    "requestedJvmReuse": requested_reuse,
+                    "effectiveJvmReuse": effective_reuse,
+                    "engineId": args.engine_id,
+                    "reason": "persistent JVM equivalence not yet trusted",
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
 
     worker_count = max(1, min(args.workers, len(args.seeds)))
     buckets = [[] for _ in range(worker_count)]
@@ -72,7 +100,7 @@ def main() -> int:
             "--max-round", str(args.max_round),
             "--max-prompts", str(args.max_prompts),
             "--max-seconds", str(args.max_seconds),
-            "--jvm-reuse", str(args.jvm_reuse),
+            "--jvm-reuse", str(effective_reuse),
             "--xmx", args.xmx,
             "--xms", args.xms,
             "--cache-dir", str(shared_cache),
@@ -131,6 +159,9 @@ def main() -> int:
         "seat": args.fixed_seat,
         "games": len(merged),
         "workers": worker_count,
+        "requestedJvmReuse": requested_reuse,
+        "effectiveJvmReuse": effective_reuse,
+        "persistenceAllowed": allow_persistence,
         "cacheHits": sum(int(s.get("cacheHits", 0)) for s in summaries),
         "jvmStarts": sum(int(s.get("jvmStarts", 0)) for s in summaries),
         "childWallMs": sum(int(s.get("wallMs", 0)) for s in summaries),
