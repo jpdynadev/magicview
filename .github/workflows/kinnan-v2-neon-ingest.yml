@@ -43,7 +43,7 @@ jobs:
           mkdir -p engine-tests/v2-export/neon-ingest-status
           python3 - <<'PY' 2>&1 | tee engine-tests/v2-export/neon-ingest-status/ingest.log
           import json, os, pathlib, subprocess
-          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest_batch'
+          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
           token = os.environ['OIDC_TOKEN']
           root = pathlib.Path('engine-tests/v2-export/bridge/latest/sql')
           manifest = json.loads((root / 'manifest.json').read_text())
@@ -62,7 +62,7 @@ jobs:
               for stmt in statements:
                   if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
                       raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
-              body = json.dumps({'p_sqls': statements})
+              body = json.dumps({'p_sql': json.dumps(statements)})
               proc = subprocess.run([
                   'curl','-sS','--retry','4','--retry-all-errors',
                   '-w','\nHTTP_STATUS:%{http_code}\n',
