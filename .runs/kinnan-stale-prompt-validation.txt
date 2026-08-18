@@ -1,0 +1,1 @@
+2026-08-18 semantic-prompt identity validation: 96 cold-v2 games, 12 architectures x 4 seats x 2 seeds, jvm-reuse=1
