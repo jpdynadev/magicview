@@ -10,13 +10,88 @@ HTTP_STATUS:200
 HTTP_STATUS:200
 
 {"files": 3, "statements": 120, "last": "engine-tests/v2-export/bridge/latest/sql/003-games.sql"}
-Traceback (most recent call last):
-  File "<stdin>", line 22, in <module>
-  File "/usr/lib/python3.12/subprocess.py", line 548, in run
-    with Popen(*popenargs, **kwargs) as process:
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
-    self._execute_child(args, executable, preexec_fn, close_fds,
-  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
-    raise child_exception_type(errno_num, err_msg, err_filename)
-OSError: [Errno 7] Argument list too long: 'curl'
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 4, "statements": 160, "last": "engine-tests/v2-export/bridge/latest/sql/004-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 5, "statements": 200, "last": "engine-tests/v2-export/bridge/latest/sql/005-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 6, "statements": 240, "last": "engine-tests/v2-export/bridge/latest/sql/006-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 7, "statements": 280, "last": "engine-tests/v2-export/bridge/latest/sql/007-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 8, "statements": 320, "last": "engine-tests/v2-export/bridge/latest/sql/008-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 9, "statements": 360, "last": "engine-tests/v2-export/bridge/latest/sql/009-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 10, "statements": 400, "last": "engine-tests/v2-export/bridge/latest/sql/010-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 11, "statements": 440, "last": "engine-tests/v2-export/bridge/latest/sql/011-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 12, "statements": 480, "last": "engine-tests/v2-export/bridge/latest/sql/012-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 13, "statements": 520, "last": "engine-tests/v2-export/bridge/latest/sql/013-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 14, "statements": 560, "last": "engine-tests/v2-export/bridge/latest/sql/014-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 15, "statements": 600, "last": "engine-tests/v2-export/bridge/latest/sql/015-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 16, "statements": 640, "last": "engine-tests/v2-export/bridge/latest/sql/016-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 17, "statements": 680, "last": "engine-tests/v2-export/bridge/latest/sql/017-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 18, "statements": 720, "last": "engine-tests/v2-export/bridge/latest/sql/018-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 19, "statements": 760, "last": "engine-tests/v2-export/bridge/latest/sql/019-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 20, "statements": 800, "last": "engine-tests/v2-export/bridge/latest/sql/020-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 21, "statements": 840, "last": "engine-tests/v2-export/bridge/latest/sql/021-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 22, "statements": 880, "last": "engine-tests/v2-export/bridge/latest/sql/022-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 23, "statements": 920, "last": "engine-tests/v2-export/bridge/latest/sql/023-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 24, "statements": 960, "last": "engine-tests/v2-export/bridge/latest/sql/024-games.sql"}
+{"complete": true, "files": 24, "statements": 960}
