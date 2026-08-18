@@ -7,7 +7,7 @@ on:
     paths: [.runs/kinnan-v2-neon-ingest.txt]
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 env:
@@ -29,14 +29,16 @@ jobs:
           test -n "$TOKEN" && test "$TOKEN" != null
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
       - name: Ingest exported simulation SQL through scoped RPC
+        id: ingest
+        continue-on-error: true
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
         shell: bash
         run: |
-          set -euo pipefail
-          python3 - <<'PY'
+          set -o pipefail
+          mkdir -p engine-tests/v2-export/neon-ingest-status
+          python3 - <<'PY' 2>&1 | tee engine-tests/v2-export/neon-ingest-status/ingest.log
           import json, os, pathlib, subprocess
-
           api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
           token = os.environ['OIDC_TOKEN']
           roots = [
@@ -61,16 +63,51 @@ jobs:
                       if not stmt.upper().startswith('INSERT INTO SIM_'):
                           raise SystemExit(f'{path}: unexpected statement prefix')
                       body = json.dumps({'p_sql': stmt})
-                      subprocess.run([
-                          'curl','-fsS','--retry','4','--retry-all-errors',
+                      proc = subprocess.run([
+                          'curl','-sS','--retry','4','--retry-all-errors',
+                          '-w','\nHTTP_STATUS:%{http_code}\n',
                           '-X','POST', api,
                           '-H',f'Authorization: Bearer {token}',
                           '-H','Content-Type: application/json',
                           '--data-binary',body,
-                      ], check=True)
+                      ], text=True, capture_output=True)
+                      print(proc.stdout, flush=True)
+                      if proc.stderr:
+                          print(proc.stderr, flush=True)
+                      if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
+                          raise SystemExit(f'RPC failed for {path} statement {total_statements+1}')
                       total_statements += 1
                   total_files += 1
                   if total_files % 10 == 0:
                       print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
           print(json.dumps({'complete': True, 'files': total_files, 'statements': total_statements}), flush=True)
           PY
+      - name: Commit ingestion diagnostics
+        if: always()
+        env:
+          OUTCOME: ${{ steps.ingest.outcome }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          mkdir -p engine-tests/v2-export/neon-ingest-status
+          python3 - <<'PY'
+          import json, os, pathlib, datetime
+          p=pathlib.Path('engine-tests/v2-export/neon-ingest-status/status.json')
+          p.write_text(json.dumps({
+            'runId': int(os.environ['RUN_ID']),
+            'runAttempt': int(os.environ['RUN_ATTEMPT']),
+            'outcome': os.environ['OUTCOME'],
+            'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }, indent=2)+'\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189826+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/neon-ingest-status
+          if ! git diff --cached --quiet; then
+            git commit -m 'record Neon ingest diagnostics [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
+      - name: Fail if ingestion failed
+        if: ${{ steps.ingest.outcome != 'success' }}
+        run: exit 1
