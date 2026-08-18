@@ -1,0 +1,36 @@
+{
+  "created": "2026-08-17",
+  "baseline": "F10_BLUE/F10",
+  "purpose": "Predeclare package hypotheses to test only after the active expanded architecture wave completes; do not trigger a competing workflow.",
+  "promotion_gate": "Controlled paired sim-v2 confirmation remains authoritative; tournament prevalence is hypothesis generation only.",
+  "packages": [
+    {
+      "id": "PKG_COPY_META_1",
+      "class": "2-6_card_package",
+      "adds": ["Mirage Mirror", "Mirrormade", "Imposter Mech", "Copy Enchantment"],
+      "hypothesis": "A current-metagame copy-density package improves both self-contained redundancy and opportunistic value without requiring the full six-card heavy-copy architecture.",
+      "priority": 1,
+      "evidence_note": "EDHTop16 one-year 60+ player Kinnan staples currently reports Mirage Mirror 90.3%, Mirrormade 70.0%, Imposter Mech 51.9%, Copy Enchantment 46.2%; cEDHStats six-month Kinnan sample reports Imposter Mech 54.8% and Copy Enchantment 51.2%."
+    },
+    {
+      "id": "PKG_COPY_META_2",
+      "class": "2-6_card_package",
+      "adds": ["Mirage Mirror", "Imposter Mech", "Copy Artifact"],
+      "hypothesis": "Artifact-weighted copy density may preserve Kinnan/rock synergy with fewer context-dependent enchantment slots.",
+      "priority": 2
+    },
+    {
+      "id": "PKG_DRUID_COMPACT",
+      "class": "2-6_card_package",
+      "adds": ["Devoted Druid", "Machine God's Effigy", "Green Sun's Zenith", "Eldritch Evolution"],
+      "hypothesis": "Compact Druid/Effigy plus creature-tutor access may outperform broad clone density if the extra deterministic node is the actual source of architecture gains.",
+      "priority": 3
+    }
+  ],
+  "measurement": {
+    "screen": "100-200 paired games as rejection/ranking only",
+    "confirmation": "2,000-5,000+ paired games adaptively only while decision-relevant",
+    "primary_endpoint": "strict protected deterministic attempt by end of Kinnan T4",
+    "report": ["natural deck-level paired effect", "conditional paired effect when package slot exposed", "exposure frequency", "pod/seat splits", "valid/error counts", "cache hits", "JVM starts", "wall time"]
+  }
+}
