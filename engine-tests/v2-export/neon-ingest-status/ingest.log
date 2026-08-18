@@ -1,4 +1,22 @@
-{"hint":"Perhaps you meant to call the function public.exec_sim_ingest","message":"Could not find the function public.exec_sim_ingest_batch without parameters in the schema cache","code":"PGRST202","details":"Searched for the function public.exec_sim_ingest_batch without parameters, but no matches were found in the schema cache."}
-HTTP_STATUS:404
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
 
-RPC failed for engine-tests/v2-export/bridge/latest/sql/001-games.sql
+{"files": 1, "statements": 40, "last": "engine-tests/v2-export/bridge/latest/sql/001-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 2, "statements": 80, "last": "engine-tests/v2-export/bridge/latest/sql/002-games.sql"}
+{"ok": true, "statements": 40}
+HTTP_STATUS:200
+
+{"files": 3, "statements": 120, "last": "engine-tests/v2-export/bridge/latest/sql/003-games.sql"}
+Traceback (most recent call last):
+  File "<stdin>", line 22, in <module>
+  File "/usr/lib/python3.12/subprocess.py", line 548, in run
+    with Popen(*popenargs, **kwargs) as process:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/usr/lib/python3.12/subprocess.py", line 1955, in _execute_child
+    raise child_exception_type(errno_num, err_msg, err_filename)
+OSError: [Errno 7] Argument list too long: 'curl'
