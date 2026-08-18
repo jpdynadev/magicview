@@ -71,9 +71,6 @@ jobs:
               games=[screen[v][k] for k in sorted(screen[v])]
               valid=sum(g.get('status') in completed for g in games)
               manifest['screen'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid}
-              # Recovery completeness means all scheduled records are present.
-              # Engine/pilot failures are data and must be preserved, not silently
-              # dropped to make an apparently clean dataset.
               if len(games)!=800: manifest['screenComplete']=False
               with open(f'{outroot}/screen-{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
           for v in expected_adv:
@@ -100,4 +97,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add engine-tests/v2-export/precision-31888564541
           git commit -m 'recover 8,800 precision games for Neon ingestion [skip ci]'
+          git pull --rebase origin agent/kinnan-expanded-architecture
           git push origin HEAD:agent/kinnan-expanded-architecture
