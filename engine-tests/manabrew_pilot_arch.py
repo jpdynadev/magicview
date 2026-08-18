@@ -6,13 +6,14 @@ from pathlib import Path
 from typing import Any
 
 import manabrew_pilot as base
+import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 
-runner.PILOT_VERSION = 'arch-aware-v1'
+runner.PILOT_VERSION = 'arch-aware-v1.1'
 
 # Cards introduced by mutation experiments must not silently fall through to the
-# legacy unknown-card score of 2. Keep this registry small and explicit; future
-# experiment generators should fail when an added card is not registered here.
+# legacy unknown-card score of 2. Future experiment generators should fail when
+# an added card is not registered here.
 ROLE_SCORES = {
     # F10 tutor package
     'Reshape': 9,
@@ -30,8 +31,7 @@ ROLE_SCORES = {
     'Clever Impersonator': 8,
     'Gene Pollinator': 8,
     'Phyrexian Metamorph': 8,
-    # Druid/Effigy architecture (legacy pilot already knows Druid/Effigy, kept
-    # here so the experiment validator has one source of truth).
+    # Druid/Effigy architecture
     'Devoted Druid': 10,
     "Machine God's Effigy": 8,
 }
@@ -48,6 +48,7 @@ COPY_CARDS = {
 _ORIGINAL_HAND_SCORE = base.hand_score
 _ORIGINAL_KEEP_PRIORITY = runner._keep_priority
 _ORIGINAL_SMART_RESPONSE = runner.smart_response
+_ORIGINAL_ACTION_SCORE = runner.v8_action_score
 
 
 def hand_score(deck: str, name: str) -> int:
@@ -58,6 +59,9 @@ def hand_score(deck: str, name: str) -> int:
 
 base.hand_score = hand_score
 base.K_TUTORS.update(TUTOR_ADDS)
+# Mirage Mirror has a strategically meaningful activated ability; without this,
+# v7 assigns unknown activators a large negative score and effectively blanks it.
+v7.KNOWN_GOOD_ACTIVATORS.add('Mirage Mirror')
 
 
 def keep_priority(name: str) -> int:
@@ -73,6 +77,24 @@ def keep_priority(name: str) -> int:
 
 
 runner._keep_priority = keep_priority
+
+
+def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], player: int) -> int:
+    score = _ORIGINAL_ACTION_SCORE(deck, action, snapshot, player)
+    if deck != 'Kinnan':
+        return score
+    name = runner._action_card(action, snapshot)
+    if name == 'Mirage Mirror' and action.get('type') == 'activateAbility':
+        text = str(action.get('description') or action.get('label') or '').lower()
+        if 'copy' in text:
+            own_turn = snapshot.get('activePlayerId') == f'player-{player}'
+            own_main = own_turn and snapshot.get('step') in {'main1', 'main2'}
+            return 1125 if own_main else 350
+    return score
+
+
+runner.v8_action_score = action_score
+base.action_score = action_score
 
 
 def _copy_target_score(name: str, controller: str | None, player: int) -> int:
@@ -97,7 +119,15 @@ def _copy_target_score(name: str, controller: str | None, player: int) -> int:
 
 
 def _copy_prompt(inp: dict[str, Any]) -> bool:
-    raw = json.dumps(inp, sort_keys=True).lower()
+    # Do not inspect candidates themselves: otherwise the mere presence of a
+    # clone on the battlefield could make an unrelated targeting prompt look
+    # like a copy prompt.
+    context = {
+        key: inp.get(key)
+        for key in ('cardName', 'sourceCardName', 'description', 'label', 'presentation', 'abilityText')
+        if key in inp
+    }
+    raw = json.dumps(context, sort_keys=True).lower()
     return 'copy' in raw or any(name.lower() in raw for name in COPY_CARDS)
 
 
