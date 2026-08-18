@@ -1,0 +1,107 @@
+name: Kinnan v2 data recovery
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.runs/kinnan-v2-data-recovery.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: kinnan-v2-data-recovery
+  cancel-in-progress: true
+
+jobs:
+  recover-precision:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-expanded-architecture
+          fetch-depth: 0
+      - name: Download 6,400 precision screen records
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 31888564541
+          github-token: ${{ github.token }}
+          pattern: prec-P*
+          path: precision-screen
+          merge-multiple: true
+      - name: Download 2,400 adversarial precision records
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 31888564541
+          github-token: ${{ github.token }}
+          pattern: precadv-P*
+          path: precision-adv
+          merge-multiple: true
+      - name: Validate and normalize all 8,800 scheduled records
+        run: |
+          python3 - <<'PY'
+          import glob,json,os,re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}
+          root='engine-tests/v2-export/precision-31888564541'
+          os.makedirs(root,exist_ok=True)
+          screen=defaultdict(dict); adv=defaultdict(dict)
+          for p in glob.glob('precision-screen/*.json'):
+              m=re.match(r'(.+)-seat([0-3])-block([01])\.json$',os.path.basename(p))
+              if not m: continue
+              v=m.group(1)
+              games=json.load(open(p))
+              for g in games:
+                  screen[v][(int(g.get('kinnanSeat')),int(g.get('seed')))]=g
+          for p in glob.glob('precision-adv/*.json'):
+              m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
+              if not m: continue
+              v,pod=m.group(1),m.group(2)
+              games=json.load(open(p))
+              for g in games:
+                  g=dict(g); g['recoveredPod']=pod
+                  adv[v][(pod,int(g.get('kinnanSeat')),int(g.get('seed')))]=g
+          screen_variants=['P00_F10','P01_MISCAST','P02_GSZ','P03_ELDRITCH','P04_TRIBUTE','P05_SEEDBORN','P06_HULLBREAKER','P07_M30_MICRO']
+          adv_variants=['P00_F10','P02_GSZ','P03_ELDRITCH']
+          manifest={'sourceRun':31888564541,'screen':{},'adversarial':{},'complete':True}
+          for v in screen_variants:
+              games=[screen[v][k] for k in sorted(screen[v])]
+              valid=sum(g.get('status') in completed for g in games)
+              manifest['screen'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid}
+              if len(games)!=800: manifest['complete']=False
+              json.dump(games,open(f'{root}/screen-{v}.json','w'),separators=(',',':'))
+          for v in adv_variants:
+              games=[adv[v][k] for k in sorted(adv[v])]
+              valid=sum(g.get('status') in completed for g in games)
+              manifest['adversarial'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid}
+              if len(games)!=800: manifest['complete']=False
+              json.dump(games,open(f'{root}/adv-{v}.json','w'),separators=(',',':'))
+          manifest['screenTotal']=sum(x['records'] for x in manifest['screen'].values())
+          manifest['screenValid']=sum(x['valid'] for x in manifest['screen'].values())
+          manifest['screenErrors']=sum(x['errors'] for x in manifest['screen'].values())
+          manifest['advTotal']=sum(x['records'] for x in manifest['adversarial'].values())
+          manifest['advValid']=sum(x['valid'] for x in manifest['adversarial'].values())
+          manifest['advErrors']=sum(x['errors'] for x in manifest['adversarial'].values())
+          manifest['complete']=manifest['complete'] and manifest['screenTotal']==6400 and manifest['advTotal']==2400
+          json.dump(manifest,open(f'{root}/manifest.json','w'),indent=2)
+          print(json.dumps(manifest,indent=2))
+          if not manifest['complete']: raise SystemExit('missing scheduled precision records')
+          PY
+      - name: Generate idempotent Neon ingestion batches
+        run: |
+          python3 engine-tests/build_neon_ingest_sql.py \
+            --corpus precision \
+            --root engine-tests/v2-export/precision-31888564541 \
+            --experiment-id c1150747-149a-453c-a429-b8250fbc7c26 \
+            --source github-run-31888564541 \
+            --batch-size 100
+      - name: Commit recovered corpus and SQL batches to simulation branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/precision-31888564541
+          git commit -m 'recover 8,800 precision records for v2 Neon [skip ci]'
+          git pull --rebase origin agent/kinnan-expanded-architecture
+          git push origin HEAD:agent/kinnan-expanded-architecture
