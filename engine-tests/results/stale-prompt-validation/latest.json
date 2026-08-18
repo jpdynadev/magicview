@@ -1,0 +1,16 @@
+{
+  "commit": "b299a8c4f7a6e39870ccf58ac8183b8452172afa",
+  "gamesWithSemanticPromptAdvances": 0,
+  "invalid": 35,
+  "records": 96,
+  "scheduledExpected": 96,
+  "schema": "stale-prompt-validation-v1",
+  "semanticPromptAdvances": 0,
+  "stalePromptTimeouts": 34,
+  "statuses": {
+    "horizon_complete": 61,
+    "stale_prompt_timeout": 34,
+    "wall_timeout": 1
+  },
+  "valid": 61
+}
