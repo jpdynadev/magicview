@@ -1,1 +1,2 @@
 2026-08-17 sim-v2 architecture wave: cold-equivalent JVMs only, 12x200 paired screen, 4 finalists x 800 adversarial confirmation, exact paired tests, exposure-conditioned effects, shard caches
+2026-08-17 retrigger after root import shim fix for inline SPECS lookup
