@@ -57,11 +57,11 @@ jobs:
                   text = path.read_text()
                   parts = [p.strip() for p in text.split(';\n') if p.strip()]
                   statements = [p for p in parts if p.upper() not in {'BEGIN','COMMIT'}]
-                  if len(statements) != 2:
-                      raise SystemExit(f'{path}: expected 2 INSERT statements, got {len(statements)}')
+                  if not statements:
+                      raise SystemExit(f'{path}: no INSERT statements found')
                   for stmt in statements:
-                      if not stmt.upper().startswith('INSERT INTO SIM_'):
-                          raise SystemExit(f'{path}: unexpected statement prefix')
+                      if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
+                          raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
                       body = json.dumps({'p_sql': stmt})
                       proc = subprocess.run([
                           'curl','-sS','--retry','4','--retry-all-errors',
