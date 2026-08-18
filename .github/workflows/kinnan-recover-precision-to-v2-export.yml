@@ -66,24 +66,33 @@ jobs:
                   adv[v][key]=g
           manifest={'sourceRun':31888564541,'screen':{},'adversarial':{},'screenComplete':True,'adversarialComplete':True}
           expected_screen=['P00_F10','P01_MISCAST','P02_GSZ','P03_ELDRITCH','P04_TRIBUTE','P05_SEEDBORN','P06_HULLBREAKER','P07_M30_MICRO']
+          expected_adv=['P00_F10','P02_GSZ','P03_ELDRITCH']
           for v in expected_screen:
               games=[screen[v][k] for k in sorted(screen[v])]
               valid=sum(g.get('status') in completed for g in games)
-              manifest['screen'][v]={'records':len(games),'valid':valid}
-              if len(games)!=800 or valid!=800: manifest['screenComplete']=False
+              manifest['screen'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid}
+              # Recovery completeness means all scheduled records are present.
+              # Engine/pilot failures are data and must be preserved, not silently
+              # dropped to make an apparently clean dataset.
+              if len(games)!=800: manifest['screenComplete']=False
               with open(f'{outroot}/screen-{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
-          for v in sorted(adv):
+          for v in expected_adv:
               games=[adv[v][k] for k in sorted(adv[v])]
               valid=sum(g.get('status') in completed for g in games)
-              manifest['adversarial'][v]={'records':len(games),'valid':valid}
-              if len(games)!=800 or valid!=800: manifest['adversarialComplete']=False
+              manifest['adversarial'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid}
+              if len(games)!=800: manifest['adversarialComplete']=False
               with open(f'{outroot}/adv-{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
           manifest['screenTotal']=sum(x['records'] for x in manifest['screen'].values())
+          manifest['screenValid']=sum(x['valid'] for x in manifest['screen'].values())
+          manifest['screenErrors']=sum(x['errors'] for x in manifest['screen'].values())
           manifest['advTotal']=sum(x['records'] for x in manifest['adversarial'].values())
+          manifest['advValid']=sum(x['valid'] for x in manifest['adversarial'].values())
+          manifest['advErrors']=sum(x['errors'] for x in manifest['adversarial'].values())
+          manifest['complete']=manifest['screenComplete'] and manifest['adversarialComplete'] and manifest['screenTotal']==6400 and manifest['advTotal']==2400
           with open(f'{outroot}/manifest.json','w') as f: json.dump(manifest,f,indent=2)
           print(json.dumps(manifest,indent=2))
-          if not manifest['screenComplete'] or not manifest['adversarialComplete']:
-              raise SystemExit('precision recovery incomplete')
+          if not manifest['complete']:
+              raise SystemExit('precision recovery missing scheduled records')
           PY
       - name: Commit recovered corpus
         run: |
