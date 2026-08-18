@@ -42,7 +42,7 @@ jobs:
           set -o pipefail
           mkdir -p engine-tests/v2-export/neon-ingest-status
           python3 - <<'PY' 2>&1 | tee engine-tests/v2-export/neon-ingest-status/ingest.log
-          import json, os, pathlib, subprocess
+          import json, os, pathlib, subprocess, tempfile
           api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
           token = os.environ['OIDC_TOKEN']
           root = pathlib.Path('engine-tests/v2-export/bridge/latest/sql')
@@ -63,14 +63,20 @@ jobs:
                   if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
                       raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
               body = json.dumps({'p_sql': json.dumps(statements)})
-              proc = subprocess.run([
-                  'curl','-sS','--retry','4','--retry-all-errors',
-                  '-w','\nHTTP_STATUS:%{http_code}\n',
-                  '-X','POST', api,
-                  '-H',f'Authorization: Bearer {token}',
-                  '-H','Content-Type: application/json',
-                  '--data-binary',body,
-              ], text=True, capture_output=True)
+              with tempfile.NamedTemporaryFile('w', delete=False) as f:
+                  f.write(body)
+                  payload_path = f.name
+              try:
+                  proc = subprocess.run([
+                      'curl','-sS','--retry','4','--retry-all-errors',
+                      '-w','\nHTTP_STATUS:%{http_code}\n',
+                      '-X','POST', api,
+                      '-H',f'Authorization: Bearer {token}',
+                      '-H','Content-Type: application/json',
+                      '--data-binary',f'@{payload_path}',
+                  ], text=True, capture_output=True)
+              finally:
+                  pathlib.Path(payload_path).unlink(missing_ok=True)
               print(proc.stdout, flush=True)
               if proc.stderr:
                   print(proc.stderr, flush=True)
