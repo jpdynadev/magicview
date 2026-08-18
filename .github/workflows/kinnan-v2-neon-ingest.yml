@@ -1,0 +1,76 @@
+name: Kinnan v2 Neon ingest
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v2-neon-ingest.txt]
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NEON_DATA_API: https://ep-dark-mud-axcpnjso.apirest.c-4.us-east-2.aws.neon.tech/neondb/rest/v1
+
+jobs:
+  ingest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain GitHub OIDC token for Neon
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=neon-v2-ingest"
+          TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
+          test -n "$TOKEN" && test "$TOKEN" != null
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Ingest exported simulation SQL through scoped RPC
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+
+          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
+          token = os.environ['OIDC_TOKEN']
+          roots = [
+              pathlib.Path('engine-tests/v2-export/precision-31888564541/sql'),
+              pathlib.Path('engine-tests/v2-export/bridge/latest/sql'),
+          ]
+          total_statements = 0
+          total_files = 0
+          for root in roots:
+              manifest = json.loads((root / 'manifest.json').read_text())
+              names = manifest.get('sqlFiles') or manifest.get('files') or []
+              for name in names:
+                  if name == '000-variants.sql' or not name.endswith('-games.sql'):
+                      continue
+                  path = root / name
+                  text = path.read_text()
+                  parts = [p.strip() for p in text.split(';\n') if p.strip()]
+                  statements = [p for p in parts if p.upper() not in {'BEGIN','COMMIT'}]
+                  if len(statements) != 2:
+                      raise SystemExit(f'{path}: expected 2 INSERT statements, got {len(statements)}')
+                  for stmt in statements:
+                      if not stmt.upper().startswith('INSERT INTO SIM_'):
+                          raise SystemExit(f'{path}: unexpected statement prefix')
+                      body = json.dumps({'p_sql': stmt})
+                      subprocess.run([
+                          'curl','-fsS','--retry','4','--retry-all-errors',
+                          '-X','POST', api,
+                          '-H',f'Authorization: Bearer {token}',
+                          '-H','Content-Type: application/json',
+                          '--data-binary',body,
+                      ], check=True)
+                      total_statements += 1
+                  total_files += 1
+                  if total_files % 10 == 0:
+                      print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
+          print(json.dumps({'complete': True, 'files': total_files, 'statements': total_statements}), flush=True)
+          PY
