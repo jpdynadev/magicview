@@ -1,0 +1,1 @@
+2026-08-18 run 48 fresh cold-v2 games across 12 architecture decklists and four seats; commit exact game records for Neon persistence
