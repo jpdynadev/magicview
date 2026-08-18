@@ -160,14 +160,18 @@ jobs:
               valid=sum(g.get('status') in completed for g in games)
               strict=sum(bool(g.get('strictProtectedT4')) for g in games if g.get('status') in completed)
               exposed=sum(bool(g.get('slotExposed')) for g in games if g.get('status') in completed)
-              manifest['variants'][v]={'records':len(games),'valid':valid,'strictProtectedT4':strict,'exposed':exposed}
-              if len(games)!=40 or valid!=40:
+              manifest['variants'][v]={'records':len(games),'valid':valid,'errors':len(games)-valid,'strictProtectedT4':strict,'exposed':exposed}
+              # Every scheduled seed must have a record. Failures remain in the
+              # corpus and Neon so error rates are measurable rather than hidden.
+              if len(games)!=40:
                   manifest['complete']=False
               with open(f'{root}/{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
+          manifest['validTotal']=sum(x['valid'] for x in manifest['variants'].values())
+          manifest['errorTotal']=sum(x['errors'] for x in manifest['variants'].values())
           with open(f'{root}/manifest.json','w') as f: json.dump(manifest,f,indent=2)
           print(json.dumps(manifest,indent=2))
           if not manifest['complete']:
-              raise SystemExit('bridge export incomplete; refusing to call pipeline reproduced')
+              raise SystemExit('bridge export missing scheduled game records')
           PY
       - name: Commit validated v2 corpus to branch
         if: success()
