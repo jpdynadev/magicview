@@ -534,4 +534,7 @@ HTTP_STATUS:200
 {"ok": true}
 HTTP_STATUS:200
 
-engine-tests/v2-export/bridge/latest/sql/001-games.sql: expected 2 INSERT statements, got 40
+{"code":"P0001","message":"statement not allowed","details":null,"hint":null}
+HTTP_STATUS:400
+
+RPC failed for engine-tests/v2-export/bridge/latest/sql/001-games.sql statement 177
