@@ -1,0 +1,61 @@
+name: Kinnan architecture progress observer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.runs/kinnan-progress-observer.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture latest architecture run progress
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p status
+          RUN=$(gh api --method GET "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=50" \
+            --jq '[.workflow_runs[] | select(.name=="Kinnan expanded architecture sim-v2")][0]')
+          if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
+            jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-architecture-progress.json
+            exit 0
+          fi
+          ID=$(jq -r '.id' <<<"$RUN")
+          JOBS=$(gh api --method GET "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
+          jq -n --argjson run "$RUN" --argjson jobs "$JOBS" '
+            {
+              found:true,
+              checkedAt:(now|todateiso8601),
+              runId:$run.id,
+              runNumber:$run.run_number,
+              event:$run.event,
+              headSha:$run.head_sha,
+              status:$run.status,
+              conclusion:$run.conclusion,
+              createdAt:$run.created_at,
+              updatedAt:$run.updated_at,
+              htmlUrl:$run.html_url,
+              jobsTotal:($jobs.jobs|length),
+              jobsCompleted:([$jobs.jobs[]|select(.status=="completed")]|length),
+              jobsInProgress:([$jobs.jobs[]|select(.status=="in_progress")]|length),
+              jobsQueued:([$jobs.jobs[]|select(.status=="queued")]|length),
+              jobsSuccess:([$jobs.jobs[]|select(.conclusion=="success")]|length),
+              jobsFailure:([$jobs.jobs[]|select(.conclusion=="failure")]|length),
+              jobsCancelled:([$jobs.jobs[]|select(.conclusion=="cancelled")]|length),
+              jobSummary:[$jobs.jobs[]|{id,name,status,conclusion,started_at,completed_at}]
+            }' > status/kinnan-architecture-progress.json
+          cat status/kinnan-architecture-progress.json
+      - name: Commit snapshot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add status/kinnan-architecture-progress.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Record Kinnan architecture run progress"
+          git push
