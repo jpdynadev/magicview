@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
 import sim_v2_worker_ultra as ultra
 
@@ -49,6 +50,18 @@ def main() -> int:
     )
 
     import sim_v2_worker
+
+    # sim_v2_worker.main() normally imports the precision screen/adversarial
+    # configuration internally.  That is correct for precision experiments but
+    # would silently replace the architecture runner/pilot identity after this
+    # wrapper has installed architecture-aware card semantics and observation
+    # instrumentation.  Alias the already-loaded architecture config under the
+    # names main() imports so the exact configured runner is preserved.
+    if mode == "adversarial":
+        sys.modules["manabrew_pilot_precision_adv"] = config
+    else:
+        sys.modules["manabrew_pilot_precision"] = config
+
     original_compact = sim_v2_worker.compact_result
 
     def compact_with_events(result, cards):
