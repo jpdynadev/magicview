@@ -1,1 +1,2 @@
 2026-08-18 reproduce 480 cold-v2 games across 12 architecture decklists; export validated game corpus for Neon ingestion
+2026-08-18 v2 bridge retrigger: require every scheduled record, preserve failures as measurable data, jvm-reuse=1
