@@ -6,6 +6,10 @@ on:
     branches: [agent/kinnan-expanded-architecture]
     paths: [.runs/kinnan-v2-neon-ingest.txt]
 
+concurrency:
+  group: kinnan-v2-neon-ingest
+  cancel-in-progress: true
+
 permissions:
   contents: write
   id-token: write
@@ -28,7 +32,7 @@ jobs:
           TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
           test -n "$TOKEN" && test "$TOKEN" != null
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
-      - name: Ingest exported simulation SQL through scoped RPC
+      - name: Ingest bridge simulation SQL through scoped RPC
         id: ingest
         continue-on-error: true
         env:
@@ -41,45 +45,41 @@ jobs:
           import json, os, pathlib, subprocess
           api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
           token = os.environ['OIDC_TOKEN']
-          roots = [
-              pathlib.Path('engine-tests/v2-export/precision-31888564541/sql'),
-              pathlib.Path('engine-tests/v2-export/bridge/latest/sql'),
-          ]
+          root = pathlib.Path('engine-tests/v2-export/bridge/latest/sql')
+          manifest = json.loads((root / 'manifest.json').read_text())
+          names = manifest.get('files') or []
           total_statements = 0
           total_files = 0
-          for root in roots:
-              manifest = json.loads((root / 'manifest.json').read_text())
-              names = manifest.get('sqlFiles') or manifest.get('files') or []
-              for name in names:
-                  if name == '000-variants.sql' or not name.endswith('-games.sql'):
-                      continue
-                  path = root / name
-                  text = path.read_text()
-                  parts = [p.strip() for p in text.split(';\n') if p.strip()]
-                  statements = [p for p in parts if p.upper() not in {'BEGIN','COMMIT'}]
-                  if not statements:
-                      raise SystemExit(f'{path}: no INSERT statements found')
-                  for stmt in statements:
-                      if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
-                          raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
-                      body = json.dumps({'p_sql': stmt})
-                      proc = subprocess.run([
-                          'curl','-sS','--retry','4','--retry-all-errors',
-                          '-w','\nHTTP_STATUS:%{http_code}\n',
-                          '-X','POST', api,
-                          '-H',f'Authorization: Bearer {token}',
-                          '-H','Content-Type: application/json',
-                          '--data-binary',body,
-                      ], text=True, capture_output=True)
-                      print(proc.stdout, flush=True)
-                      if proc.stderr:
-                          print(proc.stderr, flush=True)
-                      if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
-                          raise SystemExit(f'RPC failed for {path} statement {total_statements+1}')
-                      total_statements += 1
-                  total_files += 1
-                  if total_files % 10 == 0:
-                      print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
+          for name in names:
+              if name == '000-variants.sql' or not name.endswith('-games.sql'):
+                  continue
+              path = root / name
+              text = path.read_text()
+              parts = [p.strip() for p in text.split(';\n') if p.strip()]
+              statements = [p for p in parts if p.upper() not in {'BEGIN','COMMIT'}]
+              if not statements:
+                  raise SystemExit(f'{path}: no INSERT statements found')
+              for stmt in statements:
+                  if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
+                      raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
+                  body = json.dumps({'p_sql': stmt})
+                  proc = subprocess.run([
+                      'curl','-sS','--retry','4','--retry-all-errors',
+                      '-w','\nHTTP_STATUS:%{http_code}\n',
+                      '-X','POST', api,
+                      '-H',f'Authorization: Bearer {token}',
+                      '-H','Content-Type: application/json',
+                      '--data-binary',body,
+                  ], text=True, capture_output=True)
+                  print(proc.stdout, flush=True)
+                  if proc.stderr:
+                      print(proc.stderr, flush=True)
+                  if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
+                      raise SystemExit(f'RPC failed for {path} statement {total_statements+1}')
+                  total_statements += 1
+              total_files += 1
+              if total_files % 5 == 0:
+                  print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
           print(json.dumps({'complete': True, 'files': total_files, 'statements': total_statements}), flush=True)
           PY
       - name: Commit ingestion diagnostics
