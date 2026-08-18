@@ -1,1 +1,2 @@
 2026-08-18 recover run 31888564541 full 6,400-game precision screen plus 2,400-game adversarial corpus for Neon ingestion
+2026-08-18 v2 recovery: preserve all 8,800 scheduled records including engine/pilot failures; require record completeness, not zero errors
