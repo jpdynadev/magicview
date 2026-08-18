@@ -1,1 +1,2 @@
 2026-08-18 check repaired architecture wave progress
+2026-08-18 recheck until repaired shard evidence exists
