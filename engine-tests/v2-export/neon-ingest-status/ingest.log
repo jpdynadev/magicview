@@ -1,0 +1,4 @@
+{"code":"42501","message":"permission denied for function exec_sim_ingest","details":null,"hint":null}
+HTTP_STATUS:403
+
+RPC failed for engine-tests/v2-export/precision-31888564541/sql/001-games.sql statement 1
