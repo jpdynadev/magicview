@@ -1,3 +1,4 @@
 2026-08-18 OIDC ingest: precision 8800 + bridge 480 durable v2 records
 2026-08-18 retrigger with durable ingestion diagnostics
 2026-08-18 retrigger after Data API RPC role grant
+2026-08-18 retrigger after allowing ON CONFLICT DO NOTHING
