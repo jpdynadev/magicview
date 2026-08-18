@@ -1,0 +1,97 @@
+{
+  "runId": 32168795879,
+  "runAttempt": 1,
+  "commitSha": "098c1f032dae6c81f2529a90000a831e589aad4d",
+  "expectedPerVariant": 40,
+  "expectedTotal": 480,
+  "rawRecords": 480,
+  "variants": {
+    "F10": {
+      "records": 40,
+      "valid": 28,
+      "errors": 12,
+      "strictProtectedT4": 3,
+      "exposed": 0
+    },
+    "COPY_CORE": {
+      "records": 40,
+      "valid": 27,
+      "errors": 13,
+      "strictProtectedT4": 0,
+      "exposed": 15
+    },
+    "COPY_CREATURE": {
+      "records": 40,
+      "valid": 24,
+      "errors": 16,
+      "strictProtectedT4": 2,
+      "exposed": 17
+    },
+    "DRUID_EFFIGY": {
+      "records": 40,
+      "valid": 26,
+      "errors": 14,
+      "strictProtectedT4": 1,
+      "exposed": 15
+    },
+    "COPY_DRUID": {
+      "records": 40,
+      "valid": 26,
+      "errors": 14,
+      "strictProtectedT4": 0,
+      "exposed": 21
+    },
+    "COPY_HEAVY": {
+      "records": 40,
+      "valid": 28,
+      "errors": 12,
+      "strictProtectedT4": 2,
+      "exposed": 26
+    },
+    "COPY_ARTIFACT": {
+      "records": 40,
+      "valid": 26,
+      "errors": 14,
+      "strictProtectedT4": 1,
+      "exposed": 16
+    },
+    "COPY_PROTECTED": {
+      "records": 40,
+      "valid": 27,
+      "errors": 13,
+      "strictProtectedT4": 1,
+      "exposed": 23
+    },
+    "DRUID_TUTOR": {
+      "records": 40,
+      "valid": 26,
+      "errors": 14,
+      "strictProtectedT4": 1,
+      "exposed": 18
+    },
+    "TUTOR_DENSE": {
+      "records": 40,
+      "valid": 24,
+      "errors": 16,
+      "strictProtectedT4": 2,
+      "exposed": 19
+    },
+    "NODE_DENSE": {
+      "records": 40,
+      "valid": 28,
+      "errors": 12,
+      "strictProtectedT4": 0,
+      "exposed": 25
+    },
+    "COPY_VALUE": {
+      "records": 40,
+      "valid": 27,
+      "errors": 13,
+      "strictProtectedT4": 0,
+      "exposed": 21
+    }
+  },
+  "complete": true,
+  "validTotal": 317,
+  "errorTotal": 163
+}
