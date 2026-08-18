@@ -9,3 +9,4 @@
 2026-08-18 batched bridge ingestion transaction per export file
 2026-08-18 retrigger after Data API schema cache reload
 2026-08-18 batched via existing cached exec_sim_ingest(text) RPC
+2026-08-18 payload files avoid ARG_MAX for observed-card telemetry
