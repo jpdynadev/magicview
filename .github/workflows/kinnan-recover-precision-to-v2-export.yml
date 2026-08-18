@@ -91,6 +91,14 @@ jobs:
           if not manifest['complete']:
               raise SystemExit('precision recovery missing scheduled records')
           PY
+      - name: Build idempotent Neon ingestion SQL
+        run: |
+          python3 engine-tests/build_neon_ingest_sql.py \
+            --corpus precision \
+            --root engine-tests/v2-export/precision-31888564541 \
+            --experiment-id c1150747-149a-453c-a429-b8250fbc7c26 \
+            --source github-run-31888564541 \
+            --batch-size 100
       - name: Commit recovered corpus
         run: |
           git config user.name 'github-actions[bot]'
