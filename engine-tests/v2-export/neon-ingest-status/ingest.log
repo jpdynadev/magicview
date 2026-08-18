@@ -534,7 +534,284 @@ HTTP_STATUS:200
 {"ok": true}
 HTTP_STATUS:200
 
-{"code":"P0001","message":"statement not allowed","details":null,"hint":null}
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"files": 90, "statements": 256, "last": "engine-tests/v2-export/bridge/latest/sql/002-games.sql"}
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"ok": true}
+HTTP_STATUS:200
+
+{"code":"P0001","message":"forbidden token","details":null,"hint":null}
 HTTP_STATUS:400
 
-RPC failed for engine-tests/v2-export/bridge/latest/sql/001-games.sql statement 177
+RPC failed for engine-tests/v2-export/bridge/latest/sql/003-games.sql statement 269
