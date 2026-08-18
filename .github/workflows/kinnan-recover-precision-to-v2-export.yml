@@ -1,0 +1,94 @@
+name: Recover precision corpus for v2 Neon
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-recover-precision.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: kinnan-recover-precision
+  cancel-in-progress: true
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download precision screen artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 31888564541
+          github-token: ${{ github.token }}
+          pattern: prec-P*
+          path: precision-screen
+          merge-multiple: true
+      - name: Download precision adversarial artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: 31888564541
+          github-token: ${{ github.token }}
+          pattern: precadv-P*
+          path: precision-adv
+          merge-multiple: true
+      - name: Build validated durable corpus
+        run: |
+          python3 - <<'PY'
+          import glob,json,os,re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}
+          outroot='engine-tests/v2-export/precision-31888564541'
+          os.makedirs(outroot,exist_ok=True)
+          screen=defaultdict(dict); adv=defaultdict(dict)
+          for p in glob.glob('precision-screen/*.json'):
+              m=re.match(r'(.+)-seat([0-3])-block([01])\.json$',os.path.basename(p))
+              if not m: continue
+              v=m.group(1)
+              try: games=json.load(open(p))
+              except Exception: continue
+              for g in games:
+                  key=(int(g.get('kinnanSeat')),int(g.get('seed')))
+                  screen[v][key]=g
+          for p in glob.glob('precision-adv/*.json'):
+              m=re.match(r'(.+)-(balanced|turbo|midrange|mixed)-seat([0-3])\.json$',os.path.basename(p))
+              if not m: continue
+              v,pod=m.group(1),m.group(2)
+              try: games=json.load(open(p))
+              except Exception: continue
+              for g in games:
+                  g=dict(g); g['recoveredPod']=pod
+                  key=(pod,int(g.get('kinnanSeat')),int(g.get('seed')))
+                  adv[v][key]=g
+          manifest={'sourceRun':31888564541,'screen':{},'adversarial':{},'screenComplete':True,'adversarialComplete':True}
+          expected_screen=['P00_F10','P01_MISCAST','P02_GSZ','P03_ELDRITCH','P04_TRIBUTE','P05_SEEDBORN','P06_HULLBREAKER','P07_M30_MICRO']
+          for v in expected_screen:
+              games=[screen[v][k] for k in sorted(screen[v])]
+              valid=sum(g.get('status') in completed for g in games)
+              manifest['screen'][v]={'records':len(games),'valid':valid}
+              if len(games)!=800 or valid!=800: manifest['screenComplete']=False
+              with open(f'{outroot}/screen-{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
+          for v in sorted(adv):
+              games=[adv[v][k] for k in sorted(adv[v])]
+              valid=sum(g.get('status') in completed for g in games)
+              manifest['adversarial'][v]={'records':len(games),'valid':valid}
+              if len(games)!=800 or valid!=800: manifest['adversarialComplete']=False
+              with open(f'{outroot}/adv-{v}.json','w') as f: json.dump(games,f,separators=(',',':'))
+          manifest['screenTotal']=sum(x['records'] for x in manifest['screen'].values())
+          manifest['advTotal']=sum(x['records'] for x in manifest['adversarial'].values())
+          with open(f'{outroot}/manifest.json','w') as f: json.dump(manifest,f,indent=2)
+          print(json.dumps(manifest,indent=2))
+          if not manifest['screenComplete'] or not manifest['adversarialComplete']:
+              raise SystemExit('precision recovery incomplete')
+          PY
+      - name: Commit recovered corpus
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/precision-31888564541
+          git commit -m 'recover 8,800 precision games for Neon ingestion [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture
