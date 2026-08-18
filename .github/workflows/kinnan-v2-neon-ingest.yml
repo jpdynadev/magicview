@@ -32,7 +32,7 @@ jobs:
           TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
           test -n "$TOKEN" && test "$TOKEN" != null
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
-      - name: Ingest bridge simulation SQL through scoped RPC
+      - name: Ingest bridge simulation SQL through scoped batch RPC
         id: ingest
         continue-on-error: true
         env:
@@ -43,7 +43,7 @@ jobs:
           mkdir -p engine-tests/v2-export/neon-ingest-status
           python3 - <<'PY' 2>&1 | tee engine-tests/v2-export/neon-ingest-status/ingest.log
           import json, os, pathlib, subprocess
-          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
+          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest_batch'
           token = os.environ['OIDC_TOKEN']
           root = pathlib.Path('engine-tests/v2-export/bridge/latest/sql')
           manifest = json.loads((root / 'manifest.json').read_text())
@@ -62,24 +62,23 @@ jobs:
               for stmt in statements:
                   if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
                       raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
-                  body = json.dumps({'p_sql': stmt})
-                  proc = subprocess.run([
-                      'curl','-sS','--retry','4','--retry-all-errors',
-                      '-w','\nHTTP_STATUS:%{http_code}\n',
-                      '-X','POST', api,
-                      '-H',f'Authorization: Bearer {token}',
-                      '-H','Content-Type: application/json',
-                      '--data-binary',body,
-                  ], text=True, capture_output=True)
-                  print(proc.stdout, flush=True)
-                  if proc.stderr:
-                      print(proc.stderr, flush=True)
-                  if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
-                      raise SystemExit(f'RPC failed for {path} statement {total_statements+1}')
-                  total_statements += 1
+              body = json.dumps({'p_sqls': statements})
+              proc = subprocess.run([
+                  'curl','-sS','--retry','4','--retry-all-errors',
+                  '-w','\nHTTP_STATUS:%{http_code}\n',
+                  '-X','POST', api,
+                  '-H',f'Authorization: Bearer {token}',
+                  '-H','Content-Type: application/json',
+                  '--data-binary',body,
+              ], text=True, capture_output=True)
+              print(proc.stdout, flush=True)
+              if proc.stderr:
+                  print(proc.stderr, flush=True)
+              if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
+                  raise SystemExit(f'RPC failed for {path}')
+              total_statements += len(statements)
               total_files += 1
-              if total_files % 5 == 0:
-                  print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
+              print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
           print(json.dumps({'complete': True, 'files': total_files, 'statements': total_statements}), flush=True)
           PY
       - name: Commit ingestion diagnostics
