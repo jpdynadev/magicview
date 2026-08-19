@@ -4,33 +4,129 @@
 Uses the architecture policy/decks while retaining sim-v2 cache identity,
 exposure tracking, compact records, and session cleanup. Production workflows
 must still request jvm-reuse=1 until the persistent equivalence gate clears.
+
+Diagnostic runs can set SIM_V2_TRACE=1 or SIM_V2_CAPTURE_STDERR=1. In that
+mode the wrapper preserves the Forge JVM stderr tail, the harness decoded-action
+tail and the pilot prompt/answer tail directly in each compact result. This is
+important because sim_v2_worker normally redirects pooled JVM stderr to DEVNULL.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import os
+import subprocess
 import sys
+import tempfile
+from pathlib import Path
 
 import sim_v2_worker_ultra as ultra
 
 
-def _install_semantic_prompt_ids(runner) -> None:
-    """Treat changed prompt payloads as progress even when promptId is reused.
+def _tail_text(path: str | Path | None, limit: int = 12000) -> str | None:
+    if not path:
+        return None
+    try:
+        text = Path(path).read_text(errors="replace")
+    except Exception:
+        return None
+    return text[-limit:] if text else None
 
-    Manabrew may keep one promptId while mutating that prompt's input during a
-    multi-step decision/payment. The v8 pilot historically used promptId alone
-    to detect a repeated prompt, so a changed action/selection payload could be
-    ignored for 60 seconds and reported as stale_prompt_timeout.
 
-    Give the pilot an internal prompt identity composed of Forge's promptId plus
-    a stable hash of the deciding player and input payload. Truly identical
-    prompts remain identical (so existing retry/stall handling still applies),
-    while a semantic change is processed immediately as new progress. The
-    transformed ID is pilot-local; submitAction does not send promptId back to
-    Manabrew, so Forge protocol semantics are unchanged.
+def _pilot_trace_tail(runner, result, limit: int = 12):
+    try:
+        suffix = f"{result.get('variant')}-{int(result.get('seed'))}-s{int(result.get('kinnanSeat'))}"
+        path = runner.base.RESULT_DIR / f"pilot-trace-{suffix}.json"
+        rows = json.loads(path.read_text())
+        return rows[-limit:] if isinstance(rows, list) else None
+    except Exception:
+        return None
+
+
+def _install_forensic_stderr_capture(worker, runner) -> None:
+    """Capture stderr without changing trusted game semantics.
+
+    ForgeJvmPool normally replaces the pilot's stderr=PIPE with DEVNULL. That
+    made game-thread RuntimeExceptions invisible and caused stale_prompt_timeout
+    to be a diagnostic dead end. In forensic mode we redirect each pooled JVM's
+    stderr to a temporary file instead, keep the pilot-facing BorrowedProc
+    semantics unchanged, and copy only the tail into the result after the game.
     """
+    enabled = os.getenv("SIM_V2_CAPTURE_STDERR", "0") == "1" or os.getenv("SIM_V2_TRACE", "0") == "1"
+    if not enabled:
+        return
 
+    pool_cls = worker.ForgeJvmPool
+    original_init = pool_cls.__init__
+    original_spawn = pool_cls._spawn
+    original_close = pool_cls._close
+
+    def patched_init(self, *args, **kwargs):
+        original_init(self, *args, **kwargs)
+        self._forensic_stderr_path = None
+        self._forensic_stderr_handle = None
+        worker._ARCH_ACTIVE_POOL = self
+
+    def patched_spawn(self, args, kwargs):
+        old_handle = getattr(self, "_forensic_stderr_handle", None)
+        if old_handle is not None:
+            try:
+                old_handle.close()
+            except Exception:
+                pass
+        handle = tempfile.NamedTemporaryFile(
+            mode="w+", prefix="kinnan-forge-stderr-", suffix=".log", delete=False
+        )
+        old_devnull = subprocess.DEVNULL
+        subprocess.DEVNULL = handle
+        try:
+            proc = original_spawn(self, args, kwargs)
+        finally:
+            subprocess.DEVNULL = old_devnull
+        self._forensic_stderr_handle = handle
+        self._forensic_stderr_path = handle.name
+        return proc
+
+    def stderr_tail(self, limit=12000):
+        return _tail_text(getattr(self, "_forensic_stderr_path", None), limit)
+
+    def patched_close(self):
+        original_close(self)
+        handle = getattr(self, "_forensic_stderr_handle", None)
+        if handle is not None:
+            try:
+                handle.close()
+            except Exception:
+                pass
+            self._forensic_stderr_handle = None
+
+    pool_cls.__init__ = patched_init
+    pool_cls._spawn = patched_spawn
+    pool_cls._close = patched_close
+    pool_cls.stderr_tail = stderr_tail
+
+    original_run = runner.run_game
+
+    def forensic_run_game(*args, **kwargs):
+        result = original_run(*args, **kwargs)
+        pool = getattr(worker, "_ARCH_ACTIVE_POOL", None)
+        if pool is not None and hasattr(pool, "stderr_tail"):
+            result["v2JvmStderrTail"] = pool.stderr_tail()
+        result["v2HarnessActionTail"] = _tail_text(os.getenv("MANABREW_HARNESS_TRACE"), 12000)
+        result["v2PilotTraceTail"] = _pilot_trace_tail(runner, result)
+        return result
+
+    runner.run_game = forensic_run_game
+
+
+def _install_semantic_prompt_ids(runner) -> None:
+    """Retain the prior semantic-prompt probe for comparability.
+
+    The 96-game validation proved this mechanism does not explain the stale
+    failures (zero semantic advances), but leaving the no-op probe in place keeps
+    pre/post forensic records directly comparable until the actual root cause is
+    repaired.
+    """
     original_run = runner.run_game
 
     def semantic_run_game(*args, **kwargs):
@@ -102,6 +198,7 @@ def main() -> int:
         "sessionLifecycle": "abort+reset",
         "policy": "architecture-aware",
         "semanticPromptIdentity": True,
+        "forensicStderrCapture": os.getenv("SIM_V2_CAPTURE_STDERR", "0") == "1" or os.getenv("SIM_V2_TRACE", "0") == "1",
     }
 
     requested_exposure = ultra._arg_values("--exposure-card")
@@ -118,16 +215,15 @@ def main() -> int:
 
     import sim_v2_worker
 
-    # sim_v2_worker.main() normally imports the precision screen/adversarial
-    # configuration internally.  That is correct for precision experiments but
-    # would silently replace the architecture runner/pilot identity after this
-    # wrapper has installed architecture-aware card semantics and observation
-    # instrumentation.  Alias the already-loaded architecture config under the
-    # names main() imports so the exact configured runner is preserved.
+    # sim_v2_worker.main() normally imports the precision configuration. Alias
+    # the already-loaded architecture config so the exact configured runner is
+    # preserved.
     if mode == "adversarial":
         sys.modules["manabrew_pilot_precision_adv"] = config
     else:
         sys.modules["manabrew_pilot_precision"] = config
+
+    _install_forensic_stderr_capture(sim_v2_worker, runner)
 
     original_compact = sim_v2_worker.compact_result
 
@@ -148,6 +244,12 @@ def main() -> int:
         item["v2SessionCleanup"] = bool(result.get("v2SessionCleanup"))
         item["v2SessionCleanupError"] = result.get("v2SessionCleanupError")
         item["v2SemanticPromptAdvances"] = int(result.get("v2SemanticPromptAdvances") or 0)
+        if result.get("v2JvmStderrTail"):
+            item["v2JvmStderrTail"] = result.get("v2JvmStderrTail")
+        if result.get("v2HarnessActionTail"):
+            item["v2HarnessActionTail"] = result.get("v2HarnessActionTail")
+        if result.get("v2PilotTraceTail"):
+            item["v2PilotTraceTail"] = result.get("v2PilotTraceTail")
         return item
 
     sim_v2_worker.compact_result = compact_with_events
