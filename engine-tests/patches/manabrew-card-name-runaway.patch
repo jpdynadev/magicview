@@ -28,3 +28,31 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveC
                          return true;
                      }
                      final PaperCard cp = forge.StaticData.instance().getCommonCards().getCard(face.getName());
++
++diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
++--- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
+++++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
++@@ -1720,8 +1720,14 @@ public final class ManaBrewInteractiveSession {
++                 continue;
++             }
++             final String kind = action.has("kind") ? action.get("kind").getAsString() : "";
++             if (!"concede".equals(kind)) {
+++                // A prompt is outstanding only until the game thread consumes
+++                // its answer.  Keeping it published after consumption lets a
+++                // polling client mistake an acknowledged action for an
+++                // unacknowledged one and enqueue duplicate retries that can be
+++                // consumed by a later prompt.
+++                latestPromptJson = null;
+++                promptedPlayerIndex = -1;
++                 return action;
++             }
++             final int target = action.has("player")
++@@ -1734,6 +1740,8 @@ public final class ManaBrewInteractiveSession {
++             if (target != promptedPlayerIndex && !gameDecided()) {
++                 continue;
++             }
+++            latestPromptJson = null;
+++            promptedPlayerIndex = -1;
++             return syntheticPass();
++         }
++     }
