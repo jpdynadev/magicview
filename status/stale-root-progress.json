@@ -8,9 +8,45 @@
     {
       "id": 95936276094,
       "name": "build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 95939751553,
+      "name": "reproduce (1800013)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 95939751566,
+      "name": "reproduce (1800007)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 95939751604,
+      "name": "reproduce (1800000)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 95939751622,
+      "name": "reproduce (1800001)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 95939751691,
+      "name": "reproduce (1800020)",
       "status": "queued",
       "conclusion": null
     }
   ],
-  "artifacts": []
+  "artifacts": [
+    {
+      "id": 9350308416,
+      "name": "stale-root-runtime",
+      "size_in_bytes": 201428632
+    }
+  ]
 }
