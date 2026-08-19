@@ -1,0 +1,42 @@
+name: Kinnan idle forensic observer
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-idle-forensic-observer.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - name: Record latest forensic run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p status
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=100" --jq '[.workflow_runs[] | select(.name=="Kinnan idle-timeout root-cause forensic")][0]')
+          ID=$(jq -r '.id // empty' <<<"${RUN:-null}")
+          if [ -z "$ID" ]; then
+            jq -n '{found:false}' > status/kinnan-idle-forensic-progress.json
+          else
+            JOBS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
+            ARTS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/artifacts?per_page=100")
+            jq -n --argjson run "$RUN" --argjson jobs "$JOBS" --argjson arts "$ARTS" '{found:true,runId:$run.id,status:$run.status,conclusion:$run.conclusion,headSha:$run.head_sha,createdAt:$run.created_at,updatedAt:$run.updated_at,jobs:[$jobs.jobs[]|{id,name,status,conclusion}],artifacts:[$arts.artifacts[]|{id,name,size_in_bytes}]}' > status/kinnan-idle-forensic-progress.json
+          fi
+          cat status/kinnan-idle-forensic-progress.json
+      - name: Commit snapshot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add status/kinnan-idle-forensic-progress.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record idle forensic progress [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture
