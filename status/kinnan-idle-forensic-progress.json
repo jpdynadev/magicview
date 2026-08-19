@@ -1,29 +1,17 @@
 {
   "found": true,
-  "runId": 32311671569,
-  "status": "completed",
-  "conclusion": "failure",
-  "headSha": "939f64b85070f9e01e2cc4d4049562d43d8d4b37",
-  "createdAt": "2026-08-19T23:04:28Z",
-  "updatedAt": "2026-08-19T23:05:17Z",
+  "runId": 32312010780,
+  "status": "in_progress",
+  "conclusion": null,
+  "headSha": "e661a7e4a1c8d26a1142d5ccbe3228702dfc71c0",
+  "createdAt": "2026-08-19T23:09:10Z",
+  "updatedAt": "2026-08-19T23:09:14Z",
   "jobs": [
     {
-      "id": 96255738960,
+      "id": 96256746347,
       "name": "build",
-      "status": "completed",
-      "conclusion": "failure"
-    },
-    {
-      "id": 96255875808,
-      "name": "aggregate",
-      "status": "completed",
-      "conclusion": "success"
-    },
-    {
-      "id": 96255876658,
-      "name": "reproduce",
-      "status": "completed",
-      "conclusion": "skipped"
+      "status": "in_progress",
+      "conclusion": null
     }
   ],
   "artifacts": []
