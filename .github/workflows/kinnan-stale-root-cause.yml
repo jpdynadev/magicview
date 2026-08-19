@@ -1,4 +1,4 @@
-name: Kinnan stale root-cause forensic
+name: Kinnan idle-timeout root-cause forensic
 
 on:
   workflow_dispatch:
@@ -16,6 +16,7 @@ env:
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '1'
   SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: idle-regression-forensic-v9
 
 jobs:
   build:
@@ -31,8 +32,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
-      - name: Build pinned runtime on cache miss
+          key: manabrew-runtime-idle-forensic-v9-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build repaired runtime on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
           git init /tmp/manabrew
@@ -46,7 +47,7 @@ jobs:
           tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
       - uses: actions/upload-artifact@v4
         with:
-          name: stale-root-runtime
+          name: idle-forensic-runtime
           path: manabrew-runtime.tgz
           compression-level: 0
           retention-days: 2
@@ -54,22 +55,29 @@ jobs:
   reproduce:
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       max-parallel: 5
       matrix:
-        seed: [1800000, 1800001, 1800007, 1800013, 1800020]
+        include:
+          - {seat: 0, seed: 1960002, label: fail-s0}
+          - {seat: 1, seed: 1960071, label: fail-s1}
+          - {seat: 2, seed: 1960124, label: fail-s2}
+          - {seat: 3, seed: 1960162, label: fail-s3}
+          - {seat: 0, seed: 1960000, label: control-s0}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
         with: {distribution: temurin, java-version: '21'}
       - uses: actions/download-artifact@v4
-        with: {name: stale-root-runtime, path: runtime}
-      - name: Reproduce with full protocol evidence
+        with: {name: idle-forensic-runtime, path: runtime}
+      - name: Reproduce with full prompt/action/Forge evidence
         env:
           SEED: ${{ matrix.seed }}
-          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
+          SEAT: ${{ matrix.seat }}
+          LABEL: ${{ matrix.label }}
+          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.label }}.log
         run: |
           mkdir -p /tmp/manabrew out engine-tests/results
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
@@ -78,21 +86,21 @@ jobs:
           python3 engine-tests/sim_v2_worker_arch.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
-            --mode screen --variant F10 --fixed-seat 0 --seeds "$SEED" \
-            --max-round 4 --max-prompts 3500 --max-seconds 100 \
+            --mode screen --variant F10 --fixed-seat "$SEAT" --seeds "$SEED" \
+            --max-round 4 --max-prompts 5000 --max-seconds 160 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir .sim-cache/stale-root-cause --retain-traces failures \
-            --engine-id "$MANABREW_REF:stale-root-cause-v6" \
-            --output "out/result-${SEED}.json" 2>&1 | tee "out/worker-${SEED}.log"
+            --cache-dir ".sim-cache/idle-forensic-v9-${LABEL}" --retain-traces all \
+            --engine-id "$MANABREW_REF:idle-forensic-v9:${LABEL}" \
+            --output "out/result-${LABEL}.json" 2>&1 | tee "out/worker-${LABEL}.log"
           RC=${PIPESTATUS[0]}
           cp engine-tests/results/pilot-*"-${SEED}-"* out/ 2>/dev/null || true
           find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
-          echo "$RC" > "out/exit-${SEED}.txt"
+          echo "$RC" > "out/exit-${LABEL}.txt"
           exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: stale-root-${{ matrix.seed }}
+          name: idle-forensic-${{ matrix.label }}
           path: out/**
           if-no-files-found: error
           retention-days: 5
@@ -106,49 +114,35 @@ jobs:
         with: {ref: agent/kinnan-expanded-architecture}
       - uses: actions/download-artifact@v4
         with:
-          pattern: stale-root-18*
+          pattern: idle-forensic-*
           path: forensic
           merge-multiple: true
-      - name: Aggregate exact-seed evidence
+      - name: Aggregate regression evidence
         run: |
           python3 - <<'PY'
           import glob,json,os
-          completed={'game_over','horizon_complete'}
           rows=[]
           for path in sorted(glob.glob('forensic/result-*.json')):
               try:
-                  data=json.load(open(path))
-              except Exception as exc:
-                  rows.append({'path':path,'parseError':repr(exc)})
-                  continue
-              if isinstance(data,list): rows.extend(data)
-              elif isinstance(data,dict): rows.append(data)
-          statuses={}
-          for row in rows:
-              s=str(row.get('status'))
-              statuses[s]=statuses.get(s,0)+1
-          out={
-              'schema':'stale-root-exact-seed-v6',
-              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
-              'expectedSeeds':[1800000,1800001,1800007,1800013,1800020],
-              'records':len(rows),
-              'valid':sum(r.get('status') in completed for r in rows),
-              'stalePromptTimeouts':sum(r.get('status')=='stale_prompt_timeout' for r in rows),
-              'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
-              'wallTimeouts':sum(r.get('status')=='wall_timeout' for r in rows),
-              'statuses':statuses,
-              'rows':rows,
-          }
-          os.makedirs('engine-tests/results/stale-root-forensic',exist_ok=True)
-          json.dump(out,open('engine-tests/results/stale-root-forensic/latest.json','w'),indent=2,sort_keys=True)
+                  d=json.load(open(path)); r=d[0] if isinstance(d,list) and d else d
+                  if isinstance(r,dict): rows.append(r)
+              except Exception as exc: rows.append({'path':path,'parseError':repr(exc)})
+          completed={'game_over','horizon_complete'}
+          out={'schema':'idle-timeout-regression-v9','sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+               'expected':[[0,1960002],[1,1960071],[2,1960124],[3,1960162],[0,1960000]],
+               'records':len(rows),'valid':sum(r.get('status') in completed for r in rows),
+               'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
+               'stalePromptTimeouts':sum(r.get('status')=='stale_prompt_timeout' for r in rows),
+               'wallTimeouts':sum(r.get('status')=='wall_timeout' for r in rows),'rows':rows}
+          os.makedirs('engine-tests/results/idle-regression-forensic',exist_ok=True)
+          json.dump(out,open('engine-tests/results/idle-regression-forensic/latest.json','w'),indent=2,sort_keys=True)
           print(json.dumps(out,indent=2,sort_keys=True))
           PY
-      - name: Commit exact-seed evidence
+      - name: Commit regression evidence
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add engine-tests/results/stale-root-forensic/latest.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Record stale root exact-seed v6 evidence [skip ci]'
-            git push origin HEAD:agent/kinnan-expanded-architecture
-          fi
+          git add engine-tests/results/idle-regression-forensic/latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record idle-timeout regression forensic evidence [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture
