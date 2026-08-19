@@ -1,1 +1,2 @@
 2026-08-19 observe idle-timeout regression forensic v9
+2026-08-19 observe rerun after cumulative patch offset repair
