@@ -1,0 +1,30 @@
+{
+  "found": true,
+  "runId": 32311671569,
+  "status": "completed",
+  "conclusion": "failure",
+  "headSha": "939f64b85070f9e01e2cc4d4049562d43d8d4b37",
+  "createdAt": "2026-08-19T23:04:28Z",
+  "updatedAt": "2026-08-19T23:05:17Z",
+  "jobs": [
+    {
+      "id": 96255738960,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96255875808,
+      "name": "aggregate",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96255876658,
+      "name": "reproduce",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "artifacts": []
+}
