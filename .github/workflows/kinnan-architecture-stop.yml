@@ -1,0 +1,20 @@
+name: Kinnan architecture stop guard
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-architecture-stop.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-expanded-architecture
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Stopped incompatible architecture scale-out after validity regression"
