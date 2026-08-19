@@ -9,3 +9,4 @@
 2026-08-18 forensic v4: same exact seeds plus 5-second JVM Thread.print samples so a live deadlock cannot hide behind stale_prompt_timeout.
 2026-08-18 prompt-scoped queue v5: rebuild with action promptSeq binding, consumed-prompt ACK, late retry discard, explicit engineError/gameOver terminal prompts; rerun exact known stale seeds.
 2026-08-18 root-fix v6: preserve chooseColor W/U/B/R/G/C -> full-name decoding, transmit actual answered promptId, reject superseded promptId server-side, retain promptSeq fallback; rerun exact five seeds with fresh patched runtime.
+2026-08-19 strict repaired v8 screen: 12 architectures x exactly 200 valid paired keys, balanced seats, common seed bank, jvm-reuse=1; retry invalid seed up to 3 fresh identities; preserve stale/idle/wall/engine attempts separately; hard-block ranking/confirmation unless F10 and every challenger have 200 unique valid keys and exact 200-key pairing.
