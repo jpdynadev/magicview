@@ -5,3 +5,4 @@
 2026-08-18 durable v6 validation: dedicated workflow commits exact five-seed aggregate to engine-tests/results/stale-root-forensic/latest.json.
 2026-08-19 rerun exact five seeds after repairing malformed runtime patch hunk counts; no architecture compute.
 2026-08-19 rerun exact five seeds after repairing all remaining patch hunk lengths; no architecture compute.
+2026-08-19 automation rerun exact five seeds against prompt-scoped queue v5/v6 repair; retain stderr/action/pilot/jstack evidence; no scale-out.
