@@ -6,3 +6,4 @@
 2026-08-18 root-cause forensic takeover: registered architecture workflow now runs only F10 seat0 seeds 1800000,1800001,1800007,1800013,1800020 with Forge stderr, decoded action tail and pilot trace tail preserved in result JSON.
 2026-08-18 forensic v3: same five seeds, and aggregate commits self-contained stderr/action/pilot evidence to engine-tests/results/stale-root-forensic/latest.json.
 2026-08-18 prompt-ack v3 validation: rebuild pinned Manabrew with prompt-cleared-on-consume semantics and dedupe exact same-prompt submissions; rerun the same five seeds and commit forensic evidence.
+2026-08-18 forensic v4: same exact seeds plus 5-second JVM Thread.print samples so a live deadlock cannot hide behind stale_prompt_timeout.
