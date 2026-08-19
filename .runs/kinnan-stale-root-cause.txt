@@ -1,1 +1,2 @@
 2026-08-18 root-cause forensic: F10 seat0 known-good 1800000 plus stale seeds 1800001 1800007 1800013 1800020; preserve pilot trace, Forge stderr, and decoded harness action trace.
+2026-08-18 retrigger after workflow registration; same failing seeds, no architecture compute.
