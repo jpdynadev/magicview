@@ -6,6 +6,10 @@ on:
     branches: [main]
     paths: [.runs/kinnan-progress-observer.txt]
 
+concurrency:
+  group: kinnan-expanded-architecture
+  cancel-in-progress: true
+
 permissions:
   actions: read
   contents: write
