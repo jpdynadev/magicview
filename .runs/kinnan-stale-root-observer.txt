@@ -1,2 +1,3 @@
 2026-08-18 check root-cause forensic run and artifacts
 2026-08-18 recheck root-cause forensic run after trigger
+2026-08-18 check main forensic workflow
