@@ -32,7 +32,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveC
 diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
 --- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
 +++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
-@@ -47,9 +47,10 @@ public final class ManaBrewInteractiveSession {
+@@ -47,10 +47,11 @@ public final class ManaBrewInteractiveSession {
      private final BlockingQueue<JsonObject> actions = new LinkedBlockingQueue<>();
      private volatile String latestPromptJson;
      private volatile int promptedPlayerIndex = -1;
@@ -170,7 +170,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManabrewProtocolAdap
              flat.addProperty("value", value);
              return flat;
          }
-@@ -239,6 +239,22 @@ final class ManabrewProtocolAdapter {
+@@ -239,4 +239,20 @@ final class ManabrewProtocolAdapter {
          return flat;
      }
 +
