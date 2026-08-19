@@ -1,0 +1,317 @@
+{
+  "found": true,
+  "runId": 32307447721,
+  "status": "queued",
+  "conclusion": null,
+  "headSha": "56d0c5a0da435500c947de45cb3511e3e1aa3964",
+  "createdAt": "2026-08-19T22:09:10Z",
+  "updatedAt": "2026-08-19T22:09:26Z",
+  "jobs": [
+    {
+      "id": 96243182873,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241334,
+      "name": "screen (COPY_CORE, 1)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241347,
+      "name": "screen (COPY_CORE, 0)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241351,
+      "name": "screen (F10, 3)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241377,
+      "name": "screen (DRUID_EFFIGY, 1)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241388,
+      "name": "screen (F10, 0)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241426,
+      "name": "screen (COPY_CREATURE, 2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241438,
+      "name": "screen (COPY_CORE, 3)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241440,
+      "name": "screen (COPY_CREATURE, 1)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241446,
+      "name": "screen (COPY_DRUID, 0)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241452,
+      "name": "screen (COPY_CREATURE, 0)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241453,
+      "name": "screen (COPY_CREATURE, 3)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241458,
+      "name": "screen (COPY_CORE, 2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241461,
+      "name": "screen (F10, 1)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241464,
+      "name": "screen (DRUID_EFFIGY, 2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241493,
+      "name": "screen (COPY_ARTIFACT, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241504,
+      "name": "screen (DRUID_EFFIGY, 3)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241513,
+      "name": "screen (COPY_DRUID, 1)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241514,
+      "name": "screen (COPY_DRUID, 3)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241524,
+      "name": "screen (COPY_HEAVY, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241529,
+      "name": "screen (COPY_DRUID, 2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241531,
+      "name": "screen (COPY_PROTECTED, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241538,
+      "name": "screen (COPY_HEAVY, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241542,
+      "name": "screen (COPY_HEAVY, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241549,
+      "name": "screen (COPY_ARTIFACT, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241550,
+      "name": "screen (COPY_ARTIFACT, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241565,
+      "name": "screen (COPY_HEAVY, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241588,
+      "name": "screen (DRUID_EFFIGY, 0)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241617,
+      "name": "screen (COPY_PROTECTED, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243241672,
+      "name": "screen (F10, 2)",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "id": 96243241676,
+      "name": "screen (COPY_ARTIFACT, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242448,
+      "name": "screen (COPY_PROTECTED, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242820,
+      "name": "screen (DRUID_TUTOR, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242833,
+      "name": "screen (COPY_PROTECTED, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242850,
+      "name": "screen (DRUID_TUTOR, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242854,
+      "name": "screen (DRUID_TUTOR, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242857,
+      "name": "screen (DRUID_TUTOR, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242860,
+      "name": "screen (TUTOR_DENSE, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242864,
+      "name": "screen (TUTOR_DENSE, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243242928,
+      "name": "screen (TUTOR_DENSE, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243051,
+      "name": "screen (TUTOR_DENSE, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243743,
+      "name": "screen (COPY_VALUE, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243750,
+      "name": "screen (NODE_DENSE, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243759,
+      "name": "screen (NODE_DENSE, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243765,
+      "name": "screen (NODE_DENSE, 3)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243770,
+      "name": "screen (NODE_DENSE, 0)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243816,
+      "name": "screen (COPY_VALUE, 1)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243243865,
+      "name": "screen (COPY_VALUE, 2)",
+      "status": "queued",
+      "conclusion": null
+    },
+    {
+      "id": 96243244158,
+      "name": "screen (COPY_VALUE, 3)",
+      "status": "queued",
+      "conclusion": null
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 9385815247,
+      "name": "arch-repaired-v8-COPY_CORE-seat3",
+      "size_in_bytes": 280237
+    },
+    {
+      "id": 9385200233,
+      "name": "arch-repaired-v8-runtime",
+      "size_in_bytes": 201424190
+    }
+  ]
+}
