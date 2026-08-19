@@ -18,8 +18,9 @@ env:
   PYTHONUNBUFFERED: '1'
   SIM_V2_EARLY_SUCCESS: '0'
   SIM_V2_EXACT_DEADLINE: '0'
-  SIM_V2_TRACE: '1'
-  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v8-screen-cold
 
 jobs:
   build:
@@ -35,8 +36,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-root-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
-      - name: Build pinned runtime on cache miss
+          key: manabrew-runtime-arch-repaired-v8-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned repaired runtime on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
           git init /tmp/manabrew
@@ -50,72 +51,132 @@ jobs:
           tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
       - uses: actions/upload-artifact@v4
         with:
-          name: arch-root-runtime
+          name: arch-repaired-v8-runtime
           path: manabrew-runtime.tgz
           compression-level: 0
           retention-days: 2
 
-  forensic:
+  screen:
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 210
     strategy:
       fail-fast: false
-      max-parallel: 5
+      max-parallel: 20
       matrix:
-        seed: [1800000, 1800001, 1800007, 1800013, 1800020]
+        variant: [F10, COPY_CORE, COPY_CREATURE, DRUID_EFFIGY, COPY_DRUID, COPY_HEAVY, COPY_ARTIFACT, COPY_PROTECTED, DRUID_TUTOR, TUTOR_DENSE, NODE_DENSE, COPY_VALUE]
+        seat: [0,1,2,3]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
         with: {distribution: temurin, java-version: '21'}
       - uses: actions/download-artifact@v4
-        with: {name: arch-root-runtime, path: runtime}
-      - name: Run cold F10 game with stderr, protocol trace, and JVM thread dumps
+        with: {name: arch-repaired-v8-runtime, path: runtime}
+      - name: Run 50 exact-paired repaired games with invalid replay
         env:
-          SEED: ${{ matrix.seed }}
-          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
         run: |
-          mkdir -p /tmp/manabrew out engine-tests/results
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
           python3 engine-tests/generate_architecture_decks_v2.py
-          set +e
-          python3 engine-tests/sim_v2_worker_arch.py \
-            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
-            /tmp/manabrew/forge/forge-gui/ \
-            --mode screen --variant F10 --fixed-seat 0 --seeds "$SEED" \
-            --max-round 4 --max-prompts 3500 --max-seconds 100 \
-            --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir ".sim-cache/root-${SEED}-${GITHUB_RUN_ID}" --retain-traces all \
-            --engine-id "$MANABREW_REF:root-cause-jstack-v4" \
-            --output "out/F10-${SEED}.json" > >(tee "out/F10-${SEED}.log") 2>&1 &
-          WORKER=$!
-          (
-            for N in $(seq 1 18); do
-              sleep 5
-              kill -0 "$WORKER" 2>/dev/null || break
-              for JPID in $(pgrep -f 'forge-harness-jar-with-dependencies.jar.*interactive-server' 2>/dev/null || true); do
-                echo "===== seed=$SEED sample=$N pid=$JPID at=$(date -u +%FT%TZ) ====="
-                jcmd "$JPID" Thread.print -l || true
-              done
+          python3 -m py_compile engine-tests/sim_v2_worker_arch.py engine-tests/rank_architecture_screen_v2.py
+
+          mapfile -t EXPOSURE_CARDS < <(python3 - "$VARIANT" <<'PY'
+          import sys
+          import engine_tests_dummy
+          PY
+          ) || true
+          # Import by path because engine-tests is not a package.
+          mapfile -t EXPOSURE_CARDS < <(python3 - "$VARIANT" <<'PY'
+          import importlib.util, pathlib, sys
+          variant=sys.argv[1]
+          path=pathlib.Path('engine-tests/generate_architecture_decks_v2.py')
+          spec=importlib.util.spec_from_file_location('archgen', path)
+          mod=importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+          cards = mod.F10_ADDS if variant == 'F10' else mod.SPECS[variant][1]
+          for card in cards: print(card)
+          PY
+          )
+          EXP_ARGS=()
+          for CARD in "${EXPOSURE_CARDS[@]}"; do EXP_ARGS+=(--exposure-card "$CARD"); done
+
+          BASE=$((1960000 + SEAT * 50))
+          : > "out/${VARIANT}-seat${SEAT}-errors.ndjson"
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET))
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-seat${SEAT}-seed${SEED}-try${TRY}.json"
+              CACHE=".sim-cache/arch-repaired-v8-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-repaired-v8:${GITHUB_RUN_ID}:try${TRY}"
+              set +e
+              python3 engine-tests/sim_v2_worker_arch.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode screen --variant "$VARIANT" --fixed-seat "$SEAT" \
+                --seeds "$SEED" --max-round 4 --max-prompts 3500 --max-seconds 130 \
+                --jvm-reuse 1 --xmx 1280m --xms 192m \
+                --cache-dir "$CACHE" --retain-traces failures \
+                --engine-id "$ENGINE" "${EXP_ARGS[@]}" \
+                --output "$ATT" > "out/attempts/${VARIANT}-seat${SEAT}-seed${SEED}-try${TRY}.log" 2>&1
+              RC=$?
+              set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
+              print(r.get('status','missing') if isinstance(r,dict) else 'missing')
+          except Exception:
+              print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                cp "$ATT" "out/valid/${VARIANT}-seat${SEAT}-seed${SEED}.json"
+                OK=1
+                break
+              fi
+              python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-errors.ndjson" <<'PY'
+          import json,sys
+          path,variant,seat,seed,attempt,status,rc=sys.argv[1:]
+          row={'variant':variant,'seat':int(seat),'seed':int(seed),'attempt':int(attempt),'status':status,'rc':int(rc)}
+          try:
+              d=json.load(open(path)); r=d[0] if isinstance(d,list) and d else d
+              if isinstance(r,dict):
+                  row.update({k:r.get(k) for k in ['primaryFailureCode','wallMs','error','v2SessionCleanupError'] if r.get(k) is not None})
+          except Exception as exc:
+              row['parseError']=repr(exc)
+          print(json.dumps(row,sort_keys=True))
+          PY
             done
-          ) > "out/jstack-${SEED}.log" 2>&1 &
-          WATCH=$!
-          wait "$WORKER"
-          RC=$?
-          wait "$WATCH" || true
-          find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
-          echo "$RC" > "out/exit-${SEED}.txt"
-          exit 0
+            if [ "$OK" -ne 1 ]; then
+              echo "unresolved invalid key variant=$VARIANT seat=$SEAT seed=$SEED after 3 attempts" >&2
+            fi
+          done
+
+          python3 - "$VARIANT" "$SEAT" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2])
+          rows=[]
+          for p in glob.glob(f'out/valid/{v}-seat{seat}-seed*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              rows.append(r)
+          keys={(int(r['seed']),int(r['kinnanSeat'])) for r in rows if r.get('status') in {'game_over','horizon_complete'}}
+          print(json.dumps({'variant':v,'seat':seat,'valid':len(rows),'uniqueKeys':len(keys)},sort_keys=True))
+          if len(rows)!=50 or len(keys)!=50:
+              raise SystemExit(1)
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: arch-root-F10-${{ matrix.seed }}
+          name: arch-repaired-v8-${{ matrix.variant }}-seat${{ matrix.seat }}
           path: out/**
           if-no-files-found: error
-          retention-days: 5
+          retention-days: 10
 
   aggregate:
-    needs: forensic
+    needs: screen
     if: always()
     runs-on: ubuntu-24.04
     steps:
@@ -123,45 +184,47 @@ jobs:
         with: {ref: agent/kinnan-expanded-architecture}
       - uses: actions/download-artifact@v4
         with:
-          pattern: arch-root-F10-*
-          path: forensic
-          merge-multiple: true
-      - name: Build durable forensic summary
+          pattern: arch-repaired-v8-*
+          path: all
+      - name: Rank only exact complete paired samples
         run: |
+          set -euo pipefail
+          python3 engine-tests/rank_architecture_screen_v2.py --input 'all/**/valid/*.json' --output arch-repaired-v8-ranking.json
           python3 - <<'PY'
-          import glob,json,os,pathlib,re
-          rows=[]
-          for path in sorted(glob.glob('forensic/F10-*.json')):
-              try:
-                  data=json.load(open(path))
-              except Exception as exc:
-                  rows.append({'path':path,'parseError':repr(exc)})
-                  continue
-              items=data if isinstance(data,list) else [data]
-              for row in items:
-                  if isinstance(row,dict) and row.get('seed') is not None:
-                      seed=str(row['seed'])
-                      jp=pathlib.Path(f'forensic/jstack-{seed}.log')
-                      if jp.exists():
-                          text=jp.read_text(errors='replace')
-                          row['v2JstackTail']=text[-24000:]
-                  rows.append(row)
-          out={
-              'schema':'stale-root-forensic-v4',
-              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
-              'records':len(rows),
-              'rows':rows,
-          }
-          os.makedirs('engine-tests/results/stale-root-forensic',exist_ok=True)
-          json.dump(out,open('engine-tests/results/stale-root-forensic/latest.json','w'),indent=2,sort_keys=True)
-          print(json.dumps(out,indent=2,sort_keys=True))
+          import glob,json,collections
+          attempts=[]
+          for p in glob.glob('all/**/*.ndjson',recursive=True):
+              for line in open(p,errors='replace'):
+                  try: attempts.append(json.loads(line))
+                  except Exception: pass
+          d=json.load(open('arch-repaired-v8-ranking.json'))
+          errs=collections.Counter(str(r.get('status')) for r in attempts)
+          d['invalidAttempts']=len(attempts)
+          d['invalidAttemptStatuses']=dict(sorted(errs.items()))
+          d['sourceRunId']=__import__('os').environ.get('GITHUB_RUN_ID')
+          d['profile']=__import__('os').environ.get('SIM_V2_PROFILE')
+          json.dump(d,open('arch-repaired-v8-ranking.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(d,indent=2,sort_keys=True))
+          assert d['baselineComplete'] is True, d
+          assert d['baselineValid']==200, d
+          for row in d['ranking']:
+              assert row['valid']==200, row
+              if row['variant']!='F10': assert row['pairedN']==200, row
           PY
-      - name: Commit forensic evidence
+      - name: Commit durable repaired screen ranking
         run: |
+          mkdir -p engine-tests/results/architecture-repaired-v8
+          cp arch-repaired-v8-ranking.json engine-tests/results/architecture-repaired-v8/latest.json
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add engine-tests/results/stale-root-forensic/latest.json
+          git add engine-tests/results/architecture-repaired-v8/latest.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Record stale root-cause forensic evidence [skip ci]'
+            git commit -m 'Record strict repaired architecture screen [skip ci]'
             git push origin HEAD:agent/kinnan-expanded-architecture
           fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arch-repaired-v8-ranking
+          path: arch-repaired-v8-ranking.json
+          retention-days: 14
