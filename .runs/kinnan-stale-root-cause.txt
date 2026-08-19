@@ -2,3 +2,4 @@
 2026-08-18 retrigger after workflow registration; same failing seeds, no architecture compute.
 2026-08-18 rerun exact five seeds after canonical W/U/B/R/G/C -> Forge color-name decoder fix.
 2026-08-18 final v6 rerun: color-name decoder + client answered promptId + server promptId rejection + promptSeq fallback + consumed-prompt ACK.
+2026-08-18 durable v6 validation: dedicated workflow commits exact five-seed aggregate to engine-tests/results/stale-root-forensic/latest.json.
