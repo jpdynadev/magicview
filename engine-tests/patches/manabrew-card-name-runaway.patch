@@ -150,3 +150,34 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
              return syntheticPass();
          }
      }
+
+diff --git a/forge-harness/src/main/java/forge/harness/host/ManabrewProtocolAdapter.java b/forge-harness/src/main/java/forge/harness/host/ManabrewProtocolAdapter.java
+--- a/forge-harness/src/main/java/forge/harness/host/ManabrewProtocolAdapter.java
++++ b/forge-harness/src/main/java/forge/harness/host/ManabrewProtocolAdapter.java
+@@ -222,7 +222,7 @@ final class ManabrewProtocolAdapter {
+         final JsonObject flat = new JsonObject();
+         if (total <= 1) {
+             flat.addProperty("kind", "string_decision");
+-            final String value = map.entrySet().isEmpty() ? "" : map.entrySet().iterator().next().getKey();
++            final String value = map.entrySet().isEmpty() ? "" : fullColorName(map.entrySet().iterator().next().getKey());
+             flat.addProperty("value", value);
+             return flat;
+         }
+@@ -239,6 +239,22 @@ final class ManabrewProtocolAdapter {
+         return flat;
+     }
++
++    private static String fullColorName(final String token) {
++        switch (token) {
++            case "W": return "White";
++            case "U": return "Blue";
++            case "B": return "Black";
++            case "R": return "Red";
++            case "G": return "Green";
++            case "C": return "Colorless";
++            default: return token;
++        }
++    }
+ 
+     private static JsonObject parseActionId(final String actionId) {
+         final JsonObject flat = new JsonObject();
