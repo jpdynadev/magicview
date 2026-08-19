@@ -16,7 +16,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveC
          return chooseCardName(sa, faces, message);
      }
  
-@@ -2551,7 +2559,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
+@@ -2552,7 +2560,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
          forge.StaticData.instance().getCommonCards().streamAllFaces()
                  .filter(faceFilter)
                  .filter(face -> {
