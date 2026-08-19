@@ -7,8 +7,7 @@ must still request jvm-reuse=1 until the persistent equivalence gate clears.
 
 Diagnostic runs can set SIM_V2_TRACE=1 or SIM_V2_CAPTURE_STDERR=1. In that
 mode the wrapper preserves the Forge JVM stderr tail, the harness decoded-action
-tail and the pilot prompt/answer tail directly in each compact result. This is
-important because sim_v2_worker normally redirects pooled JVM stderr to DEVNULL.
+tail and the pilot prompt/answer tail directly in each compact result.
 """
 from __future__ import annotations
 
@@ -43,15 +42,74 @@ def _pilot_trace_tail(runner, result, limit: int = 12):
         return None
 
 
-def _install_forensic_stderr_capture(worker, runner) -> None:
-    """Capture stderr without changing trusted game semantics.
+def _install_prompt_submission_guard(runner) -> None:
+    """Prevent a retry for one prompt from leaking into the next prompt.
 
-    ForgeJvmPool normally replaces the pilot's stderr=PIPE with DEVNULL. That
-    made game-thread RuntimeExceptions invisible and caused stale_prompt_timeout
-    to be a diagnostic dead end. In forensic mode we redirect each pooled JVM's
-    stderr to a temporary file instead, keep the pilot-facing BorrowedProc
-    semantics unchanged, and copy only the tail into the result after the game.
+    Manabrew's action queue is session-wide and submitAction historically did
+    not carry a prompt id. The v8 pilot can resend a pass while the same prompt
+    is still visible. If Forge has already consumed the first pass but has not
+    yet replaced latestPromptJson, a duplicate can remain queued and be consumed
+    by a later, unrelated decision. Track the latest *original* prompt id at the
+    RPC boundary and suppress only an exact duplicate payload for that same id.
     """
+    original_rpc = runner.base.rpc
+    current_prompt: dict[str, str] = {}
+    submitted: set[tuple[str, str, str]] = set()
+    stats = {"suppressed": 0}
+
+    def guarded_rpc(proc, request):
+        command = request.get("command")
+        session = str(request.get("sessionId") or "")
+        if command == "submitAction":
+            prompt_id = current_prompt.get(session, "")
+            payload = str(request.get("payload") or "")
+            key = (session, prompt_id, payload)
+            if prompt_id and key in submitted:
+                stats["suppressed"] += 1
+                return ""
+            if prompt_id:
+                submitted.add(key)
+            return original_rpc(proc, request)
+
+        raw = original_rpc(proc, request)
+        if command == "getPrompt":
+            if raw:
+                try:
+                    prompt = json.loads(raw)
+                    pid = str(prompt.get("promptId") or "")
+                    if pid:
+                        previous = current_prompt.get(session)
+                        if previous != pid:
+                            current_prompt[session] = pid
+                            # Bound memory to the current prompt for this session.
+                            submitted_copy = {k for k in submitted if k[0] != session or k[1] == pid}
+                            submitted.clear()
+                            submitted.update(submitted_copy)
+                except Exception:
+                    pass
+        return raw
+
+    runner.base.rpc = guarded_rpc
+    runner._V2_PROMPT_GUARD_STATS = stats
+
+
+def _attach_prompt_guard_metric(runner) -> None:
+    stats = getattr(runner, "_V2_PROMPT_GUARD_STATS", None)
+    if not stats:
+        return
+    original_run = runner.run_game
+
+    def guarded_run(*args, **kwargs):
+        before = int(stats.get("suppressed", 0))
+        result = original_run(*args, **kwargs)
+        result["v2DuplicateSubmitsSuppressed"] = int(stats.get("suppressed", 0)) - before
+        return result
+
+    runner.run_game = guarded_run
+
+
+def _install_forensic_stderr_capture(worker, runner) -> None:
+    """Capture Forge stderr without changing the borrowed-JVM lifecycle."""
     enabled = os.getenv("SIM_V2_CAPTURE_STDERR", "0") == "1" or os.getenv("SIM_V2_TRACE", "0") == "1"
     if not enabled:
         return
@@ -120,13 +178,7 @@ def _install_forensic_stderr_capture(worker, runner) -> None:
 
 
 def _install_semantic_prompt_ids(runner) -> None:
-    """Retain the prior semantic-prompt probe for comparability.
-
-    The 96-game validation proved this mechanism does not explain the stale
-    failures (zero semantic advances), but leaving the no-op probe in place keeps
-    pre/post forensic records directly comparable until the actual root cause is
-    repaired.
-    """
+    """Retain the prior disproven probe only for pre/post comparability."""
     original_run = runner.run_game
 
     def semantic_run_game(*args, **kwargs):
@@ -143,18 +195,12 @@ def _install_semantic_prompt_ids(runner) -> None:
                 prompt = json.loads(raw)
             except Exception:
                 return raw
-
             original_id = prompt.get("promptId")
             material = {
                 "decidingPlayerId": prompt.get("decidingPlayerId"),
                 "input": prompt.get("input") or {},
             }
-            encoded = json.dumps(
-                material,
-                sort_keys=True,
-                separators=(",", ":"),
-                ensure_ascii=False,
-            ).encode("utf-8")
+            encoded = json.dumps(material, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
             signature = hashlib.sha256(encoded).hexdigest()[:16]
             key = (str(request.get("sessionId") or ""), str(original_id))
             previous = last_signature.get(key)
@@ -176,7 +222,7 @@ def _install_semantic_prompt_ids(runner) -> None:
 
 
 def main() -> int:
-    os.environ.setdefault("SIM_V2_PROFILE", "arch-cold-v2-semantic-prompt")
+    os.environ.setdefault("SIM_V2_PROFILE", "arch-cold-v3-prompt-ack")
     mode = ultra._arg_value("--mode", "screen")
     variant = ultra._arg_value("--variant", "")
 
@@ -198,15 +244,23 @@ def main() -> int:
         "sessionLifecycle": "abort+reset",
         "policy": "architecture-aware",
         "semanticPromptIdentity": True,
+        "promptConsumptionAck": True,
+        "duplicateSubmitGuard": True,
         "forensicStderrCapture": os.getenv("SIM_V2_CAPTURE_STDERR", "0") == "1" or os.getenv("SIM_V2_TRACE", "0") == "1",
     }
 
     requested_exposure = ultra._arg_values("--exposure-card")
     deck_path = runner.base.DECK_DIR / runner.VARIANT_FILES[variant]
     observation_universe = sorted(set(ultra._deck_card_names(deck_path)) | set(requested_exposure))
+
+    # Install the RPC guard first so observation/lifecycle wrappers retain it as
+    # their underlying transport.
+    _install_prompt_submission_guard(runner)
     _install_semantic_prompt_ids(runner)
     ultra._install_observation_tracker(runner, observation_universe)
     ultra._install_session_lifecycle(runner)
+    _attach_prompt_guard_metric(runner)
+
     print(
         "SIM_V2_ARCH_CONFIG "
         + json.dumps({**runner._SIM_V2_HOTPATCH_META, "variant": variant, "observationUniverse": len(observation_universe)}, sort_keys=True),
@@ -214,17 +268,12 @@ def main() -> int:
     )
 
     import sim_v2_worker
-
-    # sim_v2_worker.main() normally imports the precision configuration. Alias
-    # the already-loaded architecture config so the exact configured runner is
-    # preserved.
     if mode == "adversarial":
         sys.modules["manabrew_pilot_precision_adv"] = config
     else:
         sys.modules["manabrew_pilot_precision"] = config
 
     _install_forensic_stderr_capture(sim_v2_worker, runner)
-
     original_compact = sim_v2_worker.compact_result
 
     def compact_with_events(result, cards):
@@ -244,6 +293,7 @@ def main() -> int:
         item["v2SessionCleanup"] = bool(result.get("v2SessionCleanup"))
         item["v2SessionCleanupError"] = result.get("v2SessionCleanupError")
         item["v2SemanticPromptAdvances"] = int(result.get("v2SemanticPromptAdvances") or 0)
+        item["v2DuplicateSubmitsSuppressed"] = int(result.get("v2DuplicateSubmitsSuppressed") or 0)
         if result.get("v2JvmStderrTail"):
             item["v2JvmStderrTail"] = result.get("v2JvmStderrTail")
         if result.get("v2HarnessActionTail"):
