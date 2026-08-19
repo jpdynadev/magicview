@@ -70,7 +70,7 @@ jobs:
         with: {distribution: temurin, java-version: '21'}
       - uses: actions/download-artifact@v4
         with: {name: arch-root-runtime, path: runtime}
-      - name: Run one cold F10 game with self-contained forensic record
+      - name: Run cold F10 game with stderr, protocol trace, and JVM thread dumps
         env:
           SEED: ${{ matrix.seed }}
           MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
@@ -86,9 +86,23 @@ jobs:
             --max-round 4 --max-prompts 3500 --max-seconds 100 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
             --cache-dir ".sim-cache/root-${SEED}-${GITHUB_RUN_ID}" --retain-traces all \
-            --engine-id "$MANABREW_REF:root-cause-stderr-v3" \
-            --output "out/F10-${SEED}.json" 2>&1 | tee "out/F10-${SEED}.log"
-          RC=${PIPESTATUS[0]}
+            --engine-id "$MANABREW_REF:root-cause-jstack-v4" \
+            --output "out/F10-${SEED}.json" > >(tee "out/F10-${SEED}.log") 2>&1 &
+          WORKER=$!
+          (
+            for N in $(seq 1 18); do
+              sleep 5
+              kill -0 "$WORKER" 2>/dev/null || break
+              for JPID in $(pgrep -f 'forge-harness-jar-with-dependencies.jar.*interactive-server' 2>/dev/null || true); do
+                echo "===== seed=$SEED sample=$N pid=$JPID at=$(date -u +%FT%TZ) ====="
+                jcmd "$JPID" Thread.print -l || true
+              done
+            done
+          ) > "out/jstack-${SEED}.log" 2>&1 &
+          WATCH=$!
+          wait "$WORKER"
+          RC=$?
+          wait "$WATCH" || true
           find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
           echo "$RC" > "out/exit-${SEED}.txt"
           exit 0
@@ -115,7 +129,7 @@ jobs:
       - name: Build durable forensic summary
         run: |
           python3 - <<'PY'
-          import glob,json,os
+          import glob,json,os,pathlib,re
           rows=[]
           for path in sorted(glob.glob('forensic/F10-*.json')):
               try:
@@ -123,10 +137,17 @@ jobs:
               except Exception as exc:
                   rows.append({'path':path,'parseError':repr(exc)})
                   continue
-              if isinstance(data,list): rows.extend(data)
-              elif isinstance(data,dict): rows.append(data)
+              items=data if isinstance(data,list) else [data]
+              for row in items:
+                  if isinstance(row,dict) and row.get('seed') is not None:
+                      seed=str(row['seed'])
+                      jp=pathlib.Path(f'forensic/jstack-{seed}.log')
+                      if jp.exists():
+                          text=jp.read_text(errors='replace')
+                          row['v2JstackTail']=text[-24000:]
+                  rows.append(row)
           out={
-              'schema':'stale-root-forensic-v3',
+              'schema':'stale-root-forensic-v4',
               'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
               'records':len(rows),
               'rows':rows,
