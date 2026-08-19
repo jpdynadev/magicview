@@ -7,7 +7,7 @@ on:
     paths: [.runs/kinnan-stale-root-cause.txt]
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
@@ -15,6 +15,7 @@ env:
   SIM_V2_EARLY_SUCCESS: '0'
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
 
 jobs:
   build:
@@ -81,7 +82,7 @@ jobs:
             --max-round 4 --max-prompts 3500 --max-seconds 100 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
             --cache-dir .sim-cache/stale-root-cause --retain-traces failures \
-            --engine-id "$MANABREW_REF:stale-root-cause-v1" \
+            --engine-id "$MANABREW_REF:stale-root-cause-v6" \
             --output "out/result-${SEED}.json" 2>&1 | tee "out/worker-${SEED}.log"
           RC=${PIPESTATUS[0]}
           cp engine-tests/results/pilot-*"-${SEED}-"* out/ 2>/dev/null || true
@@ -95,3 +96,59 @@ jobs:
           path: out/**
           if-no-files-found: error
           retention-days: 5
+
+  aggregate:
+    needs: reproduce
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stale-root-18*
+          path: forensic
+          merge-multiple: true
+      - name: Aggregate exact-seed evidence
+        run: |
+          python3 - <<'PY'
+          import glob,json,os
+          completed={'game_over','horizon_complete'}
+          rows=[]
+          for path in sorted(glob.glob('forensic/result-*.json')):
+              try:
+                  data=json.load(open(path))
+              except Exception as exc:
+                  rows.append({'path':path,'parseError':repr(exc)})
+                  continue
+              if isinstance(data,list): rows.extend(data)
+              elif isinstance(data,dict): rows.append(data)
+          statuses={}
+          for row in rows:
+              s=str(row.get('status'))
+              statuses[s]=statuses.get(s,0)+1
+          out={
+              'schema':'stale-root-exact-seed-v6',
+              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+              'expectedSeeds':[1800000,1800001,1800007,1800013,1800020],
+              'records':len(rows),
+              'valid':sum(r.get('status') in completed for r in rows),
+              'stalePromptTimeouts':sum(r.get('status')=='stale_prompt_timeout' for r in rows),
+              'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
+              'wallTimeouts':sum(r.get('status')=='wall_timeout' for r in rows),
+              'statuses':statuses,
+              'rows':rows,
+          }
+          os.makedirs('engine-tests/results/stale-root-forensic',exist_ok=True)
+          json.dump(out,open('engine-tests/results/stale-root-forensic/latest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Commit exact-seed evidence
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/results/stale-root-forensic/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record stale root exact-seed v6 evidence [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
