@@ -44,6 +44,14 @@
       "hypothesis": "A flash-oriented value package may improve card quality and interaction timing while keeping clone connectivity; test primarily in midrange and mixed adversarial pods after architecture screening.",
       "priority": 5,
       "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Valley Floodcaller 89.3%, Wan Shi Tong 85.1%, Clever Impersonator 90.1%. Observational correlations are hypothesis-only."
+    },
+    {
+      "id": "PKG_STEAL_COPY",
+      "class": "2-4_card_package",
+      "adds": ["Steal Enchantment", "Copy Enchantment", "Clever Impersonator"],
+      "hypothesis": "A compact enchantment-copy/theft package may outperform pure clone density in midrange and mixed pods by converting opposing Rhystic Study, Mystic Remora and other high-value enchantments into card advantage while retaining flexible copy connectivity.",
+      "priority": 6,
+      "evidence_note": "Fresh 2026-08-19 research: cEDHStats six-month Kinnan decklist search reports 203 tournament lists containing Steal Enchantment, including Robert R 6/195 at Pittsburgh 2026 (2026-07-11), EnderMorph 1/90 at TM Circuit Verse 2: Song (2026-07-11), Clorox Mox 1/62 at Mox Diamond $5k (2026-06-28), and Robert R 6/137 at NJcEDH SINKHOLE 2 (2026-07-19). This is hypothesis-generation evidence only; controlled paired simulation remains the promotion gate."
     }
   ],
   "measurement": {
