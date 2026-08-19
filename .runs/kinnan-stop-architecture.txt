@@ -1,0 +1,1 @@
+2026-08-18 stop run 32193352761 after failed stale-prompt validity gate
