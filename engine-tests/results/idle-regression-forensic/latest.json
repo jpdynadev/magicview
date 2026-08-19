@@ -1,0 +1,32 @@
+{
+  "expected": [
+    [
+      0,
+      1960002
+    ],
+    [
+      1,
+      1960071
+    ],
+    [
+      2,
+      1960124
+    ],
+    [
+      3,
+      1960162
+    ],
+    [
+      0,
+      1960000
+    ]
+  ],
+  "idleTimeouts": 0,
+  "records": 0,
+  "rows": [],
+  "schema": "idle-timeout-regression-v9",
+  "sourceRunId": "32311671569",
+  "stalePromptTimeouts": 0,
+  "valid": 0,
+  "wallTimeouts": 0
+}
