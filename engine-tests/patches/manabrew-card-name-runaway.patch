@@ -32,7 +32,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveC
 diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
 --- a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
 +++ b/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveSession.java
-@@ -47,7 +47,7 @@ public final class ManaBrewInteractiveSession {
+@@ -47,9 +47,10 @@ public final class ManaBrewInteractiveSession {
      private final BlockingQueue<JsonObject> actions = new LinkedBlockingQueue<>();
      private volatile String latestPromptJson;
      private volatile int promptedPlayerIndex = -1;
@@ -41,7 +41,56 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
      private volatile boolean closed;
      private volatile Thread gameThread;
      private volatile SpellAbility castingAbility;
-@@ -134,10 +134,22 @@ public final class ManaBrewInteractiveSession {
++    private volatile String terminalError;
+ 
+     ManaBrewInteractiveSession(final String sessionId) {
+         this.sessionId = Objects.requireNonNull(sessionId, "sessionId");
+@@ -80,6 +81,9 @@ public final class ManaBrewInteractiveSession {
+             try {
+                 match.startGame(game);
+             } catch (RuntimeException error) {
++                terminalError = error.toString();
++                latestPromptJson = null;
++                promptedPlayerIndex = -1;
+                 System.err.println("[mana-brew] interactive game error: " + error.getMessage());
+                 error.printStackTrace(System.err);
+             }
+@@ -109,7 +113,31 @@ public final class ManaBrewInteractiveSession {
+     }
+ 
+     public String getLatestPromptJson() {
+-        return latestPromptJson;
++        final String prompt = latestPromptJson;
++        if (prompt != null) {
++            return prompt;
++        }
++        if (terminalError != null) {
++            // A dead game thread used to leave the previous prompt visible
++            // forever, which the client mislabeled as stale_prompt_timeout.
++            // Surface the actual engine failure as a new terminal prompt.
++            final JsonObject input = new JsonObject();
++            input.addProperty("type", "engineError");
++            input.addProperty("message", terminalError);
++            final JsonObject terminal = new JsonObject();
++            terminal.addProperty("promptId", "engine-error-" + sessionId);
++            terminal.addProperty("decidingPlayerId", "player-0");
++            terminal.add("input", input);
++            return terminal.toString();
++        }
++        if (game != null && game.isGameOver()) {
++            // The final action may end the game without publishing another
++            // interactive prompt. Give the polling client one terminal event.
++            final JsonObject input = new JsonObject();
++            input.addProperty("type", "gameOver");
++            final JsonObject terminal = new JsonObject();
++            terminal.addProperty("promptId", "game-over-" + sessionId);
++            terminal.addProperty("decidingPlayerId", "player-0");
++            terminal.add("input", input);
++            return terminal.toString();
++        }
++        return null;
+     }
+@@ -134,10 +162,22 @@ public final class ManaBrewInteractiveSession {
          if (closed) {
              throw new IllegalStateException("session is closed");
          }
@@ -64,7 +113,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
          actions.offer(decoded);
          // No snapshot here — it would race the game thread this unblocks.
          return "";
-@@ -1731,11 +1743,25 @@ public final class ManaBrewInteractiveSession {
+@@ -1731,11 +1771,25 @@ public final class ManaBrewInteractiveSession {
                  }
                  continue;
              }
@@ -92,7 +141,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
              }
              final int target = action.has("player")
                      ? action.get("player").getAsInt()
-@@ -1748,6 +1774,8 @@ public final class ManaBrewInteractiveSession {
+@@ -1748,6 +1802,8 @@ public final class ManaBrewInteractiveSession {
              if (target != promptedPlayerIndex && !gameDecided()) {
                  continue;
              }
