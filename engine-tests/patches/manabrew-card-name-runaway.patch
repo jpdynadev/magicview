@@ -16,7 +16,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveC
          return chooseCardName(sa, faces, message);
      }
  
-@@ -2551,7 +2551,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
+@@ -2551,7 +2559,10 @@ public final class ManaBrewInteractiveController extends PlayerController {
          forge.StaticData.instance().getCommonCards().streamAllFaces()
                  .filter(faceFilter)
                  .filter(face -> {
@@ -85,7 +85,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
 +        }
 +        return null;
      }
-@@ -134,9 +162,39 @@ public final class ManaBrewInteractiveSession {
+@@ -134,9 +161,39 @@ public final class ManaBrewInteractiveSession {
          if (closed) {
              throw new IllegalStateException("session is closed");
          }
@@ -126,7 +126,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
          actions.offer(decoded);
          // No snapshot here — it would race the game thread this unblocks.
          return "";
-@@ -1731,9 +1791,20 @@ public final class ManaBrewInteractiveSession {
+@@ -1731,9 +1788,20 @@ public final class ManaBrewInteractiveSession {
                  }
                  continue;
              }
@@ -148,7 +148,7 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
              }
              final int target = action.has("player")
                      ? action.get("player").getAsInt()
-@@ -1748,6 +1822,8 @@ public final class ManaBrewInteractiveSession {
+@@ -1748,6 +1816,8 @@ public final class ManaBrewInteractiveSession {
              if (target != promptedPlayerIndex && !gameDecided()) {
                  continue;
              }
