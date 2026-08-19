@@ -16,7 +16,7 @@ env:
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '1'
   SIM_V2_CAPTURE_STDERR: '1'
-  SIM_V2_PROFILE: idle-regression-forensic-v9
+  SIM_V2_PROFILE: idle-regression-forensic-v10
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-idle-forensic-v9-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+          key: manabrew-runtime-idle-forensic-v10-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/apply_manabrew_repairs.py') }}
       - name: Build repaired runtime on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
@@ -42,7 +42,7 @@ jobs:
           git fetch --depth 1 origin "$MANABREW_REF"
           git checkout --detach FETCH_HEAD
           git submodule update --init --recursive --depth 1
-          git apply --recount "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          python3 "$GITHUB_WORKSPACE/engine-tests/apply_manabrew_repairs.py" /tmp/manabrew
           node scripts/harness.mjs build
           tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
       - uses: actions/upload-artifact@v4
@@ -89,8 +89,8 @@ jobs:
             --mode screen --variant F10 --fixed-seat "$SEAT" --seeds "$SEED" \
             --max-round 4 --max-prompts 5000 --max-seconds 160 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir ".sim-cache/idle-forensic-v9-${LABEL}" --retain-traces all \
-            --engine-id "$MANABREW_REF:idle-forensic-v9:${LABEL}" \
+            --cache-dir ".sim-cache/idle-forensic-v10-${LABEL}" --retain-traces all \
+            --engine-id "$MANABREW_REF:idle-forensic-v10:${LABEL}" \
             --output "out/result-${LABEL}.json" 2>&1 | tee "out/worker-${LABEL}.log"
           RC=${PIPESTATUS[0]}
           cp engine-tests/results/pilot-*"-${SEED}-"* out/ 2>/dev/null || true
@@ -128,7 +128,7 @@ jobs:
                   if isinstance(r,dict): rows.append(r)
               except Exception as exc: rows.append({'path':path,'parseError':repr(exc)})
           completed={'game_over','horizon_complete'}
-          out={'schema':'idle-timeout-regression-v9','sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+          out={'schema':'idle-timeout-regression-v10','sourceRunId':os.environ.get('GITHUB_RUN_ID'),
                'expected':[[0,1960002],[1,1960071],[2,1960124],[3,1960162],[0,1960000]],
                'records':len(rows),'valid':sum(r.get('status') in completed for r in rows),
                'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
