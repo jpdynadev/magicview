@@ -46,7 +46,7 @@ jobs:
           git fetch --depth 1 origin "$MANABREW_REF"
           git checkout --detach FETCH_HEAD
           git submodule update --init --recursive --depth 1
-          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          git apply --recount "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
           node scripts/harness.mjs build
           tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
       - uses: actions/upload-artifact@v4
