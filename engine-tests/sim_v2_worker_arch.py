@@ -43,14 +43,13 @@ def _pilot_trace_tail(runner, result, limit: int = 12):
 
 
 def _install_prompt_submission_guard(runner) -> None:
-    """Prevent a retry for one prompt from leaking into the next prompt.
+    """Make submitAction prompt-scoped instead of timing-scoped.
 
-    Manabrew's action queue is session-wide and submitAction historically did
-    not carry a prompt id. The v8 pilot can resend a pass while the same prompt
-    is still visible. If Forge has already consumed the first pass but has not
-    yet replaced latestPromptJson, a duplicate can remain queued and be consumed
-    by a later, unrelated decision. Track the latest *original* prompt id at the
-    RPC boundary and suppress only an exact duplicate payload for that same id.
+    Manabrew's action queue is session-wide and its public submitAction payload
+    historically omitted prompt identity. Preserve the original prompt id seen
+    by the client, embed it as an internal canonical-action field, suppress an
+    exact duplicate submission for that prompt, and let the patched Java session
+    reject the action if that prompt is no longer current when it arrives.
     """
     original_rpc = runner.base.rpc
     current_prompt: dict[str, str] = {}
@@ -69,6 +68,20 @@ def _install_prompt_submission_guard(runner) -> None:
                 return ""
             if prompt_id:
                 submitted.add(key)
+                try:
+                    canonical = json.loads(payload)
+                    if isinstance(canonical, dict):
+                        canonical["__promptId"] = prompt_id
+                        request = dict(request)
+                        request["payload"] = json.dumps(
+                            canonical,
+                            separators=(",", ":"),
+                            ensure_ascii=False,
+                        )
+                except Exception:
+                    # Preserve the original payload; Java will still protect it
+                    # with the server-side prompt sequence fallback.
+                    pass
             return original_rpc(proc, request)
 
         raw = original_rpc(proc, request)
@@ -222,7 +235,7 @@ def _install_semantic_prompt_ids(runner) -> None:
 
 
 def main() -> int:
-    os.environ.setdefault("SIM_V2_PROFILE", "arch-cold-v3-prompt-ack")
+    os.environ.setdefault("SIM_V2_PROFILE", "arch-cold-v4-prompt-scoped")
     mode = ultra._arg_value("--mode", "screen")
     variant = ultra._arg_value("--variant", "")
 
@@ -245,6 +258,7 @@ def main() -> int:
         "policy": "architecture-aware",
         "semanticPromptIdentity": True,
         "promptConsumptionAck": True,
+        "promptScopedActions": True,
         "duplicateSubmitGuard": True,
         "forensicStderrCapture": os.getenv("SIM_V2_CAPTURE_STDERR", "0") == "1" or os.getenv("SIM_V2_TRACE", "0") == "1",
     }
@@ -253,8 +267,6 @@ def main() -> int:
     deck_path = runner.base.DECK_DIR / runner.VARIANT_FILES[variant]
     observation_universe = sorted(set(ultra._deck_card_names(deck_path)) | set(requested_exposure))
 
-    # Install the RPC guard first so observation/lifecycle wrappers retain it as
-    # their underlying transport.
     _install_prompt_submission_guard(runner)
     _install_semantic_prompt_ids(runner)
     ultra._install_observation_tracker(runner, observation_universe)
@@ -294,6 +306,8 @@ def main() -> int:
         item["v2SessionCleanupError"] = result.get("v2SessionCleanupError")
         item["v2SemanticPromptAdvances"] = int(result.get("v2SemanticPromptAdvances") or 0)
         item["v2DuplicateSubmitsSuppressed"] = int(result.get("v2DuplicateSubmitsSuppressed") or 0)
+        if result.get("error"):
+            item["error"] = result.get("error")
         if result.get("v2JvmStderrTail"):
             item["v2JvmStderrTail"] = result.get("v2JvmStderrTail")
         if result.get("v2HarnessActionTail"):
