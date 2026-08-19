@@ -1,5 +1,6 @@
 {
   "created": "2026-08-17",
+  "updated": "2026-08-19",
   "baseline": "F10_BLUE/F10",
   "purpose": "Predeclare package hypotheses to test only after the active expanded architecture wave completes; do not trigger a competing workflow.",
   "promotion_gate": "Controlled paired sim-v2 confirmation remains authoritative; tournament prevalence is hypothesis generation only.",
@@ -7,24 +8,42 @@
     {
       "id": "PKG_COPY_META_1",
       "class": "2-6_card_package",
-      "adds": ["Mirage Mirror", "Mirrormade", "Imposter Mech", "Copy Enchantment"],
-      "hypothesis": "A current-metagame copy-density package improves both self-contained redundancy and opportunistic value without requiring the full six-card heavy-copy architecture.",
+      "adds": ["Mirage Mirror", "Clever Impersonator", "Imposter Mech", "Copy Enchantment"],
+      "hypothesis": "A current-metagame copy-density package improves self-contained redundancy and opportunistic value without requiring the full heavy-copy architecture.",
       "priority": 1,
-      "evidence_note": "EDHTop16 one-year 60+ player Kinnan staples currently reports Mirage Mirror 90.3%, Mirrormade 70.0%, Imposter Mech 51.9%, Copy Enchantment 46.2%; cEDHStats six-month Kinnan sample reports Imposter Mech 54.8% and Copy Enchantment 51.2%."
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Clever Impersonator 90.1% inclusion with +0.17 PPG association (90% interval +0.06 to +0.29); Mirage Mirror 89.6% with +0.12 association; current architecture screen remains the controlled gate."
     },
     {
       "id": "PKG_COPY_META_2",
       "class": "2-6_card_package",
-      "adds": ["Mirage Mirror", "Imposter Mech", "Copy Artifact"],
-      "hypothesis": "Artifact-weighted copy density may preserve Kinnan/rock synergy with fewer context-dependent enchantment slots.",
-      "priority": 2
+      "adds": ["Mirage Mirror", "Phyrexian Metamorph", "Imposter Mech", "Copy Artifact"],
+      "hypothesis": "Artifact-weighted copy density may preserve Kinnan/rock synergy while adding flexible clone redundancy with fewer context-dependent enchantment slots.",
+      "priority": 2,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Phyrexian Metamorph 75.0% inclusion; observational effect is near-neutral, so simulation must determine whether the slot is useful in F10 specifically."
     },
     {
       "id": "PKG_DRUID_COMPACT",
       "class": "2-6_card_package",
       "adds": ["Devoted Druid", "Machine God's Effigy", "Green Sun's Zenith", "Eldritch Evolution"],
       "hypothesis": "Compact Druid/Effigy plus creature-tutor access may outperform broad clone density if the extra deterministic node is the actual source of architecture gains.",
-      "priority": 3
+      "priority": 3,
+      "evidence_note": "Recent six-month tournament search contains 555 Kinnan lists with Devoted Druid, including multiple 2026 top finishes; this is prevalence/hypothesis evidence only."
+    },
+    {
+      "id": "PKG_TUTOR_QUALITY_FLASH",
+      "class": "2-4_card_package",
+      "adds": ["Wan Shi Tong, Librarian", "Nature's Rhythm", "Chord of Calling"],
+      "hypothesis": "A high-card-quality flash/value plus creature-tutor package may improve resilience in tutor-heavy pods without adding a dedicated combo brick, while retaining compact access to deterministic creatures.",
+      "priority": 4,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Wan Shi Tong, Librarian 85.1% inclusion with +0.12 PPG association and 90% interval +0.01 to +0.22; Nature's Rhythm 91.5% with +0.24 and interval +0.12 to +0.36; Chord of Calling 89.6% with +0.16 and interval +0.04 to +0.27. Controlled paired simulation remains authoritative."
+    },
+    {
+      "id": "PKG_FLASH_ENGINE_QUALITY",
+      "class": "2-4_card_package",
+      "adds": ["Valley Floodcaller", "Wan Shi Tong, Librarian", "Clever Impersonator"],
+      "hypothesis": "A flash-oriented value package may improve card quality and interaction timing while keeping clone connectivity; test primarily in midrange and mixed adversarial pods after architecture screening.",
+      "priority": 5,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Valley Floodcaller 89.3%, Wan Shi Tong 85.1%, Clever Impersonator 90.1%. Observational correlations are hypothesis-only."
     }
   ],
   "measurement": {
