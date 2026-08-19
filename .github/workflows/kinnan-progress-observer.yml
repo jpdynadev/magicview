@@ -10,6 +10,13 @@ permissions:
   actions: read
   contents: write
 
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+
 jobs:
   observe:
     runs-on: ubuntu-latest
@@ -28,28 +35,7 @@ jobs:
           fi
           ID=$(jq -r '.id' <<<"$RUN")
           JOBS=$(gh api --method GET "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
-          jq -n --argjson run "$RUN" --argjson jobs "$JOBS" '
-            {
-              found:true,
-              checkedAt:(now|todateiso8601),
-              runId:$run.id,
-              runNumber:$run.run_number,
-              event:$run.event,
-              headSha:$run.head_sha,
-              status:$run.status,
-              conclusion:$run.conclusion,
-              createdAt:$run.created_at,
-              updatedAt:$run.updated_at,
-              htmlUrl:$run.html_url,
-              jobsTotal:($jobs.jobs|length),
-              jobsCompleted:([$jobs.jobs[]|select(.status=="completed")]|length),
-              jobsInProgress:([$jobs.jobs[]|select(.status=="in_progress")]|length),
-              jobsQueued:([$jobs.jobs[]|select(.status=="queued")]|length),
-              jobsSuccess:([$jobs.jobs[]|select(.conclusion=="success")]|length),
-              jobsFailure:([$jobs.jobs[]|select(.conclusion=="failure")]|length),
-              jobsCancelled:([$jobs.jobs[]|select(.conclusion=="cancelled")]|length),
-              jobSummary:[$jobs.jobs[]|{id,name,status,conclusion,started_at,completed_at}]
-            }' > status/kinnan-architecture-progress.json
+          jq -n --argjson run "$RUN" --argjson jobs "$JOBS" '{found:true,checkedAt:(now|todateiso8601),runId:$run.id,runNumber:$run.run_number,event:$run.event,headSha:$run.head_sha,status:$run.status,conclusion:$run.conclusion,createdAt:$run.created_at,updatedAt:$run.updated_at,htmlUrl:$run.html_url,jobsTotal:($jobs.jobs|length),jobsCompleted:([$jobs.jobs[]|select(.status=="completed")]|length),jobsInProgress:([$jobs.jobs[]|select(.status=="in_progress")]|length),jobsQueued:([$jobs.jobs[]|select(.status=="queued")]|length),jobsSuccess:([$jobs.jobs[]|select(.conclusion=="success")]|length),jobsFailure:([$jobs.jobs[]|select(.conclusion=="failure")]|length),jobsCancelled:([$jobs.jobs[]|select(.conclusion=="cancelled")]|length),jobSummary:[$jobs.jobs[]|{id,name,status,conclusion,started_at,completed_at}]}' > status/kinnan-architecture-progress.json
           cat status/kinnan-architecture-progress.json
       - name: Commit snapshot
         run: |
@@ -59,3 +45,82 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Record Kinnan architecture run progress"
           git push
+
+  forensic-build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registered-forensic-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  forensic-repro:
+    needs: forensic-build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        seed: [1800000, 1800001, 1800007, 1800013, 1800020]
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: registered-forensic-runtime, path: runtime}
+      - name: Reproduce stale seed with full evidence
+        env:
+          SEED: ${{ matrix.seed }}
+          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
+        run: |
+          mkdir -p /tmp/manabrew out engine-tests/results
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          set +e
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant F10 --fixed-seat 0 --seeds "$SEED" \
+            --max-round 4 --max-prompts 3500 --max-seconds 100 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir .sim-cache/registered-stale-forensic --retain-traces failures \
+            --engine-id "$MANABREW_REF:registered-stale-forensic-v1" \
+            --output "out/result-${SEED}.json" 2>&1 | tee "out/worker-${SEED}.log"
+          echo "${PIPESTATUS[0]}" > "out/exit-${SEED}.txt"
+          find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: registered-stale-forensic-${{ matrix.seed }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 5
