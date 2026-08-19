@@ -21,10 +21,35 @@ env:
   SIM_V2_EARLY_SUCCESS: '0'
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '0'
-  SIM_V2_PROFILE: arch-cold-v2
+  SIM_V2_PROFILE: arch-root-v8-cold
 
 jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require healthy 96-game protocol validation
+        run: |
+          python3 - <<'PY'
+          import json
+          path='engine-tests/results/stale-prompt-validation/latest.json'
+          d=json.load(open(path))
+          assert d.get('records') == 96, d
+          assert d.get('valid', 0) >= 90, d
+          assert d.get('stalePromptTimeouts', 0) == 0, d
+          print(json.dumps({
+              'records': d.get('records'),
+              'valid': d.get('valid'),
+              'stalePromptTimeouts': d.get('stalePromptTimeouts'),
+              'idleTimeouts': d.get('idleTimeouts'),
+              'wallTimeouts': d.get('wallTimeouts'),
+              'engineErrors': d.get('engineErrors'),
+              'sourceRunId': d.get('sourceRunId'),
+          }, sort_keys=True))
+          PY
+
   build:
+    needs: preflight
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -37,7 +62,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+          key: manabrew-runtime-arch-root-v8-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
       - name: Build pinned Manabrew/Forge on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
@@ -75,14 +100,10 @@ jobs:
         with: {name: arch-v2-runtime, path: runtime}
       - name: Restore runtime and generate architecture decks
         run: |
-          mkdir -p /tmp/manabrew out .sim-cache/arch-screen
+          mkdir -p /tmp/manabrew out
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
           python3 engine-tests/generate_architecture_decks_v2.py
-          python3 -m py_compile engine-tests/manabrew_pilot_arch.py engine-tests/sim_v2_worker.py engine-tests/sim_v2_worker_ultra.py engine-tests/sim_v2_worker_arch.py
-      - uses: actions/cache@v4
-        with:
-          path: .sim-cache/arch-screen
-          key: arch-v2-screen-${{ matrix.variant }}-s${{ matrix.seat }}-${{ hashFiles('engine-tests/generate_architecture_decks_v2.py','engine-tests/manabrew_pilot_arch.py','engine-tests/sim_v2_worker.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/sim_v2_worker_arch.py') }}
+          python3 -m py_compile engine-tests/manabrew_pilot_arch.py engine-tests/sim_v2_worker.py engine-tests/sim_v2_worker_ultra.py engine-tests/sim_v2_worker_arch.py engine-tests/rank_architecture_screen_v2.py
       - name: Run 50 canonical paired screen games
         env:
           VARIANT: ${{ matrix.variant }}
@@ -103,7 +124,8 @@ jobs:
             --mode screen --variant "$VARIANT" --fixed-seat "$SEAT" \
             --seeds $(seq "$START" $((START+49))) \
             --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 4 --max-prompts 3500 --max-seconds 100 \
-            --cache-dir .sim-cache/arch-screen --engine-id "$MANABREW_REF:arch-cold-v2" \
+            --cache-dir ".sim-cache/arch-screen-v8-${GITHUB_RUN_ID}" \
+            --engine-id "$MANABREW_REF:arch-root-v8:${GITHUB_RUN_ID}" \
             --retain-traces failures --audit-every 25 "${ARGS[@]}" \
             --output "out/${VARIANT}-seat${SEAT}.json" | tee "out/${VARIANT}-seat${SEAT}.log"
       - uses: actions/upload-artifact@v4
@@ -128,66 +150,15 @@ jobs:
           path: all
           merge-multiple: true
       - id: rank
+        name: Enforce 200-valid and exact paired-key completeness
         run: |
-          python3 - <<'PY'
-          import glob,json,math,os,re
-          from collections import defaultdict
-          from generate_architecture_decks_v2 import SPECS
-          completed={'game_over','horizon_complete'}
-          by=defaultdict(list); summaries=defaultdict(lambda:{'cacheHits':0,'jvmStarts':0,'wallMs':0})
-          for p in glob.glob('all/*.json'):
-              if 'runtime' in p or p.endswith('ranking.json'): continue
-              try: games=json.load(open(p))
-              except Exception: continue
-              if isinstance(games,list) and games:
-                  by[games[0].get('variant','?')].extend(games)
-          for p in glob.glob('all/*.log'):
-              for line in open(p,errors='ignore'):
-                  if line.startswith('SIM_V2_SUMMARY '):
-                      s=json.loads(line.split(' ',1)[1]); x=summaries[s['variant']]
-                      for k in x: x[k]+=int(s.get(k,0))
-          def endpoint(g): return bool(g.get('strictProtectedT4'))
-          def exact(b,c):
-              n=b+c
-              if not n:return 1.0
-              k=min(b,c)
-              tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
-              return min(1.0,2*tail)
-          base={(g.get('seed'),g.get('kinnanSeat')):g for g in by.get('F10',[]) if g.get('status') in completed}
-          rows=[]
-          for v,games in by.items():
-              valid=[g for g in games if g.get('status') in completed]; n=len(valid)
-              ass=sum(bool(g.get('deterministicT4')) for g in valid)
-              att=sum(g.get('firstAttemptTurn') is not None and g.get('firstAttemptTurn')<=4 for g in valid)
-              prot=sum(endpoint(g) for g in valid); wins=sum(bool(g.get('kinnanWon')) for g in valid)
-              exposed=[g for g in valid if g.get('slotExposed')]
-              exposed_prot=sum(endpoint(g) for g in exposed)
-              b=c=0; cb=cc=0
-              if v!='F10':
-                  for g in valid:
-                      k=(g.get('seed'),g.get('kinnanSeat')); f=base.get(k)
-                      if not f: continue
-                      a0,a1=endpoint(f),endpoint(g)
-                      if a0 and not a1:b+=1
-                      if a1 and not a0:c+=1
-                      if g.get('slotExposed'):
-                          if a0 and not a1:cb+=1
-                          if a1 and not a0:cc+=1
-              s=summaries[v]
-              rows.append({'variant':v,'class':'architecture','cuts':SPECS[v][0],'adds':SPECS[v][1],
-                  'valid':n,'errors':len(games)-n,'assembly':ass,'attempt':att,'protected':prot,'wins':wins,
-                  'assemblyRate':ass/max(n,1),'attemptRate':att/max(n,1),'protectedRate':prot/max(n,1),'winRate':wins/max(n,1),
-                  'exposureCount':len(exposed),'exposureRate':len(exposed)/max(n,1),'protectedGivenExposure':exposed_prot/max(len(exposed),1),
-                  'pairedBaselineOnly':b,'pairedChallengerOnly':c,'pairedP':exact(b,c),
-                  'conditionalBaselineOnly':cb,'conditionalChallengerOnly':cc,'conditionalPairedP':exact(cb,cc),
-                  'cacheHits':s['cacheHits'],'jvmStarts':s['jvmStarts'],'wallMs':s['wallMs'],
-                  'cacheHitRate':s['cacheHits']/max(n,1)})
-          rows.sort(key=lambda r:(r['protectedRate'],r['attemptRate'],r['assemblyRate'],r['valid']),reverse=True)
-          challengers=[r['variant'] for r in rows if r['variant']!='F10'][:3]
-          confirm=['F10']+challengers
-          json.dump({'ranking':rows,'confirm':confirm},open('arch-v2-screen-ranking.json','w'),indent=2)
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('confirm='+json.dumps(confirm,separators=(',',':'))+'\n')
-          print(json.dumps(rows,indent=2)); print('CONFIRM',confirm)
+          python3 engine-tests/rank_architecture_screen_v2.py \
+            --input 'all/**/*.json' \
+            --output arch-v2-screen-ranking.json
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d=json.load(open('arch-v2-screen-ranking.json'))
+          print('confirm='+json.dumps(d.get('confirm',[]),separators=(',',':')))
           PY
       - uses: actions/upload-artifact@v4
         with:
@@ -197,7 +168,7 @@ jobs:
 
   confirm:
     needs: [build, rank]
-    if: ${{ always() && needs.rank.outputs.confirm != '' }}
+    if: ${{ always() && needs.build.result == 'success' && needs.rank.outputs.confirm != '' && needs.rank.outputs.confirm != '[]' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 420
     strategy:
@@ -215,13 +186,9 @@ jobs:
         with: {name: arch-v2-runtime, path: runtime}
       - name: Restore runtime and decks
         run: |
-          mkdir -p /tmp/manabrew out .sim-cache/arch-confirm
+          mkdir -p /tmp/manabrew out
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
           python3 engine-tests/generate_architecture_decks_v2.py
-      - uses: actions/cache@v4
-        with:
-          path: .sim-cache/arch-confirm
-          key: arch-v2-confirm-${{ matrix.variant }}-${{ matrix.pod }}-s${{ matrix.seat }}-${{ hashFiles('engine-tests/generate_architecture_decks_v2.py','engine-tests/manabrew_pilot_arch.py','engine-tests/manabrew_pilot_arch_adv.py','engine-tests/sim_v2_worker.py','engine-tests/sim_v2_worker_ultra.py','engine-tests/sim_v2_worker_arch.py') }}
       - name: Run 50 adversarial paired games
         env:
           CEDH_POD: ${{ matrix.pod }}
@@ -245,7 +212,8 @@ jobs:
             --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" \
             --seeds $(seq "$START" $((START+49))) \
             --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 5 --max-prompts 4500 --max-seconds 130 \
-            --cache-dir .sim-cache/arch-confirm --engine-id "$MANABREW_REF:arch-cold-v2" \
+            --cache-dir ".sim-cache/arch-confirm-v8-${GITHUB_RUN_ID}" \
+            --engine-id "$MANABREW_REF:arch-root-v8-confirm:${GITHUB_RUN_ID}" \
             --retain-traces failures --audit-every 25 "${ARGS[@]}" \
             --output "out/${VARIANT}-${POD}-seat${SEAT}.json" | tee "out/${VARIANT}-${POD}-seat${SEAT}.log"
       - uses: actions/upload-artifact@v4
@@ -255,75 +223,3 @@ jobs:
           path: out/*
           if-no-files-found: warn
           retention-days: 14
-
-  final:
-    needs: [rank, confirm]
-    if: always()
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: arch-v2-confirm-*
-          path: all
-          merge-multiple: true
-      - uses: actions/download-artifact@v4
-        with:
-          name: arch-v2-screen-ranking
-          path: screen
-      - name: Aggregate exact paired confirmation
-        run: |
-          python3 - <<'PY'
-          import glob,json,math,os
-          from collections import defaultdict
-          from generate_architecture_decks_v2 import SPECS
-          completed={'game_over','horizon_complete'}; by=defaultdict(list); summaries=defaultdict(lambda:{'cacheHits':0,'jvmStarts':0,'wallMs':0})
-          for p in glob.glob('all/*.json'):
-              try:g=json.load(open(p))
-              except Exception:continue
-              if isinstance(g,list) and g:by[g[0].get('variant','?')].extend(g)
-          for p in glob.glob('all/*.log'):
-              for line in open(p,errors='ignore'):
-                  if line.startswith('SIM_V2_SUMMARY '):
-                      s=json.loads(line.split(' ',1)[1]); x=summaries[s['variant']]
-                      for k in x:x[k]+=int(s.get(k,0))
-          def ep(g):return bool(g.get('strictProtectedT4'))
-          def key(g):return (g.get('pod'),g.get('kinnanSeat'),g.get('seed'))
-          def exact(b,c):
-              n=b+c
-              if not n:return 1.0
-              k=min(b,c); return min(1.0,2*sum(math.comb(n,i) for i in range(k+1))/(2**n))
-          base={key(g):g for g in by.get('F10',[]) if g.get('status') in completed}
-          rows=[]; splits=[]
-          for v,games in by.items():
-              valid=[g for g in games if g.get('status') in completed]; n=len(valid)
-              ass=sum(bool(g.get('deterministicT4')) for g in valid); att=sum(g.get('firstAttemptTurn') is not None and g.get('firstAttemptTurn')<=4 for g in valid); prot=sum(ep(g) for g in valid)
-              exposed=[g for g in valid if g.get('slotExposed')]; b=c=cb=cc=0
-              for g in valid:
-                  f=base.get(key(g))
-                  if not f or v=='F10':continue
-                  a0,a1=ep(f),ep(g)
-                  b+=int(a0 and not a1); c+=int(a1 and not a0)
-                  if g.get('slotExposed'):
-                      cb+=int(a0 and not a1); cc+=int(a1 and not a0)
-              for pod in ('balanced','turbo','midrange','mixed'):
-                  for seat in range(4):
-                      z=[g for g in valid if g.get('pod')==pod and g.get('kinnanSeat')==seat]
-                      splits.append({'variant':v,'pod':pod,'seat':seat,'valid':len(z),'errors':sum(g.get('status') not in completed for g in games if g.get('pod')==pod and g.get('kinnanSeat')==seat),'protected':sum(ep(g) for g in z),'protectedRate':sum(ep(g) for g in z)/max(len(z),1)})
-              s=summaries[v]
-              rows.append({'variant':v,'class':'architecture','cuts':SPECS[v][0],'adds':SPECS[v][1],'valid':n,'errors':len(games)-n,
-                  'assembly':ass,'attempt':att,'protected':prot,'assemblyRate':ass/max(n,1),'attemptRate':att/max(n,1),'protectedRate':prot/max(n,1),
-                  'exposureCount':len(exposed),'exposureRate':len(exposed)/max(n,1),'protectedGivenExposure':sum(ep(g) for g in exposed)/max(len(exposed),1),
-                  'pairedBaselineOnly':b,'pairedChallengerOnly':c,'pairedP':exact(b,c),'pairedNet':c-b,
-                  'conditionalBaselineOnly':cb,'conditionalChallengerOnly':cc,'conditionalPairedP':exact(cb,cc),'conditionalPairedNet':cc-cb,
-                  'cacheHits':s['cacheHits'],'cacheHitRate':s['cacheHits']/max(n,1),'jvmStarts':s['jvmStarts'],'wallMs':s['wallMs']})
-          rows.sort(key=lambda r:(r['protectedRate'],r['pairedNet'],-r['pairedP']),reverse=True)
-          screen=json.load(open('screen/arch-v2-screen-ranking.json'))
-          json.dump({'ranking':rows,'podSeatSplits':splits,'screen':screen},open('arch-v2-final.json','w'),indent=2)
-          print(json.dumps(rows,indent=2))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kinnan-expanded-architecture-v2-final
-          path: arch-v2-final.json
-          retention-days: 21
