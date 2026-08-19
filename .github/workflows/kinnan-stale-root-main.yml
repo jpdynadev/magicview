@@ -1,0 +1,99 @@
+name: Kinnan stale root-cause main forensic
+
+on:
+  push:
+    branches: [main]
+    paths: [.runs/kinnan-stale-root-main.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stale-root-main-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  reproduce:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        seed: [1800000, 1800001, 1800007, 1800013, 1800020]
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: stale-root-main-runtime, path: runtime}
+      - name: Reproduce with full protocol evidence
+        env:
+          SEED: ${{ matrix.seed }}
+          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
+        run: |
+          mkdir -p /tmp/manabrew out engine-tests/results
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          set +e
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant F10 --fixed-seat 0 --seeds "$SEED" \
+            --max-round 4 --max-prompts 3500 --max-seconds 100 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir .sim-cache/stale-root-main --retain-traces failures \
+            --engine-id "$MANABREW_REF:stale-root-main-v1" \
+            --output "out/result-${SEED}.json" 2>&1 | tee "out/worker-${SEED}.log"
+          RC=${PIPESTATUS[0]}
+          find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
+          echo "$RC" > "out/exit-${SEED}.txt"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stale-root-main-${{ matrix.seed }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 5
