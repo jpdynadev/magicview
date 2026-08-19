@@ -1,1 +1,2 @@
 2026-08-18 check forensic run status
+2026-08-18 recheck after forensic workflow registration/retrigger
