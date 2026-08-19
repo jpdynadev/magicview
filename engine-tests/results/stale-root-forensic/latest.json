@@ -121,7 +121,7 @@
         },
         {
           "card": "Mystical Tutor",
-          "count": 5,
+          "count": 4,
           "reason": "prompt_small_choice"
         },
         {
@@ -1068,7 +1068,7 @@
       "v2SessionCleanupError": "RuntimeError('Cannot invoke \"java.lang.CharSequence.toString()\" because \"replacement\" is null')",
       "variant": "F10",
       "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
-      "wallMs": 36565,
+      "wallMs": 46520,
       "winnerSeat": null
     },
     {
@@ -2393,7 +2393,7 @@
       "v2SessionCleanupError": null,
       "variant": "F10",
       "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
-      "wallMs": 34058,
+      "wallMs": 41868,
       "winnerSeat": null
     },
     {
@@ -2423,7 +2423,7 @@
       "observedCardEvents": [
         {
           "card": "Birds of Paradise",
-          "count": 2,
+          "count": 3,
           "reason": "prompt_small_choice"
         },
         {
@@ -2433,7 +2433,7 @@
         },
         {
           "card": "Chain of Vapor",
-          "count": 1,
+          "count": 2,
           "reason": "prompt_small_choice"
         },
         {
@@ -2458,7 +2458,7 @@
         },
         {
           "card": "Enduring Vitality",
-          "count": 4,
+          "count": 6,
           "reason": "prompt_small_choice"
         },
         {
@@ -2473,7 +2473,7 @@
         },
         {
           "card": "Island",
-          "count": 9,
+          "count": 11,
           "reason": "prompt_small_choice"
         },
         {
@@ -2568,7 +2568,7 @@
         },
         {
           "card": "Valley Floodcaller",
-          "count": 1,
+          "count": 2,
           "reason": "prompt_small_choice"
         },
         {
@@ -3217,7 +3217,7 @@
       "v2SessionCleanupError": null,
       "variant": "F10",
       "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
-      "wallMs": 36169,
+      "wallMs": 33785,
       "winnerSeat": null
     },
     {
@@ -3252,7 +3252,7 @@
         },
         {
           "card": "Breeding Pool",
-          "count": 4,
+          "count": 2,
           "reason": "prompt_small_choice"
         },
         {
@@ -3287,7 +3287,7 @@
         },
         {
           "card": "Finale of Devastation",
-          "count": 4,
+          "count": 3,
           "reason": "prompt_small_choice"
         },
         {
@@ -3307,7 +3307,7 @@
         },
         {
           "card": "Forest",
-          "count": 13,
+          "count": 7,
           "reason": "prompt_small_choice"
         },
         {
@@ -3317,7 +3317,7 @@
         },
         {
           "card": "Island",
-          "count": 14,
+          "count": 11,
           "reason": "prompt_small_choice"
         },
         {
@@ -3357,7 +3357,7 @@
         },
         {
           "card": "Tropical Island",
-          "count": 2,
+          "count": 1,
           "reason": "prompt_small_choice"
         },
         {
@@ -4161,7 +4161,7 @@
       "v2SessionCleanupError": null,
       "variant": "F10",
       "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
-      "wallMs": 38815,
+      "wallMs": 38624,
       "winnerSeat": null
     },
     {
@@ -4191,7 +4191,7 @@
       "observedCardEvents": [
         {
           "card": "Ancient Tomb",
-          "count": 2,
+          "count": 4,
           "reason": "prompt_small_choice"
         },
         {
@@ -4231,7 +4231,7 @@
         },
         {
           "card": "Command Tower",
-          "count": 2,
+          "count": 3,
           "reason": "prompt_small_choice"
         },
         {
@@ -4291,7 +4291,7 @@
         },
         {
           "card": "Mana Vault",
-          "count": 1,
+          "count": 2,
           "reason": "prompt_small_choice"
         },
         {
@@ -4331,7 +4331,7 @@
         },
         {
           "card": "Rhystic Study",
-          "count": 1,
+          "count": 2,
           "reason": "prompt_small_choice"
         },
         {
@@ -4946,16 +4946,16 @@
         }
       ],
       "v2SemanticPromptAdvances": 0,
-      "v2SessionCleanup": false,
-      "v2SessionCleanupError": "RuntimeError('Cannot invoke \"java.lang.CharSequence.toString()\" because \"replacement\" is null')",
+      "v2SessionCleanup": true,
+      "v2SessionCleanupError": null,
       "variant": "F10",
       "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
-      "wallMs": 29947,
+      "wallMs": 31793,
       "winnerSeat": null
     }
   ],
   "schema": "stale-root-exact-seed-v6",
-  "sourceRunId": "32222622886",
+  "sourceRunId": "32307251499",
   "stalePromptTimeouts": 0,
   "statuses": {
     "horizon_complete": 5
