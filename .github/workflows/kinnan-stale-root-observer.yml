@@ -20,8 +20,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p status
-          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=50" \
-            --jq '[.workflow_runs[] | select(.name=="Kinnan stale root-cause forensic")][0]')
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=50" \
+            --jq '[.workflow_runs[] | select(.name=="Kinnan stale root-cause main forensic")][0]')
           if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
             jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-stale-root-cause-progress.json
           else
