@@ -3,3 +3,4 @@
 2026-08-18T18:52-04:00 automation evidence recheck
 2026-08-18 registered forensic: reproduce F10 stale seeds with pilot trace, harness action trace, and Forge stderr
 2026-08-18 concurrency takeover: cancel invalid architecture run and execute forensic repro
+2026-08-18 forensic capture v2: preserve JVM stderr/action/pilot tails in each compact result; rerun seeds 1800000 1800001 1800007 1800013 1800020.
