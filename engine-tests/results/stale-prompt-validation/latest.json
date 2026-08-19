@@ -1,16 +1,18 @@
 {
-  "commit": "b299a8c4f7a6e39870ccf58ac8183b8452172afa",
-  "gamesWithSemanticPromptAdvances": 0,
-  "invalid": 35,
+  "commit": "1be0a97533261ed7f5119e156a7773feb44b8418",
+  "engineErrors": 0,
+  "idleTimeouts": 0,
+  "invalid": 1,
+  "profile": "stale-root-v7-cold",
   "records": 96,
   "scheduledExpected": 96,
-  "schema": "stale-prompt-validation-v1",
-  "semanticPromptAdvances": 0,
-  "stalePromptTimeouts": 34,
+  "schema": "stale-prompt-validation-v2",
+  "sourceRunId": "32222960491",
+  "stalePromptTimeouts": 0,
   "statuses": {
-    "horizon_complete": 61,
-    "stale_prompt_timeout": 34,
+    "horizon_complete": 95,
     "wall_timeout": 1
   },
-  "valid": 61
+  "valid": 95,
+  "wallTimeouts": 1
 }
