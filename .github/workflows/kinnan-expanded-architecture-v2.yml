@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
@@ -86,7 +86,7 @@ jobs:
             --max-round 4 --max-prompts 3500 --max-seconds 100 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
             --cache-dir ".sim-cache/root-${SEED}-${GITHUB_RUN_ID}" --retain-traces all \
-            --engine-id "$MANABREW_REF:root-cause-stderr-v2" \
+            --engine-id "$MANABREW_REF:root-cause-stderr-v3" \
             --output "out/F10-${SEED}.json" 2>&1 | tee "out/F10-${SEED}.log"
           RC=${PIPESTATUS[0]}
           find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
@@ -99,3 +99,48 @@ jobs:
           path: out/**
           if-no-files-found: error
           retention-days: 5
+
+  aggregate:
+    needs: forensic
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: arch-root-F10-*
+          path: forensic
+          merge-multiple: true
+      - name: Build durable forensic summary
+        run: |
+          python3 - <<'PY'
+          import glob,json,os
+          rows=[]
+          for path in sorted(glob.glob('forensic/F10-*.json')):
+              try:
+                  data=json.load(open(path))
+              except Exception as exc:
+                  rows.append({'path':path,'parseError':repr(exc)})
+                  continue
+              if isinstance(data,list): rows.extend(data)
+              elif isinstance(data,dict): rows.append(data)
+          out={
+              'schema':'stale-root-forensic-v3',
+              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+              'records':len(rows),
+              'rows':rows,
+          }
+          os.makedirs('engine-tests/results/stale-root-forensic',exist_ok=True)
+          json.dump(out,open('engine-tests/results/stale-root-forensic/latest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Commit forensic evidence
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/results/stale-root-forensic/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record stale root-cause forensic evidence [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
