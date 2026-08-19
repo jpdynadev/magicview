@@ -65,9 +65,6 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
 +            return prompt;
 +        }
 +        if (terminalError != null) {
-+            // A dead game thread used to leave the previous prompt visible
-+            // forever, which the client mislabeled as stale_prompt_timeout.
-+            // Surface the actual engine failure as a new terminal prompt.
 +            final JsonObject input = new JsonObject();
 +            input.addProperty("type", "engineError");
 +            input.addProperty("message", terminalError);
@@ -78,8 +75,6 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
 +            return terminal.toString();
 +        }
 +        if (game != null && game.isGameOver()) {
-+            // The final action may end the game without publishing another
-+            // interactive prompt. Give the polling client one terminal event.
 +            final JsonObject input = new JsonObject();
 +            input.addProperty("type", "gameOver");
 +            final JsonObject terminal = new JsonObject();
@@ -90,39 +85,54 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
 +        }
 +        return null;
      }
-@@ -134,10 +162,22 @@ public final class ManaBrewInteractiveSession {
+@@ -134,10 +162,42 @@ public final class ManaBrewInteractiveSession {
          if (closed) {
              throw new IllegalStateException("session is closed");
          }
 +        final String visiblePrompt = latestPromptJson;
 +        if (visiblePrompt == null) {
-+            // The previous answer has already been consumed and there is no new
-+            // decision outstanding. A late retry must not enter the shared queue.
 +            trace("[harness-action] dropped=no-current-prompt recv=" + actionJson);
 +            return "";
 +        }
 +        final long submittedPromptSeq = promptSeq;
          final JsonObject canonical = JsonParser.parseString(actionJson).getAsJsonObject();
++        final String answeredPromptId = canonical.has("__promptId")
++                && !canonical.get("__promptId").isJsonNull()
++                ? canonical.get("__promptId").getAsString() : null;
++        String currentPromptId = null;
++        try {
++            final JsonObject visible = JsonParser.parseString(visiblePrompt).getAsJsonObject();
++            if (visible.has("promptId") && !visible.get("promptId").isJsonNull()) {
++                currentPromptId = visible.get("promptId").getAsString();
++            }
++        } catch (RuntimeException ignored) {
++        }
++        if (answeredPromptId != null && currentPromptId != null
++                && !answeredPromptId.equals(currentPromptId)) {
++            trace("[harness-action] dropped=prompt-id-mismatch answered="
++                    + answeredPromptId + " current=" + currentPromptId
++                    + " recv=" + actionJson);
++            return "";
++        }
++        // __promptId is transport metadata, not part of Manabrew's canonical
++        // action schema. Strip it before decoding the actual game decision.
++        canonical.remove("__promptId");
          final JsonObject decoded = ManabrewProtocolAdapter.decodeAction(canonical);
 -        trace("[harness-action] recv=" + actionJson + " decoded=" + decoded);
-+        // Keep the wire protocol unchanged; this is an internal queue envelope
-+        // used only to prove that an action belongs to the prompt consuming it.
 +        decoded.addProperty("__promptSeq", submittedPromptSeq);
 +        trace("[harness-action] promptSeq=" + submittedPromptSeq
++                + " promptId=" + currentPromptId
 +                + " recv=" + actionJson + " decoded=" + decoded);
          actions.offer(decoded);
          // No snapshot here — it would race the game thread this unblocks.
          return "";
-@@ -1731,11 +1771,25 @@ public final class ManaBrewInteractiveSession {
+@@ -1731,11 +1791,25 @@ public final class ManaBrewInteractiveSession {
                  }
                  continue;
              }
 +            if (action.has("__promptSeq") && !action.get("__promptSeq").isJsonNull()) {
 +                final long submittedPromptSeq = action.get("__promptSeq").getAsLong();
 +                if (submittedPromptSeq != promptSeq) {
-+                    // A retry for an earlier prompt raced ahead of the next
-+                    // decision. Discard it rather than letting an unrelated
-+                    // prompt consume stale input from the session-wide queue.
 +                    trace("[harness-action] dropped=stale-prompt submitted="
 +                            + submittedPromptSeq + " current=" + promptSeq
 +                            + " action=" + action);
@@ -132,16 +142,13 @@ diff --git a/forge-harness/src/main/java/forge/harness/host/ManaBrewInteractiveS
              final String kind = action.has("kind") ? action.get("kind").getAsString() : "";
              if (!"concede".equals(kind)) {
 -                return action;
-+                // Consumption is the acknowledgement boundary. Clear the
-+                // published prompt before returning control to Forge so a polling
-+                // client cannot mistake an acknowledged answer for a pending one.
 +                latestPromptJson = null;
 +                promptedPlayerIndex = -1;
 +                return action;
              }
              final int target = action.has("player")
                      ? action.get("player").getAsInt()
-@@ -1748,6 +1802,8 @@ public final class ManaBrewInteractiveSession {
+@@ -1748,6 +1822,8 @@ public final class ManaBrewInteractiveSession {
              if (target != promptedPlayerIndex && !gameDecided()) {
                  continue;
              }
