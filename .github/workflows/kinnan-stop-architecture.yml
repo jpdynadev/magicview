@@ -1,0 +1,17 @@
+name: Stop Kinnan architecture compute
+
+on:
+  push:
+    branches: [main]
+    paths: [.runs/kinnan-stop-architecture.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-expanded-architecture
+  cancel-in-progress: true
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Cancelled prior kinnan-expanded-architecture concurrency holder.'
