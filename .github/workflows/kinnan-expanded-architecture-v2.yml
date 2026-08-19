@@ -18,7 +18,8 @@ env:
   PYTHONUNBUFFERED: '1'
   SIM_V2_EARLY_SUCCESS: '0'
   SIM_V2_EXACT_DEADLINE: '0'
-  SIM_V2_TRACE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
 
 jobs:
   build:
@@ -34,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+          key: manabrew-runtime-root-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
       - name: Build pinned runtime on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
@@ -49,266 +50,52 @@ jobs:
           tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
       - uses: actions/upload-artifact@v4
         with:
-          name: arch-v2-runtime
+          name: arch-root-runtime
           path: manabrew-runtime.tgz
           compression-level: 0
           retention-days: 2
 
-  screen:
+  forensic:
     needs: build
     runs-on: ubuntu-24.04
-    timeout-minutes: 330
+    timeout-minutes: 20
     strategy:
       fail-fast: false
-      max-parallel: 20
+      max-parallel: 5
       matrix:
-        variant: [F10, COPY_CORE, COPY_CREATURE, DRUID_EFFIGY, COPY_DRUID, COPY_HEAVY, COPY_ARTIFACT, COPY_PROTECTED, DRUID_TUTOR, TUTOR_DENSE, NODE_DENSE, COPY_VALUE]
-        seat: [0,1,2,3]
+        seed: [1800000, 1800001, 1800007, 1800013, 1800020]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
         with: {distribution: temurin, java-version: '21'}
       - uses: actions/download-artifact@v4
-        with: {name: arch-v2-runtime, path: runtime}
-      - name: Restore runtime and generate architecture decks
+        with: {name: arch-root-runtime, path: runtime}
+      - name: Run one cold F10 game with self-contained forensic record
+        env:
+          SEED: ${{ matrix.seed }}
+          MANABREW_HARNESS_TRACE: ${{ github.workspace }}/out/harness-actions-${{ matrix.seed }}.log
         run: |
-          mkdir -p /tmp/manabrew out
+          mkdir -p /tmp/manabrew out engine-tests/results
           tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
           python3 engine-tests/generate_architecture_decks_v2.py
-          python3 -m py_compile engine-tests/manabrew_pilot_arch.py engine-tests/sim_v2_worker_arch.py engine-tests/sim_v2_worker.py
-      - id: shard-cache
-        uses: actions/cache@v4
-        with:
-          path: .sim-cache/architecture-v2
-          key: arch-v2-screen-${{ matrix.variant }}-s${{ matrix.seat }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/generate_architecture_decks_v2.py','engine-tests/manabrew_pilot_arch.py','engine-tests/sim_v2_worker_arch.py','engine-tests/sim_v2_worker.py','engine-tests/manabrew_pilot_v8.py','engine-tests/kinnan_policy_v8.py') }}
-      - name: Run 50 canonical paired cold-v2 games
-        env:
-          VARIANT: ${{ matrix.variant }}
-          SEAT: ${{ matrix.seat }}
-        run: |
-          START=$((1800000 + SEAT * 50))
-          mapfile -t EXPOSURES < <(python3 - <<'PY'
-          import os
-          from generate_architecture_decks_v2 import SPECS
-          for card in SPECS[os.environ['VARIANT']][1]: print(card)
-          PY
-          )
-          ARGS=()
-          for card in "${EXPOSURES[@]}"; do ARGS+=(--exposure-card "$card"); done
+          set +e
           python3 engine-tests/sim_v2_worker_arch.py \
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
-            --mode screen --variant "$VARIANT" --fixed-seat "$SEAT" \
-            --seeds $(seq "$START" $((START+49))) \
+            --mode screen --variant F10 --fixed-seat 0 --seeds "$SEED" \
             --max-round 4 --max-prompts 3500 --max-seconds 100 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir .sim-cache/architecture-v2 --retain-traces none \
-            --engine-id "$MANABREW_REF:arch-cold-v1" \
-            "${ARGS[@]}" --output "out/${VARIANT}-seat${SEAT}.json" | tee "out/${VARIANT}-seat${SEAT}.log"
+            --cache-dir ".sim-cache/root-${SEED}-${GITHUB_RUN_ID}" --retain-traces all \
+            --engine-id "$MANABREW_REF:root-cause-stderr-v2" \
+            --output "out/F10-${SEED}.json" 2>&1 | tee "out/F10-${SEED}.log"
+          RC=${PIPESTATUS[0]}
+          find engine-tests/results -maxdepth 1 -type f -name "*${SEED}*" -exec cp {} out/ \; || true
+          echo "$RC" > "out/exit-${SEED}.txt"
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: arch-v2-${{ matrix.variant }}-seat${{ matrix.seat }}
-          path: out/*
-          if-no-files-found: warn
-          retention-days: 10
-
-  rank:
-    needs: screen
-    if: always()
-    runs-on: ubuntu-24.04
-    outputs:
-      confirm: ${{ steps.rank.outputs.confirm }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: arch-v2-*
-          path: all
-          merge-multiple: true
-      - id: rank
-        run: |
-          python3 - <<'PY'
-          import glob,json,math,os
-          from collections import defaultdict
-          completed={'game_over','horizon_complete'}
-          by=defaultdict(dict)
-          for p in glob.glob('all/*.json'):
-              if p.endswith('ranking.json'): continue
-              try: games=json.load(open(p))
-              except Exception: continue
-              for g in games:
-                  if g.get('status') in completed:
-                      by[g.get('variant')][(int(g.get('seed')) , int(g.get('kinnanSeat')))] = g
-          def endpoint(g): return bool(g.get('strictProtectedT4'))
-          def pexact(b,c):
-              n=b+c
-              if not n: return 1.0
-              k=min(b,c)
-              tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
-              return min(1.0,2*tail)
-          base=by.get('F10',{})
-          rows=[]
-          for v,gmap in by.items():
-              keys=sorted(set(base)&set(gmap)) if v!='F10' else sorted(gmap)
-              valid=len(gmap); prot=sum(endpoint(g) for g in gmap.values())
-              exposed=[g for g in gmap.values() if g.get('slotExposed')]
-              exp_prot=sum(endpoint(g) for g in exposed)
-              b=c=0
-              for k in keys:
-                  a=endpoint(base[k]); x=endpoint(gmap[k])
-                  if x and not a: b+=1
-                  if a and not x: c+=1
-              rows.append({'variant':v,'valid':valid,'protected':prot,'protectedRate':prot/max(valid,1),
-                           'exposed':len(exposed),'exposureRate':len(exposed)/max(valid,1),
-                           'protectedWhenExposed':exp_prot,'protectedWhenExposedRate':exp_prot/max(len(exposed),1),
-                           'pairedN':len(keys),'pairedWins':b,'pairedLosses':c,
-                           'pairedDelta':(b-c)/max(len(keys),1),'pairedP':pexact(b,c)})
-          rows.sort(key=lambda r:(r['protectedRate'],r['pairedDelta'],r['valid']),reverse=True)
-          challengers=[r['variant'] for r in rows if r['variant']!='F10'][:3]
-          confirm=['F10']+challengers
-          out={'ranking':rows,'confirm':confirm,'note':'200-game architecture screen is ranking/rejection only; no promotion from this stage.'}
-          json.dump(out,open('arch-v2-screen-ranking.json','w'),indent=2)
-          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write('confirm='+json.dumps(confirm,separators=(',',':'))+'\n')
-          print(json.dumps(out,indent=2))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: arch-v2-screen-ranking
-          path: arch-v2-screen-ranking.json
-          retention-days: 10
-
-  confirm:
-    needs: [build, rank]
-    if: ${{ always() && needs.rank.outputs.confirm != '' }}
-    runs-on: ubuntu-24.04
-    timeout-minutes: 390
-    strategy:
-      fail-fast: false
-      max-parallel: 20
-      matrix:
-        variant: ${{ fromJSON(needs.rank.outputs.confirm) }}
-        pod: [balanced, turbo, midrange, mixed]
-        seat: [0,1,2,3]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v5
-        with: {distribution: temurin, java-version: '21'}
-      - uses: actions/download-artifact@v4
-        with: {name: arch-v2-runtime, path: runtime}
-      - name: Restore runtime and decks
-        run: |
-          mkdir -p /tmp/manabrew out
-          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
-          python3 engine-tests/generate_architecture_decks_v2.py
-      - uses: actions/cache@v4
-        with:
-          path: .sim-cache/architecture-v2-confirm
-          key: arch-v2-confirm-${{ matrix.variant }}-${{ matrix.pod }}-s${{ matrix.seat }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/generate_architecture_decks_v2.py','engine-tests/manabrew_pilot_arch.py','engine-tests/manabrew_pilot_arch_adv.py','engine-tests/sim_v2_worker_arch.py','engine-tests/sim_v2_worker.py','engine-tests/manabrew_pilot_v8.py','engine-tests/kinnan_policy_v8.py') }}
-      - name: Run 50 adversarial paired cold-v2 games
-        env:
-          VARIANT: ${{ matrix.variant }}
-          SEAT: ${{ matrix.seat }}
-          POD: ${{ matrix.pod }}
-          CEDH_POD: ${{ matrix.pod }}
-        run: |
-          case "$POD" in balanced) BASE=1810000;; turbo) BASE=1820000;; midrange) BASE=1830000;; mixed) BASE=1840000;; esac
-          START=$((BASE + SEAT * 50))
-          mapfile -t EXPOSURES < <(python3 - <<'PY'
-          import os
-          from generate_architecture_decks_v2 import SPECS
-          for card in SPECS[os.environ['VARIANT']][1]: print(card)
-          PY
-          )
-          ARGS=()
-          for card in "${EXPOSURES[@]}"; do ARGS+=(--exposure-card "$card"); done
-          python3 engine-tests/sim_v2_worker_arch.py \
-            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
-            /tmp/manabrew/forge/forge-gui/ \
-            --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" \
-            --seeds $(seq "$START" $((START+49))) \
-            --max-round 5 --max-prompts 4500 --max-seconds 130 \
-            --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir .sim-cache/architecture-v2-confirm --retain-traces failures \
-            --engine-id "$MANABREW_REF:arch-cold-v1:$POD" \
-            "${ARGS[@]}" --output "out/${VARIANT}-${POD}-seat${SEAT}.json" | tee "out/${VARIANT}-${POD}-seat${SEAT}.log"
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: arch-v2-confirm-${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}
-          path: out/*
-          if-no-files-found: warn
-          retention-days: 14
-
-  final:
-    needs: [rank, confirm]
-    if: always()
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: arch-v2-confirm-*
-          path: all
-          merge-multiple: true
-      - uses: actions/download-artifact@v4
-        with: {name: arch-v2-screen-ranking, path: screen}
-      - name: Aggregate exact paired confirmation
-        run: |
-          python3 - <<'PY'
-          import glob,json,math,os
-          from collections import defaultdict
-          completed={'game_over','horizon_complete'}
-          by=defaultdict(dict); split=defaultdict(lambda: defaultdict(list))
-          for p in glob.glob('all/*.json'):
-              try: games=json.load(open(p))
-              except Exception: continue
-              for g in games:
-                  if g.get('status') not in completed: continue
-                  v=g.get('variant'); key=(int(g.get('seed')),int(g.get('kinnanSeat')),str(g.get('podProfile') or g.get('pod') or 'unknown'))
-                  by[v][key]=g
-                  split[v][(key[2],key[1])].append(g)
-          def endpoint(g): return bool(g.get('strictProtectedT4'))
-          def pexact(b,c):
-              n=b+c
-              if not n: return 1.0
-              k=min(b,c)
-              tail=sum(math.comb(n,i) for i in range(k+1))/(2**n)
-              return min(1.0,2*tail)
-          base=by.get('F10',{})
-          rows=[]
-          for v,gmap in by.items():
-              keys=sorted(set(base)&set(gmap)) if v!='F10' else sorted(gmap)
-              b=c=0
-              for k in keys:
-                  a=endpoint(base[k]); x=endpoint(gmap[k])
-                  if x and not a: b+=1
-                  if a and not x: c+=1
-              exposed=[g for g in gmap.values() if g.get('slotExposed')]
-              exp_keys=[k for k in keys if gmap[k].get('slotExposed')] if v!='F10' else []
-              eb=ec=0
-              for k in exp_keys:
-                  a=endpoint(base[k]); x=endpoint(gmap[k])
-                  if x and not a: eb+=1
-                  if a and not x: ec+=1
-              n=len(gmap); prot=sum(endpoint(g) for g in gmap.values())
-              splits=[]
-              for (pod,seat),games in sorted(split[v].items()):
-                  splits.append({'pod':pod,'seat':seat,'valid':len(games),'protected':sum(endpoint(g) for g in games),'protectedRate':sum(endpoint(g) for g in games)/max(len(games),1)})
-              rows.append({'variant':v,'valid':n,'errors':800-n if v!='F10' else max(0,800-n),
-                           'protected':prot,'protectedRate':prot/max(n,1),
-                           'exposed':len(exposed),'exposureRate':len(exposed)/max(n,1),
-                           'protectedWhenExposedRate':sum(endpoint(g) for g in exposed)/max(len(exposed),1),
-                           'pairedN':len(keys),'pairedWins':b,'pairedLosses':c,'pairedDelta':(b-c)/max(len(keys),1),'pairedP':pexact(b,c),
-                           'exposurePairedN':len(exp_keys),'exposurePairedWins':eb,'exposurePairedLosses':ec,'exposurePairedDelta':(eb-ec)/max(len(exp_keys),1),'exposurePairedP':pexact(eb,ec),
-                           'podSeat':splits})
-          rows.sort(key=lambda r:(r['protectedRate'],r['pairedDelta']),reverse=True)
-          out={'ranking':rows,'screen':json.load(open('screen/arch-v2-screen-ranking.json'))}
-          json.dump(out,open('arch-v2-final.json','w'),indent=2)
-          print(json.dumps(out,indent=2))
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: kinnan-expanded-architecture-v2-final
-          path: arch-v2-final.json
-          retention-days: 14
+          name: arch-root-F10-${{ matrix.seed }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 5
