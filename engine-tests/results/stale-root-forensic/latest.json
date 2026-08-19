@@ -1,18 +1,6 @@
 {
-  "expectedSeeds": [
-    1800000,
-    1800001,
-    1800007,
-    1800013,
-    1800020
-  ],
-  "idleTimeouts": 0,
   "records": 0,
   "rows": [],
-  "schema": "stale-root-exact-seed-v6",
-  "sourceRunId": "32214824022",
-  "stalePromptTimeouts": 0,
-  "statuses": {},
-  "valid": 0,
-  "wallTimeouts": 0
+  "schema": "stale-root-forensic-v4",
+  "sourceRunId": "32211360305"
 }
