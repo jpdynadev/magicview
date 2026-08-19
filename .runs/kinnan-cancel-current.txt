@@ -1,0 +1,1 @@
+2026-08-18 cancel run 32193352761 after repaired screen remained ~44% invalid; preserve completed artifacts, stop confirmation compute
