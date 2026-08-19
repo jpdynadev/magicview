@@ -11,3 +11,4 @@
 2026-08-19 idle regression forensic v9: exact persistent failures (seat0/1960002, seat1/1960071, seat2/1960124, seat3/1960162) plus seat0/1960000 control; full prompt/action/Forge stderr; architecture scale-out stopped.
 2026-08-19 rerun idle regression forensic v9 after correcting cumulative unified-diff new-file offsets; require fresh runtime build from source.
 2026-08-19 rerun idle regression forensic v9 after correcting controller old-file anchor 2551->2552 and corresponding new-file anchor.
+2026-08-19 content-addressed repair v10: replace fragile unified diff application with exact idempotent source-block repairs; force fresh runtime and rerun four persistent idle seeds plus control.
