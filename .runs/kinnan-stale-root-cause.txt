@@ -9,3 +9,4 @@
 2026-08-19 rerun exact five after correcting submitAction patch hunk from -134,10/+162,40 to -134,9/+162,39.
 2026-08-19 rerun exact five with git apply --recount on repaired patch; validation only, no architecture scale-out.
 2026-08-19 idle regression forensic v9: exact persistent failures (seat0/1960002, seat1/1960071, seat2/1960124, seat3/1960162) plus seat0/1960000 control; full prompt/action/Forge stderr; architecture scale-out stopped.
+2026-08-19 rerun idle regression forensic v9 after correcting cumulative unified-diff new-file offsets; require fresh runtime build from source.
