@@ -1,0 +1,22 @@
+name: Cancel current invalid Kinnan confirmation
+
+on:
+  push:
+    branches: [main]
+    paths: [.runs/kinnan-cancel-current.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel invalid architecture run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api --method POST "repos/$REPO/actions/runs/32193352761/cancel" || true
