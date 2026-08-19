@@ -1,3 +1,4 @@
 2026-08-18 check repaired architecture wave progress
 2026-08-18 recheck until repaired shard evidence exists
 2026-08-18T18:52-04:00 automation evidence recheck
+2026-08-18 registered forensic: reproduce F10 stale seeds with pilot trace, harness action trace, and Forge stderr
