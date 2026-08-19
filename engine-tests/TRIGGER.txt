@@ -1,0 +1,2 @@
+Trigger Manabrew v7 external-pilot validation run.
+Requested 2026-08-10: use GitHub/Netlify execution and persist scalable results through Neon.
