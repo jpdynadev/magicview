@@ -19,6 +19,7 @@ env:
   SIM_V2_EARLY_SUCCESS: '0'
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '0'
+  SIM_V2_PROFILE: stale-root-v7-cold
 
 jobs:
   build:
@@ -34,7 +35,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: manabrew-runtime.tgz
-          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+          key: manabrew-runtime-stale-root-v7-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
       - name: Build pinned runtime on cache miss
         if: steps.runtime-cache.outputs.cache-hit != 'true'
         run: |
@@ -87,8 +88,8 @@ jobs:
             --seeds "$START" "$((START+1))" \
             --max-round 4 --max-prompts 3500 --max-seconds 100 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir .sim-cache/stale-prompt-validation --retain-traces failures \
-            --engine-id "$MANABREW_REF:arch-semantic-prompt-v1" \
+            --cache-dir ".sim-cache/stale-prompt-validation-v7-${GITHUB_RUN_ID}" --retain-traces failures \
+            --engine-id "$MANABREW_REF:stale-root-v7:${GITHUB_RUN_ID}" \
             --output "out/${VARIANT}-seat${SEAT}.json" | tee "out/${VARIANT}-seat${SEAT}.log"
       - uses: actions/upload-artifact@v4
         if: always()
@@ -128,15 +129,18 @@ jobs:
               s=str(row.get('status'))
               statuses[s]=statuses.get(s,0)+1
           out={
-              'schema':'stale-prompt-validation-v1',
+              'schema':'stale-prompt-validation-v2',
               'commit':os.environ.get('GITHUB_SHA'),
+              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+              'profile':os.environ.get('SIM_V2_PROFILE'),
               'scheduledExpected':96,
               'records':len(rows),
               'valid':sum(r.get('status') in completed for r in rows),
               'invalid':sum(r.get('status') not in completed for r in rows),
               'stalePromptTimeouts':sum(r.get('status')=='stale_prompt_timeout' for r in rows),
-              'semanticPromptAdvances':sum(int(r.get('v2SemanticPromptAdvances') or 0) for r in rows),
-              'gamesWithSemanticPromptAdvances':sum(int(r.get('v2SemanticPromptAdvances') or 0)>0 for r in rows),
+              'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
+              'wallTimeouts':sum(r.get('status')=='wall_timeout' for r in rows),
+              'engineErrors':sum(r.get('status') in {'engine_error','engineError'} for r in rows),
               'statuses':statuses,
           }
           os.makedirs('engine-tests/results/stale-prompt-validation',exist_ok=True)
@@ -158,6 +162,6 @@ jobs:
           import json
           d=json.load(open('engine-tests/results/stale-prompt-validation/latest.json'))
           assert d['records']==96, d
-          assert d['stalePromptTimeouts'] <= 10, d
-          assert d['valid'] >= 80, d
+          assert d['stalePromptTimeouts']==0, d
+          assert d['valid']>=90, d
           PY
