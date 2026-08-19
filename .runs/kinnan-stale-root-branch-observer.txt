@@ -1,2 +1,3 @@
 2026-08-18 check forensic run status
 2026-08-18 recheck after forensic workflow registration/retrigger
+2026-08-18 refresh after chooseColor + prompt-id root-fix v6
