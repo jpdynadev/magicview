@@ -1,0 +1,245 @@
+name: Kinnan production-path validity gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-production-path-gate.txt]
+
+concurrency:
+  group: kinnan-production-path-validity
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v13-production-gate
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Clean-build exact-content repaired runtime
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-production-gate.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - name: Runtime manifest
+        run: |
+          mkdir -p gate
+          {
+            echo "lab_sha=$GITHUB_SHA"
+            echo "manabrew=$MANABREW_REF"
+            echo "repair_sha=$(sha256sum engine-tests/apply_manabrew_repairs.py | cut -d' ' -f1)"
+            echo "pilot_arch_sha=$(sha256sum engine-tests/manabrew_pilot_arch.py | cut -d' ' -f1)"
+            echo "pilot_adv_sha=$(sha256sum engine-tests/manabrew_pilot_arch_adv.py | cut -d' ' -f1)"
+            echo "worker_sha=$(sha256sum engine-tests/sim_v2_worker_arch.py | cut -d' ' -f1)"
+            echo "jar_sha=$(tar -xOf manabrew-production-gate.tgz forge-harness/target/forge-harness-jar-with-dependencies.jar | sha256sum | cut -d' ' -f1)"
+          } | tee gate/runtime-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-production-gate-runtime
+          path: |
+            manabrew-production-gate.tgz
+            gate/runtime-manifest.txt
+          compression-level: 0
+          retention-days: 2
+
+  forensic:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix:
+        include:
+          - {seed: 1960000, seat: 0}
+          - {seed: 1960002, seat: 0}
+          - {seed: 1960071, seat: 1}
+          - {seed: 1960124, seat: 2}
+          - {seed: 1960162, seat: 3}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: kinnan-production-gate-runtime, path: runtime}
+      - name: Run production worker on forensic key
+        env:
+          SIM_V2_TRACE: '1'
+          SIM_V2_CAPTURE_STDERR: '1'
+          SEED: ${{ matrix.seed }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-production-gate.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          set +e
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant F10 --fixed-seat "$SEAT" --seeds "$SEED" \
+            --max-round 4 --max-prompts 5000 --max-seconds 160 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir ".sim-cache/prod-gate-${GITHUB_RUN_ID}-${SEED}-${SEAT}" \
+            --retain-traces all \
+            --engine-id "$MANABREW_REF:arch-v13-prod-gate:${GITHUB_RUN_ID}" \
+            --output "out/result-${SEED}-s${SEAT}.json" \
+            > "out/worker-${SEED}-s${SEAT}.log" 2>&1
+          echo $? > "out/rc-${SEED}-s${SEAT}.txt"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prod-gate-forensic-${{ matrix.seed }}-s${{ matrix.seat }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
+
+  forensic-aggregate:
+    needs: forensic
+    if: always()
+    runs-on: ubuntu-24.04
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: prod-gate-forensic-*
+          path: all
+      - id: check
+        run: |
+          python3 - <<'PY'
+          import json,glob,pathlib,collections,os
+          rows=[]
+          for p in glob.glob('all/**/result-*.json',recursive=True):
+              try:
+                  d=json.load(open(p)); rows.extend(d if isinstance(d,list) else [d])
+              except Exception: pass
+          valid={'game_over','horizon_complete'}
+          c=collections.Counter(r.get('status') for r in rows)
+          ok=len(rows)==5 and all(r.get('status') in valid for r in rows)
+          pathlib.Path('forensic-summary.json').write_text(json.dumps({'total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':dict(c),'passed':ok,'rows':rows},indent=2))
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"passed={'true' if ok else 'false'}\n")
+          print(json.dumps({'total':len(rows),'statuses':dict(c),'passed':ok},indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with: {name: prod-gate-forensic-summary, path: forensic-summary.json, retention-days: 14}
+
+  cold:
+    needs: [build, forensic-aggregate]
+    if: needs.forensic-aggregate.outputs.passed == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: kinnan-production-gate-runtime, path: runtime}
+      - name: Run eight fresh cold keys on production worker
+        env:
+          SEAT: ${{ matrix.seat }}
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-production-gate.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          BASE=$((1970000 + SEAT * 100))
+          SEEDS=""
+          for I in $(seq 0 7); do SEEDS="$SEEDS $((BASE+I))"; done
+          set +e
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant F10 --fixed-seat "$SEAT" --seeds $SEEDS \
+            --max-round 4 --max-prompts 5000 --max-seconds 160 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir ".sim-cache/prod-cold-${GITHUB_RUN_ID}-s${SEAT}" \
+            --retain-traces failures \
+            --engine-id "$MANABREW_REF:arch-v13-prod-cold:${GITHUB_RUN_ID}" \
+            --output "out/cold-seat${SEAT}.json" \
+            > "out/cold-seat${SEAT}.log" 2>&1
+          echo $? > "out/rc-seat${SEAT}.txt"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: prod-gate-cold-seat${{ matrix.seat }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
+
+  final:
+    needs: [build, forensic-aggregate, cold]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with: {pattern: prod-gate-*, path: all}
+      - name: Build strict durable gate report
+        run: |
+          python3 - <<'PY'
+          import json,glob,pathlib,collections
+          forensic=[]; cold=[]
+          for p in glob.glob('all/prod-gate-forensic-*/**/result-*.json',recursive=True):
+              try:
+                  d=json.load(open(p)); forensic.extend(d if isinstance(d,list) else [d])
+              except Exception: pass
+          for p in glob.glob('all/prod-gate-cold-seat*/**/cold-seat*.json',recursive=True):
+              try:
+                  d=json.load(open(p)); cold.extend(d if isinstance(d,list) else [d])
+              except Exception: pass
+          valid={'game_over','horizon_complete'}
+          fc=collections.Counter(r.get('status') for r in forensic); cc=collections.Counter(r.get('status') for r in cold)
+          seats=collections.Counter(r.get('kinnanSeat') for r in cold if r.get('status') in valid)
+          f_ok=len(forensic)==5 and all(r.get('status') in valid for r in forensic)
+          c_ok=len(cold)==32 and all(r.get('status') in valid for r in cold) and all(seats[s]==8 for s in range(4))
+          manifest=''
+          m=glob.glob('all/**/runtime-manifest.txt',recursive=True)
+          if m: manifest=open(m[0]).read()
+          out={'profile':'arch-repaired-v13-production-gate','cleanPipeline':bool(f_ok and c_ok),'forensic':{'total':len(forensic),'valid':sum(r.get('status') in valid for r in forensic),'statuses':dict(fc),'rows':forensic},'cold':{'total':len(cold),'valid':sum(r.get('status') in valid for r in cold),'statuses':dict(cc),'validBySeat':{str(s):seats[s] for s in range(4)},'rows':cold},'runtimeManifest':manifest,'sourceRunId':'${{ github.run_id }}'}
+          path=pathlib.Path('engine-tests/evidence/production-path-gate-latest.json'); path.parent.mkdir(parents=True,exist_ok=True); path.write_text(json.dumps(out,indent=2))
+          print(json.dumps({'cleanPipeline':out['cleanPipeline'],'forensic':{k:v for k,v in out['forensic'].items() if k!='rows'},'cold':{k:v for k,v in out['cold'].items() if k!='rows'}},indent=2))
+          PY
+      - name: Commit gate evidence
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/production-path-gate-latest.json
+          git commit -m 'Record Kinnan production-path validity gate [skip ci]' || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
+      - uses: actions/upload-artifact@v4
+        with: {name: prod-gate-final-report, path: engine-tests/evidence/production-path-gate-latest.json, retention-days: 30}
