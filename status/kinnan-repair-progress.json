@@ -1,134 +1,182 @@
 {
   "found": true,
-  "checkedAt": "2026-08-20T01:59:33Z",
-  "runId": 32321121542,
-  "runNumber": 4,
+  "checkedAt": "2026-08-20T03:03:53Z",
+  "runId": 32323170188,
+  "runNumber": 5,
   "event": "push",
-  "headSha": "638047fc252566ac505d250a9350b119f3c7105a",
+  "headSha": "532bceb4211c51876c27ec84cf8af91961c04eb7",
   "status": "completed",
   "conclusion": "success",
-  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32321121542",
+  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32323170188",
   "jobs": [
     {
-      "id": 96283352412,
+      "id": 96289130216,
       "name": "build",
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-20T01:28:18Z",
-      "completed_at": "2026-08-20T01:31:43Z"
+      "started_at": "2026-08-20T02:02:06Z",
+      "completed_at": "2026-08-20T02:04:39Z"
     },
     {
-      "id": 96283978831,
-      "name": "forensic (1960002, 0)",
-      "status": "completed",
-      "conclusion": "success",
-      "started_at": "2026-08-20T01:31:46Z",
-      "completed_at": "2026-08-20T01:34:18Z"
-    },
-    {
-      "id": 96283978843,
-      "name": "forensic (1960000, 0)",
-      "status": "completed",
-      "conclusion": "success",
-      "started_at": "2026-08-20T01:31:45Z",
-      "completed_at": "2026-08-20T01:32:45Z"
-    },
-    {
-      "id": 96283978849,
-      "name": "forensic (1960162, 3)",
-      "status": "completed",
-      "conclusion": "success",
-      "started_at": "2026-08-20T01:31:45Z",
-      "completed_at": "2026-08-20T01:33:08Z"
-    },
-    {
-      "id": 96283978883,
-      "name": "forensic (1960071, 1)",
-      "status": "completed",
-      "conclusion": "success",
-      "started_at": "2026-08-20T01:31:46Z",
-      "completed_at": "2026-08-20T01:32:57Z"
-    },
-    {
-      "id": 96283978899,
+      "id": 96289592045,
       "name": "forensic (1960124, 2)",
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-20T01:31:46Z",
-      "completed_at": "2026-08-20T01:32:37Z"
+      "started_at": "2026-08-20T02:04:42Z",
+      "completed_at": "2026-08-20T02:05:43Z"
     },
     {
-      "id": 96284448806,
+      "id": 96289592048,
+      "name": "forensic (1960002, 0)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:04:42Z",
+      "completed_at": "2026-08-20T02:05:52Z"
+    },
+    {
+      "id": 96289592060,
+      "name": "forensic (1960071, 1)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:04:42Z",
+      "completed_at": "2026-08-20T02:05:40Z"
+    },
+    {
+      "id": 96289592066,
+      "name": "forensic (1960162, 3)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:04:42Z",
+      "completed_at": "2026-08-20T02:06:15Z"
+    },
+    {
+      "id": 96289592099,
+      "name": "forensic (1960000, 0)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:04:42Z",
+      "completed_at": "2026-08-20T02:05:27Z"
+    },
+    {
+      "id": 96289888682,
       "name": "forensic-aggregate",
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-20T01:34:22Z",
-      "completed_at": "2026-08-20T01:34:26Z"
+      "started_at": "2026-08-20T02:06:18Z",
+      "completed_at": "2026-08-20T02:06:26Z"
     },
     {
-      "id": 96284473072,
+      "id": 96289921126,
+      "name": "cold (0)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:06:29Z",
+      "completed_at": "2026-08-20T02:12:04Z"
+    },
+    {
+      "id": 96289921136,
+      "name": "cold (2)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:06:29Z",
+      "completed_at": "2026-08-20T02:12:25Z"
+    },
+    {
+      "id": 96289921146,
+      "name": "cold (1)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:06:29Z",
+      "completed_at": "2026-08-20T02:12:21Z"
+    },
+    {
+      "id": 96289921159,
+      "name": "cold (3)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T02:06:30Z",
+      "completed_at": "2026-08-20T02:12:18Z"
+    },
+    {
+      "id": 96290936208,
       "name": "final",
       "status": "completed",
       "conclusion": "success",
-      "started_at": "2026-08-20T01:34:30Z",
-      "completed_at": "2026-08-20T01:34:39Z"
-    },
-    {
-      "id": 96284473849,
-      "name": "cold",
-      "status": "completed",
-      "conclusion": "skipped",
-      "started_at": "2026-08-20T01:34:27Z",
-      "completed_at": "2026-08-20T01:34:27Z"
+      "started_at": "2026-08-20T02:12:29Z",
+      "completed_at": "2026-08-20T02:12:39Z"
     }
   ],
   "artifacts": [
     {
-      "id": 9389907736,
+      "id": 9390640303,
       "name": "prod-gate-final-report",
-      "size_in_bytes": 13431,
+      "size_in_bytes": 30414,
       "expired": false
     },
     {
-      "id": 9389903114,
+      "id": 9390636288,
+      "name": "prod-gate-cold-seat2",
+      "size_in_bytes": 11357,
+      "expired": false
+    },
+    {
+      "id": 9390634888,
+      "name": "prod-gate-cold-seat1",
+      "size_in_bytes": 10112,
+      "expired": false
+    },
+    {
+      "id": 9390633987,
+      "name": "prod-gate-cold-seat3",
+      "size_in_bytes": 11273,
+      "expired": false
+    },
+    {
+      "id": 9390629561,
+      "name": "prod-gate-cold-seat0",
+      "size_in_bytes": 10693,
+      "expired": false
+    },
+    {
+      "id": 9390518738,
       "name": "prod-gate-forensic-summary",
-      "size_in_bytes": 12483,
+      "size_in_bytes": 12439,
       "expired": false
     },
     {
-      "id": 9389899702,
-      "name": "prod-gate-forensic-1960002-s0",
-      "size_in_bytes": 7949,
-      "expired": false
-    },
-    {
-      "id": 9389874446,
+      "id": 9390515245,
       "name": "prod-gate-forensic-1960162-s3",
-      "size_in_bytes": 7187,
+      "size_in_bytes": 7192,
       "expired": false
     },
     {
-      "id": 9389869382,
-      "name": "prod-gate-forensic-1960071-s1",
-      "size_in_bytes": 7783,
+      "id": 9390508180,
+      "name": "prod-gate-forensic-1960002-s0",
+      "size_in_bytes": 8036,
       "expired": false
     },
     {
-      "id": 9389865522,
-      "name": "prod-gate-forensic-1960000-s0",
-      "size_in_bytes": 6526,
-      "expired": false
-    },
-    {
-      "id": 9389862695,
+      "id": 9390504848,
       "name": "prod-gate-forensic-1960124-s2",
-      "size_in_bytes": 7372,
+      "size_in_bytes": 7235,
       "expired": false
     },
     {
-      "id": 9389842048,
+      "id": 9390503985,
+      "name": "prod-gate-forensic-1960071-s1",
+      "size_in_bytes": 7771,
+      "expired": false
+    },
+    {
+      "id": 9390500032,
+      "name": "prod-gate-forensic-1960000-s0",
+      "size_in_bytes": 6522,
+      "expired": false
+    },
+    {
+      "id": 9390483990,
       "name": "kinnan-production-gate-runtime",
-      "size_in_bytes": 201426916,
+      "size_in_bytes": 201431146,
       "expired": false
     }
   ]
