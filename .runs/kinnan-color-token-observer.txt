@@ -1,0 +1,1 @@
+2026-08-20 inspect first v1.8 color-token regression gate
