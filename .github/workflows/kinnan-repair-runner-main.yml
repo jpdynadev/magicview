@@ -1,0 +1,185 @@
+name: Kinnan clean pipeline repair runner
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/kinnan-repair-runner-main.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-clean-repair-main
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  LAB_BRANCH: agent/kinnan-expanded-architecture
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  JAR: /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar
+  FORGE_HOME: /tmp/manabrew/forge/forge-gui/
+  RUN_TOKEN: repair-v13-1
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Check out lab branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.LAB_BRANCH }}
+          fetch-depth: 1
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+
+      - name: Clone pinned Manabrew and apply exact-content repairs
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+
+      - name: Record runtime manifest
+        run: |
+          mkdir -p engine-tests/results/repair-main
+          {
+            echo "run_token=$RUN_TOKEN"
+            echo "lab_sha=$(git rev-parse HEAD)"
+            echo "manabrew=$(git -C /tmp/manabrew rev-parse HEAD)"
+            echo "forge=$(git -C /tmp/manabrew/forge rev-parse HEAD)"
+            echo "repair_sha=$(sha256sum engine-tests/apply_manabrew_repairs.py | cut -d' ' -f1)"
+            echo "pilot_sha=$(sha256sum engine-tests/manabrew_pilot_arch.py | cut -d' ' -f1)"
+            echo "jar_sha=$(sha256sum $JAR | cut -d' ' -f1)"
+          } > engine-tests/results/repair-main/runtime-manifest.txt
+
+      - name: Run exact five-seed forensic gate
+        id: forensic
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          export KINNAN_RESULT_DIR="$GITHUB_WORKSPACE/engine-tests/results/repair-main/forensic"
+          mkdir -p "$KINNAN_RESULT_DIR"
+          run_case() {
+            seed="$1"; seat="$2"
+            python3 engine-tests/manabrew_pilot_arch.py "$JAR" "$FORGE_HOME" \
+              --variant F10 --seeds "$seed" --seat-offset "$seat" \
+              --max-round 4 --max-prompts 5000 --max-seconds 160
+            echo "case $seed/$seat rc=$?"
+          }
+          run_case 1960000 0
+          run_case 1960002 0
+          run_case 1960071 1
+          run_case 1960124 2
+          run_case 1960162 3
+          exit 0
+
+      - name: Aggregate forensic gate
+        id: aggregate_forensic
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, collections
+          root=pathlib.Path('engine-tests/results/repair-main/forensic')
+          rows=[]
+          for p in root.glob('pilot-result-F10-*.json'):
+              try: rows.append(json.loads(p.read_text()))
+              except Exception: pass
+          valid={'game_over','horizon_complete'}
+          status=collections.Counter(r.get('status') for r in rows)
+          s={'runToken':'repair-v13-1','stage':'forensic','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':dict(status),'rows':rows}
+          pathlib.Path('engine-tests/results/repair-main/forensic-summary.json').write_text(json.dumps(s,indent=2))
+          pathlib.Path('engine-tests/results/repair-main/forensic_pass').write_text('1' if len(rows)==5 and s['valid']==5 else '0')
+          print(json.dumps(s,indent=2))
+          PY
+
+      - name: Run 32-game cold gate if forensic passes
+        shell: bash
+        run: |
+          if [ "$(cat engine-tests/results/repair-main/forensic_pass)" != "1" ]; then
+            echo "Forensic gate failed; skipping scale-up"
+            exit 0
+          fi
+          export KINNAN_RESULT_DIR="$GITHUB_WORKSPACE/engine-tests/results/repair-main/cold"
+          mkdir -p "$KINNAN_RESULT_DIR"
+          set +e
+          for seat in 0 1 2 3; do
+            for i in $(seq 0 7); do
+              seed=$((1970000 + seat*100 + i))
+              python3 engine-tests/manabrew_pilot_arch.py "$JAR" "$FORGE_HOME" \
+                --variant F10 --seeds "$seed" --seat-offset "$seat" \
+                --max-round 4 --max-prompts 5000 --max-seconds 160
+              echo "cold $seed/$seat rc=$?"
+            done
+          done
+          exit 0
+
+      - name: Aggregate final pipeline status
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,collections,hashlib
+          base=pathlib.Path('engine-tests/results/repair-main')
+          valid={'game_over','horizon_complete'}
+          forensic=json.loads((base/'forensic-summary.json').read_text()) if (base/'forensic-summary.json').exists() else {'valid':0,'total':0,'statuses':{'infrastructure_failure':1},'rows':[]}
+          cold=[]
+          for p in (base/'cold').glob('pilot-result-F10-*.json') if (base/'cold').exists() else []:
+              try: cold.append(json.loads(p.read_text()))
+              except Exception: pass
+          counts=collections.Counter(r.get('status') for r in cold)
+          seats=collections.Counter(r.get('kinnanSeat') for r in cold if r.get('status') in valid)
+          cold_valid=sum(r.get('status') in valid for r in cold)
+          clean=(forensic.get('total')==5 and forensic.get('valid')==5 and len(cold)==32 and cold_valid==32 and all(seats[s]==8 for s in range(4)))
+          manifest=(base/'runtime-manifest.txt').read_text() if (base/'runtime-manifest.txt').exists() else ''
+          out={
+            'runToken':'repair-v13-1','cleanPipeline':clean,
+            'forensic':forensic,
+            'cold':{'total':len(cold),'valid':cold_valid,'statuses':dict(counts),'validBySeat':{str(s):seats[s] for s in range(4)},'rows':cold},
+            'runtimeManifest':manifest,
+          }
+          path=pathlib.Path('engine-tests/evidence/pipeline-gate-latest.json')
+          path.parent.mkdir(parents=True,exist_ok=True)
+          path.write_text(json.dumps(out,indent=2))
+          print(json.dumps({k:v for k,v in out.items() if k not in {'forensic','cold'}},indent=2))
+          print('forensic',forensic.get('valid'),forensic.get('total'),forensic.get('statuses'))
+          print('cold',cold_valid,len(cold),dict(counts),dict(seats))
+          PY
+
+      - name: Commit durable result to lab branch
+        if: always()
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/pipeline-gate-latest.json
+          git commit -m "Record Kinnan clean pipeline gate $RUN_TOKEN" || exit 0
+          git push origin HEAD:$LAB_BRANCH
+
+      - name: Upload full diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-clean-repair-${{ github.run_id }}
+          path: engine-tests/results/repair-main/
+          if-no-files-found: warn
+          retention-days: 90
