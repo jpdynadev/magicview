@@ -2,10 +2,4635 @@
   "profile": "arch-repaired-v13-production-gate",
   "cleanPipeline": false,
   "forensic": {
-    "total": 0,
-    "valid": 0,
-    "statuses": {},
-    "rows": []
+    "total": 5,
+    "valid": 4,
+    "statuses": {
+      "horizon_complete": 4,
+      "idle_timeout": 1
+    },
+    "rows": [
+      {
+        "pilotVersion": "arch-aware-v1.5",
+        "variant": "F10",
+        "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+        "seed": 1960162,
+        "kinnanSeat": 3,
+        "status": "horizon_complete",
+        "winnerSeat": null,
+        "kinnanWon": false,
+        "firstAssemblyTurn": 3,
+        "firstAttemptTurn": 3,
+        "deterministicT4": true,
+        "certifiedDeterministicAttempt": false,
+        "attemptResolved": false,
+        "protectedAttempt": false,
+        "strictProtectedT4": false,
+        "comboLine": "Kinnan + Grim + Power Artifact -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+        "primaryFailureCode": "UNRESOLVED_ATTEMPT",
+        "wallMs": 73598,
+        "prompts": 1065,
+        "mulligans": 0,
+        "openingHand": [
+          "An Offer You Can't Refuse",
+          "Enduring Vitality",
+          "Fellwar Stone",
+          "Force of Vigor",
+          "Forensic Gadgeteer",
+          "Misdirection",
+          "Reshape"
+        ],
+        "keptHand": [
+          "Elvish Mystic",
+          "Fellwar Stone",
+          "Mox Opal",
+          "Power Artifact",
+          "Sol Ring",
+          "Valley Floodcaller",
+          "Wooded Foothills"
+        ],
+        "observedCards": [
+          "An Offer You Can't Refuse",
+          "Arcane Signet",
+          "Breeding Pool",
+          "Elvish Mystic",
+          "Enduring Vitality",
+          "Fellwar Stone",
+          "Fierce Guardianship",
+          "Force of Vigor",
+          "Forensic Gadgeteer",
+          "Forest",
+          "Grim Monolith",
+          "Hydroelectric Specimen",
+          "Island",
+          "Kinnan, Bonder Prodigy",
+          "Mental Misstep",
+          "Misdirection",
+          "Mox Opal",
+          "Pact of Negation",
+          "Power Artifact",
+          "Reshape",
+          "Rhystic Study",
+          "Sol Ring",
+          "Tropical Island",
+          "Valley Floodcaller",
+          "Walking Ballista",
+          "Wooded Foothills"
+        ],
+        "exposureCards": [],
+        "slotExposed": false,
+        "v2EarlyExit": false,
+        "v2DeadlineExit": false,
+        "observedCardEvents": [
+          {
+            "card": "An Offer You Can't Refuse",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Arcane Signet",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Breeding Pool",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Elvish Mystic",
+            "reason": "zone:battlefield",
+            "count": 238
+          },
+          {
+            "card": "Elvish Mystic",
+            "reason": "zone:hand",
+            "count": 56
+          },
+          {
+            "card": "Enduring Vitality",
+            "reason": "zone:battlefield",
+            "count": 60
+          },
+          {
+            "card": "Enduring Vitality",
+            "reason": "zone:hand",
+            "count": 340
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:battlefield",
+            "count": 247
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:hand",
+            "count": 46
+          },
+          {
+            "card": "Fierce Guardianship",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Force of Vigor",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Forensic Gadgeteer",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Forest",
+            "reason": "prompt_small_choice",
+            "count": 7
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:battlefield",
+            "count": 63
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:hand",
+            "count": 162
+          },
+          {
+            "card": "Hydroelectric Specimen",
+            "reason": "zone:hand",
+            "count": 40
+          },
+          {
+            "card": "Island",
+            "reason": "prompt_small_choice",
+            "count": 9
+          },
+          {
+            "card": "Kinnan, Bonder Prodigy",
+            "reason": "zone:battlefield",
+            "count": 114
+          },
+          {
+            "card": "Mental Misstep",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Misdirection",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Mox Opal",
+            "reason": "zone:battlefield",
+            "count": 256
+          },
+          {
+            "card": "Mox Opal",
+            "reason": "zone:hand",
+            "count": 27
+          },
+          {
+            "card": "Pact of Negation",
+            "reason": "prompt_small_choice",
+            "count": 5
+          },
+          {
+            "card": "Power Artifact",
+            "reason": "zone:battlefield",
+            "count": 63
+          },
+          {
+            "card": "Power Artifact",
+            "reason": "zone:hand",
+            "count": 319
+          },
+          {
+            "card": "Reshape",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Rhystic Study",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "zone:battlefield",
+            "count": 250
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "zone:hand",
+            "count": 37
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "zone:battlefield",
+            "count": 266
+          },
+          {
+            "card": "Valley Floodcaller",
+            "reason": "zone:battlefield",
+            "count": 149
+          },
+          {
+            "card": "Valley Floodcaller",
+            "reason": "zone:hand",
+            "count": 190
+          },
+          {
+            "card": "Walking Ballista",
+            "reason": "zone:hand",
+            "count": 26
+          },
+          {
+            "card": "Wooded Foothills",
+            "reason": "zone:battlefield",
+            "count": 3
+          },
+          {
+            "card": "Wooded Foothills",
+            "reason": "zone:hand",
+            "count": 9
+          }
+        ],
+        "exposureEvents": [],
+        "podProfile": "screen",
+        "v2SessionCleanup": false,
+        "v2SessionCleanupError": "RuntimeError('Cannot invoke \"java.lang.CharSequence.toString()\" because \"replacement\" is null')",
+        "v2SemanticPromptAdvances": 0,
+        "v2DuplicateSubmitsSuppressed": 0,
+        "v2PilotTraceTail": [
+          {
+            "seq": 1053,
+            "promptId": "1054:a9a8e77462cb3301",
+            "player": 2,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "e01635939ce4ca723c45825310d8e8c40e56e39a5400336b6cd5f1e2926dff05",
+            "legalActionHash": "4cf2273bf0bedaee4ce271092c696e53fa17fdbe25c97cf92d8f4ed6afca8920",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{1}, {T}: Untap target land.",
+                  "isManaAbility": false,
+                  "cost": "{T}, {1}"
+                },
+                {
+                  "id": "tap:engine-card-254:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-268:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-268",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1054,
+            "promptId": "1055:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "b056fbad71161ef7c090c945c37be1117a15f08343b04aec09e5df7f8e3089dc",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1055,
+            "promptId": "1056:19fedc785d82e0b1",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "39f813efb44eacdb39e552b3fb408bba00ed8423a316c743335ba5a3abc03850",
+            "legalActionHash": "a1d2eb6899aefc28c6e1052ac8dc33d0023036c015cc9901d1ebd575dd3a3506",
+            "legalActionCount": 5,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-14:0:W",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "W",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:U",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:G",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "G",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1056,
+            "promptId": "1057:3e9f361b23e8c138",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "0fa3450d62c10ebc474bc8b41425de155cfd7c39cf11fef3fdab1b219073e619",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1057,
+            "promptId": "1058:a9a8e77462cb3301",
+            "player": 2,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "62030a63803c83eab77a44c251a401ca8f38b4b37a2c5ef1593bacbebbaae652",
+            "legalActionHash": "4cf2273bf0bedaee4ce271092c696e53fa17fdbe25c97cf92d8f4ed6afca8920",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{1}, {T}: Untap target land.",
+                  "isManaAbility": false,
+                  "cost": "{T}, {1}"
+                },
+                {
+                  "id": "tap:engine-card-254:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-268:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-268",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1058,
+            "promptId": "1059:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "1be682b4ad0882f003198595d2f9d22b56a683dc76e44beb2b5883f22f8fc454",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1059,
+            "promptId": "1060:19fedc785d82e0b1",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "4aaada265eee0083228f7902871a11816ab8daa5e2cb5e525575964d713913ee",
+            "legalActionHash": "a1d2eb6899aefc28c6e1052ac8dc33d0023036c015cc9901d1ebd575dd3a3506",
+            "legalActionCount": 5,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-14:0:W",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "W",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:U",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:G",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "G",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1060,
+            "promptId": "1061:3e9f361b23e8c138",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "1ee9e24d0a929c832416d3b76fe2c682549aa2cd0803bfe9112bad56e2559d3c",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1061,
+            "promptId": "1062:a9a8e77462cb3301",
+            "player": 2,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "82f61c94b6509d4e85624822147eaf5653669af65d711f5af1e2028677b44195",
+            "legalActionHash": "4cf2273bf0bedaee4ce271092c696e53fa17fdbe25c97cf92d8f4ed6afca8920",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{1}, {T}: Untap target land.",
+                  "isManaAbility": false,
+                  "cost": "{T}, {1}"
+                },
+                {
+                  "id": "tap:engine-card-254:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-254",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-268:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-268",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1062,
+            "promptId": "1063:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "a20592b4aa58b953e31c9362ae6e76febeb1dbd95f7a7d2f70ac5781b3216697",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1063,
+            "promptId": "1064:19fedc785d82e0b1",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "e2b933d75d5c8cfa5f7643bca42177a866f8dd32e755885c95c89e3637244435",
+            "legalActionHash": "a1d2eb6899aefc28c6e1052ac8dc33d0023036c015cc9901d1ebd575dd3a3506",
+            "legalActionCount": 5,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-14:0:W",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "W",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:U",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 3
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-14:0:G",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-14",
+                  "description": "Discard your hand, Sacrifice Lion's Eye Diamond: Add three mana of any one color. Activate only as an instant.",
+                  "isManaAbility": true,
+                  "cost": "Discard your hand, Sacrifice CARDNAME",
+                  "producedMana": [
+                    {
+                      "color": "G",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1064,
+            "promptId": "1065:3e9f361b23e8c138",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "ff6ee019732efedd12156979e979a642f5e85262e6dcc831dd4a62aee6eb242b",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          }
+        ],
+        "cacheKey": "0bb33909297093887097f69c76d124596e673c47bcaba41916d894657e9ea9c9",
+        "mode": "screen",
+        "pod": "screen",
+        "podDeckSha256": "dfd473752914a8698828c563590d460dfffc003b7e5a67d4b5d290647ceeb1e5",
+        "seatDeckSha256s": [
+          "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+          "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+          "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+          "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559"
+        ],
+        "optimizerId": "06281acaa4805df097a03a86064b857c7d12137a0e26d76a22e3ade751c388f2",
+        "executionProfile": "arch-repaired-v13-production-gate"
+      },
+      {
+        "pilotVersion": "arch-aware-v1.5",
+        "variant": "F10",
+        "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+        "seed": 1960124,
+        "kinnanSeat": 2,
+        "status": "horizon_complete",
+        "winnerSeat": null,
+        "kinnanWon": false,
+        "firstAssemblyTurn": 4,
+        "firstAttemptTurn": null,
+        "deterministicT4": true,
+        "certifiedDeterministicAttempt": false,
+        "attemptResolved": false,
+        "protectedAttempt": false,
+        "strictProtectedT4": false,
+        "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+        "primaryFailureCode": "PILOT_ERROR",
+        "wallMs": 39080,
+        "prompts": 793,
+        "mulligans": 0,
+        "openingHand": [
+          "Borne Upon a Wind",
+          "Flusterstorm",
+          "Gaea's Cradle",
+          "Gemstone Caverns",
+          "Llanowar Elves",
+          "Swan Song",
+          "Veil of Summer"
+        ],
+        "keptHand": [
+          "Ancient Tomb",
+          "Drift of Phantasms",
+          "Elvish Spirit Guide",
+          "Mox Diamond",
+          "Polluted Delta",
+          "Rejuvenating Springs",
+          "Springleaf Drum"
+        ],
+        "observedCards": [
+          "Ancient Tomb",
+          "Basalt Monolith",
+          "Borne Upon a Wind",
+          "Breeding Pool",
+          "Drift of Phantasms",
+          "Elvish Spirit Guide",
+          "Fellwar Stone",
+          "Flusterstorm",
+          "Force of Vigor",
+          "Forest",
+          "Gaea's Cradle",
+          "Gemstone Caverns",
+          "Grim Monolith",
+          "Hydroelectric Specimen",
+          "Island",
+          "Kinnan, Bonder Prodigy",
+          "Llanowar Elves",
+          "Mox Diamond",
+          "Polluted Delta",
+          "Rejuvenating Springs",
+          "Springleaf Drum",
+          "Swan Song",
+          "Tropical Island",
+          "Veil of Summer"
+        ],
+        "exposureCards": [],
+        "slotExposed": false,
+        "v2EarlyExit": false,
+        "v2DeadlineExit": false,
+        "observedCardEvents": [
+          {
+            "card": "Ancient Tomb",
+            "reason": "zone:battlefield",
+            "count": 412
+          },
+          {
+            "card": "Ancient Tomb",
+            "reason": "zone:hand",
+            "count": 72
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "zone:battlefield",
+            "count": 215
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "zone:hand",
+            "count": 157
+          },
+          {
+            "card": "Borne Upon a Wind",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Breeding Pool",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Drift of Phantasms",
+            "reason": "zone:hand",
+            "count": 218
+          },
+          {
+            "card": "Elvish Spirit Guide",
+            "reason": "prompt_small_choice",
+            "count": 6
+          },
+          {
+            "card": "Elvish Spirit Guide",
+            "reason": "zone:battlefield",
+            "count": 386
+          },
+          {
+            "card": "Elvish Spirit Guide",
+            "reason": "zone:hand",
+            "count": 101
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:battlefield",
+            "count": 249
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:hand",
+            "count": 40
+          },
+          {
+            "card": "Flusterstorm",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Force of Vigor",
+            "reason": "zone:hand",
+            "count": 578
+          },
+          {
+            "card": "Forest",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Gaea's Cradle",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Gemstone Caverns",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Gemstone Caverns",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:battlefield",
+            "count": 210
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:hand",
+            "count": 242
+          },
+          {
+            "card": "Hydroelectric Specimen",
+            "reason": "zone:hand",
+            "count": 48
+          },
+          {
+            "card": "Island",
+            "reason": "prompt_small_choice",
+            "count": 10
+          },
+          {
+            "card": "Kinnan, Bonder Prodigy",
+            "reason": "zone:battlefield",
+            "count": 3
+          },
+          {
+            "card": "Llanowar Elves",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Mox Diamond",
+            "reason": "zone:battlefield",
+            "count": 404
+          },
+          {
+            "card": "Mox Diamond",
+            "reason": "zone:hand",
+            "count": 79
+          },
+          {
+            "card": "Polluted Delta",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Polluted Delta",
+            "reason": "zone:battlefield",
+            "count": 13
+          },
+          {
+            "card": "Polluted Delta",
+            "reason": "zone:hand",
+            "count": 169
+          },
+          {
+            "card": "Rejuvenating Springs",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Rejuvenating Springs",
+            "reason": "zone:hand",
+            "count": 83
+          },
+          {
+            "card": "Springleaf Drum",
+            "reason": "zone:battlefield",
+            "count": 319
+          },
+          {
+            "card": "Springleaf Drum",
+            "reason": "zone:hand",
+            "count": 224
+          },
+          {
+            "card": "Swan Song",
+            "reason": "zone:hand",
+            "count": 2
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "zone:battlefield",
+            "count": 341
+          },
+          {
+            "card": "Veil of Summer",
+            "reason": "zone:hand",
+            "count": 2
+          }
+        ],
+        "exposureEvents": [],
+        "podProfile": "screen",
+        "v2SessionCleanup": false,
+        "v2SessionCleanupError": "RuntimeError('Cannot invoke \"java.lang.CharSequence.toString()\" because \"replacement\" is null')",
+        "v2SemanticPromptAdvances": 0,
+        "v2DuplicateSubmitsSuppressed": 0,
+        "v2PilotTraceTail": [
+          {
+            "seq": 781,
+            "promptId": "782:80393ce77ea41c99",
+            "player": 2,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "35feecb9a21c2a8da9e266907980c199e1cf4d8cfb64f641cb81e3d21d9d149c",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 782,
+            "promptId": "783:01f3436250a6974a",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "632e9f42beffad4e1b5e4ef18421b82d869be7002e70fe50653f94785aaa5bd2",
+            "legalActionHash": "ccfacf919f8fd401221c7f714c7f3f9dcc69f6f73735980d1ca48c246a4db6ee",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-379:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-379",
+                  "description": "{T}: Add {U}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-327:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-327",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 783,
+            "promptId": "784:2720e5cd899db6b2",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "a2b1fabe0ff0d7be00f0414ad22af7841b3eb5747fd5cf72605afd160e480ea8",
+            "legalActionHash": "48dd0ba10f26426305c92d2552baa482e3838b3b4a42664785234b582f0a9200",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-8",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-1:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-1",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-2:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-2",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 784,
+            "promptId": "785:98c6c68c65aa7a9c",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "51ca712978b30408524006dd7ce571f9d54c01fe96849c748962af69f8b91584",
+            "legalActionHash": "2a2012e541585d06afeb1434e4c00b3f7ea403e9f4d5a414d99147912f3771c8",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-180:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-180",
+                  "description": "{T}: Add {C}. If Gemstone Caverns has a luck counter on it, instead add one mana of any color.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-114:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-114",
+                  "description": "Exile Simian Spirit Guide from your hand: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "Exile CARDNAME from your hand",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 785,
+            "promptId": "786:80393ce77ea41c99",
+            "player": 2,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "4da4ded54cb23ee7abbc427d2750ff8945e108855e7f50c5ab6b6f336714579f",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 786,
+            "promptId": "787:01f3436250a6974a",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "3edf0c15d4267ed61c426eb3b5f08bf3e1c1ef4210b353633663cbb4a9191243",
+            "legalActionHash": "ccfacf919f8fd401221c7f714c7f3f9dcc69f6f73735980d1ca48c246a4db6ee",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-379:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-379",
+                  "description": "{T}: Add {U}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-327:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-327",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 787,
+            "promptId": "788:2720e5cd899db6b2",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "4dabedc8640f8abee7fe968d6cee55b38175096881dfc0430f34a40fc43f3e8e",
+            "legalActionHash": "48dd0ba10f26426305c92d2552baa482e3838b3b4a42664785234b582f0a9200",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-8",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-1:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-1",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-2:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-2",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 788,
+            "promptId": "789:98c6c68c65aa7a9c",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "de1144467f58d75a6ccada119e9174032d5b52f699e269891ecc041ad54166f3",
+            "legalActionHash": "2a2012e541585d06afeb1434e4c00b3f7ea403e9f4d5a414d99147912f3771c8",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-180:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-180",
+                  "description": "{T}: Add {C}. If Gemstone Caverns has a luck counter on it, instead add one mana of any color.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-114:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-114",
+                  "description": "Exile Simian Spirit Guide from your hand: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "Exile CARDNAME from your hand",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 789,
+            "promptId": "790:80393ce77ea41c99",
+            "player": 2,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "28a7ce14e4147ea02f83cac8229313c6b020d90deb4c624052fd08fa18cac468",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 790,
+            "promptId": "791:01f3436250a6974a",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "ce16acf05e701232b525846217bc282b6ea9095df4f16f9d20169f1c471f1490",
+            "legalActionHash": "ccfacf919f8fd401221c7f714c7f3f9dcc69f6f73735980d1ca48c246a4db6ee",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-379:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-379",
+                  "description": "{T}: Add {U}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "U",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-327:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-327",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 791,
+            "promptId": "792:2720e5cd899db6b2",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-0",
+            "stateHash": "26ecbdb324054fb544ef6fa232083e0fb111cf263b07711214ca37ad718f87f8",
+            "legalActionHash": "48dd0ba10f26426305c92d2552baa482e3838b3b4a42664785234b582f0a9200",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-8",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-1:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-1",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-2:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-2",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 792,
+            "promptId": "793:98c6c68c65aa7a9c",
+            "player": 1,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "a747d5519df0d1e4fe4e37da77d7a68bfb4a55c0dd47a2ba235ee52218dd51de",
+            "legalActionHash": "2a2012e541585d06afeb1434e4c00b3f7ea403e9f4d5a414d99147912f3771c8",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-180:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-180",
+                  "description": "{T}: Add {C}. If Gemstone Caverns has a luck counter on it, instead add one mana of any color.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-114:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-114",
+                  "description": "Exile Simian Spirit Guide from your hand: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "Exile CARDNAME from your hand",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          }
+        ],
+        "cacheKey": "e6aa2975aacd18577c572d4f4b1a58857a256171ef64c6a8fd2829166ffd70e8",
+        "mode": "screen",
+        "pod": "screen",
+        "podDeckSha256": "52aadc10e2a3cf03533e3c7259ae36bd5d167c510d71bee5b6201abb0a1b06b8",
+        "seatDeckSha256s": [
+          "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+          "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+          "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+          "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+        ],
+        "optimizerId": "06281acaa4805df097a03a86064b857c7d12137a0e26d76a22e3ade751c388f2",
+        "executionProfile": "arch-repaired-v13-production-gate"
+      },
+      {
+        "pilotVersion": "arch-aware-v1.5",
+        "variant": "F10",
+        "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+        "seed": 1960002,
+        "kinnanSeat": 0,
+        "status": "idle_timeout",
+        "winnerSeat": null,
+        "kinnanWon": false,
+        "firstAssemblyTurn": 3,
+        "firstAttemptTurn": 4,
+        "deterministicT4": true,
+        "certifiedDeterministicAttempt": false,
+        "attemptResolved": false,
+        "protectedAttempt": false,
+        "strictProtectedT4": false,
+        "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+        "primaryFailureCode": "TIMEOUT",
+        "wallMs": 130909,
+        "prompts": 1569,
+        "mulligans": 0,
+        "openingHand": [
+          "Ancient Tomb",
+          "Fellwar Stone",
+          "Grim Monolith",
+          "Mox Opal",
+          "Nature's Rhythm",
+          "Tropical Island",
+          "Valley Floodcaller"
+        ],
+        "keptHand": [
+          "Ancient Tomb",
+          "Fellwar Stone",
+          "Grim Monolith",
+          "Mox Opal",
+          "Nature's Rhythm",
+          "Tropical Island",
+          "Valley Floodcaller"
+        ],
+        "observedCards": [
+          "Ancient Tomb",
+          "Arcane Signet",
+          "Basalt Monolith",
+          "Birds of Paradise",
+          "Bloom Tender",
+          "Chrome Mox",
+          "Defense Grid",
+          "Delighted Halfling",
+          "Elvish Mystic",
+          "Elvish Spirit Guide",
+          "Energy Refractor",
+          "Fellwar Stone",
+          "Force of Will",
+          "Forest",
+          "Fyndhorn Elves",
+          "Goblin Cannon",
+          "Grim Monolith",
+          "Island",
+          "Kinnan, Bonder Prodigy",
+          "Llanowar Elves",
+          "Lotus Petal",
+          "Mana Vault",
+          "Mockingbird",
+          "Moonsilver Key",
+          "Mox Amber",
+          "Mox Diamond",
+          "Mox Opal",
+          "Mystic Remora",
+          "Nature's Rhythm",
+          "Shifting Woodland",
+          "Sol Ring",
+          "Springleaf Drum",
+          "Staff of Domination",
+          "Summoner's Pact",
+          "Talisman of Curiosity",
+          "Thrasios, Triton Hero",
+          "Treasure Vault",
+          "Trinket Mage",
+          "Tropical Island",
+          "Valley Floodcaller",
+          "Verdant Catacombs",
+          "Walking Ballista",
+          "Waterlogged Grove",
+          "Whir of Invention"
+        ],
+        "exposureCards": [],
+        "slotExposed": false,
+        "v2EarlyExit": false,
+        "v2DeadlineExit": false,
+        "observedCardEvents": [
+          {
+            "card": "Ancient Tomb",
+            "reason": "zone:battlefield",
+            "count": 147
+          },
+          {
+            "card": "Ancient Tomb",
+            "reason": "zone:hand",
+            "count": 41
+          },
+          {
+            "card": "Arcane Signet",
+            "reason": "zone:battlefield",
+            "count": 62
+          },
+          {
+            "card": "Arcane Signet",
+            "reason": "zone:hand",
+            "count": 35
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "zone:battlefield",
+            "count": 3
+          },
+          {
+            "card": "Birds of Paradise",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Bloom Tender",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Chrome Mox",
+            "reason": "prompt_small_choice",
+            "count": 12
+          },
+          {
+            "card": "Defense Grid",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Delighted Halfling",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Delighted Halfling",
+            "reason": "zone:hand",
+            "count": 96
+          },
+          {
+            "card": "Elvish Mystic",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Elvish Spirit Guide",
+            "reason": "prompt_small_choice",
+            "count": 10
+          },
+          {
+            "card": "Energy Refractor",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:battlefield",
+            "count": 140
+          },
+          {
+            "card": "Fellwar Stone",
+            "reason": "zone:hand",
+            "count": 49
+          },
+          {
+            "card": "Force of Will",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Forest",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Fyndhorn Elves",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Goblin Cannon",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:battlefield",
+            "count": 1
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:hand",
+            "count": 310
+          },
+          {
+            "card": "Island",
+            "reason": "prompt_small_choice",
+            "count": 10
+          },
+          {
+            "card": "Kinnan, Bonder Prodigy",
+            "reason": "zone:battlefield",
+            "count": 42
+          },
+          {
+            "card": "Llanowar Elves",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Lotus Petal",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Mana Vault",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Mockingbird",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Moonsilver Key",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Mox Amber",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Mox Diamond",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Mox Opal",
+            "reason": "zone:battlefield",
+            "count": 136
+          },
+          {
+            "card": "Mox Opal",
+            "reason": "zone:hand",
+            "count": 56
+          },
+          {
+            "card": "Mystic Remora",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Nature's Rhythm",
+            "reason": "zone:hand",
+            "count": 209
+          },
+          {
+            "card": "Shifting Woodland",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Springleaf Drum",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Staff of Domination",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Summoner's Pact",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Talisman of Curiosity",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Thrasios, Triton Hero",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Treasure Vault",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Trinket Mage",
+            "reason": "zone:hand",
+            "count": 825
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "zone:battlefield",
+            "count": 80
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "zone:hand",
+            "count": 151
+          },
+          {
+            "card": "Valley Floodcaller",
+            "reason": "zone:hand",
+            "count": 858
+          },
+          {
+            "card": "Verdant Catacombs",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Walking Ballista",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Waterlogged Grove",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Whir of Invention",
+            "reason": "zone:hand",
+            "count": 16
+          }
+        ],
+        "exposureEvents": [],
+        "podProfile": "screen",
+        "v2SessionCleanup": true,
+        "v2SessionCleanupError": null,
+        "v2SemanticPromptAdvances": 0,
+        "v2DuplicateSubmitsSuppressed": 0,
+        "v2PilotTraceTail": [
+          {
+            "seq": 1557,
+            "promptId": "1558:5df047a10cfd28e5",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "8077cb55c067b40f4fb212a06837b7dc1f0ec900c7242f75b1c4ddda57a15bc7",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "payManaCost",
+              "cardId": "engine-card-7",
+              "cardName": "Grim Monolith",
+              "manaCost": "{4}",
+              "canConfirmFromPool": false,
+              "actions": [
+                {
+                  "id": "tap:engine-card-56:0",
+                  "type": "activateManaAbility",
+                  "cardId": "engine-card-56",
+                  "description": "Basalt Monolith",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "payManaCost",
+              "output": {
+                "type": "cancel"
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": true,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1558,
+            "promptId": "1559:291644975ca20d41",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "73407b9b2f19be08a56ae1d6b0f8a738915099db57a37e91913c39bd7edb7b12",
+            "legalActionHash": "ef4e679891ea2a00dc562e03c3b129a096f3a5ef446f74c70ef6e02a27274ef9",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-7",
+                  "description": "{4}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{4}"
+                },
+                {
+                  "id": "tap:engine-card-56:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-56",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "prompt-action-0"
+              }
+            },
+            "chosenCard": "Grim Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1559,
+            "promptId": "1560:5df047a10cfd28e5",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "73407b9b2f19be08a56ae1d6b0f8a738915099db57a37e91913c39bd7edb7b12",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "payManaCost",
+              "cardId": "engine-card-7",
+              "cardName": "Grim Monolith",
+              "manaCost": "{4}",
+              "canConfirmFromPool": false,
+              "actions": [
+                {
+                  "id": "tap:engine-card-56:0",
+                  "type": "activateManaAbility",
+                  "cardId": "engine-card-56",
+                  "description": "Basalt Monolith",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "payManaCost",
+              "output": {
+                "type": "cancel"
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": true,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1560,
+            "promptId": "1561:291644975ca20d41",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "8077cb55c067b40f4fb212a06837b7dc1f0ec900c7242f75b1c4ddda57a15bc7",
+            "legalActionHash": "ef4e679891ea2a00dc562e03c3b129a096f3a5ef446f74c70ef6e02a27274ef9",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-7",
+                  "description": "{4}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{4}"
+                },
+                {
+                  "id": "tap:engine-card-56:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-56",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "tap:engine-card-56:1"
+              }
+            },
+            "chosenCard": "Basalt Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1561,
+            "promptId": "1562:0d0b447222f6e307",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "5427cfb780549f7b212e9fc5f4c4cfbcb5df335c7ce4a2a129492a949fb377a8",
+            "legalActionHash": "91a12f764fd450fc4e9eed6834247a64972cb297b1cae5e16adf3278b4b7e7f9",
+            "legalActionCount": 3,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-56",
+                  "description": "{3}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{3}"
+                },
+                {
+                  "id": "prompt-action-1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-7",
+                  "description": "{4}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{4}"
+                },
+                {
+                  "id": "untap:engine-card-56",
+                  "type": "undoMana",
+                  "cardId": "engine-card-56"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "prompt-action-1"
+              }
+            },
+            "chosenCard": "Grim Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1562,
+            "promptId": "1563:3030f07acc22661e",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "5427cfb780549f7b212e9fc5f4c4cfbcb5df335c7ce4a2a129492a949fb377a8",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "payManaCost",
+              "cardId": "engine-card-7",
+              "cardName": "Grim Monolith",
+              "manaCost": "{4}",
+              "canConfirmFromPool": true,
+              "actions": []
+            },
+            "answer": {
+              "type": "payManaCost",
+              "output": {
+                "type": "pay",
+                "auto": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1563,
+            "promptId": "1564:679fd8d625cb0191",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "f671a43395487747cedeff18e90f353001e1c1271010d090f154bc8a9aa5f03c",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1564,
+            "promptId": "1565:b46978e09aa3dc7f",
+            "player": 1,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "0562d4155facddee7e0671765f787573c076dde8dd5e05e671ea40ada838c0b5",
+            "legalActionHash": "2f86b21efb145a82bdc6c316b93ab0e3cdd95ccc6eb774a820a02ab4aa30edaa",
+            "legalActionCount": 1,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-108:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-108",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1565,
+            "promptId": "1566:21dc7ed0b85f6560",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-2",
+            "stateHash": "44c165d3e5dd3c2fe777b3d4b6f9dc117a136c7b7fab40700840df9bf31b6642",
+            "legalActionHash": "1708ffe2ea83b7087c39fc54e0e9e53cb7ba7c1bfecb0d9d5faf912ce60b7f1a",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-224",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-246:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-246",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1566,
+            "promptId": "1567:50523e20ec002667",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-3",
+            "stateHash": "9323e8bc7af6fa41b81c5e493e9082aa909c1f607d1b9a676a6edd3012245ec0",
+            "legalActionHash": "f0c2d0a885fbd0bd43487542d21de5d5b32fae97d3bde63596fa5a3082df954b",
+            "legalActionCount": 1,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-306",
+                  "description": "{T}, Pay 1 life, Sacrifice Verdant Catacombs: Search your library for a Swamp or Forest card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1567,
+            "promptId": "1568:6bf17d389743c326",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "8b6dcf800050cff699bd41355ce8523f6a212ed532eb60a0aa4be1a1a2e2a833",
+            "legalActionHash": "19d41ea2f3cc1daf044f8b9bf87893813b02c696fc772419fcbc973f7b7c8db9",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-56",
+                  "description": "{3}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{3}"
+                },
+                {
+                  "id": "tap:engine-card-7:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-7",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "prompt-action-0"
+              }
+            },
+            "chosenCard": "Basalt Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1568,
+            "promptId": "1569:fe4bc59927a8600e",
+            "player": 0,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "8b6dcf800050cff699bd41355ce8523f6a212ed532eb60a0aa4be1a1a2e2a833",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "payManaCost",
+              "cardId": "engine-card-56",
+              "cardName": "Basalt Monolith",
+              "manaCost": "{3}",
+              "canConfirmFromPool": false,
+              "actions": [
+                {
+                  "id": "tap:engine-card-7:0",
+                  "type": "activateManaAbility",
+                  "cardId": "engine-card-7",
+                  "description": "Grim Monolith",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "payManaCost",
+              "output": {
+                "type": "cancel"
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": true,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          }
+        ],
+        "cacheKey": "795a9ff0e3d042be6b08c726d6fb3305193f490c30d5644af0886b6238923131",
+        "mode": "screen",
+        "pod": "screen",
+        "podDeckSha256": "21b917c18b7df4c7d15f6d68109bc8d21a1f22d58fbf2cace78317ed5f8e4c26",
+        "seatDeckSha256s": [
+          "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+          "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+          "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+          "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+        ],
+        "optimizerId": "06281acaa4805df097a03a86064b857c7d12137a0e26d76a22e3ade751c388f2",
+        "executionProfile": "arch-repaired-v13-production-gate"
+      },
+      {
+        "pilotVersion": "arch-aware-v1.5",
+        "variant": "F10",
+        "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+        "seed": 1960071,
+        "kinnanSeat": 1,
+        "status": "horizon_complete",
+        "winnerSeat": null,
+        "kinnanWon": false,
+        "firstAssemblyTurn": 3,
+        "firstAttemptTurn": 4,
+        "deterministicT4": true,
+        "certifiedDeterministicAttempt": false,
+        "attemptResolved": false,
+        "protectedAttempt": false,
+        "strictProtectedT4": false,
+        "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+        "primaryFailureCode": "UNRESOLVED_ATTEMPT",
+        "wallMs": 35128,
+        "prompts": 1089,
+        "mulligans": 0,
+        "openingHand": [
+          "Chrome Mox",
+          "Dispel",
+          "Flusterstorm",
+          "Island",
+          "Muddle the Mixture",
+          "Talisman of Curiosity",
+          "Trophy Mage"
+        ],
+        "keptHand": [
+          "Chrome Mox",
+          "Dispel",
+          "Flusterstorm",
+          "Island",
+          "Muddle the Mixture",
+          "Talisman of Curiosity",
+          "Trophy Mage"
+        ],
+        "observedCards": [
+          "An Offer You Can't Refuse",
+          "Basalt Monolith",
+          "Chrome Mox",
+          "City of Brass",
+          "Crop Rotation",
+          "Dispel",
+          "Elvish Spirit Guide",
+          "Finale of Devastation",
+          "Flusterstorm",
+          "Forest",
+          "Island",
+          "Kinnan, Bonder Prodigy",
+          "Llanowar Elves",
+          "Mana Confluence",
+          "Mental Misstep",
+          "Mockingbird",
+          "Muddle the Mixture",
+          "Mystic Remora",
+          "Nature's Rhythm",
+          "Pact of Negation",
+          "Rhystic Study",
+          "Scalding Tarn",
+          "Sol Ring",
+          "Staff of Domination",
+          "Summoner's Pact",
+          "Talisman of Curiosity",
+          "Trophy Mage",
+          "Tropical Island",
+          "Windswept Heath"
+        ],
+        "exposureCards": [],
+        "slotExposed": false,
+        "v2EarlyExit": false,
+        "v2DeadlineExit": false,
+        "observedCardEvents": [
+          {
+            "card": "An Offer You Can't Refuse",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "zone:hand",
+            "count": 57
+          },
+          {
+            "card": "Chrome Mox",
+            "reason": "zone:battlefield",
+            "count": 239
+          },
+          {
+            "card": "Chrome Mox",
+            "reason": "zone:hand",
+            "count": 13
+          },
+          {
+            "card": "City of Brass",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Crop Rotation",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Dispel",
+            "reason": "zone:hand",
+            "count": 24
+          },
+          {
+            "card": "Elvish Spirit Guide",
+            "reason": "prompt_small_choice",
+            "count": 8
+          },
+          {
+            "card": "Finale of Devastation",
+            "reason": "zone:hand",
+            "count": 141
+          },
+          {
+            "card": "Flusterstorm",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Flusterstorm",
+            "reason": "zone:hand",
+            "count": 395
+          },
+          {
+            "card": "Forest",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Forest",
+            "reason": "zone:battlefield",
+            "count": 198
+          },
+          {
+            "card": "Forest",
+            "reason": "zone:hand",
+            "count": 10
+          },
+          {
+            "card": "Island",
+            "reason": "prompt_small_choice",
+            "count": 14
+          },
+          {
+            "card": "Island",
+            "reason": "zone:battlefield",
+            "count": 251
+          },
+          {
+            "card": "Island",
+            "reason": "zone:hand",
+            "count": 9
+          },
+          {
+            "card": "Kinnan, Bonder Prodigy",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Kinnan, Bonder Prodigy",
+            "reason": "zone:battlefield",
+            "count": 38
+          },
+          {
+            "card": "Llanowar Elves",
+            "reason": "zone:hand",
+            "count": 434
+          },
+          {
+            "card": "Mana Confluence",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Mental Misstep",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Mockingbird",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Muddle the Mixture",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Muddle the Mixture",
+            "reason": "zone:hand",
+            "count": 33
+          },
+          {
+            "card": "Mystic Remora",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Nature's Rhythm",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Pact of Negation",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Pact of Negation",
+            "reason": "zone:hand",
+            "count": 14
+          },
+          {
+            "card": "Rhystic Study",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Scalding Tarn",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Staff of Domination",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Summoner's Pact",
+            "reason": "zone:hand",
+            "count": 29
+          },
+          {
+            "card": "Talisman of Curiosity",
+            "reason": "zone:battlefield",
+            "count": 188
+          },
+          {
+            "card": "Talisman of Curiosity",
+            "reason": "zone:hand",
+            "count": 116
+          },
+          {
+            "card": "Trophy Mage",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Trophy Mage",
+            "reason": "zone:battlefield",
+            "count": 31
+          },
+          {
+            "card": "Trophy Mage",
+            "reason": "zone:hand",
+            "count": 318
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Windswept Heath",
+            "reason": "prompt_small_choice",
+            "count": 4
+          }
+        ],
+        "exposureEvents": [],
+        "podProfile": "screen",
+        "v2SessionCleanup": true,
+        "v2SessionCleanupError": null,
+        "v2SemanticPromptAdvances": 0,
+        "v2DuplicateSubmitsSuppressed": 0,
+        "v2PilotTraceTail": [
+          {
+            "seq": 1077,
+            "promptId": "1078:bc779eb40990d284",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "b56204e8e2641d9371768b7b643242c24c30b76b3d03006251f0270886c8a3c7",
+            "legalActionHash": "39a79dc5e7ade50cf7a4e5226c452913cc14bebee62f742f033b3e7b6e67cf0b",
+            "legalActionCount": 1,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-147:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-147",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1078,
+            "promptId": "1079:513fdd9ad1d9f22e",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-2",
+            "stateHash": "5d26159e23d23ce5c144ecb141a8cb5ca95222fbb748801b79ecc52e20cb5397",
+            "legalActionHash": "69195f7a68ad276138ffe955df2aa981ba4d7ab2cbf827029b2bd04233d72b2e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-251",
+                  "description": "{T}, Pay 1 life, Sacrifice Bloodstained Mire: Search your library for a Swamp or Mountain card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-235:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-235",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1079,
+            "promptId": "1080:d600623cccf7d097",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "b02f50b47b7ebd516620a01e3d2b6f963b52a40a17faa2c97f8621a00b66b3d3",
+            "legalActionHash": "d0489b0a4f3f638d5d9260bff26ad130ae1d6c6aaee8cbaecd7edef1d797b803",
+            "legalActionCount": 8,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-21",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "prompt-action-1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-57",
+                  "description": "{T}, Pay 1 life, Sacrifice Marsh Flats: Search your library for a Plains or Swamp card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-49:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {B}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-49:3",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-52:4",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-52",
+                  "description": "{T}: Add {C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:5",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1080,
+            "promptId": "1081:bc779eb40990d284",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "985031c19ee28ea2c033edade048bea61d5847ba643ac8fbe34e5be9c9344b43",
+            "legalActionHash": "39a79dc5e7ade50cf7a4e5226c452913cc14bebee62f742f033b3e7b6e67cf0b",
+            "legalActionCount": 1,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-147:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-147",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "tap:engine-card-147:0"
+              }
+            },
+            "chosenCard": "Basalt Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1081,
+            "promptId": "1082:ed785bab4cf29680",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "1cde6012270dec42db38262ead39ef7eed8f8bf82ff79777fc0df0a97e64b716",
+            "legalActionHash": "bea5a3dc444d93aaaea3a6bdae060f9856c1bb2225295f452bca90b48ccbe2d0",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-147",
+                  "description": "{3}: Untap this artifact.",
+                  "isManaAbility": false,
+                  "cost": "{3}"
+                },
+                {
+                  "id": "untap:engine-card-147",
+                  "type": "undoMana",
+                  "cardId": "engine-card-147"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "act",
+                "actionId": "prompt-action-0"
+              }
+            },
+            "chosenCard": "Basalt Monolith",
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1082,
+            "promptId": "1083:4e813eda8f022869",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "1cde6012270dec42db38262ead39ef7eed8f8bf82ff79777fc0df0a97e64b716",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "payManaCost",
+              "cardId": "engine-card-147",
+              "cardName": "Basalt Monolith",
+              "manaCost": "{3}",
+              "canConfirmFromPool": true,
+              "actions": []
+            },
+            "answer": {
+              "type": "payManaCost",
+              "output": {
+                "type": "pay",
+                "auto": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 0
+          },
+          {
+            "seq": 1083,
+            "promptId": "1084:3e9f361b23e8c138",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "28658762a640beff3a1f578fd57fac70e40d01b58ca4a335e06305c286d555c1",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1084,
+            "promptId": "1085:513fdd9ad1d9f22e",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-2",
+            "stateHash": "2310185580e6dfb9a5f87766a17cee31fc5b7a48dc1c82085b81a0afd4a96a6a",
+            "legalActionHash": "69195f7a68ad276138ffe955df2aa981ba4d7ab2cbf827029b2bd04233d72b2e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-251",
+                  "description": "{T}, Pay 1 life, Sacrifice Bloodstained Mire: Search your library for a Swamp or Mountain card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-235:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-235",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1085,
+            "promptId": "1086:d600623cccf7d097",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "8307112984165526307cbc36658b5d68049733f8719b393c5a10663a6e115da5",
+            "legalActionHash": "d0489b0a4f3f638d5d9260bff26ad130ae1d6c6aaee8cbaecd7edef1d797b803",
+            "legalActionCount": 8,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-21",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "prompt-action-1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-57",
+                  "description": "{T}, Pay 1 life, Sacrifice Marsh Flats: Search your library for a Plains or Swamp card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-49:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {B}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-49:3",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-52:4",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-52",
+                  "description": "{T}: Add {C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:5",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": true
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1086,
+            "promptId": "1087:d600623cccf7d097",
+            "player": 0,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "stateHash": "b02f50b47b7ebd516620a01e3d2b6f963b52a40a17faa2c97f8621a00b66b3d3",
+            "legalActionHash": "d0489b0a4f3f638d5d9260bff26ad130ae1d6c6aaee8cbaecd7edef1d797b803",
+            "legalActionCount": 8,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-21",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "prompt-action-1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-57",
+                  "description": "{T}, Pay 1 life, Sacrifice Marsh Flats: Search your library for a Plains or Swamp card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-49:2",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {B}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-49:3",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-49",
+                  "description": "{T}: Add {R}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-52:4",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-52",
+                  "description": "{T}: Add {C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:5",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:B",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "B",
+                      "amount": 1
+                    }
+                  ]
+                },
+                {
+                  "id": "tap:engine-card-70:6:R",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-70",
+                  "description": "{T}: Add {B} or {R}. Talisman of Indulgence deals 1 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "R",
+                      "amount": 1
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false,
+                "until": {
+                  "playerId": "player-0",
+                  "phase": "cleanup"
+                }
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": true,
+            "passRepeatCount": 2
+          },
+          {
+            "seq": 1087,
+            "promptId": "1088:bc779eb40990d284",
+            "player": 1,
+            "deck": "Kinnan",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-1",
+            "stateHash": "985031c19ee28ea2c033edade048bea61d5847ba643ac8fbe34e5be9c9344b43",
+            "legalActionHash": "39a79dc5e7ade50cf7a4e5226c452913cc14bebee62f742f033b3e7b6e67cf0b",
+            "legalActionCount": 1,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "tap:engine-card-147:0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-147",
+                  "description": "{T}: Add {C}{C}{C}.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 3
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 1088,
+            "promptId": "1089:513fdd9ad1d9f22e",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-2",
+            "stateHash": "a3ceb2339590fdf31e923c6221f668d0ad60842deca64f5e7201898cefed796f",
+            "legalActionHash": "69195f7a68ad276138ffe955df2aa981ba4d7ab2cbf827029b2bd04233d72b2e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-251",
+                  "description": "{T}, Pay 1 life, Sacrifice Bloodstained Mire: Search your library for a Swamp or Mountain card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-235:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-235",
+                  "description": "{T}: Add one mana of any color among legendary creatures and planeswalkers you control.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          }
+        ],
+        "cacheKey": "de69878d485c077bd3da18b3921d6c74cce925752863c9ea3e045cae90caf778",
+        "mode": "screen",
+        "pod": "screen",
+        "podDeckSha256": "091ec171ed85f368b9ba6f930baaad083e14d2495e4172e0c264434720a7a253",
+        "seatDeckSha256s": [
+          "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+          "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+          "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+          "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+        ],
+        "optimizerId": "06281acaa4805df097a03a86064b857c7d12137a0e26d76a22e3ade751c388f2",
+        "executionProfile": "arch-repaired-v13-production-gate"
+      },
+      {
+        "pilotVersion": "arch-aware-v1.5",
+        "variant": "F10",
+        "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+        "seed": 1960000,
+        "kinnanSeat": 0,
+        "status": "horizon_complete",
+        "winnerSeat": null,
+        "kinnanWon": false,
+        "firstAssemblyTurn": null,
+        "firstAttemptTurn": null,
+        "deterministicT4": false,
+        "certifiedDeterministicAttempt": false,
+        "attemptResolved": false,
+        "protectedAttempt": false,
+        "strictProtectedT4": false,
+        "comboLine": null,
+        "primaryFailureCode": "NONDETERMINISTIC_ONLY",
+        "wallMs": 36127,
+        "prompts": 744,
+        "mulligans": 0,
+        "openingHand": [
+          "Basalt Monolith",
+          "Crop Rotation",
+          "Fierce Guardianship",
+          "Gemstone Caverns",
+          "Rhystic Study",
+          "Trophy Mage",
+          "Yavimaya Coast"
+        ],
+        "keptHand": [
+          "Basalt Monolith",
+          "Crop Rotation",
+          "Fierce Guardianship",
+          "Gemstone Caverns",
+          "Rhystic Study",
+          "Trophy Mage",
+          "Yavimaya Coast"
+        ],
+        "observedCards": [
+          "Basalt Monolith",
+          "Borne Upon a Wind",
+          "Breeding Pool",
+          "Crop Rotation",
+          "Endurance",
+          "Enduring Vitality",
+          "Fierce Guardianship",
+          "Flooded Strand",
+          "Forest",
+          "Gemstone Caverns",
+          "Grim Monolith",
+          "Island",
+          "Mox Amber",
+          "Pact of Negation",
+          "Rhystic Study",
+          "Scalding Tarn",
+          "Sol Ring",
+          "Tezzeret the Seeker",
+          "Treasure Vault",
+          "Trophy Mage",
+          "Tropical Island",
+          "Wooded Foothills",
+          "Yavimaya Coast"
+        ],
+        "exposureCards": [],
+        "slotExposed": false,
+        "v2EarlyExit": false,
+        "v2DeadlineExit": false,
+        "observedCardEvents": [
+          {
+            "card": "Basalt Monolith",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Basalt Monolith",
+            "reason": "zone:hand",
+            "count": 5
+          },
+          {
+            "card": "Borne Upon a Wind",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Breeding Pool",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Crop Rotation",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Crop Rotation",
+            "reason": "zone:hand",
+            "count": 66
+          },
+          {
+            "card": "Endurance",
+            "reason": "zone:hand",
+            "count": 258
+          },
+          {
+            "card": "Enduring Vitality",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Fierce Guardianship",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Fierce Guardianship",
+            "reason": "zone:hand",
+            "count": 305
+          },
+          {
+            "card": "Flooded Strand",
+            "reason": "zone:battlefield",
+            "count": 6
+          },
+          {
+            "card": "Flooded Strand",
+            "reason": "zone:hand",
+            "count": 14
+          },
+          {
+            "card": "Forest",
+            "reason": "prompt_small_choice",
+            "count": 6
+          },
+          {
+            "card": "Gemstone Caverns",
+            "reason": "zone:battlefield",
+            "count": 39
+          },
+          {
+            "card": "Gemstone Caverns",
+            "reason": "zone:hand",
+            "count": 3
+          },
+          {
+            "card": "Grim Monolith",
+            "reason": "zone:hand",
+            "count": 32
+          },
+          {
+            "card": "Island",
+            "reason": "prompt_small_choice",
+            "count": 16
+          },
+          {
+            "card": "Island",
+            "reason": "zone:battlefield",
+            "count": 33
+          },
+          {
+            "card": "Mox Amber",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Pact of Negation",
+            "reason": "zone:hand",
+            "count": 3
+          },
+          {
+            "card": "Rhystic Study",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Rhystic Study",
+            "reason": "zone:battlefield",
+            "count": 8
+          },
+          {
+            "card": "Rhystic Study",
+            "reason": "zone:hand",
+            "count": 247
+          },
+          {
+            "card": "Scalding Tarn",
+            "reason": "prompt_small_choice",
+            "count": 4
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "prompt_small_choice",
+            "count": 1
+          },
+          {
+            "card": "Sol Ring",
+            "reason": "zone:hand",
+            "count": 31
+          },
+          {
+            "card": "Tezzeret the Seeker",
+            "reason": "zone:hand",
+            "count": 15
+          },
+          {
+            "card": "Treasure Vault",
+            "reason": "zone:battlefield",
+            "count": 133
+          },
+          {
+            "card": "Trophy Mage",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Trophy Mage",
+            "reason": "zone:hand",
+            "count": 305
+          },
+          {
+            "card": "Tropical Island",
+            "reason": "prompt_small_choice",
+            "count": 3
+          },
+          {
+            "card": "Wooded Foothills",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Yavimaya Coast",
+            "reason": "prompt_small_choice",
+            "count": 2
+          },
+          {
+            "card": "Yavimaya Coast",
+            "reason": "zone:battlefield",
+            "count": 142
+          },
+          {
+            "card": "Yavimaya Coast",
+            "reason": "zone:hand",
+            "count": 57
+          }
+        ],
+        "exposureEvents": [],
+        "podProfile": "screen",
+        "v2SessionCleanup": true,
+        "v2SessionCleanupError": null,
+        "v2SemanticPromptAdvances": 0,
+        "v2DuplicateSubmitsSuppressed": 0,
+        "v2PilotTraceTail": [
+          {
+            "seq": 732,
+            "promptId": "733:582e697c070a76ae",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatDeclareAttackers",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "e5e57ecaca5d442aadc95e7c8c359b880f4aeadf596dd4496283bc45677ba86b",
+            "legalActionHash": "4d3e2d9c5edb43d8ab1104ba72c171d5e36ae700aa34fc1e1376226bddbee55e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-240",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-270:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-270",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 733,
+            "promptId": "734:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatDeclareAttackers",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "d4365204f710ed1452b85db8a2effd562337a5b19ad77ed55a056f545101f37a",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 734,
+            "promptId": "735:f34d6f346d1d1a85",
+            "player": 1,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatDeclareAttackers",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "54a18e9185f7353ef08f1310733be10a2378c09c5e6b0d05d9e2552e0295c838",
+            "legalActionHash": "70fe081d15ad9e8577ef485f5b9c923b94b3c90bca8bbf5512990225cc33986a",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-131",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-109:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-109",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 735,
+            "promptId": "736:582e697c070a76ae",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "c261f91da60da28f12e4b25eb8026cd3ecce16f59242778381fb08a117412acd",
+            "legalActionHash": "4d3e2d9c5edb43d8ab1104ba72c171d5e36ae700aa34fc1e1376226bddbee55e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-240",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-270:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-270",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 736,
+            "promptId": "737:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "40320cef0bfdce5a1087179477e33890feed00c041d7f19352ac9d99514982bb",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 737,
+            "promptId": "738:f34d6f346d1d1a85",
+            "player": 1,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "combatEnd",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "c8b00ac69dffb1041e12fd390a0b6788aa820a356920d9a8fe912b6d5ba26f34",
+            "legalActionHash": "70fe081d15ad9e8577ef485f5b9c923b94b3c90bca8bbf5512990225cc33986a",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-131",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-109:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-109",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 738,
+            "promptId": "739:582e697c070a76ae",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "877606aa8bc3bf1a5710fa0fe1102d8707587bec381ec5949c4acd9c0c9fdced",
+            "legalActionHash": "4d3e2d9c5edb43d8ab1104ba72c171d5e36ae700aa34fc1e1376226bddbee55e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-240",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-270:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-270",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 739,
+            "promptId": "740:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "75a3640394d567e37f4aa20d0e0d4dfeb78ab66094e3229a3d1334ba9ef99c12",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 740,
+            "promptId": "741:f34d6f346d1d1a85",
+            "player": 1,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "main2",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "7cd1d5f371b5a7d5c1fdc640a8bbc7dd2ece902c33111a3aa07b3e6892c43fc6",
+            "legalActionHash": "70fe081d15ad9e8577ef485f5b9c923b94b3c90bca8bbf5512990225cc33986a",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-131",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-109:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-109",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 741,
+            "promptId": "742:582e697c070a76ae",
+            "player": 2,
+            "deck": "Blue Farm",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-2",
+            "stateHash": "cba3d8375df2d2a8e28b53a0d4147dd5a2f81d4e427460a3885b8b592d4179aa",
+            "legalActionHash": "4d3e2d9c5edb43d8ab1104ba72c171d5e36ae700aa34fc1e1376226bddbee55e",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-240",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-270:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-270",
+                  "description": "{T}: Add one mana of any color in your commander's color identity.",
+                  "isManaAbility": true,
+                  "cost": "{T}"
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 742,
+            "promptId": "743:2d30fb7e580c16aa",
+            "player": 3,
+            "deck": "RogThras",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-3",
+            "stateHash": "4fc5fb323cbddf8c3d34237344bb7b9e41607c790d6fff0a12e606dbe1ded0d0",
+            "legalActionHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+            "legalActionCount": 0,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": []
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          },
+          {
+            "seq": 743,
+            "promptId": "744:f34d6f346d1d1a85",
+            "player": 1,
+            "deck": "RogSi",
+            "globalTurn": 16,
+            "round": 4,
+            "step": "endOfTurn",
+            "activePlayerId": "player-2",
+            "priorityPlayerId": "player-1",
+            "stateHash": "0159ac50e142a40df01cde480be4008acbb4fc64f7bcba160101aa8a1b5bb399",
+            "legalActionHash": "70fe081d15ad9e8577ef485f5b9c923b94b3c90bca8bbf5512990225cc33986a",
+            "legalActionCount": 2,
+            "prompt": {
+              "type": "chooseAction",
+              "actions": [
+                {
+                  "id": "prompt-action-0",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-131",
+                  "description": "{T}, Pay 1 life, Sacrifice Arid Mesa: Search your library for a Mountain or Plains card, put it onto the battlefield, then shuffle.",
+                  "isManaAbility": false,
+                  "cost": "{T}, Pay 1 life, Sacrifice CARDNAME"
+                },
+                {
+                  "id": "tap:engine-card-109:1",
+                  "type": "activateAbility",
+                  "cardId": "engine-card-109",
+                  "description": "{T}: Add {C}{C}. Ancient Tomb deals 2 damage to you.",
+                  "isManaAbility": true,
+                  "cost": "{T}",
+                  "producedMana": [
+                    {
+                      "color": "C",
+                      "amount": 2
+                    }
+                  ]
+                }
+              ]
+            },
+            "answer": {
+              "type": "chooseAction",
+              "output": {
+                "type": "pass",
+                "exhaustStack": false
+              }
+            },
+            "chosenCard": null,
+            "comboLine": null,
+            "canceledUnpayable": false,
+            "passRecovery": false,
+            "passRepeatCount": 1
+          }
+        ],
+        "cacheKey": "5ddfacbf5eb963b5ebcd380d0d606c11b1fb27924aabebc398d589a4bd6722ab",
+        "mode": "screen",
+        "pod": "screen",
+        "podDeckSha256": "21b917c18b7df4c7d15f6d68109bc8d21a1f22d58fbf2cace78317ed5f8e4c26",
+        "seatDeckSha256s": [
+          "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+          "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+          "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+          "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+        ],
+        "optimizerId": "06281acaa4805df097a03a86064b857c7d12137a0e26d76a22e3ade751c388f2",
+        "executionProfile": "arch-repaired-v13-production-gate"
+      }
+    ]
   },
   "cold": {
     "total": 0,
@@ -20,5 +4645,5 @@
     "rows": []
   },
   "runtimeManifest": "",
-  "sourceRunId": "32320158273"
+  "sourceRunId": "32320331537"
 }
