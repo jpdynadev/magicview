@@ -1,1 +1,1 @@
-2026-08-19 production path gate v15: rerun exact five regression seeds after generic exact-state strategic loop guard, then 32 cold keys
+2026-08-19 production path gate v16: canonical strategic-state loop detector; rerun exact five regression seeds then 32 cold keys
