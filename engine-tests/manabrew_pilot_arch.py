@@ -10,7 +10,7 @@ import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.3'
+runner.PILOT_VERSION = 'arch-aware-v1.4'
 
 # Cards introduced by mutation experiments must not silently fall through to the
 # legacy unknown-card score of 2. Future experiment generators should fail when
@@ -115,9 +115,24 @@ def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], pl
     if deck != 'Kinnan':
         return score
     name = runner._action_card(action, snapshot)
+    text = str(action.get('description') or action.get('label') or '')
+    lowered = text.lower()
+
+    # A bare Grim Monolith untap is mana-neutral even with Kinnan and becomes a
+    # deterministic two-state livelock when Basalt pays to untap Grim and Grim
+    # then pays to untap Basalt. Forge correctly advertises both legal actions;
+    # the strategic policy must decline the zero-gain Grim half of that cycle.
+    # Basalt's {3} untap remains untouched because Kinnan + Basalt is the actual
+    # positive-mana deterministic engine.
+    if (
+        name == 'Grim Monolith'
+        and action.get('type') == 'activateAbility'
+        and 'untap this artifact' in lowered
+    ):
+        return -5000
+
     if name == 'Mirage Mirror' and action.get('type') == 'activateAbility':
-        text = str(action.get('description') or action.get('label') or '').lower()
-        if 'copy' in text:
+        if 'copy' in lowered:
             own_turn = snapshot.get('activePlayerId') == f'player-{player}'
             own_main = own_turn and snapshot.get('step') in {'main1', 'main2'}
             return 1125 if own_main else 350
@@ -256,7 +271,6 @@ deck_dir = Path(__file__).resolve().parent / 'decks'
 for path in sorted(deck_dir.glob('Kinnan_ARCH_*.dck')):
     key = path.stem.replace('Kinnan_ARCH_', '', 1)
     runner.VARIANT_FILES[key] = path.name
-
 
 if __name__ == '__main__':
     raise SystemExit(runner.main())
