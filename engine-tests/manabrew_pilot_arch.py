@@ -10,7 +10,7 @@ import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.2'
+runner.PILOT_VERSION = 'arch-aware-v1.3'
 
 # Cards introduced by mutation experiments must not silently fall through to the
 # legacy unknown-card score of 2. Future experiment generators should fail when
@@ -51,6 +51,35 @@ _ORIGINAL_KEEP_PRIORITY = runner._keep_priority
 _ORIGINAL_SMART_RESPONSE = runner.smart_response
 _ORIGINAL_ACTION_SCORE = runner.v8_action_score
 _ORIGINAL_PAYMENT = runner.choose_productive_payment_v8
+_ORIGINAL_CONFIGURE_DECKS = runner.configure_decks
+
+# Guard payment actions by the exact Forge-advertised payment state. A mana
+# ability may be retried after the legal-action set changes (for example after a
+# source taps), but the same action cannot be selected forever against an
+# unchanged payManaCost prompt. This distinguishes semantic pilot livelock from
+# protocol staleness without inventing mana or bypassing Forge legality.
+_PAYMENT_ACTION_COUNTS: dict[tuple[Any, ...], int] = {}
+PAYMENT_ACTION_REPEAT_LIMIT = 2
+
+
+def _payment_signature(inp: dict[str, Any], player: int, action_id: str) -> tuple[Any, ...]:
+    legal_ids = tuple(sorted(str(action.get('id')) for action in (inp.get('actions') or []) if action.get('id')))
+    return (
+        player,
+        str(inp.get('cardId') or ''),
+        str(inp.get('cardName') or ''),
+        str(inp.get('manaCost') or ''),
+        legal_ids,
+        str(action_id),
+    )
+
+
+def configure_decks(variant: str, kinnan_seat: int):
+    _PAYMENT_ACTION_COUNTS.clear()
+    return _ORIGINAL_CONFIGURE_DECKS(variant, kinnan_seat)
+
+
+runner.configure_decks = configure_decks
 
 
 def hand_score(deck: str, name: str) -> int:
@@ -99,31 +128,68 @@ runner.v8_action_score = action_score
 base.action_score = action_score
 
 
+def _guard_payment_answer(inp: dict[str, Any], player: int, answer: dict[str, Any], canceled: bool):
+    output = (answer or {}).get('output') or {}
+    if canceled or output.get('type') != 'act' or not output.get('actionId'):
+        return answer, canceled
+    action_id = str(output['actionId'])
+    key = _payment_signature(inp, player, action_id)
+    count = _PAYMENT_ACTION_COUNTS.get(key, 0)
+    if count < PAYMENT_ACTION_REPEAT_LIMIT:
+        _PAYMENT_ACTION_COUNTS[key] = count + 1
+        return answer, False
+
+    # Remove only the repeating action from this exact payment state and ask the
+    # existing color-aware policy whether another Forge-advertised action can pay.
+    filtered = dict(inp)
+    filtered['actions'] = [
+        action for action in (inp.get('actions') or [])
+        if str(action.get('id') or '') != action_id
+    ]
+    retry, retry_canceled = _ORIGINAL_PAYMENT(filtered, player)
+    retry_output = (retry or {}).get('output') or {}
+    if not retry_canceled and retry_output.get('type') == 'act' and retry_output.get('actionId'):
+        retry_id = str(retry_output['actionId'])
+        retry_key = _payment_signature(filtered, player, retry_id)
+        retry_count = _PAYMENT_ACTION_COUNTS.get(retry_key, 0)
+        if retry_count < PAYMENT_ACTION_REPEAT_LIMIT:
+            _PAYMENT_ACTION_COUNTS[retry_key] = retry_count + 1
+            return retry, False
+    return {'type': 'payManaCost', 'output': {'type': 'cancel'}}, True
+
+
 def choose_productive_payment(inp: dict[str, Any], player: int) -> tuple[dict[str, Any], bool]:
-    """Use Forge-advertised mana abilities before declaring a payment unpayable.
+    """Use Forge-advertised mana abilities, with a same-state livelock guard.
 
     v8's color-aware payment helper can reject flexible sources when the payment
     prompt labels the action only by permanent name (for example Arcane Signet or
-    Fellwar Stone) instead of embedding the produced colors. Forge is still the
-    legality authority: this fallback chooses only an action that Forge explicitly
-    advertises inside the active payManaCost prompt. Any follow-up chooseColor
-    prompt is answered by the existing color-aware policy.
+    Fellwar Stone) instead of embedding the produced colors. Forge remains the
+    legality authority: this fallback chooses only actions advertised in the
+    active payManaCost prompt, while the repeat guard prevents selecting the same
+    payment action forever when Forge's payment state does not change.
     """
     answer, canceled = _ORIGINAL_PAYMENT(inp, player)
     if not canceled:
-        return answer, False
+        return _guard_payment_answer(inp, player, answer, False)
+
     mana_actions = [
         action for action in (inp.get('actions') or [])
         if action.get('id') and action.get('type') in {'activateManaAbility', 'activateAbility'}
     ]
-    if not mana_actions:
-        return answer, True
     runner.PAYMENT_COLOR_PREFERENCES[player] = policy.required_payment_colors(inp)
-    chosen = mana_actions[0]
-    return {
-        'type': 'payManaCost',
-        'output': {'type': 'act', 'actionId': chosen['id']},
-    }, False
+    for chosen in mana_actions:
+        action_id = str(chosen['id'])
+        key = _payment_signature(inp, player, action_id)
+        if _PAYMENT_ACTION_COUNTS.get(key, 0) >= PAYMENT_ACTION_REPEAT_LIMIT:
+            continue
+        _PAYMENT_ACTION_COUNTS[key] = _PAYMENT_ACTION_COUNTS.get(key, 0) + 1
+        return {
+            'type': 'payManaCost',
+            'output': {'type': 'act', 'actionId': chosen['id']},
+        }, False
+
+    runner.PAYMENT_COLOR_PREFERENCES.pop(player, None)
+    return {'type': 'payManaCost', 'output': {'type': 'cancel'}}, True
 
 
 runner.choose_productive_payment_v8 = choose_productive_payment
