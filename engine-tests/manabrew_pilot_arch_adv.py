@@ -8,10 +8,13 @@ import manabrew_pilot_v91_adversarial as adversarial  # installs pod/deck/keep/t
 import manabrew_pilot_arch as arch
 import manabrew_pilot_v8 as runner
 
-runner.PILOT_VERSION = 'arch-aware-v1.3-adversarial'
+# Cache/pilot identity must follow the repaired architecture policy actually in
+# use. The old v1.3 label could make repaired adversarial runs look cache-compatible
+# with stale policy results.
+runner.PILOT_VERSION = 'arch-aware-v1.7-adversarial'
 
 # Importing the architecture overlay intentionally replaces base.action_score so
-# Kinnan can understand copy cards/Mirage Mirror. Re-compose the scorer here so
+# Kinnan can understand architecture cards. Re-compose the scorer here so
 # non-Kinnan seats retain v9.1's race/disruption priorities in confirmation pods.
 def composed_action_score(
     deck: str, action: dict[str, Any], snapshot: dict[str, Any], player: int
