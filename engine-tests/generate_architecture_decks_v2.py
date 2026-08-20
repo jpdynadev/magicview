@@ -13,6 +13,13 @@ F10_ADDS = ['Reshape', 'Trinket Mage', 'Spellseeker', 'Mystical Tutor']
 
 SPECS = {
     'F10': ([], []),
+    # First repaired-protocol Turbo challenger. This deliberately trades slower
+    # value/development slots for compact tutor and deterministic-engine density.
+    # It stays F10-derived so every paired result isolates a six-card package.
+    'TURBO_F10': (
+        ['Tezzeret the Seeker', 'Rhystic Study', 'Sylvan Library', 'Energy Refractor', 'Hydroelectric Specimen', "Nature's Rhythm"],
+        ["Green Sun's Zenith", 'Eldritch Evolution', 'Tribute Mage', 'Devoted Druid', "Machine God's Effigy", 'Copy Artifact'],
+    ),
     'COPY_CORE': (
         ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum'],
         ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Mirage Mirror'],
