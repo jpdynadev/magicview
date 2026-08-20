@@ -15,13 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Capture clean repair run
+      - name: Capture Kinnan production-path gate
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p status
-          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=50" \
-            --jq '[.workflow_runs[] | select(.name=="Kinnan clean pipeline repair runner")][0]')
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent%2Fkinnan-expanded-architecture&per_page=50" \
+            --jq '[.workflow_runs[] | select(.name=="Kinnan production-path validity gate")][0]')
           if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
             jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-repair-progress.json
           else
