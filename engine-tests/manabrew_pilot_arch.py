@@ -8,8 +8,9 @@ from typing import Any
 import manabrew_pilot as base
 import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
+import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.1'
+runner.PILOT_VERSION = 'arch-aware-v1.2'
 
 # Cards introduced by mutation experiments must not silently fall through to the
 # legacy unknown-card score of 2. Future experiment generators should fail when
@@ -49,6 +50,7 @@ _ORIGINAL_HAND_SCORE = base.hand_score
 _ORIGINAL_KEEP_PRIORITY = runner._keep_priority
 _ORIGINAL_SMART_RESPONSE = runner.smart_response
 _ORIGINAL_ACTION_SCORE = runner.v8_action_score
+_ORIGINAL_PAYMENT = runner.choose_productive_payment_v8
 
 
 def hand_score(deck: str, name: str) -> int:
@@ -95,6 +97,36 @@ def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], pl
 
 runner.v8_action_score = action_score
 base.action_score = action_score
+
+
+def choose_productive_payment(inp: dict[str, Any], player: int) -> tuple[dict[str, Any], bool]:
+    """Use Forge-advertised mana abilities before declaring a payment unpayable.
+
+    v8's color-aware payment helper can reject flexible sources when the payment
+    prompt labels the action only by permanent name (for example Arcane Signet or
+    Fellwar Stone) instead of embedding the produced colors. Forge is still the
+    legality authority: this fallback chooses only an action that Forge explicitly
+    advertises inside the active payManaCost prompt. Any follow-up chooseColor
+    prompt is answered by the existing color-aware policy.
+    """
+    answer, canceled = _ORIGINAL_PAYMENT(inp, player)
+    if not canceled:
+        return answer, False
+    mana_actions = [
+        action for action in (inp.get('actions') or [])
+        if action.get('id') and action.get('type') in {'activateManaAbility', 'activateAbility'}
+    ]
+    if not mana_actions:
+        return answer, True
+    runner.PAYMENT_COLOR_PREFERENCES[player] = policy.required_payment_colors(inp)
+    chosen = mana_actions[0]
+    return {
+        'type': 'payManaCost',
+        'output': {'type': 'act', 'actionId': chosen['id']},
+    }, False
+
+
+runner.choose_productive_payment_v8 = choose_productive_payment
 
 
 def _copy_target_score(name: str, controller: str | None, player: int) -> int:
