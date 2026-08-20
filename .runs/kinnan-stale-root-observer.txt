@@ -3,3 +3,4 @@
 2026-08-18 check main forensic workflow
 2026-08-18 recheck after forensic seed timeout window
 2026-08-19 observe clean repair v13 runner
+2026-08-19 observe production-path gate v13
