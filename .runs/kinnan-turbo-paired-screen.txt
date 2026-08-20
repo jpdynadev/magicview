@@ -1,0 +1,1 @@
+2026-08-19 repaired v17 Turbo F10 paired 200: F10 vs TURBO_F10 across balanced/turbo/midrange/mixed pods and all four seats
