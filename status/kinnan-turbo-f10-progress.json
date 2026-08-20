@@ -1,0 +1,24 @@
+{
+  "found": true,
+  "checkedAt": "2026-08-20T04:00:19Z",
+  "runId": 32330232125,
+  "runNumber": 1,
+  "event": "push",
+  "headSha": "31c977bcaa8304d0137cdfea75bccb4a73ece617",
+  "status": "in_progress",
+  "conclusion": null,
+  "createdAt": "2026-08-20T03:59:49Z",
+  "updatedAt": "2026-08-20T03:59:53Z",
+  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32330232125",
+  "jobs": [
+    {
+      "id": 96309325351,
+      "name": "build",
+      "status": "in_progress",
+      "conclusion": null,
+      "started_at": "2026-08-20T03:59:53Z",
+      "completed_at": null
+    }
+  ],
+  "artifacts": []
+}
