@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Apply the Kinnan lab Manabrew repairs by exact source content.
 
-This intentionally avoids unified-diff line-number fragility.  Every upstream
+This intentionally avoids unified-diff line-number fragility. Every upstream
 block must either match exactly once or already contain the repaired block.
 Any unexpected pinned-source drift is a hard failure before runtime build.
 """
@@ -251,34 +251,8 @@ replace_once(
     "prompt-scoped action consumption",
 )
 
-adapter = HOST / "ManabrewProtocolAdapter.java"
-replace_once(
-    adapter,
-    '''            final String value = map.entrySet().isEmpty() ? "" : map.entrySet().iterator().next().getKey();
-''',
-    '''            final String value = map.entrySet().isEmpty() ? "" : fullColorName(map.entrySet().iterator().next().getKey());
-''',
-    "full color-name decoding",
-)
-replace_once(
-    adapter,
-    '''    private static JsonObject parseActionId(final String actionId) {
-''',
-    '''    private static String fullColorName(final String token) {
-        switch (token) {
-            case "W": return "White";
-            case "U": return "Blue";
-            case "B": return "Black";
-            case "R": return "Red";
-            case "G": return "Green";
-            case "C": return "Colorless";
-            default: return token;
-        }
-    }
-
-    private static JsonObject parseActionId(final String actionId) {
-''',
-    "color-name helper",
-)
+# Preserve chooseColor tokens exactly as the pilot submits them. The pinned
+# adapter already reads the chosenColors map key verbatim; rewriting U->Blue or
+# G->Green here breaks Forge prompts whose offered strings are mana symbols.
 
 print("all Manabrew repairs applied successfully")
