@@ -19,7 +19,7 @@ env:
   SIM_V2_EXACT_DEADLINE: '0'
   SIM_V2_TRACE: '1'
   SIM_V2_CAPTURE_STDERR: '1'
-  SIM_V2_PROFILE: arch-repaired-v18-color-token-gate
+  SIM_V2_PROFILE: arch-repaired-v19-color-token-gate
 
 jobs:
   build:
@@ -93,9 +93,9 @@ jobs:
             --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" \
             --max-round 4 --max-prompts 5000 --max-seconds 160 \
             --jvm-reuse 1 --xmx 1280m --xms 192m \
-            --cache-dir ".sim-cache/color-token-v18-${GITHUB_RUN_ID}-${VARIANT}-${SEAT}-${SEED}-${POD}" \
+            --cache-dir ".sim-cache/color-token-v19-${GITHUB_RUN_ID}-${VARIANT}-${SEAT}-${SEED}-${POD}" \
             --retain-traces all \
-            --engine-id "$MANABREW_REF:arch-v18-color-token-gate:${GITHUB_RUN_ID}" \
+            --engine-id "$MANABREW_REF:arch-v19-color-token-gate:${GITHUB_RUN_ID}" \
             --output "out/result-${VARIANT}-s${SEAT}-${SEED}.json" \
             > "out/worker-${VARIANT}-s${SEAT}-${SEED}.log" 2>&1
           python3 - "out/result-${VARIANT}-s${SEAT}-${SEED}.json" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
@@ -107,7 +107,7 @@ jobs:
           assert int(r.get('kinnanSeat')) == int(seat), r
           assert int(r.get('seed')) == int(seed), r
           assert r.get('podProfile') == pod, r
-          assert r.get('pilotVersion') == 'arch-aware-v1.8-adversarial', r
+          assert r.get('pilotVersion') == 'arch-aware-v1.9-adversarial', r
           print(json.dumps({'variant':variant,'seat':int(seat),'seed':int(seed),'pod':pod,'status':r.get('status'),'pilotVersion':r.get('pilotVersion')},sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
@@ -139,11 +139,11 @@ jobs:
           valid=[r for r in rows if r.get('status') in {'game_over','horizon_complete'}]
           keys={(r.get('variant'),int(r.get('kinnanSeat')),int(r.get('seed')),r.get('podProfile')) for r in valid}
           expected={('F10',0,2100007,'mixed'),('TURBO_F10',0,2100021,'turbo'),('TURBO_F10',0,2100044,'balanced'),('F10',3,2100189,'mixed')}
-          report={'records':len(rows),'valid':len(valid),'keys':sorted(map(list,keys)),'expected':sorted(map(list,expected)),'statuses':dict(collections.Counter(str(r.get('status')) for r in rows)),'pilotVersions':dict(collections.Counter(str(r.get('pilotVersion')) for r in rows)),'passed':keys==expected and len(valid)==4 and len(rows)==4}
-          pathlib.Path('color-token-v18-report.json').write_text(json.dumps(report,indent=2,sort_keys=True))
+          report={'records':len(rows),'valid':len(valid),'keys':sorted(map(list,keys)),'expected':sorted(map(list,expected)),'statuses':dict(collections.Counter(str(r.get('status')) for r in rows)),'pilotVersions':dict(collections.Counter(str(r.get('pilotVersion')) for r in rows)),'passed':keys==expected and len(valid)==4 and len(rows)==4 and all(r.get('pilotVersion')=='arch-aware-v1.9-adversarial' for r in valid)}
+          pathlib.Path('color-token-v19-report.json').write_text(json.dumps(report,indent=2,sort_keys=True))
           print(json.dumps(report,indent=2,sort_keys=True))
           assert report['passed'], report
           PY
       - uses: actions/upload-artifact@v4
         if: always()
-        with: {name: color-token-v18-report, path: color-token-v18-report.json, retention-days: 7}
+        with: {name: color-token-v19-report, path: color-token-v19-report.json, retention-days: 7}
