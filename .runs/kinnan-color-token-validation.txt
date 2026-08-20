@@ -1,1 +1,1 @@
-2026-08-20 replay four deterministic adversarial color-token failures after removing symbol-to-name adapter rewrite
+2026-08-20 replay four deterministic adversarial color-token failures after fixing canonical validColors handling in pilot v1.9
