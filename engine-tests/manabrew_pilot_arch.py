@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -10,7 +11,7 @@ import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.4'
+runner.PILOT_VERSION = 'arch-aware-v1.5'
 
 # Cards introduced by mutation experiments must not silently fall through to the
 # legacy unknown-card score of 2. Future experiment generators should fail when
@@ -53,13 +54,16 @@ _ORIGINAL_ACTION_SCORE = runner.v8_action_score
 _ORIGINAL_PAYMENT = runner.choose_productive_payment_v8
 _ORIGINAL_CONFIGURE_DECKS = runner.configure_decks
 
-# Guard payment actions by the exact Forge-advertised payment state. A mana
-# ability may be retried after the legal-action set changes (for example after a
-# source taps), but the same action cannot be selected forever against an
-# unchanged payManaCost prompt. This distinguishes semantic pilot livelock from
-# protocol staleness without inventing mana or bypassing Forge legality.
+# Payment-loop guard: exact Forge-advertised payment state + action.
 _PAYMENT_ACTION_COUNTS: dict[tuple[Any, ...], int] = {}
 PAYMENT_ACTION_REPEAT_LIMIT = 2
+
+# Strategic loop guard: if the pilot returns to an identical full game state and
+# selects the same Kinnan action again, that state/action pair is demonstrably
+# not advancing the game. This catches A->B->A->B cycles (monolith untaps and
+# future unknown loops) without hard-coding the participating cards.
+_STRATEGIC_ACTION_COUNTS: dict[tuple[int, str, str], int] = {}
+STRATEGIC_ACTION_REPEAT_LIMIT = 2
 
 
 def _payment_signature(inp: dict[str, Any], player: int, action_id: str) -> tuple[Any, ...]:
@@ -74,8 +78,74 @@ def _payment_signature(inp: dict[str, Any], player: int, action_id: str) -> tupl
     )
 
 
+def _strategic_state_hash(snapshot: dict[str, Any]) -> str:
+    """Stable hash of the rules-visible game state, excluding no strategic data.
+
+    Exact-state recurrence is intentionally conservative: we only suppress an
+    action after Forge has brought us back to byte-equivalent normalized state.
+    If mana, zones, tapped status, stack, counters, turn/step, life, or priority
+    differ, the action gets a fresh opportunity.
+    """
+    encoded = json.dumps(snapshot, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str).encode('utf-8')
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _chosen_action_id(answer: dict[str, Any] | None) -> str | None:
+    output = (answer or {}).get('output') or {}
+    if output.get('type') != 'act' or not output.get('actionId'):
+        return None
+    return str(output['actionId'])
+
+
+def _guard_strategic_action(
+    prompt: dict[str, Any],
+    snapshot: dict[str, Any],
+    deck: str,
+    player: int,
+    answer: dict[str, Any],
+) -> dict[str, Any]:
+    if deck != 'Kinnan':
+        return answer
+    inp = prompt.get('input') or {}
+    if inp.get('type') != 'chooseAction':
+        return answer
+    action_id = _chosen_action_id(answer)
+    if not action_id:
+        return answer
+
+    state_hash = _strategic_state_hash(snapshot)
+    key = (player, state_hash, action_id)
+    count = _STRATEGIC_ACTION_COUNTS.get(key, 0)
+    if count < STRATEGIC_ACTION_REPEAT_LIMIT:
+        _STRATEGIC_ACTION_COUNTS[key] = count + 1
+        return answer
+
+    # We have returned to the exact same state and are about to choose the same
+    # action for a third time. Remove only that action, preserve every other Forge
+    # legal action, and ask the existing policy to re-rank. This does not invent
+    # legality and does not globally blacklist the card/action in changed states.
+    filtered_prompt = dict(prompt)
+    filtered_input = dict(inp)
+    filtered_input['actions'] = [
+        action for action in (inp.get('actions') or [])
+        if str(action.get('id') or '') != action_id
+    ]
+    filtered_prompt['input'] = filtered_input
+    retry = _ORIGINAL_SMART_RESPONSE(filtered_prompt, snapshot, deck, player)
+    retry_id = _chosen_action_id(retry)
+    if retry_id:
+        retry_key = (player, state_hash, retry_id)
+        _STRATEGIC_ACTION_COUNTS[retry_key] = _STRATEGIC_ACTION_COUNTS.get(retry_key, 0) + 1
+        return retry
+
+    # Passing is preferable to a proven no-progress loop; priority can move and
+    # Forge can advance the phase/turn, yielding a new strategic state.
+    return {'type': 'chooseAction', 'output': {'type': 'pass', 'exhaustStack': False}}
+
+
 def configure_decks(variant: str, kinnan_seat: int):
     _PAYMENT_ACTION_COUNTS.clear()
+    _STRATEGIC_ACTION_COUNTS.clear()
     return _ORIGINAL_CONFIGURE_DECKS(variant, kinnan_seat)
 
 
@@ -90,8 +160,6 @@ def hand_score(deck: str, name: str) -> int:
 
 base.hand_score = hand_score
 base.K_TUTORS.update(TUTOR_ADDS)
-# Mirage Mirror has a strategically meaningful activated ability; without this,
-# v7 assigns unknown activators a large negative score and effectively blanks it.
 v7.KNOWN_GOOD_ACTIVATORS.add('Mirage Mirror')
 
 
@@ -118,12 +186,9 @@ def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], pl
     text = str(action.get('description') or action.get('label') or '')
     lowered = text.lower()
 
-    # A bare Grim Monolith untap is mana-neutral even with Kinnan and becomes a
-    # deterministic two-state livelock when Basalt pays to untap Grim and Grim
-    # then pays to untap Basalt. Forge correctly advertises both legal actions;
-    # the strategic policy must decline the zero-gain Grim half of that cycle.
-    # Basalt's {3} untap remains untouched because Kinnan + Basalt is the actual
-    # positive-mana deterministic engine.
+    # Immediate economic guard for the known monolith case. Grim produces four
+    # with Kinnan and costs four to untap, so a bare self-untap cannot increase
+    # mana. Basalt's three-mana untap is retained because it nets +1 with Kinnan.
     if (
         name == 'Grim Monolith'
         and action.get('type') == 'activateAbility'
@@ -154,8 +219,6 @@ def _guard_payment_answer(inp: dict[str, Any], player: int, answer: dict[str, An
         _PAYMENT_ACTION_COUNTS[key] = count + 1
         return answer, False
 
-    # Remove only the repeating action from this exact payment state and ask the
-    # existing color-aware policy whether another Forge-advertised action can pay.
     filtered = dict(inp)
     filtered['actions'] = [
         action for action in (inp.get('actions') or [])
@@ -174,15 +237,7 @@ def _guard_payment_answer(inp: dict[str, Any], player: int, answer: dict[str, An
 
 
 def choose_productive_payment(inp: dict[str, Any], player: int) -> tuple[dict[str, Any], bool]:
-    """Use Forge-advertised mana abilities, with a same-state livelock guard.
-
-    v8's color-aware payment helper can reject flexible sources when the payment
-    prompt labels the action only by permanent name (for example Arcane Signet or
-    Fellwar Stone) instead of embedding the produced colors. Forge remains the
-    legality authority: this fallback chooses only actions advertised in the
-    active payManaCost prompt, while the repeat guard prevents selecting the same
-    payment action forever when Forge's payment state does not change.
-    """
+    """Use Forge-advertised mana abilities, with a same-state livelock guard."""
     answer, canceled = _ORIGINAL_PAYMENT(inp, player)
     if not canceled:
         return _guard_payment_answer(inp, player, answer, False)
@@ -212,8 +267,6 @@ runner.choose_productive_payment_v8 = choose_productive_payment
 
 def _copy_target_score(name: str, controller: str | None, player: int) -> int:
     own = controller == f'player-{player}'
-    # Prefer deterministic/self-contained targets first, then high-value engines
-    # from either side of the table. Legal candidate filtering remains Forge's.
     self_scores = {
         'Basalt Monolith': 220, 'Kinnan, Bonder Prodigy': 215,
         'Devoted Druid': 210, 'Grim Monolith': 190, 'Bloom Tender': 175,
@@ -232,9 +285,6 @@ def _copy_target_score(name: str, controller: str | None, player: int) -> int:
 
 
 def _copy_prompt(inp: dict[str, Any]) -> bool:
-    # Do not inspect candidates themselves: otherwise the mere presence of a
-    # clone on the battlefield could make an unrelated targeting prompt look
-    # like a copy prompt.
     context = {
         key: inp.get(key)
         for key in ('cardName', 'sourceCardName', 'description', 'label', 'presentation', 'abilityText')
@@ -261,7 +311,9 @@ def smart_response(prompt: dict[str, Any], snapshot: dict[str, Any], deck: str, 
         chosen = [ref for _, ref in scored[:maximum]]
         if len(chosen) >= minimum:
             return {'type': 'chooseBoardTargets', 'output': {'type': 'boardTargets', 'chosen': chosen}}
-    return _ORIGINAL_SMART_RESPONSE(prompt, snapshot, deck, player)
+
+    answer = _ORIGINAL_SMART_RESPONSE(prompt, snapshot, deck, player)
+    return _guard_strategic_action(prompt, snapshot, deck, player, answer)
 
 
 base.response_for = smart_response
