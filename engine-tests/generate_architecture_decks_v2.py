@@ -57,6 +57,22 @@ SPECS = {
         ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Hydroelectric Specimen'],
         ['Copy Enchantment', 'Flesh Duplicate', 'Clever Impersonator', 'Gene Pollinator'],
     ),
+    # New F10-derived packages: unlike the older copy architectures these keep
+    # Nature's Rhythm / Chord / Transmute Artifact, which are already in F10.
+    # They target the empirically weaker F10 exposure slots instead of cutting
+    # tutor-quality cards merely to raise clone density.
+    'F10_COPY_COMPACT': (
+        ['Reshape', 'Spellseeker', 'Energy Refractor'],
+        ['Clever Impersonator', 'Flesh Duplicate', 'Copy Enchantment'],
+    ),
+    'F10_DRUID_COMPACT': (
+        ['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'],
+        ['Devoted Druid', "Machine God's Effigy", "Green Sun's Zenith", 'Eldritch Evolution'],
+    ),
+    'F10_COPY_TUTOR': (
+        ['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'],
+        ['Clever Impersonator', 'Flesh Duplicate', "Green Sun's Zenith", 'Eldritch Evolution'],
+    ),
 }
 
 # Every experimentally added card must have an explicit semantic role in the
