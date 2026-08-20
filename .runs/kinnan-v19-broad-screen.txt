@@ -1,1 +1,1 @@
-2026-08-20 start strict 200-pair broad architecture screen: F10 vs TUTOR_DENSE vs DRUID_TUTOR vs NODE_DENSE
+2026-08-20 set2: strict 200-pair broad architecture screen on fresh 2500000+ seed bank; queue behind any active set, do not cancel
