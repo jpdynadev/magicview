@@ -10,7 +10,7 @@
     },
     "rows": [
       {
-        "pilotVersion": "arch-aware-v1.5",
+        "pilotVersion": "arch-aware-v1.6",
         "variant": "F10",
         "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
         "seed": 1960162,
@@ -27,7 +27,7 @@
         "strictProtectedT4": false,
         "comboLine": "Kinnan + Grim + Power Artifact -> exhaustive Kinnan activations -> Thrasios -> Ballista",
         "primaryFailureCode": "UNRESOLVED_ATTEMPT",
-        "wallMs": 73598,
+        "wallMs": 71034,
         "prompts": 1065,
         "mulligans": 0,
         "openingHand": [
@@ -936,7 +936,7 @@
             "passRepeatCount": 1
           }
         ],
-        "cacheKey": "0bb33909297093887097f69c76d124596e673c47bcaba41916d894657e9ea9c9",
+        "cacheKey": "5c91e5dfba5ee69d2931c0a22a2e607caf492f609a57de31ffee45e9a0a6d414",
         "mode": "screen",
         "pod": "screen",
         "podDeckSha256": "dfd473752914a8698828c563590d460dfffc003b7e5a67d4b5d290647ceeb1e5",
@@ -950,7 +950,7 @@
         "executionProfile": "arch-repaired-v13-production-gate"
       },
       {
-        "pilotVersion": "arch-aware-v1.5",
+        "pilotVersion": "arch-aware-v1.6",
         "variant": "F10",
         "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
         "seed": 1960124,
@@ -967,7 +967,7 @@
         "strictProtectedT4": false,
         "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
         "primaryFailureCode": "PILOT_ERROR",
-        "wallMs": 39080,
+        "wallMs": 39445,
         "prompts": 793,
         "mulligans": 0,
         "openingHand": [
@@ -1827,7 +1827,7 @@
             "passRepeatCount": 1
           }
         ],
-        "cacheKey": "e6aa2975aacd18577c572d4f4b1a58857a256171ef64c6a8fd2829166ffd70e8",
+        "cacheKey": "e6bb6bd959e37fa49b0647a786169db9e7ceafcfdca9b81defa13beeff7e3808",
         "mode": "screen",
         "pod": "screen",
         "podDeckSha256": "52aadc10e2a3cf03533e3c7259ae36bd5d167c510d71bee5b6201abb0a1b06b8",
@@ -1841,7 +1841,7 @@
         "executionProfile": "arch-repaired-v13-production-gate"
       },
       {
-        "pilotVersion": "arch-aware-v1.5",
+        "pilotVersion": "arch-aware-v1.6",
         "variant": "F10",
         "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
         "seed": 1960002,
@@ -1858,7 +1858,7 @@
         "strictProtectedT4": false,
         "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
         "primaryFailureCode": "TIMEOUT",
-        "wallMs": 130909,
+        "wallMs": 131063,
         "prompts": 1569,
         "mulligans": 0,
         "openingHand": [
@@ -2743,7 +2743,7 @@
             "passRepeatCount": 0
           }
         ],
-        "cacheKey": "795a9ff0e3d042be6b08c726d6fb3305193f490c30d5644af0886b6238923131",
+        "cacheKey": "e4b468c01075bafe81832e61e2990b2102087d480d0537c606e4f7b6ad5b9c0c",
         "mode": "screen",
         "pod": "screen",
         "podDeckSha256": "21b917c18b7df4c7d15f6d68109bc8d21a1f22d58fbf2cace78317ed5f8e4c26",
@@ -2757,7 +2757,7 @@
         "executionProfile": "arch-repaired-v13-production-gate"
       },
       {
-        "pilotVersion": "arch-aware-v1.5",
+        "pilotVersion": "arch-aware-v1.6",
         "variant": "F10",
         "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
         "seed": 1960071,
@@ -2774,7 +2774,7 @@
         "strictProtectedT4": false,
         "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
         "primaryFailureCode": "UNRESOLVED_ATTEMPT",
-        "wallMs": 35128,
+        "wallMs": 48532,
         "prompts": 1089,
         "mulligans": 0,
         "openingHand": [
@@ -2884,7 +2884,7 @@
           {
             "card": "Flusterstorm",
             "reason": "prompt_small_choice",
-            "count": 1
+            "count": 2
           },
           {
             "card": "Flusterstorm",
@@ -2954,7 +2954,7 @@
           {
             "card": "Muddle the Mixture",
             "reason": "prompt_small_choice",
-            "count": 4
+            "count": 5
           },
           {
             "card": "Muddle the Mixture",
@@ -3019,7 +3019,7 @@
           {
             "card": "Trophy Mage",
             "reason": "prompt_small_choice",
-            "count": 2
+            "count": 4
           },
           {
             "card": "Trophy Mage",
@@ -3831,7 +3831,7 @@
             "passRepeatCount": 1
           }
         ],
-        "cacheKey": "de69878d485c077bd3da18b3921d6c74cce925752863c9ea3e045cae90caf778",
+        "cacheKey": "d037ce76aee0372db65ceeda3b495d1a36d86db0b04fe53b63f7df48f03d0066",
         "mode": "screen",
         "pod": "screen",
         "podDeckSha256": "091ec171ed85f368b9ba6f930baaad083e14d2495e4172e0c264434720a7a253",
@@ -3845,7 +3845,7 @@
         "executionProfile": "arch-repaired-v13-production-gate"
       },
       {
-        "pilotVersion": "arch-aware-v1.5",
+        "pilotVersion": "arch-aware-v1.6",
         "variant": "F10",
         "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
         "seed": 1960000,
@@ -3862,7 +3862,7 @@
         "strictProtectedT4": false,
         "comboLine": null,
         "primaryFailureCode": "NONDETERMINISTIC_ONLY",
-        "wallMs": 36127,
+        "wallMs": 45115,
         "prompts": 744,
         "mulligans": 0,
         "openingHand": [
@@ -4617,7 +4617,7 @@
             "passRepeatCount": 1
           }
         ],
-        "cacheKey": "5ddfacbf5eb963b5ebcd380d0d606c11b1fb27924aabebc398d589a4bd6722ab",
+        "cacheKey": "2174037f9f17cbf6065088c24c3c10f2de8b2859f825f302293db3d8f536a2eb",
         "mode": "screen",
         "pod": "screen",
         "podDeckSha256": "21b917c18b7df4c7d15f6d68109bc8d21a1f22d58fbf2cace78317ed5f8e4c26",
@@ -4645,5 +4645,5 @@
     "rows": []
   },
   "runtimeManifest": "",
-  "sourceRunId": "32320331537"
+  "sourceRunId": "32321121542"
 }
