@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 env:
   MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
@@ -100,19 +100,43 @@ jobs:
           rows=[]
           for p in sorted(root.glob('pilot-result-F10-*.json')):
               rows.append(json.loads(p.read_text()))
-          if len(rows) != 5:
-              raise SystemExit(f'expected 5 forensic result records, got {len(rows)}')
           valid={'game_over','horizon_complete'}
-          bad=[r for r in rows if r.get('status') not in valid]
-          print(json.dumps({
+          summary={
+              'gate':'forensic',
+              'runId':'${{ github.run_id }}',
+              'commit':'${{ github.sha }}',
               'total':len(rows),
-              'valid':len(rows)-len(bad),
+              'valid':sum(r.get('status') in valid for r in rows),
               'statuses':{s:sum(r.get('status')==s for r in rows) for s in sorted({r.get('status') for r in rows})},
               'rows':rows,
-          }, indent=2))
-          if bad:
+          }
+          pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary, indent=2))
+          if len(rows) != 5 or summary['valid'] != 5:
               raise SystemExit('forensic validity gate failed')
           PY
+
+      - name: Persist forensic failure for next repair cycle
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          out=pathlib.Path('engine-tests/results/pipeline-gate-latest.json')
+          if not out.exists():
+              rows=[]
+              for p in pathlib.Path('engine-tests/results/forensic').glob('pilot-result-F10-*.json'):
+                  try: rows.append(json.loads(p.read_text()))
+                  except Exception: pass
+              out.parent.mkdir(parents=True, exist_ok=True)
+              out.write_text(json.dumps({'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'rows':rows,'infrastructureFailure':True}, indent=2))
+          PY
+          mkdir -p engine-tests/evidence
+          cp engine-tests/results/pipeline-gate-latest.json engine-tests/evidence/pipeline-gate-latest.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/pipeline-gate-latest.json
+          git commit -m "Record failed Kinnan forensic gate ${{ github.run_id }}" || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
 
       - name: Upload forensic evidence
         if: always()
@@ -120,7 +144,7 @@ jobs:
         with:
           name: kinnan-pipeline-forensic-${{ github.run_id }}
           path: engine-tests/results/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
 
   cold-validity:
@@ -169,24 +193,47 @@ jobs:
             done
           done
       - name: Strict cold validity summary
+        if: always()
         run: |
           python3 - <<'PY'
           import json, pathlib, collections
-          rows=[json.loads(p.read_text()) for p in pathlib.Path('engine-tests/results/cold').glob('pilot-result-F10-*.json')]
+          rows=[]
+          for p in pathlib.Path('engine-tests/results/cold').glob('pilot-result-F10-*.json'):
+              try: rows.append(json.loads(p.read_text()))
+              except Exception: pass
           valid={'game_over','horizon_complete'}
           counts=collections.Counter(r.get('status') for r in rows)
           seats=collections.Counter(r.get('kinnanSeat') for r in rows if r.get('status') in valid)
-          summary={'total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':counts,'validBySeat':seats}
-          print(json.dumps(summary, indent=2, default=dict))
+          summary={
+              'gate':'cold-validity',
+              'runId':'${{ github.run_id }}',
+              'commit':'${{ github.sha }}',
+              'total':len(rows),
+              'valid':sum(r.get('status') in valid for r in rows),
+              'statuses':dict(counts),
+              'validBySeat':{str(s):seats[s] for s in range(4)},
+              'rows':rows,
+          }
+          pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary, indent=2))
+          print(json.dumps(summary, indent=2))
           if len(rows) != 32 or summary['valid'] != 32 or any(seats[s] != 8 for s in range(4)):
               raise SystemExit('cold validity gate failed')
-          pathlib.Path('engine-tests/results/cold-validity-summary.json').write_text(json.dumps(summary, indent=2, default=dict))
           PY
+      - name: Persist cold-gate result
+        if: always()
+        run: |
+          mkdir -p engine-tests/evidence
+          cp engine-tests/results/pipeline-gate-latest.json engine-tests/evidence/pipeline-gate-latest.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/pipeline-gate-latest.json
+          git commit -m "Record Kinnan cold validity gate ${{ github.run_id }}" || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
       - name: Upload cold validity evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kinnan-pipeline-cold-${{ github.run_id }}
           path: engine-tests/results/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
