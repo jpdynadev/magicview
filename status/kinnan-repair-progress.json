@@ -1,22 +1,135 @@
 {
   "found": true,
-  "checkedAt": "2026-08-20T01:12:35Z",
-  "runId": 32320158273,
-  "runNumber": 2,
+  "checkedAt": "2026-08-20T01:27:20Z",
+  "runId": 32320331537,
+  "runNumber": 3,
   "event": "push",
-  "headSha": "b075da74d6eeb3cf9160c6f4120089993bf9c0d3",
-  "status": "in_progress",
-  "conclusion": null,
-  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32320158273",
+  "headSha": "82d7d3861fa7d7f022a487516b9e7a3f16791ef4",
+  "status": "completed",
+  "conclusion": "success",
+  "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32320331537",
   "jobs": [
     {
-      "id": 96280592270,
+      "id": 96281172901,
       "name": "build",
-      "status": "in_progress",
-      "conclusion": null,
-      "started_at": "2026-08-20T01:12:17Z",
-      "completed_at": null
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:15:35Z",
+      "completed_at": "2026-08-20T01:20:29Z"
+    },
+    {
+      "id": 96282030545,
+      "name": "forensic (1960000, 0)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:20:33Z",
+      "completed_at": "2026-08-20T01:21:24Z"
+    },
+    {
+      "id": 96282030601,
+      "name": "forensic (1960124, 2)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:20:33Z",
+      "completed_at": "2026-08-20T01:21:26Z"
+    },
+    {
+      "id": 96282030641,
+      "name": "forensic (1960071, 1)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:20:33Z",
+      "completed_at": "2026-08-20T01:21:30Z"
+    },
+    {
+      "id": 96282030650,
+      "name": "forensic (1960162, 3)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:20:33Z",
+      "completed_at": "2026-08-20T01:22:02Z"
+    },
+    {
+      "id": 96282030734,
+      "name": "forensic (1960002, 0)",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:20:35Z",
+      "completed_at": "2026-08-20T01:23:07Z"
+    },
+    {
+      "id": 96282476553,
+      "name": "forensic-aggregate",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:23:11Z",
+      "completed_at": "2026-08-20T01:23:18Z"
+    },
+    {
+      "id": 96282507130,
+      "name": "final",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-08-20T01:23:22Z",
+      "completed_at": "2026-08-20T01:23:34Z"
+    },
+    {
+      "id": 96282507387,
+      "name": "cold",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-08-20T01:23:18Z",
+      "completed_at": "2026-08-20T01:23:18Z"
     }
   ],
-  "artifacts": []
+  "artifacts": [
+    {
+      "id": 9389687509,
+      "name": "prod-gate-final-report",
+      "size_in_bytes": 13425,
+      "expired": false
+    },
+    {
+      "id": 9389682739,
+      "name": "prod-gate-forensic-summary",
+      "size_in_bytes": 12478,
+      "expired": false
+    },
+    {
+      "id": 9389679371,
+      "name": "prod-gate-forensic-1960002-s0",
+      "size_in_bytes": 7949,
+      "expired": false
+    },
+    {
+      "id": 9389659574,
+      "name": "prod-gate-forensic-1960162-s3",
+      "size_in_bytes": 7189,
+      "expired": false
+    },
+    {
+      "id": 9389648980,
+      "name": "prod-gate-forensic-1960071-s1",
+      "size_in_bytes": 7779,
+      "expired": false
+    },
+    {
+      "id": 9389648153,
+      "name": "prod-gate-forensic-1960124-s2",
+      "size_in_bytes": 7374,
+      "expired": false
+    },
+    {
+      "id": 9389646976,
+      "name": "prod-gate-forensic-1960000-s0",
+      "size_in_bytes": 6521,
+      "expired": false
+    },
+    {
+      "id": 9389629789,
+      "name": "kinnan-production-gate-runtime",
+      "size_in_bytes": 201431292,
+      "expired": false
+    }
+  ]
 }
