@@ -15,30 +15,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Capture forensic run
+      - name: Capture clean repair run
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p status
           RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=main&per_page=50" \
-            --jq '[.workflow_runs[] | select(.name=="Kinnan stale root-cause main forensic")][0]')
+            --jq '[.workflow_runs[] | select(.name=="Kinnan clean pipeline repair runner")][0]')
           if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
-            jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-stale-root-cause-progress.json
+            jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-repair-progress.json
           else
             ID=$(jq -r '.id' <<<"$RUN")
             JOBS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
             ARTS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/artifacts?per_page=100")
             jq -n --argjson run "$RUN" --argjson jobs "$JOBS" --argjson arts "$ARTS" '{
-              found:true,checkedAt:(now|todateiso8601),runId:$run.id,headSha:$run.head_sha,status:$run.status,conclusion:$run.conclusion,
-              jobs:[$jobs.jobs[]|{id,name,status,conclusion}],artifacts:[$arts.artifacts[]|{id,name,size_in_bytes}]
-            }' > status/kinnan-stale-root-cause-progress.json
+              found:true,checkedAt:(now|todateiso8601),runId:$run.id,runNumber:$run.run_number,event:$run.event,headSha:$run.head_sha,status:$run.status,conclusion:$run.conclusion,htmlUrl:$run.html_url,
+              jobs:[$jobs.jobs[]|{id,name,status,conclusion,started_at,completed_at}],artifacts:[$arts.artifacts[]|{id,name,size_in_bytes,expired}]
+            }' > status/kinnan-repair-progress.json
           fi
-          cat status/kinnan-stale-root-cause-progress.json
+          cat status/kinnan-repair-progress.json
       - name: Commit snapshot
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add status/kinnan-stale-root-cause-progress.json
+          git add status/kinnan-repair-progress.json
           git diff --cached --quiet && exit 0
-          git commit -m 'Record stale root-cause progress [skip ci]'
+          git commit -m 'Record Kinnan repair progress [skip ci]'
           git push
