@@ -11,7 +11,7 @@ import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.6'
+runner.PILOT_VERSION = 'arch-aware-v1.7'
 
 ROLE_SCORES = {
     'Reshape': 9,
@@ -47,6 +47,7 @@ _ORIGINAL_SMART_RESPONSE = runner.smart_response
 _ORIGINAL_ACTION_SCORE = runner.v8_action_score
 _ORIGINAL_PAYMENT = runner.choose_productive_payment_v8
 _ORIGINAL_CONFIGURE_DECKS = runner.configure_decks
+_ORIGINAL_COMBO_ACTION_RESPONSE = runner._combo_action_response
 
 _PAYMENT_ACTION_COUNTS: dict[tuple[Any, ...], int] = {}
 PAYMENT_ACTION_REPEAT_LIMIT = 2
@@ -200,6 +201,52 @@ def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], pl
 
 runner.v8_action_score = action_score
 base.action_score = action_score
+
+
+def _primary_monolith_for_line(line: str | None) -> str | None:
+    if not line:
+        return None
+    if 'Kinnan + Basalt' in line or line.startswith('Basalt Monolith'):
+        return 'Basalt Monolith'
+    if 'Grim Monolith' in line or 'Kinnan + Grim' in line:
+        return 'Grim Monolith'
+    return None
+
+
+def combo_action_response(
+    inp: dict[str, Any],
+    snapshot: dict[str, Any],
+    line: str | None,
+    powered_monolith: bool,
+    monolith_actions: int,
+):
+    """Keep deterministic combo priority on the monolith that defines the line.
+
+    v16 exposed a cross-monolith oscillation: with Kinnan+Basalt assembled, the
+    generic combo scorer treated Grim's self-untap as equally productive. Basalt
+    then paid Grim's {4}, and Grim later paid Basalt's {3}, repeatedly consuming
+    the banked mana without advancing the actual infinite engine. Forge was
+    advertising legal actions; the strategic planner was choosing the wrong
+    engine. Filter only off-line monolith actions and let the existing combo
+    planner rank every other legal action unchanged.
+    """
+    primary = _primary_monolith_for_line(line)
+    if not primary:
+        return _ORIGINAL_COMBO_ACTION_RESPONSE(
+            inp, snapshot, line, powered_monolith, monolith_actions
+        )
+    patched = dict(inp)
+    patched['actions'] = [
+        action for action in (inp.get('actions') or [])
+        if runner._action_card(action, snapshot) not in policy.MONOLITHS
+        or runner._action_card(action, snapshot) == primary
+    ]
+    return _ORIGINAL_COMBO_ACTION_RESPONSE(
+        patched, snapshot, line, powered_monolith, monolith_actions
+    )
+
+
+runner._combo_action_response = combo_action_response
 
 
 def _guard_payment_answer(inp: dict[str, Any], player: int, answer: dict[str, Any], canceled: bool):
