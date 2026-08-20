@@ -7,3 +7,4 @@
 2026-08-19 observe production-path gate v14
 2026-08-19 observe production-path gate v15 latest failing artifact
 2026-08-19 observe production-path gate v16 canonical strategic-state guard
+2026-08-19 observe production-path gate v17 line-specific monolith planner
