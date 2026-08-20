@@ -1,0 +1,1 @@
+2026-08-20 start strict 200-pair broad architecture screen: F10 vs TUTOR_DENSE vs DRUID_TUTOR vs NODE_DENSE
