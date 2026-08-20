@@ -9,9 +9,9 @@ import manabrew_pilot_arch as arch
 import manabrew_pilot_v8 as runner
 
 # Cache/pilot identity must follow the repaired architecture policy actually in
-# use. v1.8 preserves Forge's exact advertised color-choice token while matching
-# it against canonical W/U/B/R/G/C payment requirements.
-runner.PILOT_VERSION = 'arch-aware-v1.8-adversarial'
+# use. v1.9 consumes Manabrew's canonical `validColors` field and submits the
+# exact offered token while matching it against W/U/B/R/G/C payment policy.
+runner.PILOT_VERSION = 'arch-aware-v1.9-adversarial'
 
 _COLOR_ALIASES = {
     'W': 'W', 'WHITE': 'W',
@@ -24,18 +24,22 @@ _COLOR_ALIASES = {
 
 
 def choose_payment_color_exact(inp: dict[str, Any], preferred: list[str]) -> str:
-    """Choose canonically, but submit the exact token Forge advertised.
+    """Choose canonically, but submit the exact token Manabrew advertised.
 
-    Some Manabrew/Forge string-choice prompts advertise full color names while
-    payment policy tracks mana symbols (or vice versa). Normalizing the offered
-    choices and then submitting that normalized value caused deterministic
-    engine errors such as `string choice not among offered options: Blue`.
-    Preserve the original token for the response while consuming the matching
-    canonical preferred color from the payment plan.
+    The canonical ChooseColorInput schema exposes the legal strings as
+    `validColors`. Older pilot code looked only for `availableColors`/`colors`,
+    so flexible sources such as Fellwar Stone could fall back to U/Blue even
+    when that color was not one of Forge's legal options. Preserve the exact
+    offered token while consuming the matching canonical preferred color.
     """
     raw_available = [
         str(item)
-        for item in (inp.get('availableColors') or inp.get('colors') or [])
+        for item in (
+            inp.get('validColors')
+            or inp.get('availableColors')
+            or inp.get('colors')
+            or []
+        )
     ]
     canonical = [
         (raw, _COLOR_ALIASES.get(raw.strip().upper(), raw.strip().upper()))
