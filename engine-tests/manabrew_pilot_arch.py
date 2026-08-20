@@ -11,13 +11,9 @@ import manabrew_pilot_v7 as v7
 import manabrew_pilot_v8 as runner
 import kinnan_policy_v8 as policy
 
-runner.PILOT_VERSION = 'arch-aware-v1.5'
+runner.PILOT_VERSION = 'arch-aware-v1.6'
 
-# Cards introduced by mutation experiments must not silently fall through to the
-# legacy unknown-card score of 2. Future experiment generators should fail when
-# an added card is not registered here.
 ROLE_SCORES = {
-    # F10 tutor package
     'Reshape': 9,
     'Trinket Mage': 8,
     "Green Sun's Zenith": 9,
@@ -25,7 +21,6 @@ ROLE_SCORES = {
     'Spellseeker': 8,
     'Mystical Tutor': 9,
     'Tribute Mage': 8,
-    # Copy/clone architecture
     'Copy Enchantment': 8,
     'Copy Artifact': 9,
     'Flesh Duplicate': 8,
@@ -33,7 +28,6 @@ ROLE_SCORES = {
     'Clever Impersonator': 8,
     'Gene Pollinator': 8,
     'Phyrexian Metamorph': 8,
-    # Druid/Effigy architecture
     'Devoted Druid': 10,
     "Machine God's Effigy": 8,
 }
@@ -54,16 +48,18 @@ _ORIGINAL_ACTION_SCORE = runner.v8_action_score
 _ORIGINAL_PAYMENT = runner.choose_productive_payment_v8
 _ORIGINAL_CONFIGURE_DECKS = runner.configure_decks
 
-# Payment-loop guard: exact Forge-advertised payment state + action.
 _PAYMENT_ACTION_COUNTS: dict[tuple[Any, ...], int] = {}
 PAYMENT_ACTION_REPEAT_LIMIT = 2
-
-# Strategic loop guard: if the pilot returns to an identical full game state and
-# selects the same Kinnan action again, that state/action pair is demonstrably
-# not advancing the game. This catches A->B->A->B cycles (monolith untaps and
-# future unknown loops) without hard-coding the participating cards.
 _STRATEGIC_ACTION_COUNTS: dict[tuple[int, str, str], int] = {}
 STRATEGIC_ACTION_REPEAT_LIMIT = 2
+
+# These fields change across prompts/transport bookkeeping without representing
+# strategic game progress. Keeping them in the state hash defeated recurrence
+# detection because the same board could acquire a new prompt/trace identity.
+_VOLATILE_STATE_KEYS = {
+    'promptId', 'promptSeq', 'stateHash', 'legalActionHash', 'requestId',
+    'timestamp', 'ts', 'sequence', 'seq', 'trace', 'traceId', 'sessionId',
+}
 
 
 def _payment_signature(inp: dict[str, Any], player: int, action_id: str) -> tuple[Any, ...]:
@@ -78,15 +74,22 @@ def _payment_signature(inp: dict[str, Any], player: int, action_id: str) -> tupl
     )
 
 
-def _strategic_state_hash(snapshot: dict[str, Any]) -> str:
-    """Stable hash of the rules-visible game state, excluding no strategic data.
+def _canonical_state(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {
+            str(k): _canonical_state(v)
+            for k, v in sorted(value.items(), key=lambda kv: str(kv[0]))
+            if str(k) not in _VOLATILE_STATE_KEYS
+        }
+    if isinstance(value, list):
+        return [_canonical_state(v) for v in value]
+    return value
 
-    Exact-state recurrence is intentionally conservative: we only suppress an
-    action after Forge has brought us back to byte-equivalent normalized state.
-    If mana, zones, tapped status, stack, counters, turn/step, life, or priority
-    differ, the action gets a fresh opportunity.
-    """
-    encoded = json.dumps(snapshot, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str).encode('utf-8')
+
+def _strategic_state_hash(snapshot: dict[str, Any]) -> str:
+    """Hash semantic game state while ignoring prompt/trace-only metadata."""
+    canonical = _canonical_state(snapshot)
+    encoded = json.dumps(canonical, sort_keys=True, separators=(',', ':'), ensure_ascii=False, default=str).encode('utf-8')
     return hashlib.sha256(encoded).hexdigest()
 
 
@@ -120,10 +123,6 @@ def _guard_strategic_action(
         _STRATEGIC_ACTION_COUNTS[key] = count + 1
         return answer
 
-    # We have returned to the exact same state and are about to choose the same
-    # action for a third time. Remove only that action, preserve every other Forge
-    # legal action, and ask the existing policy to re-rank. This does not invent
-    # legality and does not globally blacklist the card/action in changed states.
     filtered_prompt = dict(prompt)
     filtered_input = dict(inp)
     filtered_input['actions'] = [
@@ -138,8 +137,6 @@ def _guard_strategic_action(
         _STRATEGIC_ACTION_COUNTS[retry_key] = _STRATEGIC_ACTION_COUNTS.get(retry_key, 0) + 1
         return retry
 
-    # Passing is preferable to a proven no-progress loop; priority can move and
-    # Forge can advance the phase/turn, yielding a new strategic state.
     return {'type': 'chooseAction', 'output': {'type': 'pass', 'exhaustStack': False}}
 
 
@@ -186,9 +183,6 @@ def action_score(deck: str, action: dict[str, Any], snapshot: dict[str, Any], pl
     text = str(action.get('description') or action.get('label') or '')
     lowered = text.lower()
 
-    # Immediate economic guard for the known monolith case. Grim produces four
-    # with Kinnan and costs four to untap, so a bare self-untap cannot increase
-    # mana. Basalt's three-mana untap is retained because it nets +1 with Kinnan.
     if (
         name == 'Grim Monolith'
         and action.get('type') == 'activateAbility'
@@ -237,7 +231,6 @@ def _guard_payment_answer(inp: dict[str, Any], player: int, answer: dict[str, An
 
 
 def choose_productive_payment(inp: dict[str, Any], player: int) -> tuple[dict[str, Any], bool]:
-    """Use Forge-advertised mana abilities, with a same-state livelock guard."""
     answer, canceled = _ORIGINAL_PAYMENT(inp, player)
     if not canceled:
         return _guard_payment_answer(inp, player, answer, False)
@@ -318,7 +311,6 @@ def smart_response(prompt: dict[str, Any], snapshot: dict[str, Any], deck: str, 
 
 base.response_for = smart_response
 
-# Load any generated architecture decks.
 deck_dir = Path(__file__).resolve().parent / 'decks'
 for path in sorted(deck_dir.glob('Kinnan_ARCH_*.dck')):
     key = path.stem.replace('Kinnan_ARCH_', '', 1)
