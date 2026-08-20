@@ -5,3 +5,4 @@
 2026-08-19 observe clean repair v13 runner
 2026-08-19 observe production-path gate v13
 2026-08-19 observe production-path gate v14
+2026-08-19 observe production-path gate v15 latest failing artifact
