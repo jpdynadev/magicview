@@ -8,7 +8,7 @@ import manabrew_pilot_v91_adversarial as adversarial  # installs pod/deck/keep/t
 import manabrew_pilot_arch as arch
 import manabrew_pilot_v8 as runner
 
-runner.PILOT_VERSION = 'arch-aware-v1.1-adversarial'
+runner.PILOT_VERSION = 'arch-aware-v1.3-adversarial'
 
 # Importing the architecture overlay intentionally replaces base.action_score so
 # Kinnan can understand copy cards/Mirage Mirror. Re-compose the scorer here so
