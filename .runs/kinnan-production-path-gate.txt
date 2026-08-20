@@ -1,1 +1,1 @@
-2026-08-19 production path gate v14: rerun exact five regression seeds after Grim/Basalt zero-gain loop fix, then 32 cold keys
+2026-08-19 production path gate v15: rerun exact five regression seeds after generic exact-state strategic loop guard, then 32 cold keys
