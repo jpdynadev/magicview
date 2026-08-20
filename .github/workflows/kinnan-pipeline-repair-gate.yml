@@ -9,10 +9,19 @@ on:
       - "engine-tests/manabrew_pilot_v8.py"
       - "engine-tests/apply_manabrew_repairs.py"
       - ".github/workflows/kinnan-pipeline-repair-gate.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "engine-tests/manabrew_pilot_arch.py"
+      - "engine-tests/manabrew_pilot_v8.py"
+      - "engine-tests/apply_manabrew_repairs.py"
+      - "engine-tests/generate_architecture_decks_v2.py"
+      - ".github/workflows/kinnan-pipeline-repair-gate.yml"
   workflow_dispatch:
 
 concurrency:
-  group: kinnan-pipeline-repair-gate-${{ github.ref }}
+  group: kinnan-pipeline-repair-gate-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -117,7 +126,7 @@ jobs:
           PY
 
       - name: Persist forensic failure for next repair cycle
-        if: failure()
+        if: failure() && github.event_name == 'push'
         run: |
           python3 - <<'PY'
           import json, pathlib
@@ -220,7 +229,7 @@ jobs:
               raise SystemExit('cold validity gate failed')
           PY
       - name: Persist cold-gate result
-        if: always()
+        if: always() && github.event_name == 'push'
         run: |
           mkdir -p engine-tests/evidence
           cp engine-tests/results/pipeline-gate-latest.json engine-tests/evidence/pipeline-gate-latest.json
