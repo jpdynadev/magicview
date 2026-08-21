@@ -1,0 +1,1 @@
+2026-08-21 isolate F10 seat2 seed3020454 midrange harness-stdout-closed crash from Tutor Pair 2k; forensic only, do not substitute into canonical evidence
