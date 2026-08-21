@@ -1,1 +1,1 @@
-2026-08-21T17:12:00-04:00 rerun repaired shared pathological key seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR with full diagnostics after fixing zero-job workflow syntax; forensic only, do not substitute into canonical 160s promotion sample.
+2026-08-21T18:18:00-04:00 replay shared pathological key seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR with crash-safe JVM stderr and exit-code diagnostics; forensic only, do not substitute into canonical 160s promotion sample.
