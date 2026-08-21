@@ -1,29 +1,86 @@
 {
   "kinnan-v19-copy-tutor-2k.yml": {
-    "conclusion": null,
+    "conclusion": "failure",
     "createdAt": "2026-08-21T03:17:25Z",
     "failedJobs": [
       {
         "conclusion": "failure",
-        "id": 96663062165,
-        "name": "confirm (F10, 2, 9)"
+        "id": 96722882413,
+        "name": "confirm (F10_COPY_TUTOR, 0, 3)"
       },
       {
         "conclusion": "failure",
-        "id": 96663063513,
-        "name": "confirm (F10_COPY_TUTOR, 0, 3)"
+        "id": 96733314024,
+        "name": "aggregate"
       }
     ],
     "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32442855543",
     "id": 32442855543,
     "jobCounts": {
       "failure": 2,
-      "in_progress": 16,
-      "success": 63
+      "queued": 1,
+      "success": 79
     },
-    "reports": [],
-    "status": "in_progress",
-    "updatedAt": "2026-08-21T05:47:54Z"
+    "reports": [
+      {
+        "id": 9441983222,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9438654150,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9436672618,
+        "name": "copytutor2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T09:47:42Z"
+  },
+  "kinnan-v19-copy-tutor-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T10:07:40Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32471179659",
+    "id": 32471179659,
+    "jobCounts": {
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9442791932,
+        "name": "copy-tutor-forensic-2800160-seat0"
+      },
+      {
+        "id": 9442770000,
+        "name": "copy-tutor-forensic-2820348-seat2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T10:15:32Z"
+  },
+  "kinnan-v19-copy-tutor-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T10:04:29Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32470923302",
+    "id": 32470923302,
+    "jobCounts": {
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9442762011,
+        "name": "copy-tutor-key-forensic-s2-seed2820348"
+      },
+      {
+        "id": 9442718559,
+        "name": "copy-tutor-key-forensic-s0-seed2800160"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T10:14:32Z"
   },
   "kinnan-v19-druid-key-forensic.yml": {
     "conclusion": "success",
