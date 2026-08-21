@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import time
 from pathlib import Path
 
 import sim_v2_worker_arch as arch
@@ -63,6 +64,13 @@ def _install_forensic_stderr_capture(worker, runner) -> None:
         return proc
 
     def stderr_tail(self, limit=20000):
+        handle = getattr(self, "_forensic_stderr_handle", None)
+        if handle is not None:
+            try:
+                handle.flush()
+                os.fsync(handle.fileno())
+            except Exception:
+                pass
         return arch._tail_text(getattr(self, "_forensic_stderr_path", None), limit)
 
     def patched_close(self):
@@ -93,6 +101,12 @@ def _install_forensic_stderr_capture(worker, runner) -> None:
             if proc is not None:
                 try:
                     return_code = proc.poll()
+                    # stdout can close a fraction before the JVM's terminal
+                    # status/stderr are observable. Give diagnostics only a
+                    # brief settle window; this does not alter game execution.
+                    if return_code is None and "stdout closed" in repr(exc):
+                        time.sleep(0.5)
+                        return_code = proc.poll()
                 except Exception:
                     pass
             stderr_tail = pool.stderr_tail() if pool is not None and hasattr(pool, "stderr_tail") else None
