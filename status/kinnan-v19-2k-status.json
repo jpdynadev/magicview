@@ -219,6 +219,16 @@
         {
           "artifacts": [
             {
+              "id": 9433587562,
+              "name": "druid2k-report",
+              "size": 1201
+            },
+            {
+              "id": 9433583176,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard7",
+              "size": 279709
+            },
+            {
               "id": 9421549829,
               "name": "druid2k-report",
               "size": 1201
@@ -641,7 +651,7 @@
           },
           "jobs": 82,
           "status": "completed",
-          "updatedAt": "2026-08-20T19:35:23Z"
+          "updatedAt": "2026-08-21T03:45:54Z"
         }
       ],
       "workflow": "kinnan-v19-druid-tutor-2k.yml"
@@ -650,6 +660,31 @@
       "runs": [
         {
           "artifacts": [
+            {
+              "id": 9433683687,
+              "name": "turbo-v19-2k-report",
+              "size": 1353
+            },
+            {
+              "id": 9433678444,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard4",
+              "size": 287042
+            },
+            {
+              "id": 9433673065,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard2",
+              "size": 283142
+            },
+            {
+              "id": 9433670842,
+              "name": "turbo-v19-2k-F10-seat0-shard2",
+              "size": 284254
+            },
+            {
+              "id": 9433569162,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard1",
+              "size": 282859
+            },
             {
               "id": 9420231819,
               "name": "turbo-v19-2k-report",
@@ -1073,10 +1108,224 @@
           },
           "jobs": 82,
           "status": "completed",
-          "updatedAt": "2026-08-20T18:55:49Z"
+          "updatedAt": "2026-08-21T03:50:50Z"
         }
       ],
       "workflow": "kinnan-v19-turbo-2k-confirm.yml"
+    },
+    "tutorPair2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9451318485,
+              "name": "tutorpair2k-F10-seat2-shard5",
+              "size": 271591
+            },
+            {
+              "id": 9451309275,
+              "name": "tutorpair2k-F10-seat3-shard5",
+              "size": 275332
+            },
+            {
+              "id": 9451267906,
+              "name": "tutorpair2k-F10-seat3-shard2",
+              "size": 269895
+            },
+            {
+              "id": 9451210335,
+              "name": "tutorpair2k-F10-seat3-shard0",
+              "size": 270208
+            },
+            {
+              "id": 9451193725,
+              "name": "tutorpair2k-F10-seat3-shard8",
+              "size": 273641
+            },
+            {
+              "id": 9451149443,
+              "name": "tutorpair2k-F10-seat2-shard1",
+              "size": 271171
+            },
+            {
+              "id": 9451110244,
+              "name": "tutorpair2k-F10-seat2-shard4",
+              "size": 264314
+            },
+            {
+              "id": 9451057091,
+              "name": "tutorpair2k-F10-seat2-shard0",
+              "size": 278542
+            },
+            {
+              "id": 9450998526,
+              "name": "tutorpair2k-F10-seat3-shard3",
+              "size": 268727
+            },
+            {
+              "id": 9450986045,
+              "name": "tutorpair2k-F10-seat2-shard7",
+              "size": 277864
+            },
+            {
+              "id": 9450930853,
+              "name": "tutorpair2k-F10-seat3-shard7",
+              "size": 269189
+            },
+            {
+              "id": 9450908704,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 269432
+            },
+            {
+              "id": 9450874914,
+              "name": "tutorpair2k-F10-seat3-shard4",
+              "size": 265262
+            },
+            {
+              "id": 9450798599,
+              "name": "tutorpair2k-F10-seat3-shard1",
+              "size": 275255
+            },
+            {
+              "id": 9450791283,
+              "name": "tutorpair2k-F10-seat2-shard6",
+              "size": 271245
+            },
+            {
+              "id": 9450773112,
+              "name": "tutorpair2k-F10-seat2-shard3",
+              "size": 273425
+            },
+            {
+              "id": 9450662538,
+              "name": "tutorpair2k-F10-seat2-shard2",
+              "size": 262000
+            },
+            {
+              "id": 9450318371,
+              "name": "tutorpair2k-F10-seat0-shard8",
+              "size": 282078
+            },
+            {
+              "id": 9450154914,
+              "name": "tutorpair2k-F10-seat0-shard6",
+              "size": 265531
+            },
+            {
+              "id": 9450139201,
+              "name": "tutorpair2k-F10-seat1-shard2",
+              "size": 273596
+            },
+            {
+              "id": 9450082199,
+              "name": "tutorpair2k-F10-seat1-shard3",
+              "size": 275765
+            },
+            {
+              "id": 9450074996,
+              "name": "tutorpair2k-F10-seat1-shard7",
+              "size": 270372
+            },
+            {
+              "id": 9450037182,
+              "name": "tutorpair2k-F10-seat1-shard9",
+              "size": 277434
+            },
+            {
+              "id": 9450031842,
+              "name": "tutorpair2k-F10-seat1-shard8",
+              "size": 275414
+            },
+            {
+              "id": 9450029150,
+              "name": "tutorpair2k-F10-seat0-shard7",
+              "size": 273921
+            },
+            {
+              "id": 9450021272,
+              "name": "tutorpair2k-F10-seat0-shard0",
+              "size": 268923
+            },
+            {
+              "id": 9450020572,
+              "name": "tutorpair2k-F10-seat0-shard3",
+              "size": 276195
+            },
+            {
+              "id": 9450017525,
+              "name": "tutorpair2k-F10-seat1-shard5",
+              "size": 270546
+            },
+            {
+              "id": 9450010907,
+              "name": "tutorpair2k-F10-seat0-shard4",
+              "size": 269074
+            },
+            {
+              "id": 9450010685,
+              "name": "tutorpair2k-F10-seat1-shard6",
+              "size": 270204
+            },
+            {
+              "id": 9450000293,
+              "name": "tutorpair2k-F10-seat1-shard1",
+              "size": 274677
+            },
+            {
+              "id": 9449968352,
+              "name": "tutorpair2k-F10-seat0-shard9",
+              "size": 272755
+            },
+            {
+              "id": 9449964271,
+              "name": "tutorpair2k-F10-seat0-shard2",
+              "size": 264830
+            },
+            {
+              "id": 9449904040,
+              "name": "tutorpair2k-F10-seat0-shard1",
+              "size": 270629
+            },
+            {
+              "id": 9449804817,
+              "name": "tutorpair2k-F10-seat0-shard5",
+              "size": 273389
+            },
+            {
+              "id": 9449771648,
+              "name": "tutorpair2k-F10-seat1-shard4",
+              "size": 272828
+            },
+            {
+              "id": 9449635598,
+              "name": "tutorpair2k-F10-seat1-shard0",
+              "size": 275037
+            },
+            {
+              "id": 9448809728,
+              "name": "tutor-pair-v19-runtime",
+              "size": 201427050
+            }
+          ],
+          "conclusion": null,
+          "createdAt": "2026-08-21T13:12:24Z",
+          "event": "push",
+          "headSha": "5876d79b0afa027661b5f709d6d8b89de286edd4",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32485636013",
+          "id": 32485636013,
+          "jobStates": {
+            "failure": 1,
+            "in_progress": 18,
+            "queued": 25,
+            "success": 37
+          },
+          "jobs": 81,
+          "status": "queued",
+          "updatedAt": "2026-08-21T13:46:11Z"
+        }
+      ],
+      "workflow": "kinnan-v19-tutor-pair-2k.yml"
     }
   }
 }
