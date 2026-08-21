@@ -1,0 +1,79 @@
+name: Kinnan v19 2k status observer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v19-2k-observer.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-expanded-architecture
+      - name: Inspect decision-grade Kinnan runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          branch = 'agent/kinnan-expanded-architecture'
+          workflows = {
+              'turbo2k': 'kinnan-v19-turbo-2k-confirm.yml',
+              'druidTutor2k': 'kinnan-v19-druid-tutor-2k.yml',
+              'broad200': 'kinnan-v19-broad-screen.yml',
+          }
+
+          def gh(path):
+              out = subprocess.check_output(['gh','api','--method','GET',path], text=True)
+              return json.loads(out)
+
+          payload = {'branch': branch, 'workflows': {}}
+          for key, wf in workflows.items():
+              runs = gh(f'/repos/{repo}/actions/workflows/{wf}/runs?branch={branch}&per_page=5').get('workflow_runs', [])
+              item = {'workflow': wf, 'runs': []}
+              for r in runs[:5]:
+                  rid = int(r['id'])
+                  jobs = gh(f'/repos/{repo}/actions/runs/{rid}/jobs?per_page=100').get('jobs', [])
+                  arts = gh(f'/repos/{repo}/actions/runs/{rid}/artifacts?per_page=100').get('artifacts', [])
+                  conclusions = {}
+                  for j in jobs:
+                      c = str(j.get('conclusion') or j.get('status') or 'unknown')
+                      conclusions[c] = conclusions.get(c, 0) + 1
+                  item['runs'].append({
+                      'id': rid,
+                      'status': r.get('status'),
+                      'conclusion': r.get('conclusion'),
+                      'event': r.get('event'),
+                      'headSha': r.get('head_sha'),
+                      'createdAt': r.get('created_at'),
+                      'updatedAt': r.get('updated_at'),
+                      'jobs': len(jobs),
+                      'jobStates': conclusions,
+                      'artifacts': [{'id': a.get('id'), 'name': a.get('name'), 'size': a.get('size_in_bytes')} for a in arts],
+                      'htmlUrl': r.get('html_url'),
+                  })
+              payload['workflows'][key] = item
+
+          out = pathlib.Path('status/kinnan-v19-2k-status.json')
+          out.parent.mkdir(exist_ok=True)
+          out.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          PY
+      - name: Commit durable status
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -- status/kinnan-v19-2k-status.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record Kinnan v19 2k status [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture
