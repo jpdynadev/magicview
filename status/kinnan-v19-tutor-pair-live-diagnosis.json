@@ -1,0 +1,32 @@
+{
+  "observedAt": "2026-08-21T16:00:00Z",
+  "workflowRunId": 32485636013,
+  "workflow": "kinnan-v19-tutor-pair-2k.yml",
+  "status": "in_progress",
+  "incumbent": "F10",
+  "challenger": "F10_TUTOR_PAIR",
+  "failedShard": {
+    "variant": "F10",
+    "seat": 2,
+    "shard": 9,
+    "artifactId": 9450908704,
+    "validExpected": 50,
+    "unresolvedKey": {
+      "seed": 3020454,
+      "pod": "midrange"
+    },
+    "attempts": [
+      {"try": 1, "status": "crash", "primaryFailureCode": "ENGINE_ERROR", "error": "RuntimeError('harness stdout closed')", "summaryWallMs": 100934},
+      {"try": 2, "status": "crash", "primaryFailureCode": "ENGINE_ERROR", "error": "RuntimeError('harness stdout closed')", "summaryWallMs": 100781},
+      {"try": 3, "status": "crash", "primaryFailureCode": "ENGINE_ERROR", "error": "RuntimeError('harness stdout closed')", "summaryWallMs": 103040}
+    ],
+    "pilotVersion": "arch-aware-v1.9-adversarial",
+    "variantDeckSha256": "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559",
+    "executionProfile": "arch-repaired-v19-tutor-pair-2k"
+  },
+  "action": "Stop scaling; preserve active 2k run; queue diagnostic-only forensic replay in same non-cancelling high-value concurrency lane. Do not substitute forensic extended-envelope output into canonical promotion evidence.",
+  "forensicWorkflow": "kinnan-v19-tutor-pair-key-forensic.yml",
+  "forensicSeed": 3020454,
+  "forensicSeat": 2,
+  "forensicPod": "midrange"
+}
