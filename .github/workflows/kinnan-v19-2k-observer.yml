@@ -30,6 +30,7 @@ jobs:
           workflows = {
               'turbo2k': 'kinnan-v19-turbo-2k-confirm.yml',
               'druidTutor2k': 'kinnan-v19-druid-tutor-2k.yml',
+              'tutorPair2k': 'kinnan-v19-tutor-pair-2k.yml',
               'broad200': 'kinnan-v19-broad-screen.yml',
           }
 
