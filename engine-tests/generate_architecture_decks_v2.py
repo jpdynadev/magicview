@@ -37,6 +37,16 @@ SPECS = {
         ['Energy Refractor', 'Hydroelectric Specimen'],
         ["Green Sun's Zenith", 'Eldritch Evolution'],
     ),
+    # Singleton isolation after the two-card Tutor Pair screen was flat/worse.
+    # These identify whether one tutor is useful and the other is carrying the cost.
+    'F10_GSZ_SINGLE': (
+        ['Energy Refractor'],
+        ["Green Sun's Zenith"],
+    ),
+    'F10_EVOLUTION_SINGLE': (
+        ['Hydroelectric Specimen'],
+        ['Eldritch Evolution'],
+    ),
 }
 
 REGISTERED_ADDS = {
