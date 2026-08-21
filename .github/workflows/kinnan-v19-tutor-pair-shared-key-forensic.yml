@@ -20,6 +20,7 @@ env:
   SIM_V2_TRACE: '1'
   SIM_V2_CAPTURE_STDERR: '1'
   SIM_V2_PROFILE: arch-repaired-v19-tutor-pair-shared-key-forensic
+  SIM_V2_FORENSIC_DIR: out
 
 jobs:
   forensic:
@@ -51,19 +52,20 @@ jobs:
           python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
           cd /tmp/manabrew
           node scripts/harness.mjs build
-      - name: Replay shared pathological key with full diagnostics
+      - name: Replay shared pathological key with crash-safe diagnostics
         env:
           VARIANT: ${{ matrix.variant }}
         run: |
           set -euo pipefail
           mkdir -p out
+          rm -f out/forensic-crash-diagnostics.json out/forge-stderr-*.log
           for TRY in 1 2; do
             OUT="out/${VARIANT}-seed3020454-seat2-midrange-try${TRY}.json"
             LOG="out/${VARIANT}-seed3020454-seat2-midrange-try${TRY}.log"
-            CACHE=".sim-cache/tutorpair-forensic-${GITHUB_RUN_ID}-${VARIANT}-try${TRY}"
-            ENGINE="$MANABREW_REF:arch-v19-tutorpair-shared-forensic:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:try${TRY}"
+            CACHE=".sim-cache/tutorpair-forensic-diag-${GITHUB_RUN_ID}-${VARIANT}-try${TRY}"
+            ENGINE="$MANABREW_REF:arch-v19-tutorpair-shared-forensic-diag:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:try${TRY}"
             set +e
-            CEDH_POD=midrange python3 engine-tests/sim_v2_worker_arch.py \
+            CEDH_POD=midrange python3 engine-tests/sim_v2_forensic_driver.py \
               /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
               /tmp/manabrew/forge/forge-gui/ \
               --mode adversarial --variant "$VARIANT" --fixed-seat 2 --seeds 3020454 \
@@ -76,7 +78,15 @@ jobs:
             RC=$?
             set -e
             echo "try=$TRY rc=$RC" | tee -a out/summary.txt
-            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(json.dumps({k:r.get(k) for k in ["status","variant","seed","kinnanSeat","podProfile","pilotVersion","firstAssemblyTurn","firstAttemptTurn","strictProtectedT4","kinnanWon","primaryFailureCode","promptCount","elapsedSeconds"]},sort_keys=True))' "$OUT" 2>&1 | tee -a out/summary.txt || true
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(json.dumps({k:r.get(k) for k in ["status","variant","seed","kinnanSeat","podProfile","pilotVersion","firstAssemblyTurn","firstAttemptTurn","strictProtectedT4","kinnanWon","primaryFailureCode","prompts","wallMs","error"]},sort_keys=True))' "$OUT" 2>&1 | tee -a out/summary.txt || true
+            if [ -f out/forensic-crash-diagnostics.json ]; then
+              cp out/forensic-crash-diagnostics.json "out/${VARIANT}-try${TRY}-forensic-crash-diagnostics.json"
+            fi
+            for f in out/forge-stderr-*.log; do
+              [ -e "$f" ] || continue
+              cp "$f" "out/${VARIANT}-try${TRY}-$(basename "$f")"
+            done
+            rm -f out/forensic-crash-diagnostics.json out/forge-stderr-*.log
           done
       - uses: actions/upload-artifact@v4
         if: always()
