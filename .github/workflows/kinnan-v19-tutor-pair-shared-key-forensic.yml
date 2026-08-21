@@ -76,13 +76,7 @@ jobs:
             RC=$?
             set -e
             echo "try=$TRY rc=$RC" | tee -a out/summary.txt
-            python3 - "$OUT" <<'PY' | tee -a out/summary.txt
-import json,sys
-try:
- d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
- print(json.dumps({k:r.get(k) for k in ['status','variant','seed','kinnanSeat','podProfile','pilotVersion','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','kinnanWon','primaryFailureCode','promptCount','elapsedSeconds']},sort_keys=True))
-except Exception as e: print('unreadable',repr(e))
-PY
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(json.dumps({k:r.get(k) for k in ["status","variant","seed","kinnanSeat","podProfile","pilotVersion","firstAssemblyTurn","firstAttemptTurn","strictProtectedT4","kinnanWon","primaryFailureCode","promptCount","elapsedSeconds"]},sort_keys=True))' "$OUT" 2>&1 | tee -a out/summary.txt || true
           done
       - uses: actions/upload-artifact@v4
         if: always()
