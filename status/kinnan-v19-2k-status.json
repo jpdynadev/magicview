@@ -1,0 +1,1082 @@
+{
+  "branch": "agent/kinnan-expanded-architecture",
+  "workflows": {
+    "broad200": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9411353097,
+              "name": "broad-v19-set2-report",
+              "size": 1572
+            },
+            {
+              "id": 9411343139,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat0",
+              "size": 276846
+            },
+            {
+              "id": 9411327746,
+              "name": "broad-v19-set2-F10-seat2",
+              "size": 276890
+            },
+            {
+              "id": 9411327238,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat2",
+              "size": 279002
+            },
+            {
+              "id": 9411303163,
+              "name": "broad-v19-set2-NODE_DENSE-seat2",
+              "size": 279422
+            },
+            {
+              "id": 9411291313,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat2",
+              "size": 276747
+            },
+            {
+              "id": 9411280839,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat1",
+              "size": 272803
+            },
+            {
+              "id": 9411234550,
+              "name": "broad-v19-set2-NODE_DENSE-seat1",
+              "size": 269329
+            },
+            {
+              "id": 9411224087,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat0",
+              "size": 283529
+            },
+            {
+              "id": 9411217416,
+              "name": "broad-v19-set2-NODE_DENSE-seat0",
+              "size": 272473
+            },
+            {
+              "id": 9411187945,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat3",
+              "size": 277915
+            },
+            {
+              "id": 9411126094,
+              "name": "broad-v19-set2-F10-seat0",
+              "size": 281029
+            },
+            {
+              "id": 9410914695,
+              "name": "broad-v19-set2-NODE_DENSE-seat3",
+              "size": 274617
+            },
+            {
+              "id": 9410909518,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat3",
+              "size": 274109
+            },
+            {
+              "id": 9410905397,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat1",
+              "size": 277086
+            },
+            {
+              "id": 9410832056,
+              "name": "broad-v19-set2-F10-seat1",
+              "size": 274957
+            },
+            {
+              "id": 9410750752,
+              "name": "broad-v19-set2-F10-seat3",
+              "size": 272422
+            },
+            {
+              "id": 9409830224,
+              "name": "broad-v19-runtime",
+              "size": 201423717
+            }
+          ],
+          "conclusion": "success",
+          "createdAt": "2026-08-20T14:01:44Z",
+          "event": "push",
+          "headSha": "ab906f68ccd2f525ad9138186137ac9682d03ee6",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32377677491",
+          "id": 32377677491,
+          "jobStates": {
+            "success": 18
+          },
+          "jobs": 18,
+          "status": "completed",
+          "updatedAt": "2026-08-20T14:44:48Z"
+        },
+        {
+          "artifacts": [
+            {
+              "id": 9401570526,
+              "name": "broad-v19-report",
+              "size": 1600
+            },
+            {
+              "id": 9401560801,
+              "name": "broad-v19-F10-seat0",
+              "size": 278841
+            },
+            {
+              "id": 9401495371,
+              "name": "broad-v19-DRUID_TUTOR-seat2",
+              "size": 274102
+            },
+            {
+              "id": 9401483234,
+              "name": "broad-v19-NODE_DENSE-seat1",
+              "size": 276655
+            },
+            {
+              "id": 9401477564,
+              "name": "broad-v19-F10-seat1",
+              "size": 269393
+            },
+            {
+              "id": 9401465191,
+              "name": "broad-v19-TUTOR_DENSE-seat1",
+              "size": 283894
+            },
+            {
+              "id": 9401449143,
+              "name": "broad-v19-DRUID_TUTOR-seat1",
+              "size": 283837
+            },
+            {
+              "id": 9401443259,
+              "name": "broad-v19-DRUID_TUTOR-seat0",
+              "size": 277699
+            },
+            {
+              "id": 9401442382,
+              "name": "broad-v19-NODE_DENSE-seat3",
+              "size": 274793
+            },
+            {
+              "id": 9401441961,
+              "name": "broad-v19-TUTOR_DENSE-seat2",
+              "size": 275343
+            },
+            {
+              "id": 9401432732,
+              "name": "broad-v19-NODE_DENSE-seat0",
+              "size": 276211
+            },
+            {
+              "id": 9401432643,
+              "name": "broad-v19-F10-seat3",
+              "size": 266774
+            },
+            {
+              "id": 9401249372,
+              "name": "broad-v19-F10-seat2",
+              "size": 271513
+            },
+            {
+              "id": 9401183025,
+              "name": "broad-v19-TUTOR_DENSE-seat3",
+              "size": 274676
+            },
+            {
+              "id": 9401153230,
+              "name": "broad-v19-NODE_DENSE-seat2",
+              "size": 276735
+            },
+            {
+              "id": 9401082528,
+              "name": "broad-v19-TUTOR_DENSE-seat0",
+              "size": 281770
+            },
+            {
+              "id": 9400347364,
+              "name": "broad-v19-runtime",
+              "size": 201422900
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T09:06:57Z",
+          "event": "push",
+          "headSha": "6a5bcf95bef41d171412d762690e804a7fbaa087",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32352219848",
+          "id": 32352219848,
+          "jobStates": {
+            "failure": 2,
+            "success": 16
+          },
+          "jobs": 18,
+          "status": "completed",
+          "updatedAt": "2026-08-20T09:48:53Z"
+        }
+      ],
+      "workflow": "kinnan-v19-broad-screen.yml"
+    },
+    "druidTutor2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9421549829,
+              "name": "druid2k-report",
+              "size": 1201
+            },
+            {
+              "id": 9421541826,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard7",
+              "size": 281559
+            },
+            {
+              "id": 9421486540,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard9",
+              "size": 274254
+            },
+            {
+              "id": 9421441195,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard8",
+              "size": 283854
+            },
+            {
+              "id": 9421399904,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard5",
+              "size": 278192
+            },
+            {
+              "id": 9421329420,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard6",
+              "size": 277507
+            },
+            {
+              "id": 9421309368,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard3",
+              "size": 280056
+            },
+            {
+              "id": 9421292549,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard4",
+              "size": 269109
+            },
+            {
+              "id": 9421204981,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard0",
+              "size": 276307
+            },
+            {
+              "id": 9421194362,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard2",
+              "size": 280365
+            },
+            {
+              "id": 9421165549,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard8",
+              "size": 271549
+            },
+            {
+              "id": 9420997818,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard1",
+              "size": 273105
+            },
+            {
+              "id": 9420987533,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard9",
+              "size": 268856
+            },
+            {
+              "id": 9420779399,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard7",
+              "size": 282397
+            },
+            {
+              "id": 9420739818,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard5",
+              "size": 279933
+            },
+            {
+              "id": 9420716619,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard4",
+              "size": 281402
+            },
+            {
+              "id": 9420675977,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard6",
+              "size": 278457
+            },
+            {
+              "id": 9420436013,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard9",
+              "size": 272848
+            },
+            {
+              "id": 9420434835,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard6",
+              "size": 277400
+            },
+            {
+              "id": 9420419096,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard3",
+              "size": 279624
+            },
+            {
+              "id": 9420319748,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard7",
+              "size": 286411
+            },
+            {
+              "id": 9420216307,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard4",
+              "size": 280227
+            },
+            {
+              "id": 9420182718,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard0",
+              "size": 279756
+            },
+            {
+              "id": 9420126846,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard2",
+              "size": 272673
+            },
+            {
+              "id": 9420037320,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard1",
+              "size": 271142
+            },
+            {
+              "id": 9420030527,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard5",
+              "size": 273341
+            },
+            {
+              "id": 9420024121,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard8",
+              "size": 278867
+            },
+            {
+              "id": 9419981759,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard3",
+              "size": 273434
+            },
+            {
+              "id": 9419787656,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard1",
+              "size": 266930
+            },
+            {
+              "id": 9419468898,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard0",
+              "size": 282133
+            },
+            {
+              "id": 9419394132,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard2",
+              "size": 281019
+            },
+            {
+              "id": 9419244720,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard7",
+              "size": 277218
+            },
+            {
+              "id": 9419197549,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard9",
+              "size": 271106
+            },
+            {
+              "id": 9419163917,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard8",
+              "size": 275327
+            },
+            {
+              "id": 9418946306,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard5",
+              "size": 273820
+            },
+            {
+              "id": 9418772028,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard4",
+              "size": 281190
+            },
+            {
+              "id": 9418729274,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard3",
+              "size": 283014
+            },
+            {
+              "id": 9418529398,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard6",
+              "size": 281091
+            },
+            {
+              "id": 9418461681,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard2",
+              "size": 271113
+            },
+            {
+              "id": 9418234833,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard0",
+              "size": 276776
+            },
+            {
+              "id": 9418052285,
+              "name": "druid2k-F10-seat3-shard9",
+              "size": 272433
+            },
+            {
+              "id": 9418033768,
+              "name": "druid2k-F10-seat3-shard8",
+              "size": 272617
+            },
+            {
+              "id": 9417983611,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard1",
+              "size": 283628
+            },
+            {
+              "id": 9417959568,
+              "name": "druid2k-F10-seat3-shard3",
+              "size": 273979
+            },
+            {
+              "id": 9417869415,
+              "name": "druid2k-F10-seat3-shard6",
+              "size": 277469
+            },
+            {
+              "id": 9417850656,
+              "name": "druid2k-F10-seat3-shard4",
+              "size": 273953
+            },
+            {
+              "id": 9417789247,
+              "name": "druid2k-F10-seat3-shard5",
+              "size": 265366
+            },
+            {
+              "id": 9417677025,
+              "name": "druid2k-F10-seat3-shard7",
+              "size": 273723
+            },
+            {
+              "id": 9417648042,
+              "name": "druid2k-F10-seat3-shard1",
+              "size": 270604
+            },
+            {
+              "id": 9417552237,
+              "name": "druid2k-F10-seat3-shard0",
+              "size": 272795
+            },
+            {
+              "id": 9417539386,
+              "name": "druid2k-F10-seat3-shard2",
+              "size": 279973
+            },
+            {
+              "id": 9416800414,
+              "name": "druid2k-F10-seat2-shard8",
+              "size": 272279
+            },
+            {
+              "id": 9416757236,
+              "name": "druid2k-F10-seat2-shard7",
+              "size": 268819
+            },
+            {
+              "id": 9416529005,
+              "name": "druid2k-F10-seat2-shard6",
+              "size": 275123
+            },
+            {
+              "id": 9416424747,
+              "name": "druid2k-F10-seat2-shard9",
+              "size": 270604
+            },
+            {
+              "id": 9416373804,
+              "name": "druid2k-F10-seat2-shard3",
+              "size": 272590
+            },
+            {
+              "id": 9416371960,
+              "name": "druid2k-F10-seat2-shard4",
+              "size": 274079
+            },
+            {
+              "id": 9416078832,
+              "name": "druid2k-F10-seat2-shard5",
+              "size": 273798
+            },
+            {
+              "id": 9415597050,
+              "name": "druid2k-F10-seat2-shard0",
+              "size": 270657
+            },
+            {
+              "id": 9415525605,
+              "name": "druid2k-F10-seat2-shard2",
+              "size": 268118
+            },
+            {
+              "id": 9415512556,
+              "name": "druid2k-F10-seat1-shard8",
+              "size": 276339
+            },
+            {
+              "id": 9415483842,
+              "name": "druid2k-F10-seat1-shard4",
+              "size": 272488
+            },
+            {
+              "id": 9415475365,
+              "name": "druid2k-F10-seat1-shard3",
+              "size": 272200
+            },
+            {
+              "id": 9415471903,
+              "name": "druid2k-F10-seat0-shard3",
+              "size": 282903
+            },
+            {
+              "id": 9415384531,
+              "name": "druid2k-F10-seat0-shard5",
+              "size": 277087
+            },
+            {
+              "id": 9415345691,
+              "name": "druid2k-F10-seat1-shard6",
+              "size": 265106
+            },
+            {
+              "id": 9415344474,
+              "name": "druid2k-F10-seat1-shard5",
+              "size": 274462
+            },
+            {
+              "id": 9415238186,
+              "name": "druid2k-F10-seat0-shard7",
+              "size": 271253
+            },
+            {
+              "id": 9415207981,
+              "name": "druid2k-F10-seat1-shard7",
+              "size": 273057
+            },
+            {
+              "id": 9415175430,
+              "name": "druid2k-F10-seat2-shard1",
+              "size": 273152
+            },
+            {
+              "id": 9414754338,
+              "name": "druid2k-F10-seat1-shard9",
+              "size": 271684
+            },
+            {
+              "id": 9414463214,
+              "name": "druid2k-F10-seat1-shard1",
+              "size": 270632
+            },
+            {
+              "id": 9414308769,
+              "name": "druid2k-F10-seat0-shard9",
+              "size": 276102
+            },
+            {
+              "id": 9414296238,
+              "name": "druid2k-F10-seat1-shard0",
+              "size": 270286
+            },
+            {
+              "id": 9414278608,
+              "name": "druid2k-F10-seat0-shard1",
+              "size": 274199
+            },
+            {
+              "id": 9414276549,
+              "name": "druid2k-F10-seat0-shard8",
+              "size": 269163
+            },
+            {
+              "id": 9414225968,
+              "name": "druid2k-F10-seat0-shard4",
+              "size": 268120
+            },
+            {
+              "id": 9414219923,
+              "name": "druid2k-F10-seat0-shard6",
+              "size": 273879
+            },
+            {
+              "id": 9414206492,
+              "name": "druid2k-F10-seat0-shard0",
+              "size": 271759
+            },
+            {
+              "id": 9414013520,
+              "name": "druid2k-F10-seat1-shard2",
+              "size": 271753
+            },
+            {
+              "id": 9414000298,
+              "name": "druid2k-F10-seat0-shard2",
+              "size": 266752
+            },
+            {
+              "id": 9412463406,
+              "name": "druid-v19-runtime",
+              "size": 201427723
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T15:10:11Z",
+          "event": "push",
+          "headSha": "f86d5af3b1137f2ff1166a0dd32407283c097ab3",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32384510087",
+          "id": 32384510087,
+          "jobStates": {
+            "failure": 2,
+            "success": 80
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-20T19:35:23Z"
+        }
+      ],
+      "workflow": "kinnan-v19-druid-tutor-2k.yml"
+    },
+    "turbo2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9420231819,
+              "name": "turbo-v19-2k-report",
+              "size": 1353
+            },
+            {
+              "id": 9420188087,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard9",
+              "size": 280705
+            },
+            {
+              "id": 9420187897,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard7",
+              "size": 282644
+            },
+            {
+              "id": 9420159143,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard8",
+              "size": 272147
+            },
+            {
+              "id": 9420003683,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard5",
+              "size": 277900
+            },
+            {
+              "id": 9419968334,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard6",
+              "size": 284820
+            },
+            {
+              "id": 9419511360,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard3",
+              "size": 277455
+            },
+            {
+              "id": 9419468943,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard4",
+              "size": 280940
+            },
+            {
+              "id": 9419428338,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard2",
+              "size": 272555
+            },
+            {
+              "id": 9419273484,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard0",
+              "size": 275982
+            },
+            {
+              "id": 9419218969,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard1",
+              "size": 277460
+            },
+            {
+              "id": 9419209710,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard8",
+              "size": 275954
+            },
+            {
+              "id": 9419187725,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard7",
+              "size": 280055
+            },
+            {
+              "id": 9419058436,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard5",
+              "size": 276001
+            },
+            {
+              "id": 9418934184,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard9",
+              "size": 274332
+            },
+            {
+              "id": 9418918912,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard4",
+              "size": 284829
+            },
+            {
+              "id": 9418826090,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard3",
+              "size": 275099
+            },
+            {
+              "id": 9418805465,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard2",
+              "size": 276275
+            },
+            {
+              "id": 9418619570,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard6",
+              "size": 273816
+            },
+            {
+              "id": 9418034198,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard0",
+              "size": 274329
+            },
+            {
+              "id": 9417964411,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard7",
+              "size": 274549
+            },
+            {
+              "id": 9417947292,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard1",
+              "size": 272791
+            },
+            {
+              "id": 9417924332,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard8",
+              "size": 272349
+            },
+            {
+              "id": 9417918984,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard9",
+              "size": 269865
+            },
+            {
+              "id": 9417599345,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard5",
+              "size": 277708
+            },
+            {
+              "id": 9417510536,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard6",
+              "size": 280682
+            },
+            {
+              "id": 9417320688,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard3",
+              "size": 272840
+            },
+            {
+              "id": 9417010969,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard1",
+              "size": 283736
+            },
+            {
+              "id": 9416991011,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard4",
+              "size": 273754
+            },
+            {
+              "id": 9416985990,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard2",
+              "size": 284048
+            },
+            {
+              "id": 9416821063,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard9",
+              "size": 273662
+            },
+            {
+              "id": 9416761281,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard0",
+              "size": 282065
+            },
+            {
+              "id": 9416728867,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard8",
+              "size": 269980
+            },
+            {
+              "id": 9416701446,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard3",
+              "size": 274530
+            },
+            {
+              "id": 9416700737,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard6",
+              "size": 278856
+            },
+            {
+              "id": 9416651193,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard5",
+              "size": 276831
+            },
+            {
+              "id": 9416610843,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard2",
+              "size": 276675
+            },
+            {
+              "id": 9416551160,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard0",
+              "size": 275536
+            },
+            {
+              "id": 9416537414,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard7",
+              "size": 275590
+            },
+            {
+              "id": 9416348503,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard1",
+              "size": 283839
+            },
+            {
+              "id": 9416237101,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard4",
+              "size": 265855
+            },
+            {
+              "id": 9415616740,
+              "name": "turbo-v19-2k-F10-seat3-shard5",
+              "size": 274402
+            },
+            {
+              "id": 9415608425,
+              "name": "turbo-v19-2k-F10-seat3-shard7",
+              "size": 274255
+            },
+            {
+              "id": 9415601803,
+              "name": "turbo-v19-2k-F10-seat3-shard4",
+              "size": 273983
+            },
+            {
+              "id": 9415600792,
+              "name": "turbo-v19-2k-F10-seat3-shard6",
+              "size": 268958
+            },
+            {
+              "id": 9415572205,
+              "name": "turbo-v19-2k-F10-seat3-shard3",
+              "size": 273363
+            },
+            {
+              "id": 9415486234,
+              "name": "turbo-v19-2k-F10-seat3-shard9",
+              "size": 274420
+            },
+            {
+              "id": 9415467660,
+              "name": "turbo-v19-2k-F10-seat3-shard8",
+              "size": 276651
+            },
+            {
+              "id": 9415380780,
+              "name": "turbo-v19-2k-F10-seat3-shard2",
+              "size": 272319
+            },
+            {
+              "id": 9414563866,
+              "name": "turbo-v19-2k-F10-seat3-shard1",
+              "size": 271889
+            },
+            {
+              "id": 9414560333,
+              "name": "turbo-v19-2k-F10-seat3-shard0",
+              "size": 276184
+            },
+            {
+              "id": 9414333936,
+              "name": "turbo-v19-2k-F10-seat2-shard9",
+              "size": 274061
+            },
+            {
+              "id": 9414271794,
+              "name": "turbo-v19-2k-F10-seat2-shard5",
+              "size": 271952
+            },
+            {
+              "id": 9414193276,
+              "name": "turbo-v19-2k-F10-seat2-shard7",
+              "size": 270773
+            },
+            {
+              "id": 9414175805,
+              "name": "turbo-v19-2k-F10-seat2-shard8",
+              "size": 269452
+            },
+            {
+              "id": 9414147367,
+              "name": "turbo-v19-2k-F10-seat2-shard6",
+              "size": 269237
+            },
+            {
+              "id": 9414033182,
+              "name": "turbo-v19-2k-F10-seat2-shard3",
+              "size": 276649
+            },
+            {
+              "id": 9413924527,
+              "name": "turbo-v19-2k-F10-seat2-shard2",
+              "size": 279820
+            },
+            {
+              "id": 9413767564,
+              "name": "turbo-v19-2k-F10-seat2-shard0",
+              "size": 274446
+            },
+            {
+              "id": 9413655704,
+              "name": "turbo-v19-2k-F10-seat2-shard4",
+              "size": 274510
+            },
+            {
+              "id": 9413484592,
+              "name": "turbo-v19-2k-F10-seat2-shard1",
+              "size": 273972
+            },
+            {
+              "id": 9413266099,
+              "name": "turbo-v19-2k-F10-seat0-shard2",
+              "size": 285064
+            },
+            {
+              "id": 9413008494,
+              "name": "turbo-v19-2k-F10-seat1-shard1",
+              "size": 277569
+            },
+            {
+              "id": 9412997378,
+              "name": "turbo-v19-2k-F10-seat0-shard0",
+              "size": 276391
+            },
+            {
+              "id": 9412915446,
+              "name": "turbo-v19-2k-F10-seat0-shard9",
+              "size": 274471
+            },
+            {
+              "id": 9412910726,
+              "name": "turbo-v19-2k-F10-seat1-shard3",
+              "size": 270030
+            },
+            {
+              "id": 9412902075,
+              "name": "turbo-v19-2k-F10-seat0-shard3",
+              "size": 267118
+            },
+            {
+              "id": 9412901176,
+              "name": "turbo-v19-2k-F10-seat1-shard7",
+              "size": 272758
+            },
+            {
+              "id": 9412898608,
+              "name": "turbo-v19-2k-F10-seat0-shard4",
+              "size": 266764
+            },
+            {
+              "id": 9412875741,
+              "name": "turbo-v19-2k-F10-seat0-shard7",
+              "size": 272767
+            },
+            {
+              "id": 9412875394,
+              "name": "turbo-v19-2k-F10-seat1-shard5",
+              "size": 270277
+            },
+            {
+              "id": 9412872134,
+              "name": "turbo-v19-2k-F10-seat0-shard5",
+              "size": 268573
+            },
+            {
+              "id": 9412852642,
+              "name": "turbo-v19-2k-F10-seat1-shard0",
+              "size": 279291
+            },
+            {
+              "id": 9412824221,
+              "name": "turbo-v19-2k-F10-seat1-shard9",
+              "size": 272923
+            },
+            {
+              "id": 9412811439,
+              "name": "turbo-v19-2k-F10-seat0-shard8",
+              "size": 270846
+            },
+            {
+              "id": 9412786938,
+              "name": "turbo-v19-2k-F10-seat1-shard8",
+              "size": 267484
+            },
+            {
+              "id": 9412698472,
+              "name": "turbo-v19-2k-F10-seat0-shard1",
+              "size": 270392
+            },
+            {
+              "id": 9412488327,
+              "name": "turbo-v19-2k-F10-seat1-shard4",
+              "size": 266671
+            },
+            {
+              "id": 9412430058,
+              "name": "turbo-v19-2k-F10-seat0-shard6",
+              "size": 272877
+            },
+            {
+              "id": 9412336942,
+              "name": "turbo-v19-2k-F10-seat1-shard2",
+              "size": 271020
+            },
+            {
+              "id": 9412318265,
+              "name": "turbo-v19-2k-F10-seat1-shard6",
+              "size": 270606
+            },
+            {
+              "id": 9411474723,
+              "name": "turbo-v19-2k-runtime",
+              "size": 201424684
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T14:08:56Z",
+          "event": "push",
+          "headSha": "3b5c2ae97331d28a6cf42aec6a435f0c1db92d26",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32378390116",
+          "id": 32378390116,
+          "jobStates": {
+            "failure": 5,
+            "success": 77
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-20T18:55:49Z"
+        }
+      ],
+      "workflow": "kinnan-v19-turbo-2k-confirm.yml"
+    }
+  }
+}
