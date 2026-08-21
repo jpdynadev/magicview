@@ -13,78 +13,32 @@ F10_ADDS = ['Reshape', 'Trinket Mage', 'Spellseeker', 'Mystical Tutor']
 
 SPECS = {
     'F10': ([], []),
-    # First repaired-protocol Turbo challenger. Trade slower value/development
-    # slots for cheaper tutor density, another Kinnan-amplified mana creature,
-    # and an artifact-copy node that can duplicate the monolith architecture.
     'TURBO_F10': (
         ['Tezzeret the Seeker', 'Rhystic Study', 'Sylvan Library', 'Energy Refractor', 'Hydroelectric Specimen'],
         ["Green Sun's Zenith", 'Eldritch Evolution', 'Tribute Mage', 'Devoted Druid', 'Copy Artifact'],
     ),
-    'COPY_CORE': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum'],
-        ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Mirage Mirror'],
-    ),
-    'COPY_CREATURE': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel'],
-        ['Flesh Duplicate', 'Clever Impersonator', 'Gene Pollinator'],
-    ),
-    'DRUID_EFFIGY': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel'],
-        ['Devoted Druid', "Machine God's Effigy", 'Gene Pollinator'],
-    ),
-    'COPY_DRUID': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection'],
-        ['Devoted Druid', "Machine God's Effigy", 'Flesh Duplicate', 'Copy Enchantment', 'Gene Pollinator'],
-    ),
-    'COPY_HEAVY': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection', 'Hydroelectric Specimen'],
-        ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Mirage Mirror', 'Clever Impersonator', 'Gene Pollinator'],
-    ),
-    'COPY_ARTIFACT': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Hydroelectric Specimen'],
-        ['Copy Artifact', 'Mirage Mirror', 'Phyrexian Metamorph', 'Flesh Duplicate'],
-    ),
-    'COPY_PROTECTED': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Springleaf Drum', 'Hydroelectric Specimen'],
-        ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Gene Pollinator'],
-    ),
-    'DRUID_TUTOR': (
-        ['Energy Refractor', 'Dispel', 'Springleaf Drum', 'Hydroelectric Specimen'],
-        ['Devoted Druid', "Machine God's Effigy", "Green Sun's Zenith", 'Eldritch Evolution'],
-    ),
-    'TUTOR_DENSE': (
-        ['Energy Refractor', 'Dispel', 'Springleaf Drum', 'Hydroelectric Specimen'],
-        ["Green Sun's Zenith", 'Eldritch Evolution', 'Tribute Mage', 'Devoted Druid'],
-    ),
-    'NODE_DENSE': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection', 'Hydroelectric Specimen'],
-        ['Devoted Druid', "Machine God's Effigy", 'Copy Artifact', 'Flesh Duplicate', "Green Sun's Zenith", 'Eldritch Evolution'],
-    ),
-    'COPY_VALUE': (
-        ["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Hydroelectric Specimen'],
-        ['Copy Enchantment', 'Flesh Duplicate', 'Clever Impersonator', 'Gene Pollinator'],
-    ),
-    # New F10-derived packages: unlike the older copy architectures these keep
-    # Nature's Rhythm / Chord / Transmute Artifact, which are already in F10.
-    # They target the empirically weaker F10 exposure slots instead of cutting
-    # tutor-quality cards merely to raise clone density.
-    'F10_COPY_COMPACT': (
-        ['Reshape', 'Spellseeker', 'Energy Refractor'],
-        ['Clever Impersonator', 'Flesh Duplicate', 'Copy Enchantment'],
-    ),
-    'F10_DRUID_COMPACT': (
-        ['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'],
-        ['Devoted Druid', "Machine God's Effigy", "Green Sun's Zenith", 'Eldritch Evolution'],
-    ),
-    'F10_COPY_TUTOR': (
-        ['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'],
-        ['Clever Impersonator', 'Flesh Duplicate', "Green Sun's Zenith", 'Eldritch Evolution'],
+    'COPY_CORE': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum'], ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Mirage Mirror']),
+    'COPY_CREATURE': (["Nature's Rhythm", 'Energy Refractor', 'Dispel'], ['Flesh Duplicate', 'Clever Impersonator', 'Gene Pollinator']),
+    'DRUID_EFFIGY': (["Nature's Rhythm", 'Energy Refractor', 'Dispel'], ['Devoted Druid', "Machine God's Effigy", 'Gene Pollinator']),
+    'COPY_DRUID': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection'], ['Devoted Druid', "Machine God's Effigy", 'Flesh Duplicate', 'Copy Enchantment', 'Gene Pollinator']),
+    'COPY_HEAVY': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection', 'Hydroelectric Specimen'], ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Mirage Mirror', 'Clever Impersonator', 'Gene Pollinator']),
+    'COPY_ARTIFACT': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Hydroelectric Specimen'], ['Copy Artifact', 'Mirage Mirror', 'Phyrexian Metamorph', 'Flesh Duplicate']),
+    'COPY_PROTECTED': (["Nature's Rhythm", 'Energy Refractor', 'Springleaf Drum', 'Hydroelectric Specimen'], ['Copy Enchantment', 'Copy Artifact', 'Flesh Duplicate', 'Gene Pollinator']),
+    'DRUID_TUTOR': (['Energy Refractor', 'Dispel', 'Springleaf Drum', 'Hydroelectric Specimen'], ['Devoted Druid', "Machine God's Effigy", "Green Sun's Zenith", 'Eldritch Evolution']),
+    'TUTOR_DENSE': (['Energy Refractor', 'Dispel', 'Springleaf Drum', 'Hydroelectric Specimen'], ["Green Sun's Zenith", 'Eldritch Evolution', 'Tribute Mage', 'Devoted Druid']),
+    'NODE_DENSE': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Springleaf Drum', 'Misdirection', 'Hydroelectric Specimen'], ['Devoted Druid', "Machine God's Effigy", 'Copy Artifact', 'Flesh Duplicate', "Green Sun's Zenith", 'Eldritch Evolution']),
+    'COPY_VALUE': (["Nature's Rhythm", 'Energy Refractor', 'Dispel', 'Hydroelectric Specimen'], ['Copy Enchantment', 'Flesh Duplicate', 'Clever Impersonator', 'Gene Pollinator']),
+    'F10_COPY_COMPACT': (['Reshape', 'Spellseeker', 'Energy Refractor'], ['Clever Impersonator', 'Flesh Duplicate', 'Copy Enchantment']),
+    'F10_DRUID_COMPACT': (['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'], ['Devoted Druid', "Machine God's Effigy", "Green Sun's Zenith", 'Eldritch Evolution']),
+    'F10_COPY_TUTOR': (['Reshape', 'Spellseeker', 'Energy Refractor', 'Hydroelectric Specimen'], ['Clever Impersonator', 'Flesh Duplicate', "Green Sun's Zenith", 'Eldritch Evolution']),
+    # Minimal F10-preserving tutor-quality test after broader Druid/clone packages
+    # failed to improve protected T4 conversion at large sample sizes.
+    'F10_TUTOR_PAIR': (
+        ['Energy Refractor', 'Hydroelectric Specimen'],
+        ["Green Sun's Zenith", 'Eldritch Evolution'],
     ),
 }
 
-# Every experimentally added card must have an explicit semantic role in the
-# architecture-aware pilot. Unknown cards are a hard error rather than a silent
-# hand-score fallback.
 REGISTERED_ADDS = {
     'Reshape', 'Trinket Mage', 'Spellseeker', 'Mystical Tutor', "Green Sun's Zenith",
     'Eldritch Evolution', 'Tribute Mage', 'Copy Enchantment', 'Copy Artifact',
