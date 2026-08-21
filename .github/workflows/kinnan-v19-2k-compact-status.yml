@@ -27,6 +27,7 @@ jobs:
               'kinnan-v19-druid-tutor-2k.yml',
               'kinnan-v19-turbo-2k-confirm.yml',
               'kinnan-v19-copy-tutor-2k.yml',
+              'kinnan-v19-tutor-pair-2k.yml',
               'kinnan-v19-druid-key-forensic.yml',
               'kinnan-v19-copy-tutor-forensic.yml',
               'kinnan-v19-copy-tutor-key-forensic.yml',
