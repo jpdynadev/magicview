@@ -1,0 +1,77 @@
+{
+  "kinnan-v19-druid-tutor-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T15:10:11Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96476681772,
+        "name": "confirm (DRUID_TUTOR, 0, 7)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96556239071,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32384510087",
+    "id": 32384510087,
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9421549829,
+        "name": "druid2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-20T19:35:23Z"
+  },
+  "kinnan-v19-turbo-2k-confirm.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T14:08:56Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96468214101,
+        "name": "screen (F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96468218002,
+        "name": "screen (TURBO_F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96468219299,
+        "name": "screen (TURBO_F10, 1, 1)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96468221195,
+        "name": "screen (TURBO_F10, 2, 4)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96544342438,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32378390116",
+    "id": 32378390116,
+    "jobCounts": {
+      "failure": 5,
+      "success": 77
+    },
+    "reports": [
+      {
+        "id": 9420231819,
+        "name": "turbo-v19-2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-20T18:55:49Z"
+  }
+}
