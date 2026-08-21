@@ -1,1 +1,1 @@
-2026-08-21 replay shared pathological key seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR with full diagnostics; forensic only, do not substitute into canonical 160s promotion sample.
+2026-08-21T16:57:35-04:00 replay shared pathological key seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR with full diagnostics after Tutor Pair attempt 3; forensic only, do not substitute into canonical 160s promotion sample.
