@@ -1,16 +1,60 @@
 {
+  "kinnan-v19-copy-tutor-2k.yml": {
+    "conclusion": null,
+    "createdAt": "2026-08-21T03:17:25Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96663062165,
+        "name": "confirm (F10, 2, 9)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96663063513,
+        "name": "confirm (F10_COPY_TUTOR, 0, 3)"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32442855543",
+    "id": 32442855543,
+    "jobCounts": {
+      "failure": 2,
+      "in_progress": 16,
+      "success": 63
+    },
+    "reports": [],
+    "status": "in_progress",
+    "updatedAt": "2026-08-21T05:47:54Z"
+  },
+  "kinnan-v19-druid-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T04:05:21Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32445677060",
+    "id": 32445677060,
+    "jobCounts": {
+      "success": 1
+    },
+    "reports": [
+      {
+        "id": 9434391296,
+        "name": "druid-key-forensic"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T04:27:38Z"
+  },
   "kinnan-v19-druid-tutor-2k.yml": {
     "conclusion": "failure",
     "createdAt": "2026-08-20T15:10:11Z",
     "failedJobs": [
       {
         "conclusion": "failure",
-        "id": 96476681772,
+        "id": 96654530730,
         "name": "confirm (DRUID_TUTOR, 0, 7)"
       },
       {
         "conclusion": "failure",
-        "id": 96556239071,
+        "id": 96661507650,
         "name": "aggregate"
       }
     ],
@@ -22,12 +66,16 @@
     },
     "reports": [
       {
+        "id": 9433587562,
+        "name": "druid2k-report"
+      },
+      {
         "id": 9421549829,
         "name": "druid2k-report"
       }
     ],
     "status": "completed",
-    "updatedAt": "2026-08-20T19:35:23Z"
+    "updatedAt": "2026-08-21T03:45:54Z"
   },
   "kinnan-v19-turbo-2k-confirm.yml": {
     "conclusion": "failure",
@@ -35,27 +83,27 @@
     "failedJobs": [
       {
         "conclusion": "failure",
-        "id": 96468214101,
-        "name": "screen (F10, 0, 2)"
-      },
-      {
-        "conclusion": "failure",
-        "id": 96468218002,
+        "id": 96654552236,
         "name": "screen (TURBO_F10, 0, 2)"
       },
       {
         "conclusion": "failure",
-        "id": 96468219299,
+        "id": 96654552247,
         "name": "screen (TURBO_F10, 1, 1)"
       },
       {
         "conclusion": "failure",
-        "id": 96468221195,
+        "id": 96654552258,
+        "name": "screen (F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552409,
         "name": "screen (TURBO_F10, 2, 4)"
       },
       {
         "conclusion": "failure",
-        "id": 96544342438,
+        "id": 96662314462,
         "name": "aggregate"
       }
     ],
@@ -67,11 +115,15 @@
     },
     "reports": [
       {
+        "id": 9433683687,
+        "name": "turbo-v19-2k-report"
+      },
+      {
         "id": 9420231819,
         "name": "turbo-v19-2k-report"
       }
     ],
     "status": "completed",
-    "updatedAt": "2026-08-20T18:55:49Z"
+    "updatedAt": "2026-08-21T03:50:50Z"
   }
 }
