@@ -1,0 +1,1 @@
+2026-08-22 revalidate seed 3430166 seat 3 midrange for F10 and F10_EVOLUTION_SINGLE under arch-aware-v1.12-adversarial after Kinnan payManaCost progress repair
