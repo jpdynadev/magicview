@@ -1,0 +1,1 @@
+2026-08-22 start strict v1.10 singleton isolation: F10 vs F10_GSZ_SINGLE vs F10_EVOLUTION_SINGLE, 200 exact paired games per deck, fresh 3200000+ canonical seed bank
