@@ -1,0 +1,1 @@
+2026-08-22 launch fresh strict v1.13 F10 vs F10_EVOLUTION_SINGLE 2k confirmation after 4/4 canonical key revalidation passed; use fresh 3,500,000+ canonical seed bank and matched 240s profile; no v1.10-v1.12 cache reuse.
