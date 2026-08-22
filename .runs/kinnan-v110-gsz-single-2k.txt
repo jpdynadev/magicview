@@ -1,0 +1,1 @@
+2026-08-22 trigger strict v1.10 F10 vs F10_GSZ_SINGLE 2,000 exact paired games per deck; fresh 3300000+ canonical keys; high-value non-cancelling lane
