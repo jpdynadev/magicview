@@ -9,9 +9,11 @@ import manabrew_pilot_arch as arch
 import manabrew_pilot_v8 as runner
 
 # Cache/pilot identity must follow the repaired architecture policy actually in
-# use. v1.9 consumes Manabrew's canonical `validColors` field and submits the
-# exact offered token while matching it against W/U/B/R/G/C payment policy.
-runner.PILOT_VERSION = 'arch-aware-v1.9-adversarial'
+# use. v1.10 also breaks a pathological Forge replacement loop by declining a
+# repeated identical Mockingbird replacement prompt after first allowing the
+# normal policy decision. This is intentionally scoped to the exact same
+# visible state so normal, resolvable copy choices are unchanged.
+runner.PILOT_VERSION = 'arch-aware-v1.10-adversarial'
 
 _COLOR_ALIASES = {
     'W': 'W', 'WHITE': 'W',
@@ -74,6 +76,37 @@ def composed_action_score(
 
 
 arch.base.action_score = composed_action_score
+
+# Forge can re-advertise an optional replacement boolean without changing the
+# visible state when the accepted `true` branch has no resolvable follow-up.
+# The generic policy quite reasonably says yes to prompts containing "copy",
+# which previously made Blue Farm's Mockingbird repeat the same prompt thousands
+# of times, fill the JVM heap, and eventually close harness stdout. Preserve the
+# first normal answer; only if the exact Mockingbird prompt repeats in the exact
+# same visible state do we decline the replacement so Forge can continue.
+_ARCH_ADV_RESPONSE = runner.base.response_for
+_MOCKINGBIRD_BOOLEAN_STATES: set[tuple[int, str, str]] = set()
+
+
+def repaired_response(
+    prompt: dict[str, Any], snapshot: dict[str, Any], deck: str, player: int
+) -> dict[str, Any] | None:
+    inp = prompt.get('input') or {}
+    if inp.get('type') == 'chooseBoolean':
+        title = str((inp.get('presentation') or {}).get('title') or '')
+        if 'apply replacement effect of mockingbird?' in title.lower():
+            key = (player, arch.policy.visible_state_hash(snapshot), title)
+            if key in _MOCKINGBIRD_BOOLEAN_STATES:
+                return {
+                    'type': 'chooseBoolean',
+                    'output': {'type': 'decision', 'value': False},
+                }
+            _MOCKINGBIRD_BOOLEAN_STATES.add(key)
+    return _ARCH_ADV_RESPONSE(prompt, snapshot, deck, player)
+
+
+runner.base.response_for = repaired_response
+arch.base.response_for = repaired_response
 
 if __name__ == '__main__':
     raise SystemExit(runner.main())
