@@ -44,6 +44,7 @@ jobs:
               'kinnan-v110-gsz-f10-timeout-forensic.yml',
               'kinnan-v111-evolution-key-revalidation.yml',
               'kinnan-v112-evolution-key-revalidation.yml',
+              'kinnan-v113-evolution-key-revalidation.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
