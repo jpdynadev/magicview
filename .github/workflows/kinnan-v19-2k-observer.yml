@@ -32,6 +32,7 @@ jobs:
               'druidTutor2k': 'kinnan-v19-druid-tutor-2k.yml',
               'tutorPair2k': 'kinnan-v19-tutor-pair-2k.yml',
               'gszSingleV1102k': 'kinnan-v110-gsz-single-2k.yml',
+              'evolutionSingleV1102k': 'kinnan-v110-evolution-single-2k.yml',
               'broad200': 'kinnan-v19-broad-screen.yml',
           }
 
