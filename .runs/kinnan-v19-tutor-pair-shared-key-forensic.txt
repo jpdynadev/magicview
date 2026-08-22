@@ -1,1 +1,1 @@
-2026-08-21T19:01:00-04:00 replay seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR after forensic stderr flush/process-settle fix; diagnostic only, do not substitute into canonical 160s promotion sample.
+2026-08-21T21:00:00-04:00 revalidate seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR after arch-aware-v1.10 repeated-Mockingbird replacement-loop repair; diagnostic only, fresh engine/cache identity, do not substitute extended-envelope result into canonical promotion sample.
