@@ -656,6 +656,24 @@
       ],
       "workflow": "kinnan-v19-druid-tutor-2k.yml"
     },
+    "gszSingleV1102k": {
+      "runs": [
+        {
+          "artifacts": [],
+          "conclusion": null,
+          "createdAt": "2026-08-22T04:10:37Z",
+          "event": "push",
+          "headSha": "52c55cf724f7097a1656946f5fa597614de5b18e",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550996602",
+          "id": 32550996602,
+          "jobStates": {},
+          "jobs": 0,
+          "status": "pending",
+          "updatedAt": "2026-08-22T04:10:39Z"
+        }
+      ],
+      "workflow": "kinnan-v110-gsz-single-2k.yml"
+    },
     "turbo2k": {
       "runs": [
         {
@@ -1118,6 +1136,261 @@
         {
           "artifacts": [
             {
+              "id": 9458224683,
+              "name": "tutorpair2k-report",
+              "size": 1209
+            },
+            {
+              "id": 9458217324,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 280143
+            },
+            {
+              "id": 9458213819,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 270667
+            },
+            {
+              "id": 9456497843,
+              "name": "tutorpair2k-report",
+              "size": 1209
+            },
+            {
+              "id": 9456489982,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 272355
+            },
+            {
+              "id": 9456482319,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1",
+              "size": 278378
+            },
+            {
+              "id": 9456354426,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 282734
+            },
+            {
+              "id": 9453920389,
+              "name": "tutorpair2k-report",
+              "size": 1214
+            },
+            {
+              "id": 9453912431,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard6",
+              "size": 277093
+            },
+            {
+              "id": 9453893821,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard8",
+              "size": 277429
+            },
+            {
+              "id": 9453850753,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard9",
+              "size": 275183
+            },
+            {
+              "id": 9453847668,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard7",
+              "size": 275832
+            },
+            {
+              "id": 9453707246,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard3",
+              "size": 274439
+            },
+            {
+              "id": 9453678217,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard2",
+              "size": 275504
+            },
+            {
+              "id": 9453639809,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard4",
+              "size": 275771
+            },
+            {
+              "id": 9453506759,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard1",
+              "size": 278863
+            },
+            {
+              "id": 9453488825,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1",
+              "size": 282694
+            },
+            {
+              "id": 9453457491,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard8",
+              "size": 275335
+            },
+            {
+              "id": 9453441123,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard5",
+              "size": 277504
+            },
+            {
+              "id": 9453426831,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard7",
+              "size": 283553
+            },
+            {
+              "id": 9453355235,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard6",
+              "size": 277002
+            },
+            {
+              "id": 9453276788,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard2",
+              "size": 273012
+            },
+            {
+              "id": 9453260172,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard5",
+              "size": 276506
+            },
+            {
+              "id": 9453238857,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard3",
+              "size": 278048
+            },
+            {
+              "id": 9453231058,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard0",
+              "size": 278415
+            },
+            {
+              "id": 9453219440,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 280645
+            },
+            {
+              "id": 9453150137,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard4",
+              "size": 273105
+            },
+            {
+              "id": 9452720646,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard9",
+              "size": 283715
+            },
+            {
+              "id": 9452715138,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard0",
+              "size": 286382
+            },
+            {
+              "id": 9452699630,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard7",
+              "size": 277603
+            },
+            {
+              "id": 9452689659,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard6",
+              "size": 277445
+            },
+            {
+              "id": 9452679827,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard8",
+              "size": 275336
+            },
+            {
+              "id": 9452553857,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard5",
+              "size": 278883
+            },
+            {
+              "id": 9452543442,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard4",
+              "size": 279224
+            },
+            {
+              "id": 9452538938,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard2",
+              "size": 281833
+            },
+            {
+              "id": 9452506885,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard3",
+              "size": 283761
+            },
+            {
+              "id": 9452348413,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard1",
+              "size": 276951
+            },
+            {
+              "id": 9452319600,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard6",
+              "size": 272125
+            },
+            {
+              "id": 9452318866,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard8",
+              "size": 279254
+            },
+            {
+              "id": 9452240647,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard9",
+              "size": 276244
+            },
+            {
+              "id": 9452227099,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard7",
+              "size": 281920
+            },
+            {
+              "id": 9452129152,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard0",
+              "size": 284930
+            },
+            {
+              "id": 9452095054,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard5",
+              "size": 276477
+            },
+            {
+              "id": 9452065825,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard3",
+              "size": 282844
+            },
+            {
+              "id": 9452055320,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard4",
+              "size": 277015
+            },
+            {
+              "id": 9451893607,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard1",
+              "size": 277508
+            },
+            {
+              "id": 9451887480,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard0",
+              "size": 274039
+            },
+            {
+              "id": 9451641663,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard2",
+              "size": 275152
+            },
+            {
+              "id": 9451537587,
+              "name": "tutorpair2k-F10-seat3-shard9",
+              "size": 268203
+            },
+            {
+              "id": 9451403297,
+              "name": "tutorpair2k-F10-seat3-shard6",
+              "size": 269303
+            },
+            {
+              "id": 9451342182,
+              "name": "tutorpair2k-F10-seat2-shard8",
+              "size": 268796
+            },
+            {
               "id": 9451318485,
               "name": "tutorpair2k-F10-seat2-shard5",
               "size": 271591
@@ -1308,21 +1581,19 @@
               "size": 201427050
             }
           ],
-          "conclusion": null,
+          "conclusion": "failure",
           "createdAt": "2026-08-21T13:12:24Z",
           "event": "push",
           "headSha": "5876d79b0afa027661b5f709d6d8b89de286edd4",
           "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32485636013",
           "id": 32485636013,
           "jobStates": {
-            "failure": 1,
-            "in_progress": 18,
-            "queued": 25,
-            "success": 37
+            "failure": 3,
+            "success": 79
           },
-          "jobs": 81,
-          "status": "queued",
-          "updatedAt": "2026-08-21T13:46:11Z"
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-21T18:39:17Z"
         }
       ],
       "workflow": "kinnan-v19-tutor-pair-2k.yml"
