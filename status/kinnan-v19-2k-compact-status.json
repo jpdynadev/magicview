@@ -263,6 +263,48 @@
     "status": "completed",
     "updatedAt": "2026-08-22T17:22:26Z"
   },
+  "kinnan-v112-evolution-key-revalidation.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T18:14:07Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97072556319,
+        "name": "revalidate (F10, 1)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97072556379,
+        "name": "revalidate (F10, 2)"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32590134739",
+    "id": 32590134739,
+    "jobCounts": {
+      "failure": 2,
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9480136316,
+        "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2"
+      },
+      {
+        "id": 9480131956,
+        "name": "v112-evolution-key-revalidation-F10-rep1"
+      },
+      {
+        "id": 9480130034,
+        "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1"
+      },
+      {
+        "id": 9480121318,
+        "name": "v112-evolution-key-revalidation-F10-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T18:18:12Z"
+  },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
     "createdAt": "2026-08-21T03:17:25Z",
