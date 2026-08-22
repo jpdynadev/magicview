@@ -335,6 +335,36 @@
     "status": "completed",
     "updatedAt": "2026-08-22T20:08:15Z"
   },
+  "kinnan-v113-evolution-single-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T20:59:14Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97092488864,
+        "name": "build"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97092543938,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32598263461",
+    "id": 32598263461,
+    "jobCounts": {
+      "failure": 2,
+      "skipped": 1
+    },
+    "reports": [
+      {
+        "id": 9482154488,
+        "name": "evolutionv113-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T20:59:52Z"
+  },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
     "createdAt": "2026-08-21T03:17:25Z",
