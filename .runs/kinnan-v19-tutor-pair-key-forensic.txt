@@ -1,0 +1,1 @@
+2026-08-21T20:08Z rerun shared F10/Tutor Pair seat2 seed3020454 midrange harness-stdout-closed forensic after attempt3 reproduced same canonical failure; forensic only, do not substitute into canonical evidence

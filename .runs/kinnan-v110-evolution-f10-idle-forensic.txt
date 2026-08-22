@@ -1,0 +1,1 @@
+2026-08-22T17:09:00Z replay F10 seed 3430166 seat 3 midrange after Evolution 2k attempt 3 persistent idle_timeout; diagnostic only, do not substitute into promotion sample; automation re-trigger for current validation

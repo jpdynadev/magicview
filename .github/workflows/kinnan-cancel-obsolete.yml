@@ -1,0 +1,25 @@
+name: Cancel obsolete Kinnan runs
+
+on:
+  push:
+    branches: [agent/kinnan-2k-search]
+    paths: [.runs/kinnan-cancel-obsolete.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  cancel:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Cancel obsolete runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -x
+          for RUN in 31754908883 31761716393 31765260708 31765275589; do
+            gh api --method POST "repos/$REPO/actions/runs/$RUN/cancel" || true
+          done

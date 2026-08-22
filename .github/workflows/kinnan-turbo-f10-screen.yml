@@ -1,0 +1,327 @@
+name: Kinnan Turbo F10 strict paired screen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-turbo-f10-screen.txt]
+
+concurrency:
+  group: kinnan-turbo-f10-screen
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v17-turbo-screen
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Clean-build exact repaired runtime
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-turbo-screen.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - name: Runtime manifest
+        run: |
+          mkdir -p manifest
+          {
+            echo "lab_sha=$GITHUB_SHA"
+            echo "manabrew=$MANABREW_REF"
+            echo "repair_sha=$(sha256sum engine-tests/apply_manabrew_repairs.py | cut -d' ' -f1)"
+            echo "pilot_arch_sha=$(sha256sum engine-tests/manabrew_pilot_arch.py | cut -d' ' -f1)"
+            echo "pilot_adv_sha=$(sha256sum engine-tests/manabrew_pilot_arch_adv.py | cut -d' ' -f1)"
+            echo "worker_sha=$(sha256sum engine-tests/sim_v2_worker_arch.py | cut -d' ' -f1)"
+            echo "generator_sha=$(sha256sum engine-tests/generate_architecture_decks_v2.py | cut -d' ' -f1)"
+            echo "jar_sha=$(tar -xOf manabrew-turbo-screen.tgz forge-harness/target/forge-harness-jar-with-dependencies.jar | sha256sum | cut -d' ' -f1)"
+          } | tee manifest/runtime-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: turbo-f10-runtime
+          path: |
+            manabrew-turbo-screen.tgz
+            manifest/runtime-manifest.txt
+          compression-level: 0
+          retention-days: 2
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        variant: [F10, TURBO_F10]
+        seat: [0,1,2,3]
+        shard: [0,1]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: turbo-f10-runtime, path: runtime}
+      - name: Run 25 exact paired adversarial keys
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts
+          tar -C /tmp/manabrew -xzf runtime/manabrew-turbo-screen.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 -m py_compile engine-tests/sim_v2_worker_arch.py engine-tests/manabrew_pilot_arch.py engine-tests/manabrew_pilot_arch_adv.py
+
+          mapfile -t EXPOSURE_CARDS < <(python3 - <<'PY'
+          cards = [
+              'Tezzeret the Seeker','Rhystic Study','Sylvan Library','Energy Refractor','Hydroelectric Specimen',
+              "Green Sun's Zenith",'Eldritch Evolution','Tribute Mage','Devoted Druid','Copy Artifact',
+          ]
+          for c in cards: print(c)
+          PY
+          )
+          EXP_ARGS=()
+          for CARD in "${EXPOSURE_CARDS[@]}"; do EXP_ARGS+=(--exposure-card "$CARD"); done
+
+          START=$((SHARD * 25))
+          END=$((START + 24))
+          BASE=$((2100000 + SEAT * 50))
+          : > "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson"
+          for OFFSET in $(seq "$START" "$END"); do
+            SEED=$((BASE + OFFSET))
+            case $((OFFSET % 4)) in
+              0) POD=balanced ;;
+              1) POD=turbo ;;
+              2) POD=midrange ;;
+              3) POD=mixed ;;
+            esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-seat${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/turbo-v17-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v17-turbo-screen:${GITHUB_RUN_ID}:try${TRY}"
+              set +e
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" \
+                --seeds "$SEED" --max-round 4 --max-prompts 5000 --max-seconds 160 \
+                --jvm-reuse 1 --xmx 1280m --xms 192m \
+                --cache-dir "$CACHE" --retain-traces failures \
+                --engine-id "$ENGINE" "${EXP_ARGS[@]}" \
+                --output "$ATT" > "out/attempts/${VARIANT}-seat${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?
+              set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
+              print(r.get('status','missing') if isinstance(r,dict) else 'missing')
+          except Exception:
+              print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                python3 - "$ATT" "$POD" <<'PY'
+          import json,sys
+          p,pod=sys.argv[1:]
+          d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          if r.get('podProfile') != pod:
+              raise SystemExit(f"pod mismatch expected={pod} got={r.get('podProfile')}")
+          PY
+                cp "$ATT" "out/valid/${VARIANT}-seat${SEAT}-seed${SEED}.json"
+                OK=1
+                break
+              fi
+              python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson" <<'PY'
+          import json,sys
+          path,variant,seat,seed,pod,attempt,status,rc=sys.argv[1:]
+          row={'variant':variant,'seat':int(seat),'seed':int(seed),'pod':pod,'attempt':int(attempt),'status':status,'rc':int(rc)}
+          try:
+              d=json.load(open(path)); r=d[0] if isinstance(d,list) and d else d
+              if isinstance(r,dict):
+                  row.update({k:r.get(k) for k in ['primaryFailureCode','wallMs','error','v2SessionCleanupError'] if r.get(k) is not None})
+          except Exception as exc: row['parseError']=repr(exc)
+          print(json.dumps(row,sort_keys=True))
+          PY
+            done
+            if [ "$OK" -ne 1 ]; then
+              echo "unresolved invalid key variant=$VARIANT seat=$SEAT seed=$SEED pod=$POD after 3 attempts" >&2
+            fi
+          done
+
+          python3 - "$VARIANT" "$SEAT" "$SHARD" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2]); shard=int(sys.argv[3])
+          rows=[]
+          for p in glob.glob(f'out/valid/{v}-seat{seat}-seed*.json'):
+              d=json.load(open(p)); rows.append(d[0] if isinstance(d,list) else d)
+          valid=[r for r in rows if r.get('status') in {'game_over','horizon_complete'}]
+          keys={(int(r['seed']),int(r['kinnanSeat'])) for r in valid}
+          print(json.dumps({'variant':v,'seat':seat,'shard':shard,'valid':len(valid),'uniqueKeys':len(keys)},sort_keys=True))
+          if len(valid)!=25 or len(keys)!=25: raise SystemExit(1)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: turbo-v17-${{ matrix.variant }}-seat${{ matrix.seat }}-shard${{ matrix.shard }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 10
+
+  aggregate:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: turbo-v17-*
+          path: all
+      - name: Build strict paired report
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,os,pathlib
+          variants=['F10','TURBO_F10']
+          valid_status={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}
+          invalid=[]
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              try:
+                  d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              except Exception: continue
+              v=r.get('variant')
+              if v in rows and r.get('status') in valid_status: rows[v].append(r)
+          for p in glob.glob('all/**/*.ndjson',recursive=True):
+              for line in open(p,errors='replace'):
+                  try: invalid.append(json.loads(line))
+                  except Exception: pass
+
+          def key(r): return (int(r['seed']),int(r['kinnanSeat']))
+          maps={v:{key(r):r for r in rows[v]} for v in variants}
+          keysets={v:set(maps[v]) for v in variants}
+          paired=keysets['F10'] & keysets['TURBO_F10']
+          exact=(len(rows['F10'])==200 and len(maps['F10'])==200 and len(rows['TURBO_F10'])==200 and len(maps['TURBO_F10'])==200 and keysets['F10']==keysets['TURBO_F10'])
+
+          def b(r,k): return bool(r.get(k))
+          def rate(rs,pred): return (sum(1 for r in rs if pred(r))/len(rs)) if rs else None
+          def metrics(rs):
+              return {
+                  'valid':len(rs),
+                  'naturalWinRate':rate(rs,lambda r:b(r,'kinnanWon')),
+                  'assemblyT4Rate':rate(rs,lambda r:(r.get('firstAssemblyTurn') is not None and int(r['firstAssemblyTurn'])<=4)),
+                  'attemptT4Rate':rate(rs,lambda r:(r.get('firstAttemptTurn') is not None and int(r['firstAttemptTurn'])<=4)),
+                  'strictProtectedT4Rate':rate(rs,lambda r:b(r,'strictProtectedT4')),
+                  'protectedAttemptRate':rate(rs,lambda r:b(r,'protectedAttempt')),
+                  'slotExposureRate':rate(rs,lambda r:b(r,'slotExposed')),
+                  'mulliganMean':(sum(float(r.get('mulligans') or 0) for r in rs)/len(rs)) if rs else None,
+                  'failureLabels':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in rs)),
+              }
+          def split(rs,field):
+              groups=collections.defaultdict(list)
+              for r in rs: groups[str(r.get(field))].append(r)
+              return {g:metrics(x) for g,x in sorted(groups.items())}
+          def exact_binom_two_sided(a,b):
+              n=a+b
+              if n==0: return 1.0
+              k=min(a,b)
+              p=2*sum(math.comb(n,i) for i in range(k+1))/(2**n)
+              return min(1.0,p)
+
+          paired_rows={v:[maps[v][k] for k in sorted(paired)] for v in variants}
+          base=paired_rows['F10']; chal=paired_rows['TURBO_F10']
+          discord_base=sum(1 for x,y in zip(base,chal) if b(x,'strictProtectedT4') and not b(y,'strictProtectedT4'))
+          discord_chal=sum(1 for x,y in zip(base,chal) if not b(x,'strictProtectedT4') and b(y,'strictProtectedT4'))
+          bm=metrics(base); cm=metrics(chal)
+          delta=(cm['strictProtectedT4Rate']-bm['strictProtectedT4Rate']) if base and chal else None
+
+          exposure={}
+          for v in variants:
+              seen=[r for r in paired_rows[v] if b(r,'slotExposed')]
+              unseen=[r for r in paired_rows[v] if not b(r,'slotExposed')]
+              exposure[v]={'seen':metrics(seen),'unseen':metrics(unseen)}
+
+          report={
+              'profile':os.environ.get('SIM_V2_PROFILE'),
+              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+              'enginePolicy':'arch-aware-v1.7-adversarial',
+              'requiredPerVariant':200,
+              'screenComplete':exact,
+              'pairedN':len(paired),
+              'metrics':{v:metrics(rows[v]) for v in variants},
+              'pairedMetrics':{'F10':bm,'TURBO_F10':cm},
+              'primaryEndpoint':{
+                  'metric':'strictProtectedT4',
+                  'deltaTurboMinusF10':delta,
+                  'discordantF10Only':discord_base,
+                  'discordantTurboOnly':discord_chal,
+                  'mcnemarExactP':exact_binom_two_sided(discord_base,discord_chal),
+              },
+              'seatSplits':{v:split(paired_rows[v],'kinnanSeat') for v in variants},
+              'podSplits':{v:split(paired_rows[v],'podProfile') for v in variants},
+              'exposure':exposure,
+              'invalidAttempts':len(invalid),
+              'invalidAttemptStatuses':dict(collections.Counter(str(r.get('status')) for r in invalid)),
+              'cacheReuse':False,
+              'baselineKeyCount':len(keysets['F10']),
+              'challengerKeyCount':len(keysets['TURBO_F10']),
+          }
+          pathlib.Path('turbo-v17-report.json').write_text(json.dumps(report,indent=2,sort_keys=True))
+          print(json.dumps(report,indent=2,sort_keys=True))
+          PY
+      - name: Commit durable report
+        run: |
+          mkdir -p engine-tests/results/turbo-v17-screen
+          cp turbo-v17-report.json engine-tests/results/turbo-v17-screen/latest.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/results/turbo-v17-screen/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Record strict Turbo F10 paired screen [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
+      - name: Enforce exact screen validity
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open('turbo-v17-report.json'))
+          assert d['screenComplete'] is True, d
+          assert d['pairedN']==200, d
+          assert d['baselineKeyCount']==200 and d['challengerKeyCount']==200, d
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: turbo-v17-paired-report
+          path: turbo-v17-report.json
+          retention-days: 14

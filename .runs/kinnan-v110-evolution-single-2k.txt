@@ -1,0 +1,1 @@
+2026-08-22 start strict v1.10 F10 vs F10_EVOLUTION_SINGLE 2k confirmation on fresh 3400000+ keys using 240s canonical profile after GSZ timeout forensic showed normal horizon completion beyond 160s.

@@ -1,0 +1,1 @@
+2026-08-21 canonical v1.10 replay of seed 3020454 seat 2 midrange for F10 and F10_TUTOR_PAIR; two fresh repetitions each; revalidation only

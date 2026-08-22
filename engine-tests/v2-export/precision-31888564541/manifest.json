@@ -1,0 +1,83 @@
+{
+  "runId": 31888564541,
+  "records": 8800,
+  "validTotal": 8512,
+  "errorTotal": 288,
+  "variants": {
+    "P00_F10": {
+      "records": 1600,
+      "valid": 1537,
+      "errors": 63,
+      "strictProtectedT4": 56,
+      "assemblyT4": 275,
+      "attemptT4": 140,
+      "wins": 3
+    },
+    "P01_MISCAST": {
+      "records": 800,
+      "valid": 785,
+      "errors": 15,
+      "strictProtectedT4": 27,
+      "assemblyT4": 145,
+      "attemptT4": 80,
+      "wins": 0
+    },
+    "P02_GSZ": {
+      "records": 1600,
+      "valid": 1538,
+      "errors": 62,
+      "strictProtectedT4": 55,
+      "assemblyT4": 290,
+      "attemptT4": 153,
+      "wins": 3
+    },
+    "P03_ELDRITCH": {
+      "records": 1600,
+      "valid": 1532,
+      "errors": 68,
+      "strictProtectedT4": 57,
+      "assemblyT4": 291,
+      "attemptT4": 144,
+      "wins": 4
+    },
+    "P04_TRIBUTE": {
+      "records": 800,
+      "valid": 784,
+      "errors": 16,
+      "strictProtectedT4": 26,
+      "assemblyT4": 161,
+      "attemptT4": 75,
+      "wins": 0
+    },
+    "P05_SEEDBORN": {
+      "records": 800,
+      "valid": 781,
+      "errors": 19,
+      "strictProtectedT4": 25,
+      "assemblyT4": 141,
+      "attemptT4": 70,
+      "wins": 0
+    },
+    "P06_HULLBREAKER": {
+      "records": 800,
+      "valid": 778,
+      "errors": 22,
+      "strictProtectedT4": 24,
+      "assemblyT4": 147,
+      "attemptT4": 89,
+      "wins": 0
+    },
+    "P07_M30_MICRO": {
+      "records": 800,
+      "valid": 777,
+      "errors": 23,
+      "strictProtectedT4": 18,
+      "assemblyT4": 158,
+      "attemptT4": 74,
+      "wins": 0
+    }
+  },
+  "sourceFiles": 112,
+  "complete": true,
+  "exposureQuality": "opening_kept_protection_only"
+}

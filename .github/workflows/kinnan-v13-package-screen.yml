@@ -1,0 +1,237 @@
+name: Kinnan v13 F10 package screen
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v13-package-screen.txt]
+
+concurrency:
+  group: kinnan-v13-package-screen
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_PROFILE: arch-repaired-v13-package-screen
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    outputs:
+      clean: ${{ steps.gate.outputs.clean }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gate
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, os
+          p=pathlib.Path('engine-tests/evidence/production-path-gate-latest.json')
+          clean=False
+          if p.exists():
+              try: clean=bool(json.loads(p.read_text()).get('cleanPipeline'))
+              except Exception: pass
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write(f"clean={'true' if clean else 'false'}\n")
+          if not clean: raise SystemExit('production-path gate is not clean; refusing deck compute')
+          PY
+
+  build:
+    needs: preflight
+    if: needs.preflight.outputs.clean == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Clean-build repaired runtime and decks
+        run: |
+          python3 engine-tests/generate_architecture_decks_v2.py
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - name: Save exact identities
+        run: |
+          {
+            echo "lab_sha=$GITHUB_SHA"
+            echo "manabrew=$MANABREW_REF"
+            echo "repair_sha=$(sha256sum engine-tests/apply_manabrew_repairs.py | cut -d' ' -f1)"
+            echo "pilot_sha=$(sha256sum engine-tests/manabrew_pilot_arch.py | cut -d' ' -f1)"
+            echo "adversarial_sha=$(sha256sum engine-tests/manabrew_pilot_arch_adv.py | cut -d' ' -f1)"
+            echo "worker_sha=$(sha256sum engine-tests/sim_v2_worker_arch.py | cut -d' ' -f1)"
+            for d in F10 DRUID_EFFIGY F10_COPY_COMPACT F10_DRUID_COMPACT F10_COPY_TUTOR; do sha256sum "engine-tests/decks/Kinnan_ARCH_${d}.dck"; done
+          } > screen-manifest.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-v13-screen-runtime
+          path: |
+            runtime.tgz
+            screen-manifest.txt
+            engine-tests/decks/Kinnan_ARCH_*.dck
+          compression-level: 0
+          retention-days: 3
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [F10, DRUID_EFFIGY, F10_COPY_COMPACT, F10_DRUID_COMPACT, F10_COPY_TUTOR]
+        seat: [0,1,2,3]
+        pod: [balanced,turbo,midrange,mixed]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: kinnan-v13-screen-runtime, path: runtime}
+      - name: Run canonical paired cell
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          POD: ${{ matrix.pod }}
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/runtime.tgz
+          cp runtime/Kinnan_ARCH_*.dck engine-tests/decks/
+          case "$POD" in balanced) P=0;; turbo) P=1;; midrange) P=2;; mixed) P=3;; esac
+          if [ $(((SEAT + P) % 2)) -eq 0 ]; then N=13; else N=12; fi
+          BASE=$((1980000 + SEAT*1000 + P*100))
+          SEEDS=""
+          for I in $(seq 0 $((N-1))); do SEEDS="$SEEDS $((BASE+I))"; done
+          export CEDH_POD="$POD"
+          CHANGED=""
+          case "$VARIANT" in
+            F10) CHANGED="Reshape Spellseeker Trinket Mage Mystical_Tutor";;
+            DRUID_EFFIGY) CHANGED="Devoted_Druid Machine_Gods_Effigy Gene_Pollinator";;
+            F10_COPY_COMPACT) CHANGED="Clever_Impersonator Flesh_Duplicate Copy_Enchantment";;
+            F10_DRUID_COMPACT) CHANGED="Devoted_Druid Machine_Gods_Effigy Green_Suns_Zenith Eldritch_Evolution";;
+            F10_COPY_TUTOR) CHANGED="Clever_Impersonator Flesh_Duplicate Green_Suns_Zenith Eldritch_Evolution";;
+          esac
+          EXP=""
+          for C in $CHANGED; do EXP="$EXP --exposure-card ${C//_/ }"; done
+          set +e
+          eval python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds $SEEDS \
+            --max-round 4 --max-prompts 5000 --max-seconds 160 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir ".sim-cache/v13-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${POD}" \
+            --retain-traces all \
+            --engine-id "$MANABREW_REF:arch-v13-screen:${GITHUB_RUN_ID}" \
+            $EXP \
+            --output "out/${VARIANT}-s${SEAT}-${POD}.json" \
+            '>' "out/${VARIANT}-s${SEAT}-${POD}.log" '2>&1'
+          echo $? > "out/${VARIANT}-s${SEAT}-${POD}.rc"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cell-${{ matrix.variant }}-s${{ matrix.seat }}-${{ matrix.pod }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with: {pattern: cell-*, path: cells}
+      - name: Strict exact-pair analysis
+        run: |
+          python3 - <<'PY'
+          import glob,json,pathlib,collections,math
+          variants=['F10','DRUID_EFFIGY','F10_COPY_COMPACT','F10_DRUID_COMPACT','F10_COPY_TUTOR']
+          valid_status={'game_over','horizon_complete'}
+          by={v:{} for v in variants}; errors=collections.Counter()
+          for p in glob.glob('cells/**/**/*.json',recursive=True):
+              try: data=json.load(open(p))
+              except Exception: continue
+              rows=data if isinstance(data,list) else [data]
+              for r in rows:
+                  v=r.get('variant')
+                  if v not in by: continue
+                  key=(int(r.get('seed')) if r.get('seed') is not None else None,int(r.get('kinnanSeat')) if r.get('kinnanSeat') is not None else None,str(r.get('pod') or r.get('mode') or ''))
+                  if r.get('status') in valid_status:
+                      if key in by[v]: raise SystemExit(f'duplicate valid key {v} {key}')
+                      by[v][key]=r
+                  else: errors[(v,str(r.get('status')))] += 1
+          basekeys=set(by['F10'])
+          gate={'F10':len(basekeys)==200}
+          for v in variants[1:]: gate[v]=len(by[v])==200 and set(by[v])==basekeys
+          def endpoint(r,name): return 1 if r.get(name) else 0
+          metrics={
+            'assembly':'deterministicAssemblyByT4','attempt':'deterministicAttemptByT4','protected':'strictProtectedAttemptByT4','naturalWin':'naturalKinnanWin'
+          }
+          report={'profile':'arch-repaired-v13-package-screen','screenOnlyNoPromotion':True,'validCounts':{v:len(by[v]) for v in variants},'exactPairGate':gate,'errors':{f'{v}:{s}':n for (v,s),n in errors.items()},'variants':{}}
+          for v in variants:
+              rows=list(by[v].values()); ent={'n':len(rows)}
+              for label,field in metrics.items(): ent[label]={'count':sum(endpoint(r,field) for r in rows),'rate':sum(endpoint(r,field) for r in rows)/len(rows) if rows else None}
+              ent['meanMulligans']=sum(float(r.get('mulligans') or 0) for r in rows)/len(rows) if rows else None
+              ent['bySeat']={}; ent['byPod']={}
+              for seat in range(4):
+                  rr=[r for r in rows if int(r.get('kinnanSeat'))==seat]
+                  ent['bySeat'][str(seat)]={'n':len(rr),'protected':sum(endpoint(r,'strictProtectedAttemptByT4') for r in rr)}
+              for pod in ['balanced','turbo','midrange','mixed']:
+                  rr=[r for r in rows if str(r.get('pod') or r.get('mode') or '')==pod]
+                  ent['byPod'][pod]={'n':len(rr),'protected':sum(endpoint(r,'strictProtectedAttemptByT4') for r in rr)}
+              if v!='F10' and gate.get(v):
+                  diffs=[endpoint(by[v][k],'strictProtectedAttemptByT4')-endpoint(by['F10'][k],'strictProtectedAttemptByT4') for k in sorted(basekeys)]
+                  ent['pairedProtectedDelta']=sum(diffs)/len(diffs)
+                  b=sum(1 for k in basekeys if endpoint(by[v][k],'strictProtectedAttemptByT4')==1 and endpoint(by['F10'][k],'strictProtectedAttemptByT4')==0)
+                  c=sum(1 for k in basekeys if endpoint(by[v][k],'strictProtectedAttemptByT4')==0 and endpoint(by['F10'][k],'strictProtectedAttemptByT4')==1)
+                  n=b+c
+                  if n:
+                      # exact two-sided McNemar/binomial test
+                      from math import comb
+                      tail=sum(comb(n,i) for i in range(0,min(b,c)+1))/(2**n)
+                      ent['pairedP']=min(1.0,2*tail)
+                  else: ent['pairedP']=1.0
+                  ent['discordant']={'candidateOnly':b,'baselineOnly':c}
+              report['variants'][v]=ent
+          out=pathlib.Path('engine-tests/evidence/v13-package-screen-latest.json'); out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          if not all(gate.values()): raise SystemExit('strict 200-key pairing gate failed; screen is ineligible')
+          PY
+      - name: Commit analysis
+        if: success()
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/v13-package-screen-latest.json
+          git commit -m 'Record Kinnan v13 package screen [skip ci]' || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kinnan-v13-package-screen-analysis
+          path: engine-tests/evidence/v13-package-screen-latest.json
+          if-no-files-found: warn
+          retention-days: 60

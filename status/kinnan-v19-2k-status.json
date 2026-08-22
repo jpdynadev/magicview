@@ -1,0 +1,2613 @@
+{
+  "branch": "agent/kinnan-expanded-architecture",
+  "workflows": {
+    "broad200": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9411353097,
+              "name": "broad-v19-set2-report",
+              "size": 1572
+            },
+            {
+              "id": 9411343139,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat0",
+              "size": 276846
+            },
+            {
+              "id": 9411327746,
+              "name": "broad-v19-set2-F10-seat2",
+              "size": 276890
+            },
+            {
+              "id": 9411327238,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat2",
+              "size": 279002
+            },
+            {
+              "id": 9411303163,
+              "name": "broad-v19-set2-NODE_DENSE-seat2",
+              "size": 279422
+            },
+            {
+              "id": 9411291313,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat2",
+              "size": 276747
+            },
+            {
+              "id": 9411280839,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat1",
+              "size": 272803
+            },
+            {
+              "id": 9411234550,
+              "name": "broad-v19-set2-NODE_DENSE-seat1",
+              "size": 269329
+            },
+            {
+              "id": 9411224087,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat0",
+              "size": 283529
+            },
+            {
+              "id": 9411217416,
+              "name": "broad-v19-set2-NODE_DENSE-seat0",
+              "size": 272473
+            },
+            {
+              "id": 9411187945,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat3",
+              "size": 277915
+            },
+            {
+              "id": 9411126094,
+              "name": "broad-v19-set2-F10-seat0",
+              "size": 281029
+            },
+            {
+              "id": 9410914695,
+              "name": "broad-v19-set2-NODE_DENSE-seat3",
+              "size": 274617
+            },
+            {
+              "id": 9410909518,
+              "name": "broad-v19-set2-TUTOR_DENSE-seat3",
+              "size": 274109
+            },
+            {
+              "id": 9410905397,
+              "name": "broad-v19-set2-DRUID_TUTOR-seat1",
+              "size": 277086
+            },
+            {
+              "id": 9410832056,
+              "name": "broad-v19-set2-F10-seat1",
+              "size": 274957
+            },
+            {
+              "id": 9410750752,
+              "name": "broad-v19-set2-F10-seat3",
+              "size": 272422
+            },
+            {
+              "id": 9409830224,
+              "name": "broad-v19-runtime",
+              "size": 201423717
+            }
+          ],
+          "conclusion": "success",
+          "createdAt": "2026-08-20T14:01:44Z",
+          "event": "push",
+          "headSha": "ab906f68ccd2f525ad9138186137ac9682d03ee6",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32377677491",
+          "id": 32377677491,
+          "jobStates": {
+            "success": 18
+          },
+          "jobs": 18,
+          "status": "completed",
+          "updatedAt": "2026-08-20T14:44:48Z"
+        },
+        {
+          "artifacts": [
+            {
+              "id": 9401570526,
+              "name": "broad-v19-report",
+              "size": 1600
+            },
+            {
+              "id": 9401560801,
+              "name": "broad-v19-F10-seat0",
+              "size": 278841
+            },
+            {
+              "id": 9401495371,
+              "name": "broad-v19-DRUID_TUTOR-seat2",
+              "size": 274102
+            },
+            {
+              "id": 9401483234,
+              "name": "broad-v19-NODE_DENSE-seat1",
+              "size": 276655
+            },
+            {
+              "id": 9401477564,
+              "name": "broad-v19-F10-seat1",
+              "size": 269393
+            },
+            {
+              "id": 9401465191,
+              "name": "broad-v19-TUTOR_DENSE-seat1",
+              "size": 283894
+            },
+            {
+              "id": 9401449143,
+              "name": "broad-v19-DRUID_TUTOR-seat1",
+              "size": 283837
+            },
+            {
+              "id": 9401443259,
+              "name": "broad-v19-DRUID_TUTOR-seat0",
+              "size": 277699
+            },
+            {
+              "id": 9401442382,
+              "name": "broad-v19-NODE_DENSE-seat3",
+              "size": 274793
+            },
+            {
+              "id": 9401441961,
+              "name": "broad-v19-TUTOR_DENSE-seat2",
+              "size": 275343
+            },
+            {
+              "id": 9401432732,
+              "name": "broad-v19-NODE_DENSE-seat0",
+              "size": 276211
+            },
+            {
+              "id": 9401432643,
+              "name": "broad-v19-F10-seat3",
+              "size": 266774
+            },
+            {
+              "id": 9401249372,
+              "name": "broad-v19-F10-seat2",
+              "size": 271513
+            },
+            {
+              "id": 9401183025,
+              "name": "broad-v19-TUTOR_DENSE-seat3",
+              "size": 274676
+            },
+            {
+              "id": 9401153230,
+              "name": "broad-v19-NODE_DENSE-seat2",
+              "size": 276735
+            },
+            {
+              "id": 9401082528,
+              "name": "broad-v19-TUTOR_DENSE-seat0",
+              "size": 281770
+            },
+            {
+              "id": 9400347364,
+              "name": "broad-v19-runtime",
+              "size": 201422900
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T09:06:57Z",
+          "event": "push",
+          "headSha": "6a5bcf95bef41d171412d762690e804a7fbaa087",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32352219848",
+          "id": 32352219848,
+          "jobStates": {
+            "failure": 2,
+            "success": 16
+          },
+          "jobs": 18,
+          "status": "completed",
+          "updatedAt": "2026-08-20T09:48:53Z"
+        }
+      ],
+      "workflow": "kinnan-v19-broad-screen.yml"
+    },
+    "druidTutor2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9433587562,
+              "name": "druid2k-report",
+              "size": 1201
+            },
+            {
+              "id": 9433583176,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard7",
+              "size": 279709
+            },
+            {
+              "id": 9421549829,
+              "name": "druid2k-report",
+              "size": 1201
+            },
+            {
+              "id": 9421541826,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard7",
+              "size": 281559
+            },
+            {
+              "id": 9421486540,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard9",
+              "size": 274254
+            },
+            {
+              "id": 9421441195,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard8",
+              "size": 283854
+            },
+            {
+              "id": 9421399904,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard5",
+              "size": 278192
+            },
+            {
+              "id": 9421329420,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard6",
+              "size": 277507
+            },
+            {
+              "id": 9421309368,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard3",
+              "size": 280056
+            },
+            {
+              "id": 9421292549,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard4",
+              "size": 269109
+            },
+            {
+              "id": 9421204981,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard0",
+              "size": 276307
+            },
+            {
+              "id": 9421194362,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard2",
+              "size": 280365
+            },
+            {
+              "id": 9421165549,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard8",
+              "size": 271549
+            },
+            {
+              "id": 9420997818,
+              "name": "druid2k-DRUID_TUTOR-seat3-shard1",
+              "size": 273105
+            },
+            {
+              "id": 9420987533,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard9",
+              "size": 268856
+            },
+            {
+              "id": 9420779399,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard7",
+              "size": 282397
+            },
+            {
+              "id": 9420739818,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard5",
+              "size": 279933
+            },
+            {
+              "id": 9420716619,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard4",
+              "size": 281402
+            },
+            {
+              "id": 9420675977,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard6",
+              "size": 278457
+            },
+            {
+              "id": 9420436013,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard9",
+              "size": 272848
+            },
+            {
+              "id": 9420434835,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard6",
+              "size": 277400
+            },
+            {
+              "id": 9420419096,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard3",
+              "size": 279624
+            },
+            {
+              "id": 9420319748,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard7",
+              "size": 286411
+            },
+            {
+              "id": 9420216307,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard4",
+              "size": 280227
+            },
+            {
+              "id": 9420182718,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard0",
+              "size": 279756
+            },
+            {
+              "id": 9420126846,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard2",
+              "size": 272673
+            },
+            {
+              "id": 9420037320,
+              "name": "druid2k-DRUID_TUTOR-seat2-shard1",
+              "size": 271142
+            },
+            {
+              "id": 9420030527,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard5",
+              "size": 273341
+            },
+            {
+              "id": 9420024121,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard8",
+              "size": 278867
+            },
+            {
+              "id": 9419981759,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard3",
+              "size": 273434
+            },
+            {
+              "id": 9419787656,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard1",
+              "size": 266930
+            },
+            {
+              "id": 9419468898,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard0",
+              "size": 282133
+            },
+            {
+              "id": 9419394132,
+              "name": "druid2k-DRUID_TUTOR-seat1-shard2",
+              "size": 281019
+            },
+            {
+              "id": 9419244720,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard7",
+              "size": 277218
+            },
+            {
+              "id": 9419197549,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard9",
+              "size": 271106
+            },
+            {
+              "id": 9419163917,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard8",
+              "size": 275327
+            },
+            {
+              "id": 9418946306,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard5",
+              "size": 273820
+            },
+            {
+              "id": 9418772028,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard4",
+              "size": 281190
+            },
+            {
+              "id": 9418729274,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard3",
+              "size": 283014
+            },
+            {
+              "id": 9418529398,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard6",
+              "size": 281091
+            },
+            {
+              "id": 9418461681,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard2",
+              "size": 271113
+            },
+            {
+              "id": 9418234833,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard0",
+              "size": 276776
+            },
+            {
+              "id": 9418052285,
+              "name": "druid2k-F10-seat3-shard9",
+              "size": 272433
+            },
+            {
+              "id": 9418033768,
+              "name": "druid2k-F10-seat3-shard8",
+              "size": 272617
+            },
+            {
+              "id": 9417983611,
+              "name": "druid2k-DRUID_TUTOR-seat0-shard1",
+              "size": 283628
+            },
+            {
+              "id": 9417959568,
+              "name": "druid2k-F10-seat3-shard3",
+              "size": 273979
+            },
+            {
+              "id": 9417869415,
+              "name": "druid2k-F10-seat3-shard6",
+              "size": 277469
+            },
+            {
+              "id": 9417850656,
+              "name": "druid2k-F10-seat3-shard4",
+              "size": 273953
+            },
+            {
+              "id": 9417789247,
+              "name": "druid2k-F10-seat3-shard5",
+              "size": 265366
+            },
+            {
+              "id": 9417677025,
+              "name": "druid2k-F10-seat3-shard7",
+              "size": 273723
+            },
+            {
+              "id": 9417648042,
+              "name": "druid2k-F10-seat3-shard1",
+              "size": 270604
+            },
+            {
+              "id": 9417552237,
+              "name": "druid2k-F10-seat3-shard0",
+              "size": 272795
+            },
+            {
+              "id": 9417539386,
+              "name": "druid2k-F10-seat3-shard2",
+              "size": 279973
+            },
+            {
+              "id": 9416800414,
+              "name": "druid2k-F10-seat2-shard8",
+              "size": 272279
+            },
+            {
+              "id": 9416757236,
+              "name": "druid2k-F10-seat2-shard7",
+              "size": 268819
+            },
+            {
+              "id": 9416529005,
+              "name": "druid2k-F10-seat2-shard6",
+              "size": 275123
+            },
+            {
+              "id": 9416424747,
+              "name": "druid2k-F10-seat2-shard9",
+              "size": 270604
+            },
+            {
+              "id": 9416373804,
+              "name": "druid2k-F10-seat2-shard3",
+              "size": 272590
+            },
+            {
+              "id": 9416371960,
+              "name": "druid2k-F10-seat2-shard4",
+              "size": 274079
+            },
+            {
+              "id": 9416078832,
+              "name": "druid2k-F10-seat2-shard5",
+              "size": 273798
+            },
+            {
+              "id": 9415597050,
+              "name": "druid2k-F10-seat2-shard0",
+              "size": 270657
+            },
+            {
+              "id": 9415525605,
+              "name": "druid2k-F10-seat2-shard2",
+              "size": 268118
+            },
+            {
+              "id": 9415512556,
+              "name": "druid2k-F10-seat1-shard8",
+              "size": 276339
+            },
+            {
+              "id": 9415483842,
+              "name": "druid2k-F10-seat1-shard4",
+              "size": 272488
+            },
+            {
+              "id": 9415475365,
+              "name": "druid2k-F10-seat1-shard3",
+              "size": 272200
+            },
+            {
+              "id": 9415471903,
+              "name": "druid2k-F10-seat0-shard3",
+              "size": 282903
+            },
+            {
+              "id": 9415384531,
+              "name": "druid2k-F10-seat0-shard5",
+              "size": 277087
+            },
+            {
+              "id": 9415345691,
+              "name": "druid2k-F10-seat1-shard6",
+              "size": 265106
+            },
+            {
+              "id": 9415344474,
+              "name": "druid2k-F10-seat1-shard5",
+              "size": 274462
+            },
+            {
+              "id": 9415238186,
+              "name": "druid2k-F10-seat0-shard7",
+              "size": 271253
+            },
+            {
+              "id": 9415207981,
+              "name": "druid2k-F10-seat1-shard7",
+              "size": 273057
+            },
+            {
+              "id": 9415175430,
+              "name": "druid2k-F10-seat2-shard1",
+              "size": 273152
+            },
+            {
+              "id": 9414754338,
+              "name": "druid2k-F10-seat1-shard9",
+              "size": 271684
+            },
+            {
+              "id": 9414463214,
+              "name": "druid2k-F10-seat1-shard1",
+              "size": 270632
+            },
+            {
+              "id": 9414308769,
+              "name": "druid2k-F10-seat0-shard9",
+              "size": 276102
+            },
+            {
+              "id": 9414296238,
+              "name": "druid2k-F10-seat1-shard0",
+              "size": 270286
+            },
+            {
+              "id": 9414278608,
+              "name": "druid2k-F10-seat0-shard1",
+              "size": 274199
+            },
+            {
+              "id": 9414276549,
+              "name": "druid2k-F10-seat0-shard8",
+              "size": 269163
+            },
+            {
+              "id": 9414225968,
+              "name": "druid2k-F10-seat0-shard4",
+              "size": 268120
+            },
+            {
+              "id": 9414219923,
+              "name": "druid2k-F10-seat0-shard6",
+              "size": 273879
+            },
+            {
+              "id": 9414206492,
+              "name": "druid2k-F10-seat0-shard0",
+              "size": 271759
+            },
+            {
+              "id": 9414013520,
+              "name": "druid2k-F10-seat1-shard2",
+              "size": 271753
+            },
+            {
+              "id": 9414000298,
+              "name": "druid2k-F10-seat0-shard2",
+              "size": 266752
+            },
+            {
+              "id": 9412463406,
+              "name": "druid-v19-runtime",
+              "size": 201427723
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T15:10:11Z",
+          "event": "push",
+          "headSha": "f86d5af3b1137f2ff1166a0dd32407283c097ab3",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32384510087",
+          "id": 32384510087,
+          "jobStates": {
+            "failure": 2,
+            "success": 80
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-21T03:45:54Z"
+        }
+      ],
+      "workflow": "kinnan-v19-druid-tutor-2k.yml"
+    },
+    "evolutionKeyV111": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9479435662,
+              "name": "v111-evolution-key-revalidation-F10-rep2",
+              "size": 4373
+            },
+            {
+              "id": 9479422132,
+              "name": "v111-evolution-key-revalidation-F10-rep1",
+              "size": 4372
+            },
+            {
+              "id": 9479417092,
+              "name": "v111-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2",
+              "size": 4296
+            },
+            {
+              "id": 9479416061,
+              "name": "v111-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1",
+              "size": 4295
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-22T17:13:49Z",
+          "event": "push",
+          "headSha": "a3420ed1b70c25f87a32c758effaa66403999c5b",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32587097636",
+          "id": 32587097636,
+          "jobStates": {
+            "failure": 2,
+            "success": 2
+          },
+          "jobs": 4,
+          "status": "completed",
+          "updatedAt": "2026-08-22T17:22:26Z"
+        }
+      ],
+      "workflow": "kinnan-v111-evolution-key-revalidation.yml"
+    },
+    "evolutionKeyV112": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9480136316,
+              "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2",
+              "size": 4374
+            },
+            {
+              "id": 9480131956,
+              "name": "v112-evolution-key-revalidation-F10-rep1",
+              "size": 4627
+            },
+            {
+              "id": 9480130034,
+              "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1",
+              "size": 4294
+            },
+            {
+              "id": 9480121318,
+              "name": "v112-evolution-key-revalidation-F10-rep2",
+              "size": 4618
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-22T18:14:07Z",
+          "event": "push",
+          "headSha": "55837293f338e8976d90cfa2c234727ae4aef779",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32590134739",
+          "id": 32590134739,
+          "jobStates": {
+            "failure": 2,
+            "success": 2
+          },
+          "jobs": 4,
+          "status": "completed",
+          "updatedAt": "2026-08-22T18:18:12Z"
+        }
+      ],
+      "workflow": "kinnan-v112-evolution-key-revalidation.yml"
+    },
+    "evolutionKeyV113": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9481496855,
+              "name": "v113-evolution-key-revalidation-F10-rep1",
+              "size": 3746
+            },
+            {
+              "id": 9481477499,
+              "name": "v113-evolution-key-revalidation-F10-rep2",
+              "size": 3747
+            },
+            {
+              "id": 9481474710,
+              "name": "v113-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2",
+              "size": 4296
+            },
+            {
+              "id": 9481465681,
+              "name": "v113-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1",
+              "size": 4377
+            }
+          ],
+          "conclusion": "success",
+          "createdAt": "2026-08-22T20:02:55Z",
+          "event": "push",
+          "headSha": "335ffecf9aba4aa95e71412ed3975a801bfe52d9",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32595527350",
+          "id": 32595527350,
+          "jobStates": {
+            "success": 4
+          },
+          "jobs": 4,
+          "status": "completed",
+          "updatedAt": "2026-08-22T20:08:15Z"
+        }
+      ],
+      "workflow": "kinnan-v113-evolution-key-revalidation.yml"
+    },
+    "evolutionSingleV1102k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9478904398,
+              "name": "evolutionv110-report",
+              "size": 1259
+            },
+            {
+              "id": 9478901315,
+              "name": "evolutionv110-F10-seat3-shard3",
+              "size": 277721
+            },
+            {
+              "id": 9478219308,
+              "name": "evolutionv110-report",
+              "size": 1259
+            },
+            {
+              "id": 9478216401,
+              "name": "evolutionv110-F10-seat3-shard3",
+              "size": 276766
+            },
+            {
+              "id": 9477483259,
+              "name": "evolutionv110-report",
+              "size": 1259
+            },
+            {
+              "id": 9477480284,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard6",
+              "size": 283643
+            },
+            {
+              "id": 9477470398,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard9",
+              "size": 275198
+            },
+            {
+              "id": 9477431470,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard8",
+              "size": 282199
+            },
+            {
+              "id": 9477411949,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard5",
+              "size": 277393
+            },
+            {
+              "id": 9477411372,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard0",
+              "size": 277782
+            },
+            {
+              "id": 9477408937,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard7",
+              "size": 284418
+            },
+            {
+              "id": 9477406459,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard1",
+              "size": 277517
+            },
+            {
+              "id": 9477347580,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard7",
+              "size": 276451
+            },
+            {
+              "id": 9477328025,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard8",
+              "size": 275113
+            },
+            {
+              "id": 9477327267,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard2",
+              "size": 281564
+            },
+            {
+              "id": 9477321812,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard9",
+              "size": 281585
+            },
+            {
+              "id": 9477308660,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard4",
+              "size": 284197
+            },
+            {
+              "id": 9477280629,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat3-shard3",
+              "size": 280885
+            },
+            {
+              "id": 9477277497,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard5",
+              "size": 273957
+            },
+            {
+              "id": 9477253286,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard3",
+              "size": 282635
+            },
+            {
+              "id": 9477235039,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard4",
+              "size": 287398
+            },
+            {
+              "id": 9477202823,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard6",
+              "size": 277868
+            },
+            {
+              "id": 9477173056,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard2",
+              "size": 284919
+            },
+            {
+              "id": 9477077959,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard1",
+              "size": 278402
+            },
+            {
+              "id": 9477076282,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat2-shard0",
+              "size": 278195
+            },
+            {
+              "id": 9477054909,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard7",
+              "size": 282753
+            },
+            {
+              "id": 9477029412,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard9",
+              "size": 283531
+            },
+            {
+              "id": 9477004048,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard2",
+              "size": 274567
+            },
+            {
+              "id": 9477000554,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard1",
+              "size": 286810
+            },
+            {
+              "id": 9476989667,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard6",
+              "size": 281115
+            },
+            {
+              "id": 9476976189,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard3",
+              "size": 279667
+            },
+            {
+              "id": 9476975302,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard5",
+              "size": 279553
+            },
+            {
+              "id": 9476972250,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard0",
+              "size": 277447
+            },
+            {
+              "id": 9476958888,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard5",
+              "size": 281628
+            },
+            {
+              "id": 9476956434,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard7",
+              "size": 283624
+            },
+            {
+              "id": 9476955680,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard6",
+              "size": 277781
+            },
+            {
+              "id": 9476941814,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard8",
+              "size": 281117
+            },
+            {
+              "id": 9476914542,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard8",
+              "size": 282910
+            },
+            {
+              "id": 9476879773,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard9",
+              "size": 278452
+            },
+            {
+              "id": 9476867445,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard2",
+              "size": 287868
+            },
+            {
+              "id": 9476843072,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat1-shard4",
+              "size": 286436
+            },
+            {
+              "id": 9476817832,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard4",
+              "size": 284786
+            },
+            {
+              "id": 9476763213,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard0",
+              "size": 288217
+            },
+            {
+              "id": 9476738125,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard3",
+              "size": 281966
+            },
+            {
+              "id": 9476668507,
+              "name": "evolutionv110-F10_EVOLUTION_SINGLE-seat0-shard1",
+              "size": 280896
+            },
+            {
+              "id": 9476570158,
+              "name": "evolutionv110-F10-seat3-shard4",
+              "size": 269530
+            },
+            {
+              "id": 9476563178,
+              "name": "evolutionv110-F10-seat3-shard3",
+              "size": 276895
+            },
+            {
+              "id": 9476560091,
+              "name": "evolutionv110-F10-seat3-shard6",
+              "size": 274208
+            },
+            {
+              "id": 9476558622,
+              "name": "evolutionv110-F10-seat2-shard9",
+              "size": 269079
+            },
+            {
+              "id": 9476550616,
+              "name": "evolutionv110-F10-seat3-shard2",
+              "size": 274944
+            },
+            {
+              "id": 9476549817,
+              "name": "evolutionv110-F10-seat3-shard9",
+              "size": 266914
+            },
+            {
+              "id": 9476542331,
+              "name": "evolutionv110-F10-seat2-shard8",
+              "size": 275377
+            },
+            {
+              "id": 9476540966,
+              "name": "evolutionv110-F10-seat3-shard5",
+              "size": 272628
+            },
+            {
+              "id": 9476539400,
+              "name": "evolutionv110-F10-seat2-shard3",
+              "size": 269875
+            },
+            {
+              "id": 9476534678,
+              "name": "evolutionv110-F10-seat3-shard0",
+              "size": 271165
+            },
+            {
+              "id": 9476532947,
+              "name": "evolutionv110-F10-seat2-shard6",
+              "size": 267786
+            },
+            {
+              "id": 9476523817,
+              "name": "evolutionv110-F10-seat3-shard8",
+              "size": 262199
+            },
+            {
+              "id": 9476523487,
+              "name": "evolutionv110-F10-seat3-shard1",
+              "size": 273153
+            },
+            {
+              "id": 9476514505,
+              "name": "evolutionv110-F10-seat2-shard5",
+              "size": 265646
+            },
+            {
+              "id": 9476513279,
+              "name": "evolutionv110-F10-seat3-shard7",
+              "size": 279780
+            },
+            {
+              "id": 9476496750,
+              "name": "evolutionv110-F10-seat2-shard4",
+              "size": 271578
+            },
+            {
+              "id": 9476410035,
+              "name": "evolutionv110-F10-seat2-shard1",
+              "size": 272355
+            },
+            {
+              "id": 9476369881,
+              "name": "evolutionv110-F10-seat2-shard7",
+              "size": 272416
+            },
+            {
+              "id": 9476349666,
+              "name": "evolutionv110-F10-seat2-shard0",
+              "size": 271812
+            },
+            {
+              "id": 9476327311,
+              "name": "evolutionv110-F10-seat2-shard2",
+              "size": 275539
+            },
+            {
+              "id": 9476132051,
+              "name": "evolutionv110-F10-seat1-shard9",
+              "size": 276814
+            },
+            {
+              "id": 9476124658,
+              "name": "evolutionv110-F10-seat1-shard7",
+              "size": 271152
+            },
+            {
+              "id": 9476124600,
+              "name": "evolutionv110-F10-seat0-shard7",
+              "size": 277241
+            },
+            {
+              "id": 9476124549,
+              "name": "evolutionv110-F10-seat1-shard0",
+              "size": 275820
+            },
+            {
+              "id": 9476122901,
+              "name": "evolutionv110-F10-seat0-shard5",
+              "size": 275683
+            },
+            {
+              "id": 9476121303,
+              "name": "evolutionv110-F10-seat1-shard2",
+              "size": 266362
+            },
+            {
+              "id": 9476114083,
+              "name": "evolutionv110-F10-seat1-shard4",
+              "size": 277684
+            },
+            {
+              "id": 9476108579,
+              "name": "evolutionv110-F10-seat0-shard1",
+              "size": 275243
+            },
+            {
+              "id": 9476108374,
+              "name": "evolutionv110-F10-seat0-shard3",
+              "size": 273092
+            },
+            {
+              "id": 9476106715,
+              "name": "evolutionv110-F10-seat0-shard8",
+              "size": 267956
+            },
+            {
+              "id": 9476102088,
+              "name": "evolutionv110-F10-seat1-shard5",
+              "size": 275751
+            },
+            {
+              "id": 9476100581,
+              "name": "evolutionv110-F10-seat0-shard2",
+              "size": 277233
+            },
+            {
+              "id": 9476100176,
+              "name": "evolutionv110-F10-seat1-shard8",
+              "size": 269819
+            },
+            {
+              "id": 9476098805,
+              "name": "evolutionv110-F10-seat1-shard1",
+              "size": 270202
+            },
+            {
+              "id": 9476095312,
+              "name": "evolutionv110-F10-seat0-shard0",
+              "size": 278593
+            },
+            {
+              "id": 9476094391,
+              "name": "evolutionv110-F10-seat0-shard6",
+              "size": 269222
+            },
+            {
+              "id": 9476081022,
+              "name": "evolutionv110-F10-seat1-shard3",
+              "size": 274085
+            },
+            {
+              "id": 9476024682,
+              "name": "evolutionv110-F10-seat0-shard4",
+              "size": 271571
+            },
+            {
+              "id": 9476014883,
+              "name": "evolutionv110-F10-seat1-shard6",
+              "size": 266025
+            },
+            {
+              "id": 9475980687,
+              "name": "evolutionv110-F10-seat0-shard9",
+              "size": 273295
+            },
+            {
+              "id": 9475684577,
+              "name": "evolution-single-v110-runtime",
+              "size": 201423296
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-22T12:13:09Z",
+          "event": "push",
+          "headSha": "f654b3a436459d3a5eeb08774ef013b706cdecf8",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32572392674",
+          "id": 32572392674,
+          "jobStates": {
+            "failure": 2,
+            "success": 80
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-22T16:40:36Z"
+        }
+      ],
+      "workflow": "kinnan-v110-evolution-single-2k.yml"
+    },
+    "gszSingleV1102k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9474125453,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9474121836,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 281505
+            },
+            {
+              "id": 9473452186,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9473449848,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 278100
+            },
+            {
+              "id": 9472304413,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9472301083,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard6",
+              "size": 279050
+            },
+            {
+              "id": 9472293034,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard7",
+              "size": 274440
+            },
+            {
+              "id": 9472282145,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard9",
+              "size": 286411
+            },
+            {
+              "id": 9472189233,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard5",
+              "size": 279802
+            },
+            {
+              "id": 9472184724,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard8",
+              "size": 284071
+            },
+            {
+              "id": 9472172672,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard2",
+              "size": 276216
+            },
+            {
+              "id": 9472161310,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard3",
+              "size": 280750
+            },
+            {
+              "id": 9472139527,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard0",
+              "size": 279771
+            },
+            {
+              "id": 9472138879,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard1",
+              "size": 277600
+            },
+            {
+              "id": 9472132937,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard9",
+              "size": 285812
+            },
+            {
+              "id": 9472126868,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard8",
+              "size": 282548
+            },
+            {
+              "id": 9472109093,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard4",
+              "size": 285523
+            },
+            {
+              "id": 9472104071,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard7",
+              "size": 282102
+            },
+            {
+              "id": 9472070395,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard6",
+              "size": 283806
+            },
+            {
+              "id": 9472039840,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard5",
+              "size": 277266
+            },
+            {
+              "id": 9471954646,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard1",
+              "size": 280057
+            },
+            {
+              "id": 9471950467,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard3",
+              "size": 274065
+            },
+            {
+              "id": 9471904273,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard0",
+              "size": 275927
+            },
+            {
+              "id": 9471891350,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard4",
+              "size": 280959
+            },
+            {
+              "id": 9471864344,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard9",
+              "size": 280646
+            },
+            {
+              "id": 9471864296,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard8",
+              "size": 276253
+            },
+            {
+              "id": 9471861739,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard5",
+              "size": 277872
+            },
+            {
+              "id": 9471860372,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard6",
+              "size": 276923
+            },
+            {
+              "id": 9471860103,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard7",
+              "size": 271282
+            },
+            {
+              "id": 9471804271,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard3",
+              "size": 274358
+            },
+            {
+              "id": 9471782178,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard2",
+              "size": 277127
+            },
+            {
+              "id": 9471779939,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard1",
+              "size": 273997
+            },
+            {
+              "id": 9471771527,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard0",
+              "size": 283384
+            },
+            {
+              "id": 9471759747,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard2",
+              "size": 278219
+            },
+            {
+              "id": 9471755404,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard9",
+              "size": 280833
+            },
+            {
+              "id": 9471717285,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard6",
+              "size": 276281
+            },
+            {
+              "id": 9471716190,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard4",
+              "size": 272653
+            },
+            {
+              "id": 9471654187,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard5",
+              "size": 270659
+            },
+            {
+              "id": 9471636139,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard1",
+              "size": 276734
+            },
+            {
+              "id": 9471635485,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard3",
+              "size": 268125
+            },
+            {
+              "id": 9471606412,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard2",
+              "size": 275916
+            },
+            {
+              "id": 9471550206,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard8",
+              "size": 281358
+            },
+            {
+              "id": 9471503502,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard7",
+              "size": 276199
+            },
+            {
+              "id": 9471486628,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard4",
+              "size": 276967
+            },
+            {
+              "id": 9471420028,
+              "name": "gszv110-F10-seat3-shard9",
+              "size": 275644
+            },
+            {
+              "id": 9471419705,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard0",
+              "size": 278519
+            },
+            {
+              "id": 9471415827,
+              "name": "gszv110-F10-seat3-shard6",
+              "size": 274625
+            },
+            {
+              "id": 9471408811,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 279393
+            },
+            {
+              "id": 9471375062,
+              "name": "gszv110-F10-seat3-shard8",
+              "size": 274860
+            },
+            {
+              "id": 9471363916,
+              "name": "gszv110-F10-seat3-shard4",
+              "size": 276969
+            },
+            {
+              "id": 9471344413,
+              "name": "gszv110-F10-seat3-shard5",
+              "size": 274172
+            },
+            {
+              "id": 9471341338,
+              "name": "gszv110-F10-seat2-shard9",
+              "size": 275762
+            },
+            {
+              "id": 9471327529,
+              "name": "gszv110-F10-seat3-shard2",
+              "size": 265534
+            },
+            {
+              "id": 9471322013,
+              "name": "gszv110-F10-seat3-shard0",
+              "size": 269970
+            },
+            {
+              "id": 9471312622,
+              "name": "gszv110-F10-seat3-shard1",
+              "size": 270069
+            },
+            {
+              "id": 9471286733,
+              "name": "gszv110-F10-seat2-shard6",
+              "size": 269858
+            },
+            {
+              "id": 9471267530,
+              "name": "gszv110-F10-seat2-shard2",
+              "size": 271509
+            },
+            {
+              "id": 9471253188,
+              "name": "gszv110-F10-seat3-shard3",
+              "size": 277986
+            },
+            {
+              "id": 9471251436,
+              "name": "gszv110-F10-seat3-shard7",
+              "size": 271535
+            },
+            {
+              "id": 9471232996,
+              "name": "gszv110-F10-seat2-shard3",
+              "size": 269238
+            },
+            {
+              "id": 9471223675,
+              "name": "gszv110-F10-seat2-shard8",
+              "size": 273119
+            },
+            {
+              "id": 9471191688,
+              "name": "gszv110-F10-seat2-shard0",
+              "size": 266539
+            },
+            {
+              "id": 9471160300,
+              "name": "gszv110-F10-seat2-shard1",
+              "size": 276326
+            },
+            {
+              "id": 9471156024,
+              "name": "gszv110-F10-seat2-shard5",
+              "size": 272804
+            },
+            {
+              "id": 9471100303,
+              "name": "gszv110-F10-seat2-shard4",
+              "size": 267342
+            },
+            {
+              "id": 9470985714,
+              "name": "gszv110-F10-seat0-shard8",
+              "size": 274652
+            },
+            {
+              "id": 9470965074,
+              "name": "gszv110-F10-seat1-shard6",
+              "size": 270424
+            },
+            {
+              "id": 9470948839,
+              "name": "gszv110-F10-seat1-shard4",
+              "size": 271965
+            },
+            {
+              "id": 9470947207,
+              "name": "gszv110-F10-seat1-shard8",
+              "size": 270928
+            },
+            {
+              "id": 9470934771,
+              "name": "gszv110-F10-seat0-shard1",
+              "size": 266367
+            },
+            {
+              "id": 9470933527,
+              "name": "gszv110-F10-seat0-shard7",
+              "size": 272652
+            },
+            {
+              "id": 9470927832,
+              "name": "gszv110-F10-seat0-shard0",
+              "size": 272347
+            },
+            {
+              "id": 9470919368,
+              "name": "gszv110-F10-seat1-shard9",
+              "size": 272303
+            },
+            {
+              "id": 9470917630,
+              "name": "gszv110-F10-seat0-shard4",
+              "size": 269215
+            },
+            {
+              "id": 9470915416,
+              "name": "gszv110-F10-seat1-shard3",
+              "size": 268151
+            },
+            {
+              "id": 9470908342,
+              "name": "gszv110-F10-seat0-shard5",
+              "size": 262493
+            },
+            {
+              "id": 9470881397,
+              "name": "gszv110-F10-seat0-shard6",
+              "size": 271338
+            },
+            {
+              "id": 9470870790,
+              "name": "gszv110-F10-seat1-shard5",
+              "size": 273467
+            },
+            {
+              "id": 9470860177,
+              "name": "gszv110-F10-seat1-shard0",
+              "size": 276205
+            },
+            {
+              "id": 9470835519,
+              "name": "gszv110-F10-seat1-shard2",
+              "size": 272418
+            },
+            {
+              "id": 9470834669,
+              "name": "gszv110-F10-seat0-shard2",
+              "size": 275455
+            },
+            {
+              "id": 9470813663,
+              "name": "gszv110-F10-seat1-shard1",
+              "size": 269329
+            },
+            {
+              "id": 9470813348,
+              "name": "gszv110-F10-seat1-shard7",
+              "size": 274140
+            },
+            {
+              "id": 9470789971,
+              "name": "gszv110-F10-seat0-shard3",
+              "size": 267972
+            },
+            {
+              "id": 9470755522,
+              "name": "gszv110-F10-seat0-shard9",
+              "size": 273424
+            },
+            {
+              "id": 9470477716,
+              "name": "gsz-single-v110-runtime",
+              "size": 201425488
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-22T04:10:37Z",
+          "event": "push",
+          "headSha": "52c55cf724f7097a1656946f5fa597614de5b18e",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550996602",
+          "id": 32550996602,
+          "jobStates": {
+            "failure": 2,
+            "success": 80
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-22T09:53:37Z"
+        }
+      ],
+      "workflow": "kinnan-v110-gsz-single-2k.yml"
+    },
+    "turbo2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9433683687,
+              "name": "turbo-v19-2k-report",
+              "size": 1353
+            },
+            {
+              "id": 9433678444,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard4",
+              "size": 287042
+            },
+            {
+              "id": 9433673065,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard2",
+              "size": 283142
+            },
+            {
+              "id": 9433670842,
+              "name": "turbo-v19-2k-F10-seat0-shard2",
+              "size": 284254
+            },
+            {
+              "id": 9433569162,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard1",
+              "size": 282859
+            },
+            {
+              "id": 9420231819,
+              "name": "turbo-v19-2k-report",
+              "size": 1353
+            },
+            {
+              "id": 9420188087,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard9",
+              "size": 280705
+            },
+            {
+              "id": 9420187897,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard7",
+              "size": 282644
+            },
+            {
+              "id": 9420159143,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard8",
+              "size": 272147
+            },
+            {
+              "id": 9420003683,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard5",
+              "size": 277900
+            },
+            {
+              "id": 9419968334,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard6",
+              "size": 284820
+            },
+            {
+              "id": 9419511360,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard3",
+              "size": 277455
+            },
+            {
+              "id": 9419468943,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard4",
+              "size": 280940
+            },
+            {
+              "id": 9419428338,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard2",
+              "size": 272555
+            },
+            {
+              "id": 9419273484,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard0",
+              "size": 275982
+            },
+            {
+              "id": 9419218969,
+              "name": "turbo-v19-2k-TURBO_F10-seat3-shard1",
+              "size": 277460
+            },
+            {
+              "id": 9419209710,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard8",
+              "size": 275954
+            },
+            {
+              "id": 9419187725,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard7",
+              "size": 280055
+            },
+            {
+              "id": 9419058436,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard5",
+              "size": 276001
+            },
+            {
+              "id": 9418934184,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard9",
+              "size": 274332
+            },
+            {
+              "id": 9418918912,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard4",
+              "size": 284829
+            },
+            {
+              "id": 9418826090,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard3",
+              "size": 275099
+            },
+            {
+              "id": 9418805465,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard2",
+              "size": 276275
+            },
+            {
+              "id": 9418619570,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard6",
+              "size": 273816
+            },
+            {
+              "id": 9418034198,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard0",
+              "size": 274329
+            },
+            {
+              "id": 9417964411,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard7",
+              "size": 274549
+            },
+            {
+              "id": 9417947292,
+              "name": "turbo-v19-2k-TURBO_F10-seat2-shard1",
+              "size": 272791
+            },
+            {
+              "id": 9417924332,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard8",
+              "size": 272349
+            },
+            {
+              "id": 9417918984,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard9",
+              "size": 269865
+            },
+            {
+              "id": 9417599345,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard5",
+              "size": 277708
+            },
+            {
+              "id": 9417510536,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard6",
+              "size": 280682
+            },
+            {
+              "id": 9417320688,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard3",
+              "size": 272840
+            },
+            {
+              "id": 9417010969,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard1",
+              "size": 283736
+            },
+            {
+              "id": 9416991011,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard4",
+              "size": 273754
+            },
+            {
+              "id": 9416985990,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard2",
+              "size": 284048
+            },
+            {
+              "id": 9416821063,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard9",
+              "size": 273662
+            },
+            {
+              "id": 9416761281,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard0",
+              "size": 282065
+            },
+            {
+              "id": 9416728867,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard8",
+              "size": 269980
+            },
+            {
+              "id": 9416701446,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard3",
+              "size": 274530
+            },
+            {
+              "id": 9416700737,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard6",
+              "size": 278856
+            },
+            {
+              "id": 9416651193,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard5",
+              "size": 276831
+            },
+            {
+              "id": 9416610843,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard2",
+              "size": 276675
+            },
+            {
+              "id": 9416551160,
+              "name": "turbo-v19-2k-TURBO_F10-seat1-shard0",
+              "size": 275536
+            },
+            {
+              "id": 9416537414,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard7",
+              "size": 275590
+            },
+            {
+              "id": 9416348503,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard1",
+              "size": 283839
+            },
+            {
+              "id": 9416237101,
+              "name": "turbo-v19-2k-TURBO_F10-seat0-shard4",
+              "size": 265855
+            },
+            {
+              "id": 9415616740,
+              "name": "turbo-v19-2k-F10-seat3-shard5",
+              "size": 274402
+            },
+            {
+              "id": 9415608425,
+              "name": "turbo-v19-2k-F10-seat3-shard7",
+              "size": 274255
+            },
+            {
+              "id": 9415601803,
+              "name": "turbo-v19-2k-F10-seat3-shard4",
+              "size": 273983
+            },
+            {
+              "id": 9415600792,
+              "name": "turbo-v19-2k-F10-seat3-shard6",
+              "size": 268958
+            },
+            {
+              "id": 9415572205,
+              "name": "turbo-v19-2k-F10-seat3-shard3",
+              "size": 273363
+            },
+            {
+              "id": 9415486234,
+              "name": "turbo-v19-2k-F10-seat3-shard9",
+              "size": 274420
+            },
+            {
+              "id": 9415467660,
+              "name": "turbo-v19-2k-F10-seat3-shard8",
+              "size": 276651
+            },
+            {
+              "id": 9415380780,
+              "name": "turbo-v19-2k-F10-seat3-shard2",
+              "size": 272319
+            },
+            {
+              "id": 9414563866,
+              "name": "turbo-v19-2k-F10-seat3-shard1",
+              "size": 271889
+            },
+            {
+              "id": 9414560333,
+              "name": "turbo-v19-2k-F10-seat3-shard0",
+              "size": 276184
+            },
+            {
+              "id": 9414333936,
+              "name": "turbo-v19-2k-F10-seat2-shard9",
+              "size": 274061
+            },
+            {
+              "id": 9414271794,
+              "name": "turbo-v19-2k-F10-seat2-shard5",
+              "size": 271952
+            },
+            {
+              "id": 9414193276,
+              "name": "turbo-v19-2k-F10-seat2-shard7",
+              "size": 270773
+            },
+            {
+              "id": 9414175805,
+              "name": "turbo-v19-2k-F10-seat2-shard8",
+              "size": 269452
+            },
+            {
+              "id": 9414147367,
+              "name": "turbo-v19-2k-F10-seat2-shard6",
+              "size": 269237
+            },
+            {
+              "id": 9414033182,
+              "name": "turbo-v19-2k-F10-seat2-shard3",
+              "size": 276649
+            },
+            {
+              "id": 9413924527,
+              "name": "turbo-v19-2k-F10-seat2-shard2",
+              "size": 279820
+            },
+            {
+              "id": 9413767564,
+              "name": "turbo-v19-2k-F10-seat2-shard0",
+              "size": 274446
+            },
+            {
+              "id": 9413655704,
+              "name": "turbo-v19-2k-F10-seat2-shard4",
+              "size": 274510
+            },
+            {
+              "id": 9413484592,
+              "name": "turbo-v19-2k-F10-seat2-shard1",
+              "size": 273972
+            },
+            {
+              "id": 9413266099,
+              "name": "turbo-v19-2k-F10-seat0-shard2",
+              "size": 285064
+            },
+            {
+              "id": 9413008494,
+              "name": "turbo-v19-2k-F10-seat1-shard1",
+              "size": 277569
+            },
+            {
+              "id": 9412997378,
+              "name": "turbo-v19-2k-F10-seat0-shard0",
+              "size": 276391
+            },
+            {
+              "id": 9412915446,
+              "name": "turbo-v19-2k-F10-seat0-shard9",
+              "size": 274471
+            },
+            {
+              "id": 9412910726,
+              "name": "turbo-v19-2k-F10-seat1-shard3",
+              "size": 270030
+            },
+            {
+              "id": 9412902075,
+              "name": "turbo-v19-2k-F10-seat0-shard3",
+              "size": 267118
+            },
+            {
+              "id": 9412901176,
+              "name": "turbo-v19-2k-F10-seat1-shard7",
+              "size": 272758
+            },
+            {
+              "id": 9412898608,
+              "name": "turbo-v19-2k-F10-seat0-shard4",
+              "size": 266764
+            },
+            {
+              "id": 9412875741,
+              "name": "turbo-v19-2k-F10-seat0-shard7",
+              "size": 272767
+            },
+            {
+              "id": 9412875394,
+              "name": "turbo-v19-2k-F10-seat1-shard5",
+              "size": 270277
+            },
+            {
+              "id": 9412872134,
+              "name": "turbo-v19-2k-F10-seat0-shard5",
+              "size": 268573
+            },
+            {
+              "id": 9412852642,
+              "name": "turbo-v19-2k-F10-seat1-shard0",
+              "size": 279291
+            },
+            {
+              "id": 9412824221,
+              "name": "turbo-v19-2k-F10-seat1-shard9",
+              "size": 272923
+            },
+            {
+              "id": 9412811439,
+              "name": "turbo-v19-2k-F10-seat0-shard8",
+              "size": 270846
+            },
+            {
+              "id": 9412786938,
+              "name": "turbo-v19-2k-F10-seat1-shard8",
+              "size": 267484
+            },
+            {
+              "id": 9412698472,
+              "name": "turbo-v19-2k-F10-seat0-shard1",
+              "size": 270392
+            },
+            {
+              "id": 9412488327,
+              "name": "turbo-v19-2k-F10-seat1-shard4",
+              "size": 266671
+            },
+            {
+              "id": 9412430058,
+              "name": "turbo-v19-2k-F10-seat0-shard6",
+              "size": 272877
+            },
+            {
+              "id": 9412336942,
+              "name": "turbo-v19-2k-F10-seat1-shard2",
+              "size": 271020
+            },
+            {
+              "id": 9412318265,
+              "name": "turbo-v19-2k-F10-seat1-shard6",
+              "size": 270606
+            },
+            {
+              "id": 9411474723,
+              "name": "turbo-v19-2k-runtime",
+              "size": 201424684
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-20T14:08:56Z",
+          "event": "push",
+          "headSha": "3b5c2ae97331d28a6cf42aec6a435f0c1db92d26",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32378390116",
+          "id": 32378390116,
+          "jobStates": {
+            "failure": 5,
+            "success": 77
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-21T03:50:50Z"
+        }
+      ],
+      "workflow": "kinnan-v19-turbo-2k-confirm.yml"
+    },
+    "tutorPair2k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9458224683,
+              "name": "tutorpair2k-report",
+              "size": 1209
+            },
+            {
+              "id": 9458217324,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 280143
+            },
+            {
+              "id": 9458213819,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 270667
+            },
+            {
+              "id": 9456497843,
+              "name": "tutorpair2k-report",
+              "size": 1209
+            },
+            {
+              "id": 9456489982,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 272355
+            },
+            {
+              "id": 9456482319,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1",
+              "size": 278378
+            },
+            {
+              "id": 9456354426,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 282734
+            },
+            {
+              "id": 9453920389,
+              "name": "tutorpair2k-report",
+              "size": 1214
+            },
+            {
+              "id": 9453912431,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard6",
+              "size": 277093
+            },
+            {
+              "id": 9453893821,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard8",
+              "size": 277429
+            },
+            {
+              "id": 9453850753,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard9",
+              "size": 275183
+            },
+            {
+              "id": 9453847668,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard7",
+              "size": 275832
+            },
+            {
+              "id": 9453707246,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard3",
+              "size": 274439
+            },
+            {
+              "id": 9453678217,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard2",
+              "size": 275504
+            },
+            {
+              "id": 9453639809,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard4",
+              "size": 275771
+            },
+            {
+              "id": 9453506759,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard1",
+              "size": 278863
+            },
+            {
+              "id": 9453488825,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1",
+              "size": 282694
+            },
+            {
+              "id": 9453457491,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard8",
+              "size": 275335
+            },
+            {
+              "id": 9453441123,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard5",
+              "size": 277504
+            },
+            {
+              "id": 9453426831,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard7",
+              "size": 283553
+            },
+            {
+              "id": 9453355235,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard6",
+              "size": 277002
+            },
+            {
+              "id": 9453276788,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard2",
+              "size": 273012
+            },
+            {
+              "id": 9453260172,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard5",
+              "size": 276506
+            },
+            {
+              "id": 9453238857,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard3",
+              "size": 278048
+            },
+            {
+              "id": 9453231058,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard0",
+              "size": 278415
+            },
+            {
+              "id": 9453219440,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9",
+              "size": 280645
+            },
+            {
+              "id": 9453150137,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard4",
+              "size": 273105
+            },
+            {
+              "id": 9452720646,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard9",
+              "size": 283715
+            },
+            {
+              "id": 9452715138,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard0",
+              "size": 286382
+            },
+            {
+              "id": 9452699630,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard7",
+              "size": 277603
+            },
+            {
+              "id": 9452689659,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard6",
+              "size": 277445
+            },
+            {
+              "id": 9452679827,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard8",
+              "size": 275336
+            },
+            {
+              "id": 9452553857,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard5",
+              "size": 278883
+            },
+            {
+              "id": 9452543442,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard4",
+              "size": 279224
+            },
+            {
+              "id": 9452538938,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard2",
+              "size": 281833
+            },
+            {
+              "id": 9452506885,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard3",
+              "size": 283761
+            },
+            {
+              "id": 9452348413,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard1",
+              "size": 276951
+            },
+            {
+              "id": 9452319600,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard6",
+              "size": 272125
+            },
+            {
+              "id": 9452318866,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard8",
+              "size": 279254
+            },
+            {
+              "id": 9452240647,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard9",
+              "size": 276244
+            },
+            {
+              "id": 9452227099,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard7",
+              "size": 281920
+            },
+            {
+              "id": 9452129152,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard0",
+              "size": 284930
+            },
+            {
+              "id": 9452095054,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard5",
+              "size": 276477
+            },
+            {
+              "id": 9452065825,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard3",
+              "size": 282844
+            },
+            {
+              "id": 9452055320,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard4",
+              "size": 277015
+            },
+            {
+              "id": 9451893607,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard1",
+              "size": 277508
+            },
+            {
+              "id": 9451887480,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard0",
+              "size": 274039
+            },
+            {
+              "id": 9451641663,
+              "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard2",
+              "size": 275152
+            },
+            {
+              "id": 9451537587,
+              "name": "tutorpair2k-F10-seat3-shard9",
+              "size": 268203
+            },
+            {
+              "id": 9451403297,
+              "name": "tutorpair2k-F10-seat3-shard6",
+              "size": 269303
+            },
+            {
+              "id": 9451342182,
+              "name": "tutorpair2k-F10-seat2-shard8",
+              "size": 268796
+            },
+            {
+              "id": 9451318485,
+              "name": "tutorpair2k-F10-seat2-shard5",
+              "size": 271591
+            },
+            {
+              "id": 9451309275,
+              "name": "tutorpair2k-F10-seat3-shard5",
+              "size": 275332
+            },
+            {
+              "id": 9451267906,
+              "name": "tutorpair2k-F10-seat3-shard2",
+              "size": 269895
+            },
+            {
+              "id": 9451210335,
+              "name": "tutorpair2k-F10-seat3-shard0",
+              "size": 270208
+            },
+            {
+              "id": 9451193725,
+              "name": "tutorpair2k-F10-seat3-shard8",
+              "size": 273641
+            },
+            {
+              "id": 9451149443,
+              "name": "tutorpair2k-F10-seat2-shard1",
+              "size": 271171
+            },
+            {
+              "id": 9451110244,
+              "name": "tutorpair2k-F10-seat2-shard4",
+              "size": 264314
+            },
+            {
+              "id": 9451057091,
+              "name": "tutorpair2k-F10-seat2-shard0",
+              "size": 278542
+            },
+            {
+              "id": 9450998526,
+              "name": "tutorpair2k-F10-seat3-shard3",
+              "size": 268727
+            },
+            {
+              "id": 9450986045,
+              "name": "tutorpair2k-F10-seat2-shard7",
+              "size": 277864
+            },
+            {
+              "id": 9450930853,
+              "name": "tutorpair2k-F10-seat3-shard7",
+              "size": 269189
+            },
+            {
+              "id": 9450908704,
+              "name": "tutorpair2k-F10-seat2-shard9",
+              "size": 269432
+            },
+            {
+              "id": 9450874914,
+              "name": "tutorpair2k-F10-seat3-shard4",
+              "size": 265262
+            },
+            {
+              "id": 9450798599,
+              "name": "tutorpair2k-F10-seat3-shard1",
+              "size": 275255
+            },
+            {
+              "id": 9450791283,
+              "name": "tutorpair2k-F10-seat2-shard6",
+              "size": 271245
+            },
+            {
+              "id": 9450773112,
+              "name": "tutorpair2k-F10-seat2-shard3",
+              "size": 273425
+            },
+            {
+              "id": 9450662538,
+              "name": "tutorpair2k-F10-seat2-shard2",
+              "size": 262000
+            },
+            {
+              "id": 9450318371,
+              "name": "tutorpair2k-F10-seat0-shard8",
+              "size": 282078
+            },
+            {
+              "id": 9450154914,
+              "name": "tutorpair2k-F10-seat0-shard6",
+              "size": 265531
+            },
+            {
+              "id": 9450139201,
+              "name": "tutorpair2k-F10-seat1-shard2",
+              "size": 273596
+            },
+            {
+              "id": 9450082199,
+              "name": "tutorpair2k-F10-seat1-shard3",
+              "size": 275765
+            },
+            {
+              "id": 9450074996,
+              "name": "tutorpair2k-F10-seat1-shard7",
+              "size": 270372
+            },
+            {
+              "id": 9450037182,
+              "name": "tutorpair2k-F10-seat1-shard9",
+              "size": 277434
+            },
+            {
+              "id": 9450031842,
+              "name": "tutorpair2k-F10-seat1-shard8",
+              "size": 275414
+            },
+            {
+              "id": 9450029150,
+              "name": "tutorpair2k-F10-seat0-shard7",
+              "size": 273921
+            },
+            {
+              "id": 9450021272,
+              "name": "tutorpair2k-F10-seat0-shard0",
+              "size": 268923
+            },
+            {
+              "id": 9450020572,
+              "name": "tutorpair2k-F10-seat0-shard3",
+              "size": 276195
+            },
+            {
+              "id": 9450017525,
+              "name": "tutorpair2k-F10-seat1-shard5",
+              "size": 270546
+            },
+            {
+              "id": 9450010907,
+              "name": "tutorpair2k-F10-seat0-shard4",
+              "size": 269074
+            },
+            {
+              "id": 9450010685,
+              "name": "tutorpair2k-F10-seat1-shard6",
+              "size": 270204
+            },
+            {
+              "id": 9450000293,
+              "name": "tutorpair2k-F10-seat1-shard1",
+              "size": 274677
+            },
+            {
+              "id": 9449968352,
+              "name": "tutorpair2k-F10-seat0-shard9",
+              "size": 272755
+            },
+            {
+              "id": 9449964271,
+              "name": "tutorpair2k-F10-seat0-shard2",
+              "size": 264830
+            },
+            {
+              "id": 9449904040,
+              "name": "tutorpair2k-F10-seat0-shard1",
+              "size": 270629
+            },
+            {
+              "id": 9449804817,
+              "name": "tutorpair2k-F10-seat0-shard5",
+              "size": 273389
+            },
+            {
+              "id": 9449771648,
+              "name": "tutorpair2k-F10-seat1-shard4",
+              "size": 272828
+            },
+            {
+              "id": 9449635598,
+              "name": "tutorpair2k-F10-seat1-shard0",
+              "size": 275037
+            },
+            {
+              "id": 9448809728,
+              "name": "tutor-pair-v19-runtime",
+              "size": 201427050
+            }
+          ],
+          "conclusion": "failure",
+          "createdAt": "2026-08-21T13:12:24Z",
+          "event": "push",
+          "headSha": "5876d79b0afa027661b5f709d6d8b89de286edd4",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32485636013",
+          "id": 32485636013,
+          "jobStates": {
+            "failure": 3,
+            "success": 79
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-21T18:39:17Z"
+        }
+      ],
+      "workflow": "kinnan-v19-tutor-pair-2k.yml"
+    }
+  }
+}

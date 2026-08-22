@@ -1,0 +1,15 @@
+2026-08-18 root-cause forensic: F10 seat0 known-good 1800000 plus stale seeds 1800001 1800007 1800013 1800020; preserve pilot trace, Forge stderr, and decoded harness action trace.
+2026-08-18 retrigger after workflow registration; same failing seeds, no architecture compute.
+2026-08-18 rerun exact five seeds after canonical W/U/B/R/G/C -> Forge color-name decoder fix.
+2026-08-18 final v6 rerun: color-name decoder + client answered promptId + server promptId rejection + promptSeq fallback + consumed-prompt ACK.
+2026-08-18 durable v6 validation: dedicated workflow commits exact five-seed aggregate to engine-tests/results/stale-root-forensic/latest.json.
+2026-08-19 rerun exact five seeds after repairing malformed runtime patch hunk counts; no architecture compute.
+2026-08-19 rerun exact five seeds after repairing all remaining patch hunk lengths; no architecture compute.
+2026-08-19 automation rerun exact five seeds against prompt-scoped queue v5/v6 repair; retain stderr/action/pilot/jstack evidence; no scale-out.
+2026-08-19 rerun exact five after correcting submitAction patch hunk from -134,10/+162,40 to -134,9/+162,39.
+2026-08-19 rerun exact five with git apply --recount on repaired patch; validation only, no architecture scale-out.
+2026-08-19 idle regression forensic v9: exact persistent failures (seat0/1960002, seat1/1960071, seat2/1960124, seat3/1960162) plus seat0/1960000 control; full prompt/action/Forge stderr; architecture scale-out stopped.
+2026-08-19 rerun idle regression forensic v9 after correcting cumulative unified-diff new-file offsets; require fresh runtime build from source.
+2026-08-19 rerun idle regression forensic v9 after correcting controller old-file anchor 2551->2552 and corresponding new-file anchor.
+2026-08-19 content-addressed repair v10: replace fragile unified diff application with exact idempotent source-block repairs; force fresh runtime and rerun four persistent idle seeds plus control.
+2026-08-19 payment-policy forensic v11: v10 record gate failed 4/5 with repeated Forge-advertised payManaCost actions canceled by color inference; arch-aware-v1.2 now consumes advertised mana abilities before cancel; rerun exact four failures plus control, no scale-out.

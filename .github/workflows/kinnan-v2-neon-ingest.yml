@@ -1,0 +1,118 @@
+name: Kinnan v2 Neon ingest
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v2-neon-ingest.txt]
+
+concurrency:
+  group: kinnan-v2-neon-ingest
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  id-token: write
+
+env:
+  NEON_DATA_API: https://ep-dark-mud-axcpnjso.apirest.c-4.us-east-2.aws.neon.tech/neondb/rest/v1
+
+jobs:
+  ingest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain GitHub OIDC token for Neon
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=neon-v2-ingest"
+          TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
+          test -n "$TOKEN" && test "$TOKEN" != null
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Ingest bridge simulation SQL through scoped batch RPC
+        id: ingest
+        continue-on-error: true
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p engine-tests/v2-export/neon-ingest-status
+          python3 - <<'PY' 2>&1 | tee engine-tests/v2-export/neon-ingest-status/ingest.log
+          import json, os, pathlib, subprocess, tempfile
+          api = os.environ['NEON_DATA_API'].rstrip('/') + '/rpc/exec_sim_ingest'
+          token = os.environ['OIDC_TOKEN']
+          root = pathlib.Path('engine-tests/v2-export/bridge/latest/sql')
+          manifest = json.loads((root / 'manifest.json').read_text())
+          names = manifest.get('files') or []
+          total_statements = 0
+          total_files = 0
+          for name in names:
+              if name == '000-variants.sql' or not name.endswith('-games.sql'):
+                  continue
+              path = root / name
+              text = path.read_text()
+              parts = [p.strip() for p in text.split(';\n') if p.strip()]
+              statements = [p for p in parts if p.upper() not in {'BEGIN','COMMIT'}]
+              if not statements:
+                  raise SystemExit(f'{path}: no INSERT statements found')
+              for stmt in statements:
+                  if not stmt.upper().startswith(('INSERT INTO SIM_GAME_RESULTS','INSERT INTO SIM_EXPERIMENT_GAMES')):
+                      raise SystemExit(f'{path}: unexpected statement prefix: {stmt[:80]}')
+              body = json.dumps({'p_sql': json.dumps(statements)})
+              with tempfile.NamedTemporaryFile('w', delete=False) as f:
+                  f.write(body)
+                  payload_path = f.name
+              try:
+                  proc = subprocess.run([
+                      'curl','-sS','--retry','4','--retry-all-errors',
+                      '-w','\nHTTP_STATUS:%{http_code}\n',
+                      '-X','POST', api,
+                      '-H',f'Authorization: Bearer {token}',
+                      '-H','Content-Type: application/json',
+                      '--data-binary',f'@{payload_path}',
+                  ], text=True, capture_output=True)
+              finally:
+                  pathlib.Path(payload_path).unlink(missing_ok=True)
+              print(proc.stdout, flush=True)
+              if proc.stderr:
+                  print(proc.stderr, flush=True)
+              if proc.returncode or 'HTTP_STATUS:2' not in proc.stdout:
+                  raise SystemExit(f'RPC failed for {path}')
+              total_statements += len(statements)
+              total_files += 1
+              print(json.dumps({'files': total_files, 'statements': total_statements, 'last': str(path)}), flush=True)
+          print(json.dumps({'complete': True, 'files': total_files, 'statements': total_statements}), flush=True)
+          PY
+      - name: Commit ingestion diagnostics
+        if: always()
+        env:
+          OUTCOME: ${{ steps.ingest.outcome }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+        shell: bash
+        run: |
+          mkdir -p engine-tests/v2-export/neon-ingest-status
+          python3 - <<'PY'
+          import json, os, pathlib, datetime
+          p=pathlib.Path('engine-tests/v2-export/neon-ingest-status/status.json')
+          p.write_text(json.dumps({
+            'runId': int(os.environ['RUN_ID']),
+            'runAttempt': int(os.environ['RUN_ATTEMPT']),
+            'outcome': os.environ['OUTCOME'],
+            'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()
+          }, indent=2)+'\n')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189826+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/neon-ingest-status
+          if ! git diff --cached --quiet; then
+            git commit -m 'record Neon ingest diagnostics [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
+      - name: Fail if ingestion failed
+        if: ${{ steps.ingest.outcome != 'success' }}
+        run: exit 1

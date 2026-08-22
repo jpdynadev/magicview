@@ -1,0 +1,2 @@
+2026-08-18 semantic-prompt identity validation: 96 cold-v2 games, 12 architectures x 4 seats x 2 seeds, jvm-reuse=1
+2026-08-19 launch 96-game cold validity gate after exact five-seed pass; fresh cache/engine identity; require >=90 valid and zero stale_prompt_timeout.

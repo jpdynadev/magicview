@@ -1,0 +1,167 @@
+name: Kinnan stale-prompt validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-stale-prompt-validation.txt]
+
+concurrency:
+  group: kinnan-stale-prompt-validation
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_PROFILE: stale-root-v7-cold
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-stale-root-v7-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stale-v2-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  validate:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [F10, COPY_CORE, COPY_CREATURE, DRUID_EFFIGY, COPY_DRUID, COPY_HEAVY, COPY_ARTIFACT, COPY_PROTECTED, DRUID_TUTOR, TUTOR_DENSE, NODE_DENSE, COPY_VALUE]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: stale-v2-runtime, path: runtime}
+      - name: Run two cold-v2 validation games
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 -m py_compile engine-tests/sim_v2_worker_arch.py
+          START=$((1950000 + SEAT * 100 + ( $(printf '%s' "$VARIANT" | cksum | awk '{print $1}') % 50 ) * 2))
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant "$VARIANT" --fixed-seat "$SEAT" \
+            --seeds "$START" "$((START+1))" \
+            --max-round 4 --max-prompts 3500 --max-seconds 100 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir ".sim-cache/stale-prompt-validation-v7-${GITHUB_RUN_ID}" --retain-traces failures \
+            --engine-id "$MANABREW_REF:stale-root-v7:${GITHUB_RUN_ID}" \
+            --output "out/${VARIANT}-seat${SEAT}.json" | tee "out/${VARIANT}-seat${SEAT}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: stale-v2-${{ matrix.variant }}-seat${{ matrix.seat }}
+          path: out/*
+          if-no-files-found: warn
+          retention-days: 7
+
+  aggregate:
+    needs: validate
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-expanded-architecture
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: stale-v2-*
+          path: all
+          merge-multiple: true
+      - name: Aggregate actual records
+        run: |
+          python3 - <<'PY'
+          import glob,json,os
+          rows=[]
+          for path in glob.glob('all/*.json'):
+              try:
+                  data=json.load(open(path))
+              except Exception:
+                  continue
+              if isinstance(data,list): rows.extend(data)
+          completed={'game_over','horizon_complete'}
+          statuses={}
+          for row in rows:
+              s=str(row.get('status'))
+              statuses[s]=statuses.get(s,0)+1
+          out={
+              'schema':'stale-prompt-validation-v2',
+              'commit':os.environ.get('GITHUB_SHA'),
+              'sourceRunId':os.environ.get('GITHUB_RUN_ID'),
+              'profile':os.environ.get('SIM_V2_PROFILE'),
+              'scheduledExpected':96,
+              'records':len(rows),
+              'valid':sum(r.get('status') in completed for r in rows),
+              'invalid':sum(r.get('status') not in completed for r in rows),
+              'stalePromptTimeouts':sum(r.get('status')=='stale_prompt_timeout' for r in rows),
+              'idleTimeouts':sum(r.get('status')=='idle_timeout' for r in rows),
+              'wallTimeouts':sum(r.get('status')=='wall_timeout' for r in rows),
+              'engineErrors':sum(r.get('status') in {'engine_error','engineError'} for r in rows),
+              'statuses':statuses,
+          }
+          os.makedirs('engine-tests/results/stale-prompt-validation',exist_ok=True)
+          json.dump(out,open('engine-tests/results/stale-prompt-validation/latest.json','w'),indent=2,sort_keys=True)
+          print(json.dumps(out,indent=2,sort_keys=True))
+          PY
+      - name: Commit validation summary
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/results/stale-prompt-validation/latest.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'record stale-prompt validation result [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi
+      - name: Enforce validity gate
+        run: |
+          python3 - <<'PY'
+          import json
+          d=json.load(open('engine-tests/results/stale-prompt-validation/latest.json'))
+          assert d['records']==96, d
+          assert d['stalePromptTimeouts']==0, d
+          assert d['valid']>=90, d
+          PY

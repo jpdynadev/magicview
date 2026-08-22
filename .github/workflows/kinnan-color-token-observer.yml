@@ -1,0 +1,41 @@
+name: Kinnan color-token observer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-color-token-observer.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - name: Capture latest color-token gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p engine-tests/results/color-token-v18
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent%2Fkinnan-expanded-architecture&per_page=50" --jq '[.workflow_runs[] | select(.name=="Kinnan adversarial color-token validation")][0]')
+          if [ -z "$RUN" ] || [ "$RUN" = "null" ]; then
+            jq -n '{found:false,checkedAt:(now|todateiso8601)}' > engine-tests/results/color-token-v18/observer.json
+          else
+            ID=$(jq -r '.id' <<<"$RUN")
+            JOBS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
+            ARTS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/artifacts?per_page=100")
+            jq -n --argjson run "$RUN" --argjson jobs "$JOBS" --argjson arts "$ARTS" '{found:true,checkedAt:(now|todateiso8601),runId:$run.id,runNumber:$run.run_number,status:$run.status,conclusion:$run.conclusion,headSha:$run.head_sha,htmlUrl:$run.html_url,jobs:[$jobs.jobs[]|{id,name,status,conclusion}],artifacts:[$arts.artifacts[]|{id,name,size_in_bytes,expired}]}' > engine-tests/results/color-token-v18/observer.json
+          fi
+          cat engine-tests/results/color-token-v18/observer.json
+      - name: Commit observer snapshot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/results/color-token-v18/observer.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'record color-token v18 gate observer [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

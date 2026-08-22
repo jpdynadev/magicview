@@ -1,0 +1,103 @@
+name: Kinnan early confirmations 100
+
+on:
+  push:
+    branches:
+      - agent/kinnan-2k-search
+    paths:
+      - .github/workflows/kinnan-early-confirm-100.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  confirm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        variant: [M2K0026, M2K0023, M2K0017, M2K0011, M2K0029, M2K0030, M2K0010]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 engine-tests/generate_2k_mutations.py --count 2000
+      - name: Build pinned Manabrew/Forge harness
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+      - name: Confirm mutation with 100 new paired games
+        run: |
+          python3 engine-tests/manabrew_pilot_v90.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant "${{ matrix.variant }}" \
+            --seeds $(seq 930000 930099) \
+            --seat-offset 0 \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 || true
+          find engine-tests/results -type f \( -name 'pilot-trace-*' -o -name 'pilot-stderr-*' -o -name 'pilot-errors-*' \) -delete || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: early-confirm-${{ matrix.variant }}
+          path: engine-tests/results/pilot-summary-${{ matrix.variant }}.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  control:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build pinned Manabrew/Forge harness
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+      - name: M25 control with same 100 seeds
+        run: |
+          python3 engine-tests/manabrew_pilot_v89.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant B0 --seeds $(seq 930000 930099) --seat-offset 0 \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: early-confirm-M25-control
+          path: engine-tests/results/pilot-summary-B0.json
+          retention-days: 14

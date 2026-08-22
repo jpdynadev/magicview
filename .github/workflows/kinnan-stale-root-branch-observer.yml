@@ -1,0 +1,39 @@
+name: Kinnan stale forensic branch observer
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-stale-root-branch-observer.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - name: Find forensic run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p status
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=50" --jq '[.workflow_runs[] | select(.name=="Kinnan stale root-cause forensic")][0]')
+          ID=$(jq -r '.id // empty' <<<"${RUN:-null}")
+          if [ -z "$ID" ]; then jq -n '{found:false}' > status/stale-root-progress.json; else
+            JOBS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
+            ARTS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/artifacts?per_page=100")
+            jq -n --argjson run "$RUN" --argjson jobs "$JOBS" --argjson arts "$ARTS" '{found:true,runId:$run.id,status:$run.status,conclusion:$run.conclusion,headSha:$run.head_sha,jobs:[$jobs.jobs[]|{id,name,status,conclusion}],artifacts:[$arts.artifacts[]|{id,name,size_in_bytes}]}' > status/stale-root-progress.json
+          fi
+          cat status/stale-root-progress.json
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add status/stale-root-progress.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record stale forensic progress [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

@@ -1,0 +1,678 @@
+{
+  "kinnan-v110-evolution-f10-idle-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T17:10:48Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32586947581",
+    "id": 32586947581,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9479370556,
+        "name": "evolution-f10-idle-forensic-xmx2048-rep1"
+      },
+      {
+        "id": 9479345576,
+        "name": "evolution-f10-idle-forensic-xmx1280-rep2"
+      },
+      {
+        "id": 9479345539,
+        "name": "evolution-f10-idle-forensic-xmx1280-rep1"
+      },
+      {
+        "id": 9479343170,
+        "name": "evolution-f10-idle-forensic-xmx2048-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T17:17:14Z"
+  },
+  "kinnan-v110-evolution-single-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T12:13:09Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97056134531,
+        "name": "confirm (F10, 3, 3)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97060919618,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32572392674",
+    "id": 32572392674,
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9478904398,
+        "name": "evolutionv110-report"
+      },
+      {
+        "id": 9478219308,
+        "name": "evolutionv110-report"
+      },
+      {
+        "id": 9477483259,
+        "name": "evolutionv110-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T16:40:36Z"
+  },
+  "kinnan-v110-gsz-baseline-timeout-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T11:00:20Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32569115889",
+    "id": 32569115889,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9474914916,
+        "name": "gsz-baseline-timeout-forensic-xmx1280-rep1"
+      },
+      {
+        "id": 9474912905,
+        "name": "gsz-baseline-timeout-forensic-xmx1280-rep2"
+      },
+      {
+        "id": 9474908297,
+        "name": "gsz-baseline-timeout-forensic-xmx2048-rep1"
+      },
+      {
+        "id": 9474893619,
+        "name": "gsz-baseline-timeout-forensic-xmx2048-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T11:06:26Z"
+  },
+  "kinnan-v110-gsz-f10-timeout-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T10:01:03Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32566494924",
+    "id": 32566494924,
+    "jobCounts": {
+      "success": 5
+    },
+    "reports": [
+      {
+        "id": 9474280464,
+        "name": "v110-gsz-timeout-forensic-2048m-rep2"
+      },
+      {
+        "id": 9474277807,
+        "name": "v110-gsz-timeout-forensic-2048m-rep1"
+      },
+      {
+        "id": 9474266949,
+        "name": "v110-gsz-timeout-forensic-1280m-rep2"
+      },
+      {
+        "id": 9474264867,
+        "name": "v110-gsz-timeout-forensic-1280m-rep1"
+      },
+      {
+        "id": 9474239918,
+        "name": "v110-gsz-timeout-forensic-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T10:07:36Z"
+  },
+  "kinnan-v110-gsz-single-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T04:10:37Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97009597542,
+        "name": "confirm (F10, 2, 7)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97014936462,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550996602",
+    "id": 32550996602,
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9474125453,
+        "name": "gszv110-report"
+      },
+      {
+        "id": 9473452186,
+        "name": "gszv110-report"
+      },
+      {
+        "id": 9472304413,
+        "name": "gszv110-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T09:53:37Z"
+  },
+  "kinnan-v110-shared-key-revalidation.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T02:04:05Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32545223637",
+    "id": 32545223637,
+    "jobCounts": {
+      "success": 5
+    },
+    "reports": [
+      {
+        "id": 9468332215,
+        "name": "v110-revalidation-F10_TUTOR_PAIR-rep2"
+      },
+      {
+        "id": 9468330835,
+        "name": "v110-revalidation-F10-rep2"
+      },
+      {
+        "id": 9468330477,
+        "name": "v110-revalidation-F10-rep1"
+      },
+      {
+        "id": 9468330285,
+        "name": "v110-revalidation-F10_TUTOR_PAIR-rep1"
+      },
+      {
+        "id": 9468316520,
+        "name": "v110-revalidation-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T02:08:02Z"
+  },
+  "kinnan-v110-singleton-screen.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T04:03:49Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550688741",
+    "id": 32550688741,
+    "jobCounts": {
+      "success": 14
+    },
+    "reports": [
+      {
+        "id": 9470437316,
+        "name": "v110-singletons-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T04:43:29Z"
+  },
+  "kinnan-v111-evolution-key-revalidation.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T17:13:49Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97065459248,
+        "name": "revalidate (F10, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97065459392,
+        "name": "revalidate (F10, 1)"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32587097636",
+    "id": 32587097636,
+    "jobCounts": {
+      "failure": 2,
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9479435662,
+        "name": "v111-evolution-key-revalidation-F10-rep2"
+      },
+      {
+        "id": 9479422132,
+        "name": "v111-evolution-key-revalidation-F10-rep1"
+      },
+      {
+        "id": 9479417092,
+        "name": "v111-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2"
+      },
+      {
+        "id": 9479416061,
+        "name": "v111-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T17:22:26Z"
+  },
+  "kinnan-v112-evolution-key-revalidation.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T18:14:07Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97072556319,
+        "name": "revalidate (F10, 1)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97072556379,
+        "name": "revalidate (F10, 2)"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32590134739",
+    "id": 32590134739,
+    "jobCounts": {
+      "failure": 2,
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9480136316,
+        "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2"
+      },
+      {
+        "id": 9480131956,
+        "name": "v112-evolution-key-revalidation-F10-rep1"
+      },
+      {
+        "id": 9480130034,
+        "name": "v112-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1"
+      },
+      {
+        "id": 9480121318,
+        "name": "v112-evolution-key-revalidation-F10-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T18:18:12Z"
+  },
+  "kinnan-v113-evolution-key-revalidation.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T20:02:55Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32595527350",
+    "id": 32595527350,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9481496855,
+        "name": "v113-evolution-key-revalidation-F10-rep1"
+      },
+      {
+        "id": 9481477499,
+        "name": "v113-evolution-key-revalidation-F10-rep2"
+      },
+      {
+        "id": 9481474710,
+        "name": "v113-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2"
+      },
+      {
+        "id": 9481465681,
+        "name": "v113-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T20:08:15Z"
+  },
+  "kinnan-v113-evolution-single-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-22T20:59:14Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97092488864,
+        "name": "build"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97092543938,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32598263461",
+    "id": 32598263461,
+    "jobCounts": {
+      "failure": 2,
+      "skipped": 1
+    },
+    "reports": [
+      {
+        "id": 9482154488,
+        "name": "evolutionv113-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T20:59:52Z"
+  },
+  "kinnan-v19-copy-tutor-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-21T03:17:25Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96722882413,
+        "name": "confirm (F10_COPY_TUTOR, 0, 3)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96733314024,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32442855543",
+    "id": 32442855543,
+    "jobCounts": {
+      "failure": 2,
+      "queued": 1,
+      "success": 79
+    },
+    "reports": [
+      {
+        "id": 9441983222,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9438654150,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9436672618,
+        "name": "copytutor2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T09:47:42Z"
+  },
+  "kinnan-v19-copy-tutor-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T10:07:40Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32471179659",
+    "id": 32471179659,
+    "jobCounts": {
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9442791932,
+        "name": "copy-tutor-forensic-2800160-seat0"
+      },
+      {
+        "id": 9442770000,
+        "name": "copy-tutor-forensic-2820348-seat2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T10:15:32Z"
+  },
+  "kinnan-v19-copy-tutor-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T10:04:29Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32470923302",
+    "id": 32470923302,
+    "jobCounts": {
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9442762011,
+        "name": "copy-tutor-key-forensic-s2-seed2820348"
+      },
+      {
+        "id": 9442718559,
+        "name": "copy-tutor-key-forensic-s0-seed2800160"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T10:14:32Z"
+  },
+  "kinnan-v19-druid-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T04:05:21Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32445677060",
+    "id": 32445677060,
+    "jobCounts": {
+      "success": 1
+    },
+    "reports": [
+      {
+        "id": 9434391296,
+        "name": "druid-key-forensic"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T04:27:38Z"
+  },
+  "kinnan-v19-druid-tutor-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T15:10:11Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96654530730,
+        "name": "confirm (DRUID_TUTOR, 0, 7)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96661507650,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32384510087",
+    "id": 32384510087,
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9433587562,
+        "name": "druid2k-report"
+      },
+      {
+        "id": 9421549829,
+        "name": "druid2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T03:45:54Z"
+  },
+  "kinnan-v19-shared-key-memory-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T23:08:34Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32535771675",
+    "id": 32535771675,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9465454228,
+        "name": "shared-key-memory-forensic-F10-1280m"
+      },
+      {
+        "id": 9465450213,
+        "name": "shared-key-memory-forensic-F10_TUTOR_PAIR-1280m"
+      },
+      {
+        "id": 9465446762,
+        "name": "shared-key-memory-forensic-F10-2048m"
+      },
+      {
+        "id": 9465445063,
+        "name": "shared-key-memory-forensic-F10_TUTOR_PAIR-2048m"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T23:14:00Z"
+  },
+  "kinnan-v19-turbo-2k-confirm.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T14:08:56Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96654552236,
+        "name": "screen (TURBO_F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552247,
+        "name": "screen (TURBO_F10, 1, 1)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552258,
+        "name": "screen (F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552409,
+        "name": "screen (TURBO_F10, 2, 4)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96662314462,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32378390116",
+    "id": 32378390116,
+    "jobCounts": {
+      "failure": 5,
+      "success": 77
+    },
+    "reports": [
+      {
+        "id": 9433683687,
+        "name": "turbo-v19-2k-report"
+      },
+      {
+        "id": 9420231819,
+        "name": "turbo-v19-2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T03:50:50Z"
+  },
+  "kinnan-v19-tutor-pair-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-21T13:12:24Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96861949571,
+        "name": "confirm (F10, 2, 9)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96861949626,
+        "name": "confirm (F10_TUTOR_PAIR, 2, 9)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96872728445,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32485636013",
+    "id": 32485636013,
+    "jobCounts": {
+      "failure": 3,
+      "success": 79
+    },
+    "reports": [
+      {
+        "id": 9458224683,
+        "name": "tutorpair2k-report"
+      },
+      {
+        "id": 9456497843,
+        "name": "tutorpair2k-report"
+      },
+      {
+        "id": 9453920389,
+        "name": "tutorpair2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T18:39:17Z"
+  },
+  "kinnan-v19-tutor-pair-jvm-memory-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T00:05:06Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32539153306",
+    "id": 32539153306,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [],
+    "status": "completed",
+    "updatedAt": "2026-08-22T00:10:16Z"
+  },
+  "kinnan-v19-tutor-pair-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-21T20:09:52Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32522160571",
+    "id": 32522160571,
+    "jobCounts": {
+      "success": 1
+    },
+    "reports": [
+      {
+        "id": 9461115162,
+        "name": "tutor-pair-key-forensic-f10-s2-seed3020454"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T20:16:50Z"
+  },
+  "kinnan-v19-tutor-pair-shared-key-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T01:08:37Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32542553324",
+    "id": 32542553324,
+    "jobCounts": {
+      "success": 2
+    },
+    "reports": [
+      {
+        "id": 9467572646,
+        "name": "tutor-pair-shared-key-forensic-F10"
+      },
+      {
+        "id": 9467572258,
+        "name": "tutor-pair-shared-key-forensic-F10_TUTOR_PAIR"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T01:15:40Z"
+  }
+}

@@ -1,0 +1,523 @@
+{
+  "found": true,
+  "runId": 32307447721,
+  "status": "completed",
+  "conclusion": "cancelled",
+  "headSha": "56d0c5a0da435500c947de45cb3511e3e1aa3964",
+  "createdAt": "2026-08-19T22:09:10Z",
+  "updatedAt": "2026-08-19T23:05:09Z",
+  "jobs": [
+    {
+      "id": 96243182873,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241334,
+      "name": "screen (COPY_CORE, 1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241347,
+      "name": "screen (COPY_CORE, 0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241351,
+      "name": "screen (F10, 3)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241377,
+      "name": "screen (DRUID_EFFIGY, 1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241388,
+      "name": "screen (F10, 0)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241426,
+      "name": "screen (COPY_CREATURE, 2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241438,
+      "name": "screen (COPY_CORE, 3)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241440,
+      "name": "screen (COPY_CREATURE, 1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241446,
+      "name": "screen (COPY_DRUID, 0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241452,
+      "name": "screen (COPY_CREATURE, 0)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241453,
+      "name": "screen (COPY_CREATURE, 3)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241458,
+      "name": "screen (COPY_CORE, 2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241461,
+      "name": "screen (F10, 1)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241464,
+      "name": "screen (DRUID_EFFIGY, 2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241493,
+      "name": "screen (COPY_ARTIFACT, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241504,
+      "name": "screen (DRUID_EFFIGY, 3)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241513,
+      "name": "screen (COPY_DRUID, 1)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241514,
+      "name": "screen (COPY_DRUID, 3)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241524,
+      "name": "screen (COPY_HEAVY, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241529,
+      "name": "screen (COPY_DRUID, 2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241531,
+      "name": "screen (COPY_PROTECTED, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241538,
+      "name": "screen (COPY_HEAVY, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241542,
+      "name": "screen (COPY_HEAVY, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241549,
+      "name": "screen (COPY_ARTIFACT, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241550,
+      "name": "screen (COPY_ARTIFACT, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241565,
+      "name": "screen (COPY_HEAVY, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241588,
+      "name": "screen (DRUID_EFFIGY, 0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 96243241617,
+      "name": "screen (COPY_PROTECTED, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243241672,
+      "name": "screen (F10, 2)",
+      "status": "completed",
+      "conclusion": "failure"
+    },
+    {
+      "id": 96243241676,
+      "name": "screen (COPY_ARTIFACT, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242448,
+      "name": "screen (COPY_PROTECTED, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242820,
+      "name": "screen (DRUID_TUTOR, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242833,
+      "name": "screen (COPY_PROTECTED, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242850,
+      "name": "screen (DRUID_TUTOR, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242854,
+      "name": "screen (DRUID_TUTOR, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242857,
+      "name": "screen (DRUID_TUTOR, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242860,
+      "name": "screen (TUTOR_DENSE, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242864,
+      "name": "screen (TUTOR_DENSE, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243242928,
+      "name": "screen (TUTOR_DENSE, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243051,
+      "name": "screen (TUTOR_DENSE, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243743,
+      "name": "screen (COPY_VALUE, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243750,
+      "name": "screen (NODE_DENSE, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243759,
+      "name": "screen (NODE_DENSE, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243765,
+      "name": "screen (NODE_DENSE, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243770,
+      "name": "screen (NODE_DENSE, 0)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243816,
+      "name": "screen (COPY_VALUE, 1)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243243865,
+      "name": "screen (COPY_VALUE, 2)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96243244158,
+      "name": "screen (COPY_VALUE, 3)",
+      "status": "completed",
+      "conclusion": "cancelled"
+    },
+    {
+      "id": 96255832446,
+      "name": "aggregate",
+      "status": "completed",
+      "conclusion": "failure"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 9386661862,
+      "name": "arch-repaired-v8-ranking",
+      "size_in_bytes": 1407
+    },
+    {
+      "id": 9386656461,
+      "name": "arch-repaired-v8-COPY_PROTECTED-seat1",
+      "size_in_bytes": 168002
+    },
+    {
+      "id": 9386655167,
+      "name": "arch-repaired-v8-COPY_PROTECTED-seat0",
+      "size_in_bytes": 212640
+    },
+    {
+      "id": 9386654913,
+      "name": "arch-repaired-v8-COPY_ARTIFACT-seat0",
+      "size_in_bytes": 221013
+    },
+    {
+      "id": 9386654653,
+      "name": "arch-repaired-v8-COPY_ARTIFACT-seat1",
+      "size_in_bytes": 176064
+    },
+    {
+      "id": 9386654210,
+      "name": "arch-repaired-v8-COPY_ARTIFACT-seat3",
+      "size_in_bytes": 199919
+    },
+    {
+      "id": 9386653438,
+      "name": "arch-repaired-v8-COPY_HEAVY-seat3",
+      "size_in_bytes": 204965
+    },
+    {
+      "id": 9386652798,
+      "name": "arch-repaired-v8-TUTOR_DENSE-seat2",
+      "size_in_bytes": 106065
+    },
+    {
+      "id": 9386650149,
+      "name": "arch-repaired-v8-TUTOR_DENSE-seat0",
+      "size_in_bytes": 132391
+    },
+    {
+      "id": 9386649882,
+      "name": "arch-repaired-v8-DRUID_TUTOR-seat2",
+      "size_in_bytes": 140810
+    },
+    {
+      "id": 9386649823,
+      "name": "arch-repaired-v8-TUTOR_DENSE-seat3",
+      "size_in_bytes": 97287
+    },
+    {
+      "id": 9386649411,
+      "name": "arch-repaired-v8-COPY_HEAVY-seat2",
+      "size_in_bytes": 226824
+    },
+    {
+      "id": 9386647914,
+      "name": "arch-repaired-v8-DRUID_TUTOR-seat1",
+      "size_in_bytes": 155733
+    },
+    {
+      "id": 9386647832,
+      "name": "arch-repaired-v8-DRUID_TUTOR-seat0",
+      "size_in_bytes": 158617
+    },
+    {
+      "id": 9386645702,
+      "name": "arch-repaired-v8-TUTOR_DENSE-seat1",
+      "size_in_bytes": 126078
+    },
+    {
+      "id": 9386645689,
+      "name": "arch-repaired-v8-COPY_HEAVY-seat1",
+      "size_in_bytes": 236896
+    },
+    {
+      "id": 9386643267,
+      "name": "arch-repaired-v8-COPY_PROTECTED-seat3",
+      "size_in_bytes": 191174
+    },
+    {
+      "id": 9386640070,
+      "name": "arch-repaired-v8-COPY_PROTECTED-seat2",
+      "size_in_bytes": 144790
+    },
+    {
+      "id": 9386639230,
+      "name": "arch-repaired-v8-COPY_ARTIFACT-seat2",
+      "size_in_bytes": 228050
+    },
+    {
+      "id": 9386638524,
+      "name": "arch-repaired-v8-DRUID_TUTOR-seat3",
+      "size_in_bytes": 145024
+    },
+    {
+      "id": 9386637329,
+      "name": "arch-repaired-v8-COPY_HEAVY-seat0",
+      "size_in_bytes": 233530
+    },
+    {
+      "id": 9386315288,
+      "name": "arch-repaired-v8-F10-seat3",
+      "size_in_bytes": 277829
+    },
+    {
+      "id": 9386299259,
+      "name": "arch-repaired-v8-F10-seat2",
+      "size_in_bytes": 274720
+    },
+    {
+      "id": 9386268840,
+      "name": "arch-repaired-v8-COPY_CORE-seat2",
+      "size_in_bytes": 284082
+    },
+    {
+      "id": 9386229632,
+      "name": "arch-repaired-v8-COPY_DRUID-seat1",
+      "size_in_bytes": 276661
+    },
+    {
+      "id": 9386171769,
+      "name": "arch-repaired-v8-DRUID_EFFIGY-seat3",
+      "size_in_bytes": 278596
+    },
+    {
+      "id": 9386161138,
+      "name": "arch-repaired-v8-COPY_CREATURE-seat1",
+      "size_in_bytes": 272744
+    },
+    {
+      "id": 9386158551,
+      "name": "arch-repaired-v8-COPY_DRUID-seat2",
+      "size_in_bytes": 278954
+    },
+    {
+      "id": 9386158384,
+      "name": "arch-repaired-v8-DRUID_EFFIGY-seat1",
+      "size_in_bytes": 276849
+    },
+    {
+      "id": 9386154207,
+      "name": "arch-repaired-v8-DRUID_EFFIGY-seat2",
+      "size_in_bytes": 273343
+    },
+    {
+      "id": 9386151642,
+      "name": "arch-repaired-v8-DRUID_EFFIGY-seat0",
+      "size_in_bytes": 283794
+    },
+    {
+      "id": 9386147358,
+      "name": "arch-repaired-v8-COPY_DRUID-seat3",
+      "size_in_bytes": 279332
+    },
+    {
+      "id": 9386100784,
+      "name": "arch-repaired-v8-COPY_CORE-seat1",
+      "size_in_bytes": 269154
+    },
+    {
+      "id": 9386100256,
+      "name": "arch-repaired-v8-COPY_DRUID-seat0",
+      "size_in_bytes": 277094
+    },
+    {
+      "id": 9386083489,
+      "name": "arch-repaired-v8-COPY_CORE-seat0",
+      "size_in_bytes": 274873
+    },
+    {
+      "id": 9386012116,
+      "name": "arch-repaired-v8-F10-seat1",
+      "size_in_bytes": 274144
+    },
+    {
+      "id": 9385904116,
+      "name": "arch-repaired-v8-F10-seat0",
+      "size_in_bytes": 277376
+    },
+    {
+      "id": 9385902184,
+      "name": "arch-repaired-v8-COPY_CREATURE-seat0",
+      "size_in_bytes": 284270
+    },
+    {
+      "id": 9385899055,
+      "name": "arch-repaired-v8-COPY_CREATURE-seat2",
+      "size_in_bytes": 272920
+    },
+    {
+      "id": 9385895236,
+      "name": "arch-repaired-v8-COPY_CREATURE-seat3",
+      "size_in_bytes": 278385
+    },
+    {
+      "id": 9385815247,
+      "name": "arch-repaired-v8-COPY_CORE-seat3",
+      "size_in_bytes": 280237
+    },
+    {
+      "id": 9385200233,
+      "name": "arch-repaired-v8-runtime",
+      "size_in_bytes": 201424190
+    }
+  ]
+}

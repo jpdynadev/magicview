@@ -1,0 +1,1 @@
+2026-08-20 inspect v1.9 validColors regression gate
