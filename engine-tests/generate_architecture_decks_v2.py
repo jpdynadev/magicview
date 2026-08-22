@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import runpy
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -87,7 +89,23 @@ def mutate(cards, cuts, adds, label):
     return out
 
 
+def prepare_profile_pilot():
+    """Materialize runtime-only pilot patches required by profile-specific jobs.
+
+    The v1.13 Evolution 2k workflow intentionally keeps v1.12/v1.13 changes as
+    narrow patch scripts. Both build and confirm jobs invoke this generator, so
+    applying them here for only that exact profile guarantees every fresh job
+    uses the same validated pilot identity before assertions/simulation run.
+    Other profiles are untouched.
+    """
+    if os.environ.get('SIM_V2_PROFILE') != 'arch-repaired-v113-evolution-single-2k-240s':
+        return
+    runpy.run_path(str(ROOT / 'apply_arch_v112_payment_repair.py'), run_name='__main__')
+    runpy.run_path(str(ROOT / 'apply_arch_v113_payment_scope_fix.py'), run_name='__main__')
+
+
 def main():
+    prepare_profile_pilot()
     header, base_cards = parse(BASE.read_text())
     f10 = mutate(base_cards, F10_CUTS, F10_ADDS, 'F10_BASE')
     for key, (cuts, adds) in SPECS.items():
