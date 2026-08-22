@@ -36,6 +36,8 @@ jobs:
               'kinnan-v19-tutor-pair-jvm-memory-forensic.yml',
               'kinnan-v19-shared-key-memory-forensic.yml',
               'kinnan-v110-shared-key-revalidation.yml',
+              'kinnan-v110-singleton-screen.yml',
+              'kinnan-v110-gsz-single-2k.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
