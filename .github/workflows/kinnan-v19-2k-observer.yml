@@ -35,6 +35,7 @@ jobs:
               'evolutionSingleV1102k': 'kinnan-v110-evolution-single-2k.yml',
               'evolutionKeyV111': 'kinnan-v111-evolution-key-revalidation.yml',
               'evolutionKeyV112': 'kinnan-v112-evolution-key-revalidation.yml',
+              'evolutionKeyV113': 'kinnan-v113-evolution-key-revalidation.yml',
               'broad200': 'kinnan-v19-broad-screen.yml',
           }
 
