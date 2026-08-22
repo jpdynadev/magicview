@@ -656,20 +656,597 @@
       ],
       "workflow": "kinnan-v19-druid-tutor-2k.yml"
     },
+    "evolutionSingleV1102k": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9476369881,
+              "name": "evolutionv110-F10-seat2-shard7",
+              "size": 272416
+            },
+            {
+              "id": 9476349666,
+              "name": "evolutionv110-F10-seat2-shard0",
+              "size": 271812
+            },
+            {
+              "id": 9476327311,
+              "name": "evolutionv110-F10-seat2-shard2",
+              "size": 275539
+            },
+            {
+              "id": 9476132051,
+              "name": "evolutionv110-F10-seat1-shard9",
+              "size": 276814
+            },
+            {
+              "id": 9476124658,
+              "name": "evolutionv110-F10-seat1-shard7",
+              "size": 271152
+            },
+            {
+              "id": 9476124600,
+              "name": "evolutionv110-F10-seat0-shard7",
+              "size": 277241
+            },
+            {
+              "id": 9476124549,
+              "name": "evolutionv110-F10-seat1-shard0",
+              "size": 275820
+            },
+            {
+              "id": 9476122901,
+              "name": "evolutionv110-F10-seat0-shard5",
+              "size": 275683
+            },
+            {
+              "id": 9476121303,
+              "name": "evolutionv110-F10-seat1-shard2",
+              "size": 266362
+            },
+            {
+              "id": 9476114083,
+              "name": "evolutionv110-F10-seat1-shard4",
+              "size": 277684
+            },
+            {
+              "id": 9476108579,
+              "name": "evolutionv110-F10-seat0-shard1",
+              "size": 275243
+            },
+            {
+              "id": 9476108374,
+              "name": "evolutionv110-F10-seat0-shard3",
+              "size": 273092
+            },
+            {
+              "id": 9476106715,
+              "name": "evolutionv110-F10-seat0-shard8",
+              "size": 267956
+            },
+            {
+              "id": 9476102088,
+              "name": "evolutionv110-F10-seat1-shard5",
+              "size": 275751
+            },
+            {
+              "id": 9476100581,
+              "name": "evolutionv110-F10-seat0-shard2",
+              "size": 277233
+            },
+            {
+              "id": 9476100176,
+              "name": "evolutionv110-F10-seat1-shard8",
+              "size": 269819
+            },
+            {
+              "id": 9476098805,
+              "name": "evolutionv110-F10-seat1-shard1",
+              "size": 270202
+            },
+            {
+              "id": 9476095312,
+              "name": "evolutionv110-F10-seat0-shard0",
+              "size": 278593
+            },
+            {
+              "id": 9476094391,
+              "name": "evolutionv110-F10-seat0-shard6",
+              "size": 269222
+            },
+            {
+              "id": 9476081022,
+              "name": "evolutionv110-F10-seat1-shard3",
+              "size": 274085
+            },
+            {
+              "id": 9476024682,
+              "name": "evolutionv110-F10-seat0-shard4",
+              "size": 271571
+            },
+            {
+              "id": 9476014883,
+              "name": "evolutionv110-F10-seat1-shard6",
+              "size": 266025
+            },
+            {
+              "id": 9475980687,
+              "name": "evolutionv110-F10-seat0-shard9",
+              "size": 273295
+            },
+            {
+              "id": 9475684577,
+              "name": "evolution-single-v110-runtime",
+              "size": 201423296
+            }
+          ],
+          "conclusion": null,
+          "createdAt": "2026-08-22T12:13:09Z",
+          "event": "push",
+          "headSha": "f654b3a436459d3a5eeb08774ef013b706cdecf8",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32572392674",
+          "id": 32572392674,
+          "jobStates": {
+            "in_progress": 18,
+            "queued": 39,
+            "success": 24
+          },
+          "jobs": 81,
+          "status": "queued",
+          "updatedAt": "2026-08-22T12:15:54Z"
+        }
+      ],
+      "workflow": "kinnan-v110-evolution-single-2k.yml"
+    },
     "gszSingleV1102k": {
       "runs": [
         {
-          "artifacts": [],
-          "conclusion": null,
+          "artifacts": [
+            {
+              "id": 9474125453,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9474121836,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 281505
+            },
+            {
+              "id": 9473452186,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9473449848,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 278100
+            },
+            {
+              "id": 9472304413,
+              "name": "gszv110-report",
+              "size": 1225
+            },
+            {
+              "id": 9472301083,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard6",
+              "size": 279050
+            },
+            {
+              "id": 9472293034,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard7",
+              "size": 274440
+            },
+            {
+              "id": 9472282145,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard9",
+              "size": 286411
+            },
+            {
+              "id": 9472189233,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard5",
+              "size": 279802
+            },
+            {
+              "id": 9472184724,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard8",
+              "size": 284071
+            },
+            {
+              "id": 9472172672,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard2",
+              "size": 276216
+            },
+            {
+              "id": 9472161310,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard3",
+              "size": 280750
+            },
+            {
+              "id": 9472139527,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard0",
+              "size": 279771
+            },
+            {
+              "id": 9472138879,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard1",
+              "size": 277600
+            },
+            {
+              "id": 9472132937,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard9",
+              "size": 285812
+            },
+            {
+              "id": 9472126868,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard8",
+              "size": 282548
+            },
+            {
+              "id": 9472109093,
+              "name": "gszv110-F10_GSZ_SINGLE-seat3-shard4",
+              "size": 285523
+            },
+            {
+              "id": 9472104071,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard7",
+              "size": 282102
+            },
+            {
+              "id": 9472070395,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard6",
+              "size": 283806
+            },
+            {
+              "id": 9472039840,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard5",
+              "size": 277266
+            },
+            {
+              "id": 9471954646,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard1",
+              "size": 280057
+            },
+            {
+              "id": 9471950467,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard3",
+              "size": 274065
+            },
+            {
+              "id": 9471904273,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard0",
+              "size": 275927
+            },
+            {
+              "id": 9471891350,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard4",
+              "size": 280959
+            },
+            {
+              "id": 9471864344,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard9",
+              "size": 280646
+            },
+            {
+              "id": 9471864296,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard8",
+              "size": 276253
+            },
+            {
+              "id": 9471861739,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard5",
+              "size": 277872
+            },
+            {
+              "id": 9471860372,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard6",
+              "size": 276923
+            },
+            {
+              "id": 9471860103,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard7",
+              "size": 271282
+            },
+            {
+              "id": 9471804271,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard3",
+              "size": 274358
+            },
+            {
+              "id": 9471782178,
+              "name": "gszv110-F10_GSZ_SINGLE-seat2-shard2",
+              "size": 277127
+            },
+            {
+              "id": 9471779939,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard1",
+              "size": 273997
+            },
+            {
+              "id": 9471771527,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard0",
+              "size": 283384
+            },
+            {
+              "id": 9471759747,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard2",
+              "size": 278219
+            },
+            {
+              "id": 9471755404,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard9",
+              "size": 280833
+            },
+            {
+              "id": 9471717285,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard6",
+              "size": 276281
+            },
+            {
+              "id": 9471716190,
+              "name": "gszv110-F10_GSZ_SINGLE-seat1-shard4",
+              "size": 272653
+            },
+            {
+              "id": 9471654187,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard5",
+              "size": 270659
+            },
+            {
+              "id": 9471636139,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard1",
+              "size": 276734
+            },
+            {
+              "id": 9471635485,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard3",
+              "size": 268125
+            },
+            {
+              "id": 9471606412,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard2",
+              "size": 275916
+            },
+            {
+              "id": 9471550206,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard8",
+              "size": 281358
+            },
+            {
+              "id": 9471503502,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard7",
+              "size": 276199
+            },
+            {
+              "id": 9471486628,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard4",
+              "size": 276967
+            },
+            {
+              "id": 9471420028,
+              "name": "gszv110-F10-seat3-shard9",
+              "size": 275644
+            },
+            {
+              "id": 9471419705,
+              "name": "gszv110-F10_GSZ_SINGLE-seat0-shard0",
+              "size": 278519
+            },
+            {
+              "id": 9471415827,
+              "name": "gszv110-F10-seat3-shard6",
+              "size": 274625
+            },
+            {
+              "id": 9471408811,
+              "name": "gszv110-F10-seat2-shard7",
+              "size": 279393
+            },
+            {
+              "id": 9471375062,
+              "name": "gszv110-F10-seat3-shard8",
+              "size": 274860
+            },
+            {
+              "id": 9471363916,
+              "name": "gszv110-F10-seat3-shard4",
+              "size": 276969
+            },
+            {
+              "id": 9471344413,
+              "name": "gszv110-F10-seat3-shard5",
+              "size": 274172
+            },
+            {
+              "id": 9471341338,
+              "name": "gszv110-F10-seat2-shard9",
+              "size": 275762
+            },
+            {
+              "id": 9471327529,
+              "name": "gszv110-F10-seat3-shard2",
+              "size": 265534
+            },
+            {
+              "id": 9471322013,
+              "name": "gszv110-F10-seat3-shard0",
+              "size": 269970
+            },
+            {
+              "id": 9471312622,
+              "name": "gszv110-F10-seat3-shard1",
+              "size": 270069
+            },
+            {
+              "id": 9471286733,
+              "name": "gszv110-F10-seat2-shard6",
+              "size": 269858
+            },
+            {
+              "id": 9471267530,
+              "name": "gszv110-F10-seat2-shard2",
+              "size": 271509
+            },
+            {
+              "id": 9471253188,
+              "name": "gszv110-F10-seat3-shard3",
+              "size": 277986
+            },
+            {
+              "id": 9471251436,
+              "name": "gszv110-F10-seat3-shard7",
+              "size": 271535
+            },
+            {
+              "id": 9471232996,
+              "name": "gszv110-F10-seat2-shard3",
+              "size": 269238
+            },
+            {
+              "id": 9471223675,
+              "name": "gszv110-F10-seat2-shard8",
+              "size": 273119
+            },
+            {
+              "id": 9471191688,
+              "name": "gszv110-F10-seat2-shard0",
+              "size": 266539
+            },
+            {
+              "id": 9471160300,
+              "name": "gszv110-F10-seat2-shard1",
+              "size": 276326
+            },
+            {
+              "id": 9471156024,
+              "name": "gszv110-F10-seat2-shard5",
+              "size": 272804
+            },
+            {
+              "id": 9471100303,
+              "name": "gszv110-F10-seat2-shard4",
+              "size": 267342
+            },
+            {
+              "id": 9470985714,
+              "name": "gszv110-F10-seat0-shard8",
+              "size": 274652
+            },
+            {
+              "id": 9470965074,
+              "name": "gszv110-F10-seat1-shard6",
+              "size": 270424
+            },
+            {
+              "id": 9470948839,
+              "name": "gszv110-F10-seat1-shard4",
+              "size": 271965
+            },
+            {
+              "id": 9470947207,
+              "name": "gszv110-F10-seat1-shard8",
+              "size": 270928
+            },
+            {
+              "id": 9470934771,
+              "name": "gszv110-F10-seat0-shard1",
+              "size": 266367
+            },
+            {
+              "id": 9470933527,
+              "name": "gszv110-F10-seat0-shard7",
+              "size": 272652
+            },
+            {
+              "id": 9470927832,
+              "name": "gszv110-F10-seat0-shard0",
+              "size": 272347
+            },
+            {
+              "id": 9470919368,
+              "name": "gszv110-F10-seat1-shard9",
+              "size": 272303
+            },
+            {
+              "id": 9470917630,
+              "name": "gszv110-F10-seat0-shard4",
+              "size": 269215
+            },
+            {
+              "id": 9470915416,
+              "name": "gszv110-F10-seat1-shard3",
+              "size": 268151
+            },
+            {
+              "id": 9470908342,
+              "name": "gszv110-F10-seat0-shard5",
+              "size": 262493
+            },
+            {
+              "id": 9470881397,
+              "name": "gszv110-F10-seat0-shard6",
+              "size": 271338
+            },
+            {
+              "id": 9470870790,
+              "name": "gszv110-F10-seat1-shard5",
+              "size": 273467
+            },
+            {
+              "id": 9470860177,
+              "name": "gszv110-F10-seat1-shard0",
+              "size": 276205
+            },
+            {
+              "id": 9470835519,
+              "name": "gszv110-F10-seat1-shard2",
+              "size": 272418
+            },
+            {
+              "id": 9470834669,
+              "name": "gszv110-F10-seat0-shard2",
+              "size": 275455
+            },
+            {
+              "id": 9470813663,
+              "name": "gszv110-F10-seat1-shard1",
+              "size": 269329
+            },
+            {
+              "id": 9470813348,
+              "name": "gszv110-F10-seat1-shard7",
+              "size": 274140
+            },
+            {
+              "id": 9470789971,
+              "name": "gszv110-F10-seat0-shard3",
+              "size": 267972
+            },
+            {
+              "id": 9470755522,
+              "name": "gszv110-F10-seat0-shard9",
+              "size": 273424
+            },
+            {
+              "id": 9470477716,
+              "name": "gsz-single-v110-runtime",
+              "size": 201425488
+            }
+          ],
+          "conclusion": "failure",
           "createdAt": "2026-08-22T04:10:37Z",
           "event": "push",
           "headSha": "52c55cf724f7097a1656946f5fa597614de5b18e",
           "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550996602",
           "id": 32550996602,
-          "jobStates": {},
-          "jobs": 0,
-          "status": "pending",
-          "updatedAt": "2026-08-22T04:10:39Z"
+          "jobStates": {
+            "failure": 2,
+            "success": 80
+          },
+          "jobs": 82,
+          "status": "completed",
+          "updatedAt": "2026-08-22T09:53:37Z"
         }
       ],
       "workflow": "kinnan-v110-gsz-single-2k.yml"
