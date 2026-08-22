@@ -1,4 +1,19 @@
 {
+  "kinnan-v110-gsz-single-2k.yml": {
+    "conclusion": null,
+    "createdAt": "2026-08-22T04:10:37Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550996602",
+    "id": 32550996602,
+    "jobCounts": {
+      "in_progress": 18,
+      "queued": 25,
+      "success": 38
+    },
+    "reports": [],
+    "status": "queued",
+    "updatedAt": "2026-08-22T04:46:47Z"
+  },
   "kinnan-v110-shared-key-revalidation.yml": {
     "conclusion": "success",
     "createdAt": "2026-08-22T02:04:05Z",
@@ -32,6 +47,24 @@
     ],
     "status": "completed",
     "updatedAt": "2026-08-22T02:08:02Z"
+  },
+  "kinnan-v110-singleton-screen.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-22T04:03:49Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32550688741",
+    "id": 32550688741,
+    "jobCounts": {
+      "success": 14
+    },
+    "reports": [
+      {
+        "id": 9470437316,
+        "name": "v110-singletons-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-22T04:43:29Z"
   },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
