@@ -1,1 +1,1 @@
-2026-08-22T09:11:00-04:00 inspect active decision-grade Kinnan lanes including v1.10 Evolution singleton 2k
+2026-08-22T15:03:00-04:00 inspect active decision-grade Kinnan lanes including v1.12 Evolution key revalidation
