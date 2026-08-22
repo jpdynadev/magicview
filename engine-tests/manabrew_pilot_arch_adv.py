@@ -9,11 +9,12 @@ import manabrew_pilot_arch as arch
 import manabrew_pilot_v8 as runner
 
 # Cache/pilot identity must follow the repaired architecture policy actually in
-# use. v1.10 also breaks a pathological Forge replacement loop by declining a
-# repeated identical Mockingbird replacement prompt after first allowing the
-# normal policy decision. This is intentionally scoped to the exact same
-# visible state so normal, resolvable copy choices are unchanged.
-runner.PILOT_VERSION = 'arch-aware-v1.10-adversarial'
+# use. v1.10 broke a pathological Forge Mockingbird replacement loop. v1.11
+# additionally prevents selecting Kinnan's seven-mana activation when the
+# authoritative snapshot mana pool plus currently advertised mana abilities
+# cannot actually pay it. Forge can advertise the activation before payment is
+# feasible; cancelling the subsequent payManaCost prompt can strand the engine.
+runner.PILOT_VERSION = 'arch-aware-v1.11-adversarial'
 
 _COLOR_ALIASES = {
     'W': 'W', 'WHITE': 'W',
@@ -88,6 +89,115 @@ _ARCH_ADV_RESPONSE = runner.base.response_for
 _MOCKINGBIRD_BOOLEAN_STATES: set[tuple[int, str, str]] = set()
 
 
+def _player_mana_pool_total(snapshot: dict[str, Any], player: int) -> int:
+    """Read authoritative floating mana from GameViewDto.PlayerDto."""
+    wanted = f'player-{player}'
+    for item in snapshot.get('players', []) or []:
+        if str(item.get('id') or '') != wanted:
+            continue
+        pool = item.get('manaPool') or {}
+        total = 0
+        for value in pool.values():
+            try:
+                total += max(0, int(value or 0))
+            except (TypeError, ValueError):
+                continue
+        return total
+    return 0
+
+
+def _mana_action_capacity(action: dict[str, Any]) -> int:
+    """Upper-bound mana from one advertised source activation.
+
+    Multiple color choices for the same permanent are deduplicated by caller.
+    If the protocol omits producedMana for a known mana ability (for example a
+    Chrome Mox color choice), count it conservatively as one mana.
+    """
+    if not (
+        action.get('isManaAbility')
+        or action.get('type') == 'activateManaAbility'
+    ):
+        return 0
+    produced = action.get('producedMana') or []
+    amount = 0
+    for item in produced:
+        try:
+            amount += max(0, int(item.get('amount') or 0))
+        except (AttributeError, TypeError, ValueError):
+            continue
+    return amount or 1
+
+
+def _available_mana_upper_bound(
+    inp: dict[str, Any], snapshot: dict[str, Any], player: int
+) -> int:
+    """Floating pool plus maximum one-shot mana from each advertised source."""
+    per_source: dict[str, int] = {}
+    for action in inp.get('actions', []) or []:
+        capacity = _mana_action_capacity(action)
+        if capacity <= 0:
+            continue
+        source = str(action.get('cardId') or action.get('card_id') or action.get('id') or '')
+        if not source:
+            continue
+        per_source[source] = max(per_source.get(source, 0), capacity)
+    return _player_mana_pool_total(snapshot, player) + sum(per_source.values())
+
+
+def _guard_unpayable_kinnan_activation(
+    prompt: dict[str, Any],
+    snapshot: dict[str, Any],
+    deck: str,
+    player: int,
+    answer: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Avoid the exact activate-then-cancel path that can idle Forge.
+
+    Forge's chooseAction prompt may advertise Kinnan's {5}{G}{U} activation even
+    when the subsequent payManaCost prompt cannot be completed. The v1.10
+    forensic seed 3430166 reproduced this deterministically: the pilot selected
+    Kinnan, payment cancelled as unpayable, and the harness received no further
+    semantic progress. Only filter that activation when even an optimistic total
+    of floating mana plus one activation from each advertised mana source is <7.
+    Every other action and all actual payment/color legality remain Forge-owned.
+    """
+    if deck != 'Kinnan':
+        return answer
+    inp = prompt.get('input') or {}
+    if inp.get('type') != 'chooseAction':
+        return answer
+    output = (answer or {}).get('output') or {}
+    if output.get('type') != 'act' or not output.get('actionId'):
+        return answer
+    chosen_id = str(output['actionId'])
+    chosen = next(
+        (action for action in (inp.get('actions') or []) if str(action.get('id') or '') == chosen_id),
+        None,
+    )
+    if not chosen or chosen.get('type') != 'activateAbility':
+        return answer
+    if runner._action_card(chosen, snapshot) != 'Kinnan, Bonder Prodigy':
+        return answer
+    description = str(chosen.get('description') or chosen.get('label') or '')
+    cost = str(chosen.get('cost') or '')
+    if '{5}{G}{U}' not in (cost + description).replace(' ', ''):
+        return answer
+    if _available_mana_upper_bound(inp, snapshot, player) >= 7:
+        return answer
+
+    filtered_prompt = dict(prompt)
+    filtered_input = dict(inp)
+    filtered_input['actions'] = [
+        action for action in (inp.get('actions') or [])
+        if str(action.get('id') or '') != chosen_id
+    ]
+    filtered_prompt['input'] = filtered_input
+    retry = _ARCH_ADV_RESPONSE(filtered_prompt, snapshot, deck, player)
+    if retry is not None:
+        return retry
+    return {'type': 'chooseAction', 'output': {'type': 'pass', 'exhaustStack': False}}
+
+
 def repaired_response(
     prompt: dict[str, Any], snapshot: dict[str, Any], deck: str, player: int
 ) -> dict[str, Any] | None:
@@ -102,7 +212,8 @@ def repaired_response(
                     'output': {'type': 'decision', 'value': False},
                 }
             _MOCKINGBIRD_BOOLEAN_STATES.add(key)
-    return _ARCH_ADV_RESPONSE(prompt, snapshot, deck, player)
+    answer = _ARCH_ADV_RESPONSE(prompt, snapshot, deck, player)
+    return _guard_unpayable_kinnan_activation(prompt, snapshot, deck, player, answer)
 
 
 runner.base.response_for = repaired_response
