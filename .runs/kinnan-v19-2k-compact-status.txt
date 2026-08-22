@@ -1,1 +1,1 @@
-2026-08-21T18:58:00-04:00 refresh high-value Kinnan v19 status after repaired shared-key forensic rerun; inspect before any further scaling
+2026-08-21T20:07:00-04:00 refresh high-value Kinnan v19 status including JVM/shared-key memory forensics before any further scaling
