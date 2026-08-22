@@ -38,6 +38,8 @@ jobs:
               'kinnan-v110-shared-key-revalidation.yml',
               'kinnan-v110-singleton-screen.yml',
               'kinnan-v110-gsz-single-2k.yml',
+              'kinnan-v110-gsz-baseline-timeout-forensic.yml',
+              'kinnan-v110-gsz-f10-timeout-forensic.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
