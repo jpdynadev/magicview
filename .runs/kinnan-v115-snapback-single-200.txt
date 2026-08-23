@@ -1,0 +1,1 @@
+Trigger fresh strict v1.15 F10 vs Snapback singleton 200-pair triage after Shoal clean rejection. Fresh 3,900,000+ canonical keys; 7,000-prompt/240-second matched profile; no incompatible cache reuse.
