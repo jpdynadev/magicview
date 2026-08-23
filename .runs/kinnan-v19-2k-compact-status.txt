@@ -1,1 +1,1 @@
-2026-08-23T02:03:00-04:00 refresh high-value Kinnan status including v1.13 Evolution idle forensics
+2026-08-23T02:59:00-04:00 refresh high-value Kinnan status including v1.14 Evolution key revalidation
