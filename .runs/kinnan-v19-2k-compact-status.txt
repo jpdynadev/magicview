@@ -1,1 +1,1 @@
-2026-08-23T00:10:00Z refresh high-value Kinnan status after v1.13 Evolution 2k retrigger
+2026-08-23T02:03:00-04:00 refresh high-value Kinnan status including v1.13 Evolution idle forensics
