@@ -52,6 +52,7 @@ jobs:
               'kinnan-v115-evolution-key-revalidation.yml',
               'kinnan-v115-evolution-single-2k.yml',
               'kinnan-v115-evolution-f10-promptcap-forensic-3620191.yml',
+              'kinnan-v115-promptcap-7000-revalidation.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
