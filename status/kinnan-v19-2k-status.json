@@ -781,6 +781,47 @@
       ],
       "workflow": "kinnan-v113-evolution-key-revalidation.yml"
     },
+    "evolutionKeyV115": {
+      "runs": [
+        {
+          "artifacts": [
+            {
+              "id": 9489476002,
+              "name": "v115-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep1",
+              "size": 4211
+            },
+            {
+              "id": 9489467420,
+              "name": "v115-evolution-key-revalidation-F10-rep2",
+              "size": 3636
+            },
+            {
+              "id": 9489464620,
+              "name": "v115-evolution-key-revalidation-F10-rep1",
+              "size": 3643
+            },
+            {
+              "id": 9489461631,
+              "name": "v115-evolution-key-revalidation-F10_EVOLUTION_SINGLE-rep2",
+              "size": 4133
+            }
+          ],
+          "conclusion": "success",
+          "createdAt": "2026-08-23T07:13:03Z",
+          "event": "push",
+          "headSha": "1c6c6e27f95607cb58e3001bf411e3bb0da2ad4c",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32624977649",
+          "id": 32624977649,
+          "jobStates": {
+            "success": 4
+          },
+          "jobs": 4,
+          "status": "completed",
+          "updatedAt": "2026-08-23T07:17:51Z"
+        }
+      ],
+      "workflow": "kinnan-v115-evolution-key-revalidation.yml"
+    },
     "evolutionSingleV1102k": {
       "runs": [
         {
@@ -1232,6 +1273,162 @@
         }
       ],
       "workflow": "kinnan-v110-evolution-single-2k.yml"
+    },
+    "evolutionSingleV1152k": {
+      "runs": [
+        {
+          "artifacts": [],
+          "conclusion": null,
+          "createdAt": "2026-08-23T08:11:36Z",
+          "event": "push",
+          "headSha": "65be64af2435a1e12d38ba6686d0e98311bbfb8d",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32627595608",
+          "id": 32627595608,
+          "jobStates": {},
+          "jobs": 0,
+          "status": "pending",
+          "updatedAt": "2026-08-23T08:11:37Z"
+        },
+        {
+          "artifacts": [
+            {
+              "id": 9490770074,
+              "name": "evolutionv115-F10-seat3-shard2",
+              "size": 276158
+            },
+            {
+              "id": 9490765510,
+              "name": "evolutionv115-F10-seat2-shard2",
+              "size": 267350
+            },
+            {
+              "id": 9490761999,
+              "name": "evolutionv115-F10-seat2-shard0",
+              "size": 270593
+            },
+            {
+              "id": 9490491760,
+              "name": "evolutionv115-F10-seat1-shard0",
+              "size": 272745
+            },
+            {
+              "id": 9490490546,
+              "name": "evolutionv115-F10-seat1-shard6",
+              "size": 271725
+            },
+            {
+              "id": 9490489429,
+              "name": "evolutionv115-F10-seat0-shard0",
+              "size": 277831
+            },
+            {
+              "id": 9490489099,
+              "name": "evolutionv115-F10-seat1-shard4",
+              "size": 276152
+            },
+            {
+              "id": 9490486982,
+              "name": "evolutionv115-F10-seat0-shard5",
+              "size": 274686
+            },
+            {
+              "id": 9490476342,
+              "name": "evolutionv115-F10-seat0-shard4",
+              "size": 270202
+            },
+            {
+              "id": 9490476211,
+              "name": "evolutionv115-F10-seat0-shard8",
+              "size": 274784
+            },
+            {
+              "id": 9490469222,
+              "name": "evolutionv115-F10-seat0-shard6",
+              "size": 268872
+            },
+            {
+              "id": 9490467339,
+              "name": "evolutionv115-F10-seat1-shard7",
+              "size": 263262
+            },
+            {
+              "id": 9490467176,
+              "name": "evolutionv115-F10-seat0-shard3",
+              "size": 269574
+            },
+            {
+              "id": 9490465949,
+              "name": "evolutionv115-F10-seat0-shard1",
+              "size": 274058
+            },
+            {
+              "id": 9490463653,
+              "name": "evolutionv115-F10-seat0-shard7",
+              "size": 275217
+            },
+            {
+              "id": 9490452410,
+              "name": "evolutionv115-F10-seat1-shard3",
+              "size": 266881
+            },
+            {
+              "id": 9490448771,
+              "name": "evolutionv115-F10-seat1-shard5",
+              "size": 273162
+            },
+            {
+              "id": 9490441433,
+              "name": "evolutionv115-F10-seat1-shard2",
+              "size": 277289
+            },
+            {
+              "id": 9490395073,
+              "name": "evolutionv115-F10-seat1-shard9",
+              "size": 271084
+            },
+            {
+              "id": 9490386420,
+              "name": "evolutionv115-F10-seat0-shard9",
+              "size": 270552
+            },
+            {
+              "id": 9490353128,
+              "name": "evolutionv115-F10-seat0-shard2",
+              "size": 272374
+            },
+            {
+              "id": 9490308725,
+              "name": "evolutionv115-F10-seat1-shard8",
+              "size": 269359
+            },
+            {
+              "id": 9490298248,
+              "name": "evolutionv115-F10-seat1-shard1",
+              "size": 270288
+            },
+            {
+              "id": 9490031548,
+              "name": "evolution-single-v115-runtime",
+              "size": 201428522
+            }
+          ],
+          "conclusion": null,
+          "createdAt": "2026-08-23T08:01:44Z",
+          "event": "push",
+          "headSha": "829488c85147205d3409b9cda9107329303c4e25",
+          "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32627152738",
+          "id": 32627152738,
+          "jobStates": {
+            "in_progress": 17,
+            "queued": 40,
+            "success": 24
+          },
+          "jobs": 81,
+          "status": "queued",
+          "updatedAt": "2026-08-23T08:04:54Z"
+        }
+      ],
+      "workflow": "kinnan-v115-evolution-single-2k.yml"
     },
     "gszSingleV1102k": {
       "runs": [
