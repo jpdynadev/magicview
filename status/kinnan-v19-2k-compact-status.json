@@ -586,6 +586,38 @@
     "status": "completed",
     "updatedAt": "2026-08-23T16:09:35Z"
   },
+  "kinnan-v115-shoal-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T17:06:21Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32653762748",
+    "id": 32653762748,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9497451097,
+        "name": "v115-shoal-singletons-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T17:48:34Z"
+  },
+  "kinnan-v115-snapback-single-200.yml": {
+    "conclusion": null,
+    "createdAt": "2026-08-23T17:59:28Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32656595648",
+    "id": 32656595648,
+    "jobCounts": {
+      "in_progress": 8,
+      "success": 1
+    },
+    "reports": [],
+    "status": "in_progress",
+    "updatedAt": "2026-08-23T18:02:44Z"
+  },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
     "createdAt": "2026-08-21T03:17:25Z",
