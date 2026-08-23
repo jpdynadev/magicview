@@ -305,6 +305,66 @@
     "status": "completed",
     "updatedAt": "2026-08-22T18:18:12Z"
   },
+  "kinnan-v113-evolution-f10-idle-forensic-3520304.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T04:10:47Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32617223449",
+    "id": 32617223449,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9487363798,
+        "name": "v113-evolution-f10-idle-forensic-3520304-xmx1280-rep2"
+      },
+      {
+        "id": 9487358962,
+        "name": "v113-evolution-f10-idle-forensic-3520304-xmx2048-rep2"
+      },
+      {
+        "id": 9487357316,
+        "name": "v113-evolution-f10-idle-forensic-3520304-xmx2048-rep1"
+      },
+      {
+        "id": 9487354857,
+        "name": "v113-evolution-f10-idle-forensic-3520304-xmx1280-rep1"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T04:16:35Z"
+  },
+  "kinnan-v113-evolution-f10-idle-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T05:03:55Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32619415048",
+    "id": 32619415048,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9487970882,
+        "name": "v113-evolution-f10-idle-forensic-xmx1280-rep2"
+      },
+      {
+        "id": 9487969689,
+        "name": "v113-evolution-f10-idle-forensic-xmx1280-rep1"
+      },
+      {
+        "id": 9487968230,
+        "name": "v113-evolution-f10-idle-forensic-xmx2048-rep1"
+      },
+      {
+        "id": 9487962743,
+        "name": "v113-evolution-f10-idle-forensic-xmx2048-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T05:09:05Z"
+  },
   "kinnan-v113-evolution-key-revalidation.yml": {
     "conclusion": "success",
     "createdAt": "2026-08-22T20:02:55Z",
@@ -336,25 +396,46 @@
     "updatedAt": "2026-08-22T20:08:15Z"
   },
   "kinnan-v113-evolution-single-2k.yml": {
-    "conclusion": null,
+    "conclusion": "failure",
     "createdAt": "2026-08-22T21:59:43Z",
     "failedJobs": [
       {
         "conclusion": "failure",
-        "id": 97099915457,
+        "id": 97133054246,
         "name": "confirm (F10, 2, 6)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97137714871,
+        "name": "aggregate"
       }
     ],
     "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32601182839",
     "id": 32601182839,
     "jobCounts": {
-      "failure": 1,
-      "in_progress": 15,
-      "success": 65
+      "failure": 2,
+      "success": 80
     },
-    "reports": [],
-    "status": "in_progress",
-    "updatedAt": "2026-08-22T23:54:50Z"
+    "reports": [
+      {
+        "id": 9487061096,
+        "name": "evolutionv113-report"
+      },
+      {
+        "id": 9486255857,
+        "name": "evolutionv113-report"
+      },
+      {
+        "id": 9485563534,
+        "name": "evolutionv113-report"
+      },
+      {
+        "id": 9484701427,
+        "name": "evolutionv113-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T03:51:34Z"
   },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
