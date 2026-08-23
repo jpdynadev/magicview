@@ -479,6 +479,72 @@
     "status": "completed",
     "updatedAt": "2026-08-23T06:18:38Z"
   },
+  "kinnan-v115-commandeer-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T18:59:17Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32659786087",
+    "id": 32659786087,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9498984387,
+        "name": "v115-commandeer-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T19:40:53Z"
+  },
+  "kinnan-v115-cyclonic-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T20:00:28Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32663048348",
+    "id": 32663048348,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9499809854,
+        "name": "v115-cyclonic-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T20:41:35Z"
+  },
+  "kinnan-v115-cyclonic-single-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-23T21:03:11Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97260104232,
+        "name": "build"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97260158629,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32666311572",
+    "id": 32666311572,
+    "jobCounts": {
+      "failure": 2,
+      "skipped": 1
+    },
+    "reports": [
+      {
+        "id": 9500111384,
+        "name": "cyclonicv115-2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T21:03:47Z"
+  },
   "kinnan-v115-evolution-f10-promptcap-forensic-3620191.yml": {
     "conclusion": "success",
     "createdAt": "2026-08-23T15:00:46Z",
@@ -605,18 +671,22 @@
     "updatedAt": "2026-08-23T17:48:34Z"
   },
   "kinnan-v115-snapback-single-200.yml": {
-    "conclusion": null,
+    "conclusion": "success",
     "createdAt": "2026-08-23T17:59:28Z",
     "failedJobs": [],
     "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32656595648",
     "id": 32656595648,
     "jobCounts": {
-      "in_progress": 8,
-      "success": 1
+      "success": 10
     },
-    "reports": [],
-    "status": "in_progress",
-    "updatedAt": "2026-08-23T18:02:44Z"
+    "reports": [
+      {
+        "id": 9498171341,
+        "name": "v115-snapback-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T18:41:41Z"
   },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
