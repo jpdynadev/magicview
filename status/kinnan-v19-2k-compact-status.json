@@ -479,6 +479,36 @@
     "status": "completed",
     "updatedAt": "2026-08-23T06:18:38Z"
   },
+  "kinnan-v115-evolution-f10-promptcap-forensic-3620191.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T15:00:46Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32647203327",
+    "id": 32647203327,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9495259864,
+        "name": "v115-evolution-f10-promptcap-forensic-3620191-xmx2048-rep1"
+      },
+      {
+        "id": 9495256490,
+        "name": "v115-evolution-f10-promptcap-forensic-3620191-xmx1280-rep1"
+      },
+      {
+        "id": 9495248802,
+        "name": "v115-evolution-f10-promptcap-forensic-3620191-xmx2048-rep2"
+      },
+      {
+        "id": 9495243507,
+        "name": "v115-evolution-f10-promptcap-forensic-3620191-xmx1280-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T15:06:54Z"
+  },
   "kinnan-v115-evolution-key-revalidation.yml": {
     "conclusion": "success",
     "createdAt": "2026-08-23T07:13:03Z",
@@ -510,15 +540,38 @@
     "updatedAt": "2026-08-23T07:17:51Z"
   },
   "kinnan-v115-evolution-single-2k.yml": {
-    "conclusion": null,
+    "conclusion": "failure",
     "createdAt": "2026-08-23T08:11:36Z",
-    "failedJobs": [],
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97205649644,
+        "name": "confirm (F10, 2, 3)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97211127045,
+        "name": "aggregate"
+      }
+    ],
     "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32627595608",
     "id": 32627595608,
-    "jobCounts": {},
-    "reports": [],
-    "status": "pending",
-    "updatedAt": "2026-08-23T08:11:37Z"
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9494969542,
+        "name": "evolutionv115-report"
+      },
+      {
+        "id": 9493739202,
+        "name": "evolutionv115-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-23T14:44:57Z"
   },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
