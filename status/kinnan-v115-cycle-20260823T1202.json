@@ -1,0 +1,55 @@
+{
+  "incumbent": "F10",
+  "challenger": "F10_EVOLUTION_SINGLE",
+  "mutation": {"cut": ["Hydroelectric Specimen"], "add": ["Eldritch Evolution"]},
+  "v115Evolution2k": {
+    "strictValid": false,
+    "pairedKeys": 1999,
+    "F10Valid": 1999,
+    "candidateValid": 2000,
+    "errorAttempts": {"F10": {"prompt_cap": 3}, "F10_EVOLUTION_SINGLE": {}},
+    "paired": {
+      "assemblyT4": {"F10": 431, "candidate": 398, "deltaRate": -0.0165082541, "pTwoSided": 0.1444661542},
+      "attemptT4": {"F10": 241, "candidate": 218, "deltaRate": -0.0115057529, "pTwoSided": 0.2136124228},
+      "protectedT4": {"F10": 79, "candidate": 65, "deltaRate": -0.0070035018, "pTwoSided": 0.2312656822},
+      "wins": {"F10": 9, "candidate": 11, "deltaRate": 0.0010005003, "pTwoSided": 0.6875}
+    },
+    "mulligans": {"F10": 810, "candidate": 825},
+    "exposure": {"pairedKeys": 1999, "exposedKeys": 717, "F10Protected": 33, "candidateProtected": 38},
+    "podsProtected": {
+      "balanced": {"F10": 21, "candidate": 18},
+      "midrange": {"F10": 18, "candidate": 10},
+      "mixed": {"F10": 22, "candidate": 19},
+      "turbo": {"F10": 18, "candidate": 18}
+    }
+  },
+  "forensic3620191": {
+    "workflowRunId": 32647203327,
+    "conclusion": "success",
+    "representative1280": {
+      "status": "horizon_complete",
+      "pilotVersion": "arch-aware-v1.15-adversarial",
+      "seed": 3620191,
+      "seat": 2,
+      "pod": "mixed",
+      "prompts": 6299,
+      "firstAssemblyTurn": 2,
+      "firstAttemptTurn": 3,
+      "strictProtectedT4": false,
+      "win": false,
+      "primaryFailureCode": "UNRESOLVED_ATTEMPT"
+    },
+    "diagnosis": "The canonical 5000-prompt profile censors a valid horizon-complete game. This is a profile prompt-cap issue rather than a crash or persistent engine loop."
+  },
+  "action": {
+    "createdWorkflow": "kinnan-v115-promptcap-7000-revalidation.yml",
+    "profile": "arch-repaired-v115-promptcap-7000-240s",
+    "key": {"seed": 3620191, "seat": 2, "pod": "mixed"},
+    "variants": ["F10", "F10_EVOLUTION_SINGLE"],
+    "repetitionsEach": 2,
+    "maxPrompts": 7000,
+    "maxSeconds": 240,
+    "triggerCommit": "f3cd0c927cee42dae4b1987c025e77909f342b49"
+  },
+  "decision": "Do not promote Evolution. It is directionally worse on every primary deterministic T4 endpoint in the clean near-complete v1.15 sample. Validate the 7000-prompt production profile before resuming search. If validation passes, retire Evolution and test a protection/resilience mutation that preserves Hydroelectric Specimen."
+}
