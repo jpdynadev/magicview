@@ -1,0 +1,1 @@
+2026-08-23T17:00:45Z triage F10 vs -Dispel +Disrupting Shoal under matched v1.15 7000-prompt/240-second profile after prompt-cap gate passed 4/4.
