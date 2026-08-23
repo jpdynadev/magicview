@@ -53,6 +53,8 @@ jobs:
               'kinnan-v115-evolution-single-2k.yml',
               'kinnan-v115-evolution-f10-promptcap-forensic-3620191.yml',
               'kinnan-v115-promptcap-7000-revalidation.yml',
+              'kinnan-v115-shoal-single-200.yml',
+              'kinnan-v115-snapback-single-200.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
@@ -68,7 +70,7 @@ jobs:
           PY
       - run: |
           git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config user.email 4189826+github-actions[bot]@users.noreply.github.com
           git add -- status/kinnan-v19-2k-compact-status.json
           git diff --cached --quiet && exit 0
           git commit -m 'Record compact Kinnan v19 high-value status [skip ci]'
