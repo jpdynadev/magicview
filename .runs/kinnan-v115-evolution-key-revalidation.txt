@@ -1,0 +1,1 @@
+Fresh canonical v1.15 revalidation after Monolith payment-progress repair. Replay F10 and F10_EVOLUTION_SINGLE twice each on seed 3520304 / seat 2 / balanced under the matched 240s production profile. Require 4/4 valid arch-aware-v1.15-adversarial terminal records before any new 2k scaling. Do not reuse v1.14 or earlier evidence as v1.15 promotion evidence.
