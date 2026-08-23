@@ -49,13 +49,20 @@ SPECS = {
         ['Hydroelectric Specimen'],
         ['Eldritch Evolution'],
     ),
+    # Resilience singleton promoted from a clean v1.15 200-pair screen.
+    # Keep this in the shared generator so decision-grade 2k build/confirm jobs
+    # materialize the exact same 99 without relying on a screen-only helper.
+    'F10_CYCLONIC_SINGLE': (
+        ['Energy Refractor'],
+        ['Cyclonic Rift'],
+    ),
 }
 
 REGISTERED_ADDS = {
     'Reshape', 'Trinket Mage', 'Spellseeker', 'Mystical Tutor', "Green Sun's Zenith",
     'Eldritch Evolution', 'Tribute Mage', 'Copy Enchantment', 'Copy Artifact',
     'Flesh Duplicate', 'Mirage Mirror', 'Clever Impersonator', 'Gene Pollinator',
-    'Phyrexian Metamorph', 'Devoted Druid', "Machine God's Effigy",
+    'Phyrexian Metamorph', 'Devoted Druid', "Machine God's Effigy", 'Cyclonic Rift',
 }
 
 
