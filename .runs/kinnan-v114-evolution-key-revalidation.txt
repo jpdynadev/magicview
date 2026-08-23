@@ -1,0 +1,1 @@
+Revalidate the persistent F10 seed 3520304 / seat 2 / balanced path after the v1.14 Monolith untap affordability repair. Run F10 and F10_EVOLUTION_SINGLE twice each under the matched 240-second production envelope. Diagnostic prerequisite only; do not treat older v1.13 cache/results as v1.14 promotion evidence.
