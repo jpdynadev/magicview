@@ -1,1 +1,1 @@
-2026-08-23T13:00:45-04:00 refresh high-value Kinnan status including v1.15 7000-prompt revalidation
+2026-08-23T14:07:55-04:00 refresh high-value Kinnan status including Shoal and Snapback singleton screens
