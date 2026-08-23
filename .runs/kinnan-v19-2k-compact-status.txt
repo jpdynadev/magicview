@@ -1,1 +1,1 @@
-2026-08-23T11:08:00-04:00 refresh high-value Kinnan status including v1.15 Evolution 2k and seed-3620191 prompt-cap forensic
+2026-08-23T12:09:15-04:00 refresh high-value Kinnan status including v1.15 7000-prompt revalidation
