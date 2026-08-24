@@ -1,0 +1,1 @@
+fresh v1.16 Consign singleton screen after replicate-number repair; seed bank 4500000+; strict 200/200 paired triage; no v1.15 cache reuse
