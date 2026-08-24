@@ -497,6 +497,41 @@
     "status": "completed",
     "updatedAt": "2026-08-23T19:40:53Z"
   },
+  "kinnan-v115-consign-single-200.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-24T03:09:33Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97310622703,
+        "name": "screen (F10_CONSIGN_SINGLE, 0)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97310622730,
+        "name": "screen (F10_CONSIGN_SINGLE, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97317002895,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32685473052",
+    "id": 32685473052,
+    "jobCounts": {
+      "failure": 3,
+      "success": 7
+    },
+    "reports": [
+      {
+        "id": 9506365577,
+        "name": "v115-consign-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T03:56:52Z"
+  },
   "kinnan-v115-cyclonic-single-200.yml": {
     "conclusion": "success",
     "createdAt": "2026-08-23T20:00:28Z",
@@ -516,17 +551,26 @@
     "updatedAt": "2026-08-23T20:41:35Z"
   },
   "kinnan-v115-cyclonic-single-2k.yml": {
-    "conclusion": null,
+    "conclusion": "success",
     "createdAt": "2026-08-23T22:02:30Z",
     "failedJobs": [],
     "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32669357722",
     "id": 32669357722,
     "jobCounts": {
-      "in_progress": 1
+      "success": 82
     },
-    "reports": [],
-    "status": "in_progress",
-    "updatedAt": "2026-08-23T22:02:34Z"
+    "reports": [
+      {
+        "id": 9503842726,
+        "name": "cyclonicv115-2k-report"
+      },
+      {
+        "id": 9503023136,
+        "name": "cyclonicv115-2k-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T01:31:23Z"
   },
   "kinnan-v115-evolution-f10-promptcap-forensic-3620191.yml": {
     "conclusion": "success",
@@ -670,6 +714,24 @@
     ],
     "status": "completed",
     "updatedAt": "2026-08-23T18:41:41Z"
+  },
+  "kinnan-v115-strix-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T02:02:06Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32681702740",
+    "id": 32681702740,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9505053842,
+        "name": "v115-strix-report"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T02:44:56Z"
   },
   "kinnan-v19-copy-tutor-2k.yml": {
     "conclusion": "failure",
