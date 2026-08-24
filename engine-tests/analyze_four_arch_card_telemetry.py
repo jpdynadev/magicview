@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 VALID = {"game_over", "horizon_complete"}
+EXPECTED_PILOT = "arch-aware-v1.17-fourarch-adversarial"
 
 
 def load_json(path: str) -> dict[str, Any]:
@@ -66,14 +67,12 @@ def game_card_features(game, card):
     zone=[e for e in events if e.get("kind")=="zoneTransition" and e.get("card")==card]
     seen=card in opening or card in kept or bool(draws) or bool(actions) or bool(zone)
     with_prot=any(bool(e.get("hasProtection")) for e in casts)
-    hand_context=collections.Counter()
-    source_context=collections.Counter()
+    hand_context=collections.Counter(); source_context=collections.Counter()
     for e in casts:
         for other in e.get("handBefore") or []:
             if other != card: hand_context[other]+=1
     for e in targeted:
-        src=e.get("sourceCard") or "UNKNOWN"
-        source_context[str(src)]+=1
+        source_context[str(e.get("sourceCard") or "UNKNOWN")]+=1
     return {
         "opening":card in opening,"kept":card in kept,"rejected":rejected,"putBack":putback,
         "drawn":bool(draws),"seen":seen,"actions":len(actions),"castOrPlay":bool(casts),
@@ -106,10 +105,10 @@ def main():
             try:r=json.loads(line)
             except Exception:continue
             if r.get("variant") in errors: errors[r["variant"]].append(r)
-    maps={v:{key(r):r for r in rows[v] if r.get("status") in VALID and r.get("pilotVersion")=="arch-aware-v1.16-adversarial"} for v in variants}
-    tmaps={v:{key(r):r for r in telemetry[v] if r.get("status") in VALID and r.get("pilotVersion")=="arch-aware-v1.16-adversarial"} for v in variants}
+    maps={v:{key(r):r for r in rows[v] if r.get("status") in VALID and r.get("pilotVersion")==EXPECTED_PILOT} for v in variants}
+    tmaps={v:{key(r):r for r in telemetry[v] if r.get("status") in VALID and r.get("pilotVersion")==EXPECTED_PILOT} for v in variants}
     base=maps["F10"]
-    report={"schema":"kinnan-four-architecture-card-telemetry-v1","strictValid":False,"variants":{},"paired":{},"cardAnalytics":{},"errorAttempts":{},"telemetryCoverage":{}}
+    report={"schema":"kinnan-four-architecture-card-telemetry-v1","pilotVersion":EXPECTED_PILOT,"strictValid":False,"variants":{},"paired":{},"cardAnalytics":{},"errorAttempts":{},"telemetryCoverage":{}}
     for v in variants:
         good=list(maps[v].values())
         report["variants"][v]={
@@ -138,17 +137,14 @@ def main():
                 p[metric]={"candidate":cv,"baseline":bv,"deltaRate":safe_rate(cv-bv,len(common)),**mcnemar(base,maps[v],common,metric)}
             report["paired"][v]=p
 
-    deckdir=Path(args.deck_dir)
-    csv_rows=[]
+    deckdir=Path(args.deck_dir); csv_rows=[]
     for v in variants:
-        cards=deck_cards(deckdir/deck_files[v]); games=[tmaps[v][k] for k in sorted(set(tmaps[v]) & set(maps[v]))]
-        card_report={}
+        cards=deck_cards(deckdir/deck_files[v]); games=[tmaps[v][k] for k in sorted(set(tmaps[v]) & set(maps[v]))]; card_report={}
         for card in cards:
             counts=collections.Counter(); rounds=collections.Counter(); handctx=collections.Counter(); sources=collections.Counter(); seen_pt4=seen_wins=notseen_pt4=notseen_n=played_pt4=played_n=0; first_action=[]; first_draw=[]
             for g in games:
                 f=game_card_features(g,card); pt4=bool(g.get("strictProtectedT4")); win=bool(g.get("kinnanWon"))
-                for name in ("opening","kept","rejected","putBack","drawn","seen","castOrPlay","targeted","playedWithProtection"):
-                    counts[name]+=int(bool(f[name]))
+                for name in ("opening","kept","rejected","putBack","drawn","seen","castOrPlay","targeted","playedWithProtection"): counts[name]+=int(bool(f[name]))
                 counts["actions"]+=f["actions"]; counts["activations"]+=f["activations"]; counts["targetedEvents"]+=f["targetedEvents"]
                 rounds.update(f["actionRounds"]); handctx.update(f["handContext"]); sources.update(f["sourceContext"])
                 if f["firstActionRound"] is not None:first_action.append(f["firstActionRound"])
@@ -157,15 +153,16 @@ def main():
                 else: notseen_pt4+=int(pt4); notseen_n+=1
                 if f["castOrPlay"]: played_n+=1; played_pt4+=int(pt4)
             n=len(games); seen=counts["seen"]
+            seen_rate=safe_rate(seen_pt4,seen); notseen_rate=safe_rate(notseen_pt4,notseen_n)
             item={
                 "games":n,"openingHandGames":counts["opening"],"keptHandGames":counts["kept"],"mulliganRejectedGames":counts["rejected"],"putBackGames":counts["putBack"],"drawnGames":counts["drawn"],"seenGames":seen,
                 "actionEvents":counts["actions"],"playedGames":counts["castOrPlay"],"activationEvents":counts["activations"],"hostileTargetedGames":counts["targeted"],"hostileTargetEvents":counts["targetedEvents"],
                 "playedWithProtectionGames":counts["playedWithProtection"],"playedWithProtectionRate":safe_rate(counts["playedWithProtection"],counts["castOrPlay"]),
-                "strictProtectedWhenSeen":seen_pt4,"strictProtectedRateWhenSeen":safe_rate(seen_pt4,seen),"strictProtectedRateWhenNotSeen":safe_rate(notseen_pt4,notseen_n),
-                "seenProtectedDelta":(safe_rate(seen_pt4,seen)-safe_rate(notseen_pt4,notseen_n)) if seen and notseen_n else None,
+                "strictProtectedWhenSeen":seen_pt4,"strictProtectedRateWhenSeen":seen_rate,"strictProtectedRateWhenNotSeen":notseen_rate,
+                "seenProtectedDelta":(seen_rate-notseen_rate) if seen_rate is not None and notseen_rate is not None else None,
                 "strictProtectedWhenPlayed":played_pt4,"strictProtectedRateWhenPlayed":safe_rate(played_pt4,played_n),"winsWhenSeen":seen_wins,
                 "avgFirstActionRound":safe_rate(sum(first_action),len(first_action)),"avgFirstDrawRound":safe_rate(sum(first_draw),len(first_draw)),
-                "actionRoundHistogram":{str(k):v for k,v in sorted(rounds.items())},"topHandContext":handctx.most_common(12),"interactionSources":sources.most_common(12),
+                "actionRoundHistogram":{str(k):val for k,val in sorted(rounds.items())},"topHandContext":handctx.most_common(12),"interactionSources":sources.most_common(12),
             }
             card_report[card]=item
             csv_rows.append({"variant":v,"card":card,**{k:item[k] for k in ("games","openingHandGames","keptHandGames","mulliganRejectedGames","putBackGames","drawnGames","seenGames","playedGames","playedWithProtectionRate","hostileTargetedGames","strictProtectedRateWhenSeen","strictProtectedRateWhenNotSeen","seenProtectedDelta","strictProtectedRateWhenPlayed","avgFirstActionRound")}})
