@@ -3,3 +3,4 @@ Run four explicit Kinnan architectures on 2,000 identical canonical paired keys 
 Architectures: F10 control; Logan Doan SIEGE 2026 top tournament list; F10 dork-density extreme; F10 node-density extreme.
 Use repaired v1.16 chain plus v1.17 experiment-only role coverage, semantic gate first, then strict 2,000/2,000/2,000/2,000 exact-key acceptance.
 Do not reuse incompatible cache evidence.
+Retrigger after workflow registration check at 2026-08-24T15:16Z.
