@@ -1,0 +1,103 @@
+name: Kinnan v115 Consign idle forensic
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v115-consign-idle-forensic.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v19-high-value-confirmation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v115-consign-idle-forensic
+  SIM_V2_FORENSIC_DIR: out
+
+jobs:
+  forensic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {seat: 0, seed: 4400046, pod: midrange, rep: 1}
+          - {seat: 0, seed: 4400046, pod: midrange, rep: 2}
+          - {seat: 2, seed: 4420038, pod: midrange, rep: 1}
+          - {seat: 2, seed: 4420038, pod: midrange, rep: 2}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired v1.15 runtime and Consign deck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v115_consign_single.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 - <<'PY'
+          from pathlib import Path
+          adv=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert 'arch-aware-v1.15-adversarial' in adv
+          p=Path('engine-tests/decks/Kinnan_ARCH_F10_CONSIGN_SINGLE.dck')
+          assert p.exists()
+          PY
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+      - name: Replay persistent Consign idle key with full diagnostics
+        env:
+          SEAT: ${{ matrix.seat }}
+          SEED: ${{ matrix.seed }}
+          POD: ${{ matrix.pod }}
+          REP: ${{ matrix.rep }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          OUT="out/consign-seat${SEAT}-seed${SEED}-${POD}-rep${REP}.json"
+          LOG="out/consign-seat${SEAT}-seed${SEED}-${POD}-rep${REP}.log"
+          CACHE=".sim-cache/v115-consign-idle-forensic-${GITHUB_RUN_ID}-s${SEAT}-${SEED}-${POD}-rep${REP}"
+          ENGINE="$MANABREW_REF:arch-v115-consign-idle-forensic:${GITHUB_RUN_ID}:${GITHUB_SHA}:s${SEAT}:${SEED}:${POD}:rep${REP}"
+          set +e
+          CEDH_POD="$POD" python3 engine-tests/sim_v2_forensic_driver.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode adversarial --variant F10_CONSIGN_SINGLE --fixed-seat "$SEAT" --seeds "$SEED" \
+            --max-round 4 --max-prompts 7000 --max-seconds 320 --jvm-reuse 1 \
+            --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces all \
+            --engine-id "$ENGINE" --exposure-card 'Energy Refractor' --exposure-card 'Consign to Memory' \
+            --output "$OUT" > "$LOG" 2>&1
+          RC=$?
+          set -e
+          echo "seat=$SEAT seed=$SEED pod=$POD rep=$REP rc=$RC" > out/summary.txt
+          python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(json.dumps({k:r.get(k) for k in ["status","variant","seed","kinnanSeat","podProfile","pilotVersion","firstAssemblyTurn","firstAttemptTurn","strictProtectedT4","kinnanWon","primaryFailureCode","prompts","wallMs","v2SemanticPromptAdvances","slotExposed"]},sort_keys=True))' "$OUT" >> out/summary.txt 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v115-consign-idle-forensic-seat${{ matrix.seat }}-seed${{ matrix.seed }}-rep${{ matrix.rep }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 5
