@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Add fair role coverage for the four-architecture telemetry experiment.
 
-The experiment deliberately includes cards not present in F10.  Without this
+The experiment deliberately includes cards not present in F10. Without this
 layer the existing mulligan/action heuristics would fail to count several added
-mana creatures as mana sources and would undervalue tournament/node cards.  The
+mana creatures as mana sources and would undervalue tournament/node cards. The
 changes are inert for F10 because they only add classifications for cards F10
-does not contain.  Bump pilot identity so no v1.16 row can be mixed in.
+does not contain. Bump pilot identity so no v1.16 row can be mixed in.
 """
 from pathlib import Path
 
@@ -16,9 +16,9 @@ text = text.replace("runner.PILOT_VERSION = 'arch-aware-v1.11-adversarial'", "ru
 anchor = "\nif __name__ == '__main__':\n    raise SystemExit(runner.main())\n"
 block = r'''
 
-# Four-architecture experimental role coverage.  These names are absent from
+# Four-architecture experimental role coverage. These names are absent from
 # the F10 control, so extending their classification cannot change F10 policy.
-base.LANDS.update({'Exotic Orchard', 'Tarnished Citadel'})
+arch.base.LANDS.update({'Exotic Orchard', 'Tarnished Citadel'})
 runner.ONE_G_DORKS.update({
     'Arbor Elf', 'Boreal Druid', 'Paradise Druid', 'Incubation Druid',
     'Priest of Titania', "Kiora's Follower", 'Devoted Druid', 'Wall of Roots',
