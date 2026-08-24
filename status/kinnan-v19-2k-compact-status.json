@@ -497,6 +497,36 @@
     "status": "completed",
     "updatedAt": "2026-08-23T19:40:53Z"
   },
+  "kinnan-v115-consign-idle-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T06:06:42Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32695966174",
+    "id": 32695966174,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9508907427,
+        "name": "v115-consign-idle-forensic-seat2-seed4420038-rep1"
+      },
+      {
+        "id": 9508899817,
+        "name": "v115-consign-idle-forensic-seat2-seed4420038-rep2"
+      },
+      {
+        "id": 9508891778,
+        "name": "v115-consign-idle-forensic-seat0-seed4400046-rep1"
+      },
+      {
+        "id": 9508886381,
+        "name": "v115-consign-idle-forensic-seat0-seed4400046-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T06:11:34Z"
+  },
   "kinnan-v115-consign-single-200.yml": {
     "conclusion": "failure",
     "createdAt": "2026-08-24T03:09:33Z",
