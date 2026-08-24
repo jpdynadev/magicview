@@ -4,3 +4,4 @@ Architectures: F10 control; Logan Doan SIEGE 2026 top tournament list; F10 dork-
 Use repaired v1.16 chain plus v1.17 experiment-only role coverage, semantic gate first, then strict 2,000/2,000/2,000/2,000 exact-key acceptance.
 Do not reuse incompatible cache evidence.
 Retrigger after workflow registration check at 2026-08-24T15:16Z.
+Retrigger for direct run visibility at 2026-08-24T22:05Z.
