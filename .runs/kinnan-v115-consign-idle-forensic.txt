@@ -1,0 +1,1 @@
+Replay the two persistent F10_CONSIGN_SINGLE midrange idle-timeout keys with full v1.15 diagnostics before any further scaling. Fresh forensic evidence only.
