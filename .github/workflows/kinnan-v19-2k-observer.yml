@@ -39,6 +39,12 @@ jobs:
               'evolutionKeyV115': 'kinnan-v115-evolution-key-revalidation.yml',
               'evolutionSingleV1152k': 'kinnan-v115-evolution-single-2k.yml',
               'broad200': 'kinnan-v19-broad-screen.yml',
+              'cyclonicV1152k': 'kinnan-v115-cyclonic-single-2k.yml',
+              'consignV116200': 'kinnan-v116-consign-single-200.yml',
+              'pongifyV116200': 'kinnan-v116-pongify-single-200.yml',
+              'pongifyV1162k': 'kinnan-v116-pongify-single-2k.yml',
+              'flashV116200': 'kinnan-v116-flash-photography-single-200.yml',
+              'fourArchV1172k': 'kinnan-v117-four-architecture-card-telemetry-2k.yml',
           }
 
           def gh(path):
