@@ -62,6 +62,9 @@ jobs:
               'kinnan-v115-consign-single-200.yml',
               'kinnan-v115-consign-idle-forensic.yml',
               'kinnan-v116-consign-key-revalidation.yml',
+              'kinnan-v116-consign-single-200.yml',
+              'kinnan-v116-pongify-single-200.yml',
+              'kinnan-v116-pongify-single-2k.yml',
           ]
           out={}
           def gh(path): return json.loads(subprocess.check_output(['gh','api',path],text=True))
