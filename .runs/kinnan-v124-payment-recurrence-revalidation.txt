@@ -1,0 +1,5 @@
+Trigger exact canonical revalidation after v1.24 no-progress Kinnan payment recurrence repair.
+Variants: F10 and TOURNAMENT_SIEGE_2026_LOGAN.
+Canonical key: seat=1 seed=5010140 pod=balanced.
+Fresh v1.24 engine/cache identities; jvm-reuse=1; full trace/stderr; 9000 prompts / 320 seconds.
+Do not scale or promote until both exact replays terminate validly.
