@@ -1,0 +1,1 @@
+Trigger v1.19 colored-payment revalidation for canonical seat=1 seed=5010140 balanced after v1.18 reproduced the Logan idle loop. Revalidate F10 and TOURNAMENT_SIEGE_2026_LOGAN with fresh engine/cache identities before resuming deck search.
