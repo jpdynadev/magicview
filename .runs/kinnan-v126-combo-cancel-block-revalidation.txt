@@ -1,0 +1,1 @@
+Trigger exact canonical v1.26 revalidation for F10 and Logan/SIEGE on seat 1 seed 5010140 balanced after moving the failed-payment block into the deterministic combo-planner boundary.
