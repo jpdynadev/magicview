@@ -1,0 +1,1 @@
+Trigger exact-key v1.24 revalidation for F10 and TOURNAMENT_SIEGE_2026_LOGAN on seat 1 / seed 5010140 / balanced. v1.24 moves failed-payment detection to the actual choose_productive_payment_v8 layer and latches Kinnan's seven-mana activation off for the remainder of the step after a real cancel. Fresh engine/profile/cache identities required; no cache reuse.
