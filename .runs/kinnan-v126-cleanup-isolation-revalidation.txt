@@ -1,0 +1,1 @@
+2026-08-25: Revalidate F10 and Logan seat1/seed5010140/balanced after hard-stop cleanup isolation repair. Require valid terminal result plus isolation-safe session cleanup; preserve cleanup RPC errors diagnostically. Fresh profile/cache/engine identity; no old cache reuse.
