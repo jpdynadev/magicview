@@ -1,0 +1,1 @@
+Trigger fresh v1.19 canonical revalidation for seat 1 / seed 5010140 / balanced after transient reversible-mana payment-loop repair.
