@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "bash engine-tests/netlify-forge.sh; npm install --no-save --package-lock=false --ignore-scripts @neondatabase/serverless@latest; node engine-tests/write-forge-result.mjs; npm run build"
 
 [functions]
   directory = "netlify/functions"

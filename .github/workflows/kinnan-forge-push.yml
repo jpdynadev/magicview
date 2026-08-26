@@ -1,0 +1,127 @@
+name: Kinnan Forge push runner
+
+on:
+  push:
+    branches:
+      - agent/kinnan-engine-tests
+    paths:
+      - 'engine-tests/**'
+      - '.github/workflows/kinnan-forge-push.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  forge-sim:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout test branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-engine-tests
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install runtime helpers
+        run: sudo apt-get update && sudo apt-get install -y xvfb bzip2
+
+      - name: Validate Commander deck sizes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for p in sorted(Path('engine-tests/decks').glob('*.dck')):
+              sec=None; commanders=[]; main=[]
+              for raw in p.read_text().splitlines():
+                  s=raw.strip()
+                  if s.startswith('[') and s.endswith(']'):
+                      sec=s.lower(); continue
+                  if s and s[0].isdigit() and ' ' in s:
+                      _, card=s.split(' ',1)
+                      card=card.split('|',1)[0].strip()
+                      if sec=='[commander]': commanders.append(card)
+                      elif sec=='[main]': main.append(card)
+              print(f'{p.name}: commanders={len(commanders)} main={len(main)} total={len(commanders)+len(main)}')
+              assert len(commanders)+len(main)==100, p
+          PY
+
+      - name: Download latest Forge desktop snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/forge-download /tmp/forge-extract
+          mkdir -p /tmp/forge-download /tmp/forge-extract engine-tests/results
+          gh release download daily-snapshots -R Card-Forge/forge -p '*.tar.bz2' -D /tmp/forge-download
+          ls -lah /tmp/forge-download | tee engine-tests/results/downloaded-assets.txt
+          for f in /tmp/forge-download/*.tar.bz2; do
+            echo "Extracting $f"
+            tar -xjf "$f" -C /tmp/forge-extract || true
+          done
+          find /tmp/forge-extract -maxdepth 5 -type f | sort | tee engine-tests/results/extracted-files.txt
+
+      - name: Locate Forge desktop jar
+        id: forge
+        run: |
+          JAR=$(find /tmp/forge-extract -type f -name 'forge-gui-desktop-*-jar-with-dependencies.jar' | head -n 1 || true)
+          if [ -z "$JAR" ]; then
+            echo 'No Forge desktop jar found after extraction.' | tee engine-tests/results/engine-error.txt
+            exit 1
+          fi
+          echo "forge_jar=$JAR" >> "$GITHUB_OUTPUT"
+          echo "forge_dir=$(dirname "$JAR")" >> "$GITHUB_OUTPUT"
+          echo "Using Forge desktop jar: $JAR" | tee engine-tests/results/forge-jar.txt
+          java -version 2>&1 | tee engine-tests/results/java-version.txt
+
+      - name: Install test decks into Forge Commander directory
+        run: |
+          mkdir -p "$HOME/.forge/decks/commander"
+          cp "$GITHUB_WORKSPACE"/engine-tests/decks/*.dck "$HOME/.forge/decks/commander/"
+          ls -lah "$HOME/.forge/decks/commander/" | tee "$GITHUB_WORKSPACE/engine-tests/results/installed-decks.txt"
+
+      - name: Run 5 real Forge Commander games
+        id: sim
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          (
+            cd '${{ steps.forge.outputs.forge_dir }}'
+            xvfb-run -a java -Xmx3g -jar '${{ steps.forge.outputs.forge_jar }}' sim \
+              -d Kinnan_TestB.dck RogSi_2026.dck Blue_Farm_2026.dck RogThras_2026.dck \
+              -f commander \
+              -n 5 \
+              -c 120
+          ) 2>&1 | tee "$GITHUB_WORKSPACE/engine-tests/results/forge-5game-diagnostic.log"
+
+      - name: Extract diagnostics
+        if: always()
+        run: |
+          {
+            echo '=== Winner-like lines ==='
+            grep -Ei 'winner| wins|victory|match result|game over' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
+            echo
+            echo '=== Error / unsupported / deck lines ==='
+            grep -Ei 'error|exception|unsupported|unknown card|not found|invalid|deck' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
+            echo
+            echo '=== Kinnan / combo mentions ==='
+            grep -Ei 'Kinnan|Basalt Monolith|Power Artifact|Freed from the Real|Pemmin|Thrasios' engine-tests/results/forge-5game-diagnostic.log 2>/dev/null | tail -300 || true
+            echo
+            echo '=== Last 200 lines ==='
+            tail -200 engine-tests/results/forge-5game-diagnostic.log 2>/dev/null || true
+          } | tee engine-tests/results/diagnostic-summary.txt
+
+      - name: Commit results back to test branch
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/results
+          if git diff --cached --quiet; then
+            echo 'No result files changed.'
+          else
+            git commit -m 'record Forge diagnostic results [skip ci]'
+            git push origin HEAD:agent/kinnan-engine-tests
+          fi
