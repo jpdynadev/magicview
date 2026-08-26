@@ -1,0 +1,4 @@
+Trigger fresh v1.26 F10 vs F10_RING_SINGLE serious comparison.
+Mutation: -Endurance +The One Ring.
+Require 2,000 exact paired valid keys per deck on fresh 5,600,000+ canonical bank; jvm-reuse=1; balanced/turbo/midrange/mixed pods; no compatible prior rows reused.
+Rationale: strict GSZ+Ring 2k improved protected T4 +0.65 pp overall, while Ring exposure was +3 protected (17 vs 14) and GSZ exposure was -5 protected (11 vs 16); decompose package before any promotion.
