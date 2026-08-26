@@ -2,7 +2,7 @@
 """Add narrowly scoped v1.27 policy support for Shang-Chi + Legolas package.
 
 This layer is inert for the F10 control because neither added card exists there.
-Forge remains the rules/legality/payment authority.  The patch only teaches the
+Forge remains the rules/legality/payment authority. The patch only teaches the
 Kinnan policy that Shang-Chi is a valuable creature-ability accelerator and
 Legolas's Quick Reflexes is protection, avoiding an artificial candidate penalty.
 """
@@ -21,7 +21,7 @@ text += r'''
 _V127_SHANG = 'Shang-Chi, Master of Kung Fu'
 _V127_LEGOLAS = "Legolas's Quick Reflexes"
 arch.ROLE_SCORES.update({_V127_SHANG: 9, _V127_LEGOLAS: 10})
-policy.SELF_PROTECTION.add(_V127_LEGOLAS)
+arch.policy.SELF_PROTECTION.add(_V127_LEGOLAS)
 
 _V127_ACTION_SCORE = arch.action_score
 
