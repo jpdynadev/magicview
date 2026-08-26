@@ -18,8 +18,8 @@ const monoFont = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MagicView",
-  description: "AI-powered Commander mulligan and deck analysis on Next.js, Netlify Functions, and Neon Postgres.",
+  title: "Kinnan Optimization Lab | MagicView",
+  description: "A controlled cEDH experiment log searching for the best-supported Kinnan 99 through paired Forge and Manabrew simulation.",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
