@@ -1,0 +1,1 @@
+Trigger v128 Shang-Chi + Spellskite strict 200-pair PR screen after Shang singleton isolation rejection.
