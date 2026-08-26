@@ -1,0 +1,2 @@
+Trigger strict v1.27 Shang-Chi singleton isolation screen after clean Shang+Legolas triage rejection.
+Fresh canonical bank: 5,800,000+. Three arms: F10, -Nature's Rhythm +Shang-Chi, -Endurance +Shang-Chi. Require 200/200 exact paired keys per arm; no prior cache reuse.
