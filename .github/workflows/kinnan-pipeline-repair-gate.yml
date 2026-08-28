@@ -79,9 +79,13 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf engine-tests/results/forensic
-          mkdir -p engine-tests/results/forensic
-          export KINNAN_RESULT_DIR="$GITHUB_WORKSPACE/engine-tests/results/forensic"
+          # The base pilot writes to engine-tests/results directly. Clear only
+          # runtime pilot artifacts so the gate validates this run, not checked-in history.
+          rm -f engine-tests/results/pilot-result-F10-*.json \
+                engine-tests/results/pilot-trace-F10-*.json \
+                engine-tests/results/pilot-stderr-F10-*.log \
+                engine-tests/results/pilot-errors-F10-*.json \
+                engine-tests/results/pilot-summary-F10.json
           run_case() {
             local seed="$1" seat="$2"
             echo "=== forensic seed=$seed seat=$seat ==="
@@ -96,13 +100,25 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, pathlib
-          root=pathlib.Path('engine-tests/results/forensic')
-          rows=[json.loads(p.read_text()) for p in sorted(root.glob('pilot-result-F10-*.json'))]
+          root=pathlib.Path('engine-tests/results')
+          expected=[
+              root/'pilot-result-F10-1960000-s0.json',
+              root/'pilot-result-F10-1960002-s0.json',
+              root/'pilot-result-F10-1960071-s1.json',
+              root/'pilot-result-F10-1960124-s2.json',
+              root/'pilot-result-F10-1960162-s3.json',
+          ]
+          rows=[]
+          missing=[]
+          for p in expected:
+              if not p.exists(): missing.append(str(p)); continue
+              rows.append(json.loads(p.read_text()))
           valid={'game_over','horizon_complete'}
-          summary={'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':{s:sum(r.get('status')==s for r in rows) for s in sorted({r.get('status') for r in rows})},'rows':rows}
+          statuses=sorted({r.get('status') for r in rows})
+          summary={'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':{s:sum(r.get('status')==s for r in rows) for s in statuses},'missing':missing,'rows':rows}
           pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary,indent=2))
           print(json.dumps(summary,indent=2))
-          if len(rows)!=5 or summary['valid']!=5: raise SystemExit('forensic validity gate failed')
+          if missing or len(rows)!=5 or summary['valid']!=5: raise SystemExit('forensic validity gate failed')
           PY
       - name: Persist forensic failure for next repair cycle
         if: failure() && github.event_name == 'push'
@@ -112,7 +128,7 @@ jobs:
           out=pathlib.Path('engine-tests/results/pipeline-gate-latest.json')
           if not out.exists():
               rows=[]
-              for p in pathlib.Path('engine-tests/results/forensic').glob('pilot-result-F10-*.json'):
+              for p in pathlib.Path('engine-tests/results').glob('pilot-result-F10-196*.json'):
                   try: rows.append(json.loads(p.read_text()))
                   except Exception: pass
               out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps({'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'rows':rows,'infrastructureFailure':True},indent=2))
@@ -167,9 +183,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          rm -rf engine-tests/results/cold
-          mkdir -p engine-tests/results/cold
-          export KINNAN_RESULT_DIR="$GITHUB_WORKSPACE/engine-tests/results/cold"
+          rm -f engine-tests/results/pilot-result-F10-*.json \
+                engine-tests/results/pilot-trace-F10-*.json \
+                engine-tests/results/pilot-stderr-F10-*.log \
+                engine-tests/results/pilot-errors-F10-*.json \
+                engine-tests/results/pilot-summary-F10.json
           for seat in 0 1 2 3; do
             for i in $(seq 0 7); do
               seed=$((1970000 + seat*100 + i))
@@ -181,14 +199,21 @@ jobs:
         run: |
           python3 - <<'PY'
           import json,pathlib,collections
-          rows=[]
-          for p in pathlib.Path('engine-tests/results/cold').glob('pilot-result-F10-*.json'):
+          root=pathlib.Path('engine-tests/results')
+          expected=[]
+          for seat in range(4):
+              for i in range(8):
+                  seed=1970000 + seat*100 + i
+                  expected.append(root/f'pilot-result-F10-{seed}-s{seat}.json')
+          rows=[]; missing=[]
+          for p in expected:
+              if not p.exists(): missing.append(str(p)); continue
               try: rows.append(json.loads(p.read_text()))
-              except Exception: pass
+              except Exception: missing.append(str(p)+':unreadable')
           valid={'game_over','horizon_complete'}; counts=collections.Counter(r.get('status') for r in rows); seats=collections.Counter(r.get('kinnanSeat') for r in rows if r.get('status') in valid)
-          summary={'gate':'cold-validity','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':dict(counts),'validBySeat':{str(s):seats[s] for s in range(4)},'rows':rows}
+          summary={'gate':'cold-validity','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':dict(counts),'validBySeat':{str(s):seats[s] for s in range(4)},'missing':missing,'rows':rows}
           pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary,indent=2)); print(json.dumps(summary,indent=2))
-          if len(rows)!=32 or summary['valid']!=32 or any(seats[s]!=8 for s in range(4)): raise SystemExit('cold validity gate failed')
+          if missing or len(rows)!=32 or summary['valid']!=32 or any(seats[s]!=8 for s in range(4)): raise SystemExit('cold validity gate failed')
           PY
       - name: Persist cold-gate result
         if: always() && github.event_name == 'push'
