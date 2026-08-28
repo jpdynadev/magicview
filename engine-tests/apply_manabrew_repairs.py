@@ -250,6 +250,40 @@ replace_once(
 ''',
     "prompt-scoped action consumption",
 )
+replace_once(
+    session,
+    '''            final String value = action.has("value") ? action.get("value").getAsString() : "";
+            if (!options.contains(value)) {
+                throw new IllegalArgumentException("string choice not among offered options: " + value);
+            }
+            return value;
+''',
+    '''            final String value = action.has("value") ? action.get("value").getAsString() : "";
+            if (!options.contains(value)) {
+                // Canonical chooseColor prompts currently omit the authoritative
+                // Forge option list before they reach the Python policy. Do not
+                // let an uninformed fallback token terminate the game thread.
+                // The harness still owns legality because it has the real options;
+                // choose the policy's normal color preference only among those
+                // options. All non-color string choices remain strict failures.
+                if (kind != null && kind.toLowerCase().contains("color") && !options.isEmpty()) {
+                    for (final String preferred : java.util.List.of("U", "G", "C", "W", "B", "R")) {
+                        if (options.contains(preferred)) {
+                            trace("[harness-choice] repaired-illegal-color submitted=" + value
+                                    + " legal=" + options + " chosen=" + preferred);
+                            return preferred;
+                        }
+                    }
+                    trace("[harness-choice] repaired-illegal-color submitted=" + value
+                            + " legal=" + options + " chosen=" + options.get(0));
+                    return options.get(0);
+                }
+                throw new IllegalArgumentException("string choice not among offered options: " + value);
+            }
+            return value;
+''',
+    "authoritative legal chooseColor fallback",
+)
 
 # Preserve chooseColor tokens exactly as the pilot submits them. The pinned
 # adapter already reads the chosenColors map key verbatim; rewriting U->Blue or
