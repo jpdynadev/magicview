@@ -1,9 +1,3806 @@
 {
-  "gate": "forensic",
-  "runId": "33135419725",
-  "commit": "4a35bea74e9681889c40aa0cd29a771f19f8d8e2",
-  "total": 0,
-  "valid": 0,
-  "statuses": {},
-  "rows": []
+  "gate": "cold-validity",
+  "runId": "33137701992",
+  "commit": "05730c2a8539d04cb0e23a18346da5e06234f17b",
+  "total": 32,
+  "valid": 32,
+  "statuses": {
+    "horizon_complete": 32
+  },
+  "validBySeat": {
+    "0": 8,
+    "1": 8,
+    "2": 8,
+    "3": 8
+  },
+  "missing": [],
+  "rows": [
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970000,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 712,
+      "promptRetries": 0,
+      "passRecoveries": 96,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "3": [
+          "Misty Rainforest",
+          "Lotus Cobra",
+          "Veil of Summer",
+          "Snap",
+          "Fierce Guardianship",
+          "Pact of Negation",
+          "Cloud of Faeries"
+        ],
+        "0": [
+          "Defense Grid",
+          "Mox Amber",
+          "Spellseeker",
+          "Grim Monolith",
+          "Misty Rainforest",
+          "Forest",
+          "Talisman of Curiosity"
+        ],
+        "1": [
+          "Vexing Bauble",
+          "Volcanic Island",
+          "Badlands",
+          "Grim Monolith",
+          "Rain of Filth",
+          "Vampiric Tutor",
+          "Force of Will"
+        ],
+        "2": [
+          "Mana Confluence",
+          "Talisman of Conviction",
+          "Flare of Duplication",
+          "Delney, Streetwise Lookout",
+          "Flooded Strand",
+          "Cabal Ritual",
+          "Rain of Filth"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Lotus Petal",
+          "Ancient Tomb",
+          "Noxious Revival",
+          "Springleaf Drum"
+        ],
+        "0": [
+          "Defense Grid",
+          "Mox Amber",
+          "Spellseeker",
+          "Grim Monolith",
+          "Misty Rainforest",
+          "Forest",
+          "Talisman of Curiosity"
+        ],
+        "1": [
+          "Vexing Bauble",
+          "Volcanic Island",
+          "Badlands",
+          "Grim Monolith",
+          "Rain of Filth",
+          "Vampiric Tutor",
+          "Force of Will"
+        ],
+        "2": [
+          "Mana Confluence",
+          "Talisman of Conviction",
+          "Flare of Duplication",
+          "Delney, Streetwise Lookout",
+          "Flooded Strand",
+          "Cabal Ritual",
+          "Rain of Filth"
+        ]
+      },
+      "wallMs": 32159,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970001,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 788,
+      "promptRetries": 0,
+      "passRecoveries": 107,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "0": [
+          "Worldly Tutor",
+          "Mana Vault",
+          "Force of Negation",
+          "Sink into Stupor",
+          "Enduring Vitality",
+          "Command Tower",
+          "Power Artifact"
+        ],
+        "1": [
+          "Tainted Pact",
+          "Gamble",
+          "Mana Vault",
+          "Lion's Eye Diamond",
+          "Infernal Plunge",
+          "Steam Vents",
+          "Final Fortune"
+        ],
+        "2": [
+          "Gifts Ungiven",
+          "Ad Nauseam",
+          "Volcanic Island",
+          "Spider-Sense",
+          "Scrubland",
+          "Simian Spirit Guide",
+          "Spider-Woman, Stunning Savior"
+        ],
+        "3": [
+          "Gaea's Cradle",
+          "Phyrexian Metamorph",
+          "Otawara, Soaring City",
+          "Borne Upon a Wind",
+          "Candelabra of Tawnos",
+          "Lotus Cobra",
+          "Nature's Rhythm"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Worldly Tutor",
+          "Mana Vault",
+          "Force of Negation",
+          "Sink into Stupor",
+          "Enduring Vitality",
+          "Command Tower",
+          "Power Artifact"
+        ],
+        "1": [
+          "Tainted Pact",
+          "Gamble",
+          "Mana Vault",
+          "Lion's Eye Diamond",
+          "Infernal Plunge",
+          "Steam Vents",
+          "Final Fortune"
+        ],
+        "2": [
+          "Gifts Ungiven",
+          "Ad Nauseam",
+          "Volcanic Island",
+          "Spider-Sense",
+          "Scrubland",
+          "Simian Spirit Guide",
+          "Spider-Woman, Stunning Savior"
+        ],
+        "3": [
+          "Tropical Island",
+          "Elvish Spirit Guide",
+          "Sol Ring",
+          "Chain of Vapor",
+          "Gaea's Cradle",
+          "Flusterstorm",
+          "Valley Floodcaller"
+        ]
+      },
+      "wallMs": 35488,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970002,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": 4,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 811,
+      "promptRetries": 0,
+      "passRecoveries": 107,
+      "manaLoopCaps": 0,
+      "comboActionCount": 12,
+      "deterministicT3": false,
+      "deterministicT4": true,
+      "mulligans": {
+        "0": 1,
+        "1": 0,
+        "2": 3,
+        "3": 3
+      },
+      "openingHands": {
+        "1": [
+          "Pyroblast",
+          "Lion's Eye Diamond",
+          "Simian Spirit Guide",
+          "Necropotence",
+          "Demonic Tutor",
+          "City of Traitors",
+          "Hexing Squelcher"
+        ],
+        "2": [
+          "Rain of Filth",
+          "Underground Sea",
+          "Gemstone Caverns",
+          "Jeska's Will",
+          "Brain Freeze",
+          "Deflecting Swat",
+          "Smothering Tithe"
+        ],
+        "3": [
+          "Springheart Nantuko",
+          "Badgermole Cub",
+          "Phyrexian Metamorph",
+          "Biomancer's Familiar",
+          "Force of Will",
+          "Valley Floodcaller",
+          "Wooded Foothills"
+        ],
+        "0": [
+          "Polluted Delta",
+          "Invasion of Ikoria",
+          "Gaea's Cradle",
+          "Flooded Strand",
+          "Thrasios, Triton Hero",
+          "Ancient Tomb",
+          "Delighted Halfling"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Pyroblast",
+          "Lion's Eye Diamond",
+          "Simian Spirit Guide",
+          "Necropotence",
+          "Demonic Tutor",
+          "City of Traitors",
+          "Hexing Squelcher"
+        ],
+        "2": [
+          "Ad Nauseam",
+          "Mox Diamond",
+          "Verdant Catacombs",
+          "Mystical Tutor"
+        ],
+        "3": [
+          "Boseiju, Who Endures",
+          "Flesh Duplicate",
+          "Force of Will",
+          "Urza's Saga"
+        ],
+        "0": [
+          "Moonsilver Key",
+          "An Offer You Can't Refuse",
+          "Elvish Mystic",
+          "Misty Rainforest",
+          "Flooded Strand",
+          "Mindbreak Trap"
+        ]
+      },
+      "wallMs": 34559,
+      "primaryFailureCode": "PILOT_ERROR"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970003,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 849,
+      "promptRetries": 0,
+      "passRecoveries": 124,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 1,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "3": [
+          "Wan Shi Tong, Librarian",
+          "Swan Song",
+          "Deflecting Swat",
+          "Flooded Strand",
+          "Chain of Vapor",
+          "Rhystic Study",
+          "Mindbreak Trap"
+        ],
+        "0": [
+          "Dispel",
+          "Scalding Tarn",
+          "Lotus Petal",
+          "Mockingbird",
+          "Arcane Signet",
+          "Defense Grid",
+          "Boseiju, Who Endures"
+        ],
+        "1": [
+          "Beseech the Mirror",
+          "Polluted Delta",
+          "Hexing Squelcher",
+          "Dark Ritual",
+          "Badlands",
+          "Misty Rainforest",
+          "Infernal Plunge"
+        ],
+        "2": [
+          "Tainted Pact",
+          "Talisman of Creativity",
+          "Mana Vault",
+          "Talisman of Conviction",
+          "Steam Vents",
+          "Flusterstorm",
+          "Volcanic Island"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Hedge Maze",
+          "Talon Gates of Madara",
+          "Noxious Revival",
+          "Faerie Mastermind"
+        ],
+        "0": [
+          "Misty Rainforest",
+          "Boseiju, Who Endures",
+          "An Offer You Can't Refuse",
+          "Waterlogged Grove",
+          "Birds of Paradise",
+          "Power Artifact"
+        ],
+        "1": [
+          "Beseech the Mirror",
+          "Polluted Delta",
+          "Hexing Squelcher",
+          "Dark Ritual",
+          "Badlands",
+          "Misty Rainforest",
+          "Infernal Plunge"
+        ],
+        "2": [
+          "Tainted Pact",
+          "Talisman of Creativity",
+          "Mana Vault",
+          "Talisman of Conviction",
+          "Steam Vents",
+          "Flusterstorm",
+          "Volcanic Island"
+        ]
+      },
+      "wallMs": 36776,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970004,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 585,
+      "promptRetries": 0,
+      "passRecoveries": 60,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 1,
+        "1": 1,
+        "2": 3,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "Flare of Denial",
+          "Mockingbird",
+          "Hedge Maze",
+          "Tropical Island",
+          "Flesh Duplicate",
+          "Seedborn Muse",
+          "Snap"
+        ],
+        "0": [
+          "Endurance",
+          "Mana Vault",
+          "Sink into Stupor",
+          "Force of Negation",
+          "Spellseeker",
+          "Neoform",
+          "Fabricate"
+        ],
+        "1": [
+          "Borne Upon a Wind",
+          "Demonic Counsel",
+          "Thassa's Oracle",
+          "Imperial Seal",
+          "Scalding Tarn",
+          "Infernal Plunge",
+          "Jeska's Will"
+        ],
+        "2": [
+          "Scrubland",
+          "Rain of Filth",
+          "Demonic Consultation",
+          "Silence",
+          "Mox Diamond",
+          "Redirect Lightning",
+          "Talisman of Conviction"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Mox Diamond",
+          "Wild Growth",
+          "Borne Upon a Wind",
+          "Utopia Sprawl",
+          "Elvish Spirit Guide",
+          "Birds of Paradise",
+          "Breeding Pool"
+        ],
+        "0": [
+          "Sink into Stupor",
+          "Fierce Guardianship",
+          "City of Brass",
+          "Basalt Monolith",
+          "Pact of Negation",
+          "Mox Opal"
+        ],
+        "1": [
+          "Lotus Petal",
+          "Imperial Seal",
+          "Force of Will",
+          "Birgi, God of Storytelling",
+          "Deflecting Swat",
+          "Underground Sea"
+        ],
+        "2": [
+          "Mana Vault",
+          "Deadly Rollick",
+          "Cabal Ritual",
+          "Spider-Sense"
+        ]
+      },
+      "wallMs": 29553,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970005,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 842,
+      "promptRetries": 0,
+      "passRecoveries": 131,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Chrome Mox",
+          "Demonic Tutor",
+          "Mox Amber",
+          "Praetor's Grasp",
+          "Arid Mesa",
+          "Mana Vault",
+          "Grim Tutor"
+        ],
+        "2": [
+          "Delney, Streetwise Lookout",
+          "Mystic Remora",
+          "Tainted Pact",
+          "Beseech the Mirror",
+          "Force of Will",
+          "Steam Vents",
+          "Blood Crypt"
+        ],
+        "3": [
+          "Flusterstorm",
+          "Invasion of Ikoria",
+          "Prismatic Vista",
+          "Mindbreak Trap",
+          "Cloud of Faeries",
+          "Candelabra of Tawnos",
+          "Delighted Halfling"
+        ],
+        "0": [
+          "City of Brass",
+          "Summoner's Pact",
+          "Windswept Heath",
+          "Muddle the Mixture",
+          "Flusterstorm",
+          "Power Artifact",
+          "Trophy Mage"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Chrome Mox",
+          "Demonic Tutor",
+          "Mox Amber",
+          "Praetor's Grasp",
+          "Arid Mesa",
+          "Mana Vault",
+          "Grim Tutor"
+        ],
+        "2": [
+          "Delney, Streetwise Lookout",
+          "Mystic Remora",
+          "Tainted Pact",
+          "Beseech the Mirror",
+          "Force of Will",
+          "Steam Vents",
+          "Blood Crypt"
+        ],
+        "3": [
+          "Mystic Remora",
+          "Oboro Breezecaller",
+          "Boseiju, Who Endures",
+          "Scalding Tarn",
+          "Rhystic Study",
+          "Mox Amber",
+          "Sylvan Scrying"
+        ],
+        "0": [
+          "City of Brass",
+          "Summoner's Pact",
+          "Windswept Heath",
+          "Muddle the Mixture",
+          "Flusterstorm",
+          "Power Artifact",
+          "Trophy Mage"
+        ]
+      },
+      "wallMs": 35954,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970006,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 936,
+      "promptRetries": 0,
+      "passRecoveries": 160,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "0": [
+          "Fellwar Stone",
+          "Mox Opal",
+          "Misdirection",
+          "Into the Flood Maw",
+          "Mystic Remora",
+          "Sink into Stupor",
+          "Talisman of Curiosity"
+        ],
+        "1": [
+          "Ragavan, Nimble Pilferer",
+          "Otawara, Soaring City",
+          "Simian Spirit Guide",
+          "Scalding Tarn",
+          "Paradise Mantle",
+          "Into the Flood Maw",
+          "Demonic Counsel"
+        ],
+        "2": [
+          "Force of Will",
+          "Rhystic Study",
+          "Talisman of Hierarchy",
+          "Mana Vault",
+          "Cabal Ritual",
+          "Dragon's Rage Channeler",
+          "Serra Ascendant"
+        ],
+        "3": [
+          "Forest",
+          "Dryad Arbor",
+          "Scalding Tarn",
+          "Valley Floodcaller",
+          "Clever Impersonator",
+          "Otawara, Soaring City",
+          "Gilded Drake"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Forest",
+          "Whir of Invention",
+          "Elvish Spirit Guide",
+          "Staff of Domination",
+          "Mana Confluence",
+          "Forensic Gadgeteer",
+          "Sylvan Library"
+        ],
+        "1": [
+          "Ragavan, Nimble Pilferer",
+          "Otawara, Soaring City",
+          "Simian Spirit Guide",
+          "Scalding Tarn",
+          "Paradise Mantle",
+          "Into the Flood Maw",
+          "Demonic Counsel"
+        ],
+        "2": [
+          "Mindbreak Trap",
+          "Deflecting Swat",
+          "Displacer Kitten",
+          "Plateau",
+          "Underground Sea",
+          "Watery Grave",
+          "Simian Spirit Guide"
+        ],
+        "3": [
+          "Force of Will",
+          "Chain of Vapor",
+          "Phyrexian Metamorph",
+          "Eternal Witness"
+        ]
+      },
+      "wallMs": 54689,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970007,
+      "kinnanSeat": 0,
+      "seatDecks": [
+        "Kinnan",
+        "RogSi",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 750,
+      "promptRetries": 0,
+      "passRecoveries": 82,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "openingHands": {
+        "3": [
+          "Flusterstorm",
+          "Kinnan, Bonder Prodigy",
+          "Wan Shi Tong, Librarian",
+          "Earthcraft",
+          "Force of Will",
+          "Springleaf Drum",
+          "Cryptolith Rite"
+        ],
+        "0": [
+          "Neoform",
+          "Yavimaya Coast",
+          "Tolaria West",
+          "Forensic Gadgeteer",
+          "Pact of Negation",
+          "Tezzeret the Seeker",
+          "Otawara, Soaring City"
+        ],
+        "1": [
+          "Vexing Bauble",
+          "Pyroblast",
+          "Blood Crypt",
+          "Red Elemental Blast",
+          "Vampiric Tutor",
+          "Culling the Weak",
+          "Demonic Consultation"
+        ],
+        "2": [
+          "Borne Upon a Wind",
+          "Talisman of Hierarchy",
+          "Grand Abolisher",
+          "Talisman of Dominance",
+          "Tundra",
+          "Ad Nauseam",
+          "Rain of Filth"
+        ]
+      },
+      "keptHands": {
+        "2": [
+          "Gemstone Caverns",
+          "Wooded Foothills",
+          "Tundra",
+          "Mindbreak Trap",
+          "Command Tower",
+          "Sol Ring",
+          "Thassa's Oracle"
+        ],
+        "3": [
+          "Mox Diamond",
+          "Enduring Vitality",
+          "Mana Vault",
+          "Gaea's Cradle",
+          "Otawara, Soaring City",
+          "Verdant Catacombs"
+        ],
+        "0": [
+          "Neoform",
+          "Yavimaya Coast",
+          "Tolaria West",
+          "Forensic Gadgeteer",
+          "Pact of Negation",
+          "Tezzeret the Seeker",
+          "Otawara, Soaring City"
+        ],
+        "1": [
+          "Vexing Bauble",
+          "Pyroblast",
+          "Blood Crypt",
+          "Red Elemental Blast",
+          "Vampiric Tutor",
+          "Culling the Weak",
+          "Demonic Consultation"
+        ]
+      },
+      "wallMs": 33198,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970100,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 793,
+      "promptRetries": 0,
+      "passRecoveries": 103,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "3": [
+          "Minamo, School at Water's Edge",
+          "Force of Negation",
+          "Eternal Witness",
+          "Mockingbird",
+          "Biomancer's Familiar",
+          "Borne Upon a Wind",
+          "Urza's Saga"
+        ],
+        "0": [
+          "Polluted Delta",
+          "Dark Ritual",
+          "Mystical Tutor",
+          "Wishclaw Talisman",
+          "Demonic Tutor",
+          "Deadly Rollick",
+          "Yawgmoth's Will"
+        ],
+        "1": [
+          "Breeding Pool",
+          "Energy Refractor",
+          "Spellseeker",
+          "Veil of Summer",
+          "Transmute Artifact",
+          "Forest",
+          "Talisman of Curiosity"
+        ],
+        "2": [
+          "Underground Sea",
+          "Steam Vents",
+          "Lotho, Corrupt Shirriff",
+          "Chrome Mox",
+          "Mox Amber",
+          "Windswept Heath",
+          "Watery Grave"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Mox Diamond",
+          "Snap",
+          "Earthcraft",
+          "Deserted Temple"
+        ],
+        "0": [
+          "Polluted Delta",
+          "Dark Ritual",
+          "Mystical Tutor",
+          "Wishclaw Talisman",
+          "Demonic Tutor",
+          "Deadly Rollick",
+          "Yawgmoth's Will"
+        ],
+        "1": [
+          "Breeding Pool",
+          "Energy Refractor",
+          "Spellseeker",
+          "Veil of Summer",
+          "Transmute Artifact",
+          "Forest",
+          "Talisman of Curiosity"
+        ],
+        "2": [
+          "Underground Sea",
+          "Steam Vents",
+          "Lotho, Corrupt Shirriff",
+          "Chrome Mox",
+          "Mox Amber",
+          "Windswept Heath",
+          "Watery Grave"
+        ]
+      },
+      "wallMs": 37183,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970101,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 751,
+      "promptRetries": 0,
+      "passRecoveries": 84,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "2": [
+          "Flare of Duplication",
+          "Vampiric Tutor",
+          "An Offer You Can't Refuse",
+          "Dark Ritual",
+          "Imperial Seal",
+          "Flooded Strand",
+          "Tainted Pact"
+        ],
+        "3": [
+          "Chord of Calling",
+          "Springleaf Drum",
+          "Invasion of Ikoria",
+          "Mox Diamond",
+          "Polluted Delta",
+          "Cyclonic Rift",
+          "Enduring Vitality"
+        ],
+        "0": [
+          "Tainted Pact",
+          "Badlands",
+          "Red Elemental Blast",
+          "Arcane Signet",
+          "Talisman of Dominance",
+          "An Offer You Can't Refuse",
+          "Rite of Flame"
+        ],
+        "1": [
+          "Yavimaya Coast",
+          "Borne Upon a Wind",
+          "Forensic Gadgeteer",
+          "Arcane Signet",
+          "Wooded Foothills",
+          "Sink into Stupor",
+          "Sylvan Library"
+        ]
+      },
+      "keptHands": {
+        "2": [
+          "Flare of Duplication",
+          "Vampiric Tutor",
+          "An Offer You Can't Refuse",
+          "Dark Ritual",
+          "Imperial Seal",
+          "Flooded Strand",
+          "Tainted Pact"
+        ],
+        "3": [
+          "Chord of Calling",
+          "Springleaf Drum",
+          "Invasion of Ikoria",
+          "Mox Diamond",
+          "Polluted Delta",
+          "Cyclonic Rift",
+          "Enduring Vitality"
+        ],
+        "0": [
+          "Tainted Pact",
+          "Badlands",
+          "Red Elemental Blast",
+          "Arcane Signet",
+          "Talisman of Dominance",
+          "An Offer You Can't Refuse",
+          "Rite of Flame"
+        ],
+        "1": [
+          "Yavimaya Coast",
+          "Borne Upon a Wind",
+          "Forensic Gadgeteer",
+          "Arcane Signet",
+          "Wooded Foothills",
+          "Sink into Stupor",
+          "Sylvan Library"
+        ]
+      },
+      "wallMs": 36558,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970102,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 841,
+      "promptRetries": 0,
+      "passRecoveries": 130,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "openingHands": {
+        "2": [
+          "Spider-Woman, Stunning Savior",
+          "Redirect Lightning",
+          "Volcanic Island",
+          "Tainted Pact",
+          "Tataru Taru",
+          "Talisman of Conviction",
+          "Gifts Ungiven"
+        ],
+        "3": [
+          "Cloud of Faeries",
+          "Deflecting Swat",
+          "Otawara, Soaring City",
+          "Pact of Negation",
+          "Candelabra of Tawnos",
+          "Boseiju, Who Endures",
+          "Wild Growth"
+        ],
+        "0": [
+          "Cabal Ritual",
+          "Undercity Sewers",
+          "Bloodstained Mire",
+          "Badlands",
+          "Snap",
+          "Polluted Delta",
+          "Flare of Duplication"
+        ],
+        "1": [
+          "Spellseeker",
+          "Veil of Summer",
+          "Gemstone Caverns",
+          "Mockingbird",
+          "Yavimaya Coast",
+          "Llanowar Elves",
+          "Mox Opal"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Spellseeker",
+          "Veil of Summer",
+          "Gemstone Caverns",
+          "Mockingbird",
+          "Yavimaya Coast",
+          "Llanowar Elves",
+          "Mox Opal"
+        ],
+        "2": [
+          "Imperial Seal",
+          "Flare of Duplication",
+          "Misty Rainforest",
+          "Thassa's Oracle",
+          "Sol Ring",
+          "Tataru Taru",
+          "Dark Ritual"
+        ],
+        "3": [
+          "Gaea's Cradle",
+          "Breeding Pool",
+          "Mental Misstep",
+          "Gilded Drake",
+          "Chrome Mox",
+          "Swan Song"
+        ],
+        "0": [
+          "Talisman of Dominance",
+          "Vexing Bauble",
+          "Mystic Remora",
+          "Flare of Duplication",
+          "Gamble",
+          "Defense Grid",
+          "City of Brass"
+        ]
+      },
+      "wallMs": 36202,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970103,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 872,
+      "promptRetries": 0,
+      "passRecoveries": 122,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "The Cabbage Merchant",
+          "Mental Misstep",
+          "Gene Pollinator",
+          "Wild Growth",
+          "Flesh Duplicate",
+          "Dryad Arbor",
+          "Wan Shi Tong, Librarian"
+        ],
+        "0": [
+          "Mnemonic Betrayal",
+          "Verdant Catacombs",
+          "Gemstone Caverns",
+          "Vampiric Tutor",
+          "Force of Will",
+          "Yawgmoth's Will",
+          "Steam Vents"
+        ],
+        "1": [
+          "Crop Rotation",
+          "Force of Negation",
+          "Wooded Foothills",
+          "Chord of Calling",
+          "Yavimaya Coast",
+          "Lotus Petal",
+          "Thrasios, Triton Hero"
+        ],
+        "2": [
+          "Underworld Breach",
+          "Sol Ring",
+          "Volcanic Island",
+          "Brain Freeze",
+          "Diabolic Intent",
+          "Ranger-Captain of Eos",
+          "Esper Sentinel"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Mnemonic Betrayal",
+          "Verdant Catacombs",
+          "Gemstone Caverns",
+          "Vampiric Tutor",
+          "Force of Will",
+          "Yawgmoth's Will",
+          "Steam Vents"
+        ],
+        "3": [
+          "Utopia Sprawl",
+          "Springleaf Drum",
+          "This Town Ain't Big Enough",
+          "Forest",
+          "Pact of Negation",
+          "Sol Ring",
+          "Gaea's Cradle"
+        ],
+        "1": [
+          "Crop Rotation",
+          "Force of Negation",
+          "Wooded Foothills",
+          "Chord of Calling",
+          "Yavimaya Coast",
+          "Lotus Petal",
+          "Thrasios, Triton Hero"
+        ],
+        "2": [
+          "Underworld Breach",
+          "Sol Ring",
+          "Volcanic Island",
+          "Brain Freeze",
+          "Diabolic Intent",
+          "Ranger-Captain of Eos",
+          "Esper Sentinel"
+        ]
+      },
+      "wallMs": 39561,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970104,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 847,
+      "promptRetries": 0,
+      "passRecoveries": 63,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 3,
+        "1": 1,
+        "2": 0,
+        "3": 2
+      },
+      "openingHands": {
+        "1": [
+          "Mox Diamond",
+          "Ancient Tomb",
+          "Chrome Mox",
+          "Elvish Spirit Guide",
+          "Rejuvenating Springs",
+          "Energy Refractor",
+          "Tolaria West"
+        ],
+        "2": [
+          "Esper Sentinel",
+          "Watery Grave",
+          "Scrubland",
+          "Blood Crypt",
+          "Mental Misstep",
+          "Opposition Agent",
+          "An Offer You Can't Refuse"
+        ],
+        "3": [
+          "Gaea's Cradle",
+          "Veil of Summer",
+          "Flusterstorm",
+          "Scalding Tarn",
+          "Gut Shot",
+          "Finale of Devastation",
+          "Flare of Denial"
+        ],
+        "0": [
+          "Badlands",
+          "Grinding Station",
+          "Mox Opal",
+          "Paradise Mantle",
+          "Mental Misstep",
+          "Blood Crypt",
+          "Flooded Strand"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Spellseeker",
+          "Whir of Invention",
+          "Veil of Summer",
+          "Swan Song",
+          "Hydroelectric Specimen",
+          "Breeding Pool"
+        ],
+        "2": [
+          "Deadly Rollick",
+          "Orcish Bowmasters",
+          "Godless Shrine",
+          "Rain of Filth",
+          "Spider-Sense",
+          "Culling the Weak",
+          "Wooded Foothills"
+        ],
+        "3": [
+          "Deflecting Swat",
+          "Rhystic Study",
+          "Swan Song",
+          "Talon Gates of Madara",
+          "Command Tower"
+        ],
+        "0": [
+          "Simian Spirit Guide",
+          "Force of Will",
+          "City of Brass",
+          "Yawgmoth's Will"
+        ]
+      },
+      "wallMs": 41241,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970105,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 804,
+      "promptRetries": 0,
+      "passRecoveries": 125,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "An Offer You Can't Refuse",
+          "Trophy Mage",
+          "Barkchannel Pathway",
+          "Wooded Foothills",
+          "Chain of Vapor",
+          "Mox Opal",
+          "Otawara, Soaring City"
+        ],
+        "2": [
+          "Verdant Catacombs",
+          "Command Tower",
+          "Windswept Heath",
+          "Steam Vents",
+          "Deflecting Swat",
+          "Intuition",
+          "Talisman of Dominance"
+        ],
+        "3": [
+          "Windswept Heath",
+          "Wan Shi Tong, Librarian",
+          "Magus of the Candelabra",
+          "Sylvan Scrying",
+          "Green Sun's Zenith",
+          "Dryad Arbor",
+          "Cloud of Faeries"
+        ],
+        "0": [
+          "Ancient Tomb",
+          "Mox Opal",
+          "Blood Crypt",
+          "Simian Spirit Guide",
+          "Thassa's Oracle",
+          "Wheel of Fortune",
+          "Mana Vault"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "An Offer You Can't Refuse",
+          "Trophy Mage",
+          "Barkchannel Pathway",
+          "Wooded Foothills",
+          "Chain of Vapor",
+          "Mox Opal",
+          "Otawara, Soaring City"
+        ],
+        "2": [
+          "Marsh Flats",
+          "Ad Nauseam",
+          "Diabolic Intent",
+          "Mystical Tutor",
+          "Talisman of Dominance",
+          "Brain Freeze",
+          "Talisman of Creativity"
+        ],
+        "3": [
+          "Forest",
+          "Springleaf Drum",
+          "Deflecting Swat",
+          "Wan Shi Tong, Librarian",
+          "Sol Ring",
+          "Flusterstorm",
+          "Mental Misstep"
+        ],
+        "0": [
+          "Watery Grave",
+          "Springleaf Drum",
+          "Necropotence",
+          "Fierce Guardianship",
+          "Demonic Tutor",
+          "Polluted Delta",
+          "Mana Confluence"
+        ]
+      },
+      "wallMs": 39897,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970106,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": 4,
+      "firstAttemptTurn": 4,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 812,
+      "promptRetries": 0,
+      "passRecoveries": 107,
+      "manaLoopCaps": 0,
+      "comboActionCount": 1,
+      "deterministicT3": false,
+      "deterministicT4": true,
+      "mulligans": {
+        "0": 3,
+        "1": 1,
+        "2": 0,
+        "3": 2
+      },
+      "openingHands": {
+        "2": [
+          "Jeska's Will",
+          "Windswept Heath",
+          "Necropotence",
+          "Culling the Weak",
+          "Gamble",
+          "Orcish Bowmasters",
+          "Underworld Breach"
+        ],
+        "3": [
+          "Flesh Duplicate",
+          "Cryptolith Rite",
+          "Flusterstorm",
+          "Otawara, Soaring City",
+          "Chain of Vapor",
+          "Snow-Covered Island",
+          "Cloud of Faeries"
+        ],
+        "0": [
+          "Underground Sea",
+          "Hexing Squelcher",
+          "Vampiric Tutor",
+          "Wheel of Fortune",
+          "Fierce Guardianship",
+          "Infernal Plunge",
+          "Mystical Tutor"
+        ],
+        "1": [
+          "Hydroelectric Specimen",
+          "Rejuvenating Springs",
+          "Endurance",
+          "Chain of Vapor",
+          "Mox Opal",
+          "Verdant Catacombs",
+          "Mockingbird"
+        ]
+      },
+      "keptHands": {
+        "2": [
+          "Jeska's Will",
+          "Windswept Heath",
+          "Necropotence",
+          "Culling the Weak",
+          "Gamble",
+          "Orcish Bowmasters",
+          "Underworld Breach"
+        ],
+        "3": [
+          "Springleaf Drum",
+          "Urza's Saga",
+          "Mystic Remora",
+          "Delighted Halfling",
+          "This Town Ain't Big Enough"
+        ],
+        "0": [
+          "Mox Amber",
+          "Fierce Guardianship",
+          "Praetor's Grasp",
+          "Rite of Flame"
+        ],
+        "1": [
+          "Ancient Tomb",
+          "Fabricate",
+          "Birds of Paradise",
+          "Yavimaya Coast",
+          "Boseiju, Who Endures",
+          "Nature's Rhythm"
+        ]
+      },
+      "wallMs": 41912,
+      "primaryFailureCode": "UNRESOLVED_ATTEMPT"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970107,
+      "kinnanSeat": 1,
+      "seatDecks": [
+        "RogSi",
+        "Kinnan",
+        "Blue Farm",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 784,
+      "promptRetries": 0,
+      "passRecoveries": 109,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 1,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Goblin Cannon",
+          "Elvish Mystic",
+          "Verdant Catacombs",
+          "Mindbreak Trap",
+          "Crop Rotation",
+          "Windswept Heath",
+          "Fyndhorn Elves"
+        ],
+        "2": [
+          "Scrubland",
+          "Voice of Victory",
+          "Brain Freeze",
+          "Scalding Tarn",
+          "Mindbreak Trap",
+          "Mental Misstep",
+          "Imperial Seal"
+        ],
+        "3": [
+          "Force of Will",
+          "Command Tower",
+          "Misty Rainforest",
+          "Rhystic Study",
+          "Candelabra of Tawnos",
+          "Delighted Halfling",
+          "Chord of Calling"
+        ],
+        "0": [
+          "Wheel of Fortune",
+          "Arid Mesa",
+          "Jeska's Will",
+          "Lotus Petal",
+          "Pyroblast",
+          "Flare of Duplication",
+          "Paradise Mantle"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Goblin Cannon",
+          "Elvish Mystic",
+          "Verdant Catacombs",
+          "Mindbreak Trap",
+          "Crop Rotation",
+          "Windswept Heath",
+          "Fyndhorn Elves"
+        ],
+        "2": [
+          "Flesh Duplicate",
+          "Gamble",
+          "Displacer Kitten",
+          "Imperial Seal",
+          "Voice of Victory",
+          "Drannith Magistrate"
+        ],
+        "3": [
+          "Wild Growth",
+          "Springleaf Drum",
+          "Sol Ring",
+          "Faerie Mastermind",
+          "Training Grounds",
+          "Island",
+          "Chrome Mox"
+        ],
+        "0": [
+          "Gitaxian Probe",
+          "Swan Song",
+          "Windfall",
+          "Force of Will",
+          "Diabolic Intent",
+          "Flooded Strand",
+          "Command Tower"
+        ]
+      },
+      "wallMs": 33427,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970200,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": 3,
+      "firstAttemptTurn": 4,
+      "protectedAttempt": true,
+      "attemptResolved": false,
+      "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+      "protectionAvailable": [
+        "Defense Grid"
+      ],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 1076,
+      "promptRetries": 0,
+      "passRecoveries": 287,
+      "manaLoopCaps": 0,
+      "comboActionCount": 76,
+      "deterministicT3": true,
+      "deterministicT4": true,
+      "mulligans": {
+        "0": 2,
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "openingHands": {
+        "0": [
+          "Hexing Squelcher",
+          "Arcane Signet",
+          "Volcanic Island",
+          "Springleaf Drum",
+          "Dark Ritual",
+          "Polluted Delta",
+          "Mox Amber"
+        ],
+        "1": [
+          "Esper Sentinel",
+          "Displacer Kitten",
+          "Rhystic Study",
+          "Volcanic Island",
+          "Jeska's Will",
+          "Plateau",
+          "Arid Mesa"
+        ],
+        "2": [
+          "Gemstone Caverns",
+          "Mental Misstep",
+          "Dispel",
+          "An Offer You Can't Refuse",
+          "Grim Monolith",
+          "Trinket Mage",
+          "Finale of Devastation"
+        ],
+        "3": [
+          "Mindbreak Trap",
+          "Mistrise Village",
+          "Deserted Temple",
+          "Rhystic Study",
+          "Gemstone Caverns",
+          "This Town Ain't Big Enough",
+          "Birds of Paradise"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Green Sun's Zenith",
+          "Gemstone Caverns",
+          "Minamo, School at Water's Edge",
+          "Mana Vault",
+          "Flusterstorm",
+          "Elvish Spirit Guide"
+        ],
+        "0": [
+          "Snap",
+          "Cabal Ritual",
+          "Fierce Guardianship",
+          "Arcane Signet",
+          "Thassa's Oracle"
+        ],
+        "1": [
+          "Fierce Guardianship",
+          "Drannith Magistrate",
+          "Rain of Filth",
+          "Ad Nauseam",
+          "Mindbreak Trap",
+          "Underground Sea",
+          "Delney, Streetwise Lookout"
+        ],
+        "2": [
+          "Mox Diamond",
+          "Moonsilver Key",
+          "Sol Ring",
+          "Veil of Summer",
+          "Misdirection",
+          "Otawara, Soaring City",
+          "Misty Rainforest"
+        ]
+      },
+      "wallMs": 57855,
+      "primaryFailureCode": "UNRESOLVED_ATTEMPT"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970201,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 801,
+      "promptRetries": 0,
+      "passRecoveries": 106,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "2": [
+          "Polluted Delta",
+          "Mindbreak Trap",
+          "Island",
+          "Birds of Paradise",
+          "Yavimaya Coast",
+          "Trophy Mage",
+          "Chord of Calling"
+        ],
+        "3": [
+          "Gene Pollinator",
+          "Elvish Spirit Guide",
+          "Urza's Saga",
+          "The Cabbage Merchant",
+          "Breeding Pool",
+          "Snap",
+          "Misty Rainforest"
+        ],
+        "0": [
+          "Diabolic Intent",
+          "Verdant Catacombs",
+          "Volcanic Island",
+          "Talisman of Dominance",
+          "Beseech the Mirror",
+          "Arid Mesa",
+          "Ad Nauseam"
+        ],
+        "1": [
+          "Esper Sentinel",
+          "Lion's Eye Diamond",
+          "Marsh Flats",
+          "Mental Misstep",
+          "Mox Amber",
+          "Ranger-Captain of Eos",
+          "Rain of Filth"
+        ]
+      },
+      "keptHands": {
+        "2": [
+          "Polluted Delta",
+          "Mindbreak Trap",
+          "Island",
+          "Birds of Paradise",
+          "Yavimaya Coast",
+          "Trophy Mage",
+          "Chord of Calling"
+        ],
+        "3": [
+          "Mana Vault",
+          "The Cabbage Merchant",
+          "Gene Pollinator",
+          "Urza's Saga"
+        ],
+        "0": [
+          "Diabolic Intent",
+          "Verdant Catacombs",
+          "Volcanic Island",
+          "Talisman of Dominance",
+          "Beseech the Mirror",
+          "Arid Mesa",
+          "Ad Nauseam"
+        ],
+        "1": [
+          "Esper Sentinel",
+          "Lion's Eye Diamond",
+          "Marsh Flats",
+          "Mental Misstep",
+          "Mox Amber",
+          "Ranger-Captain of Eos",
+          "Rain of Filth"
+        ]
+      },
+      "wallMs": 35636,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970202,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 831,
+      "promptRetries": 0,
+      "passRecoveries": 95,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 3
+      },
+      "openingHands": {
+        "0": [
+          "Mana Vault",
+          "Hexing Squelcher",
+          "An Offer You Can't Refuse",
+          "Volcanic Island",
+          "Windfall",
+          "Grim Tutor",
+          "Thassa's Oracle"
+        ],
+        "1": [
+          "Displacer Kitten",
+          "Mental Misstep",
+          "Ancient Tomb",
+          "The One Ring",
+          "Scalding Tarn",
+          "Fierce Guardianship",
+          "Imperial Seal"
+        ],
+        "2": [
+          "Reshape",
+          "Veil of Summer",
+          "Tropical Island",
+          "Lotus Petal",
+          "Springleaf Drum",
+          "Finale of Devastation",
+          "Defense Grid"
+        ],
+        "3": [
+          "Earthcraft",
+          "Mindbreak Trap",
+          "Hedge Maze",
+          "Wooded Foothills",
+          "Sol Ring",
+          "Prismatic Vista",
+          "Scalding Tarn"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Mana Vault",
+          "Hexing Squelcher",
+          "An Offer You Can't Refuse",
+          "Volcanic Island",
+          "Windfall",
+          "Grim Tutor",
+          "Thassa's Oracle"
+        ],
+        "1": [
+          "Displacer Kitten",
+          "Mental Misstep",
+          "Ancient Tomb",
+          "The One Ring",
+          "Scalding Tarn",
+          "Fierce Guardianship",
+          "Imperial Seal"
+        ],
+        "2": [
+          "Reshape",
+          "Veil of Summer",
+          "Tropical Island",
+          "Lotus Petal",
+          "Springleaf Drum",
+          "Finale of Devastation",
+          "Defense Grid"
+        ],
+        "3": [
+          "Snap",
+          "Sol Ring",
+          "Training Grounds",
+          "Flesh Duplicate"
+        ]
+      },
+      "wallMs": 37191,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970203,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 669,
+      "promptRetries": 0,
+      "passRecoveries": 88,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 1,
+        "2": 2,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "Ancient Tomb",
+          "Training Grounds",
+          "Urza's Saga",
+          "Dryad Arbor",
+          "Mystic Remora",
+          "Biomancer's Familiar",
+          "Sol Ring"
+        ],
+        "0": [
+          "Demonic Tutor",
+          "Simian Spirit Guide",
+          "Timetwister",
+          "Pact of Negation",
+          "Into the Flood Maw",
+          "Flooded Strand",
+          "Gamble"
+        ],
+        "1": [
+          "Talisman of Creativity",
+          "Thassa's Oracle",
+          "Ranger-Captain of Eos",
+          "Dark Ritual",
+          "Spider-Woman, Stunning Savior",
+          "Demonic Tutor",
+          "Talisman of Dominance"
+        ],
+        "2": [
+          "Flooded Strand",
+          "Forest",
+          "Tropical Island",
+          "Sol Ring",
+          "Goblin Cannon",
+          "Mana Confluence",
+          "Staff of Domination"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Ancient Tomb",
+          "Training Grounds",
+          "Urza's Saga",
+          "Dryad Arbor",
+          "Mystic Remora",
+          "Biomancer's Familiar",
+          "Sol Ring"
+        ],
+        "0": [
+          "Demonic Tutor",
+          "Simian Spirit Guide",
+          "Timetwister",
+          "Pact of Negation",
+          "Into the Flood Maw",
+          "Flooded Strand",
+          "Gamble"
+        ],
+        "1": [
+          "Marsh Flats",
+          "Arcane Signet",
+          "Tundra",
+          "The One Ring",
+          "Badlands",
+          "Mana Vault"
+        ],
+        "2": [
+          "Gaea's Cradle",
+          "Windswept Heath",
+          "Dispel",
+          "Delighted Halfling",
+          "Trophy Mage"
+        ]
+      },
+      "wallMs": 30466,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970204,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 827,
+      "promptRetries": 0,
+      "passRecoveries": 117,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 2,
+        "3": 3
+      },
+      "openingHands": {
+        "0": [
+          "Beseech the Mirror",
+          "Vampiric Tutor",
+          "Deadly Rollick",
+          "Lion's Eye Diamond",
+          "Otawara, Soaring City",
+          "Red Elemental Blast",
+          "Praetor's Grasp"
+        ],
+        "1": [
+          "Redirect Lightning",
+          "Notion Thief",
+          "Underground Sea",
+          "Watery Grave",
+          "Simian Spirit Guide",
+          "Demonic Consultation",
+          "Culling the Weak"
+        ],
+        "2": [
+          "Crop Rotation",
+          "Rhystic Study",
+          "Rejuvenating Springs",
+          "Fierce Guardianship",
+          "Forensic Gadgeteer",
+          "Flusterstorm",
+          "Trinket Mage"
+        ],
+        "3": [
+          "Hedge Maze",
+          "The Cabbage Merchant",
+          "Growing Rites of Itlimoc",
+          "Gilded Drake",
+          "Crop Rotation",
+          "Oboro Breezecaller",
+          "Force of Negation"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Deflecting Swat",
+          "Cabal Ritual",
+          "Mox Amber",
+          "Blood Crypt",
+          "Flare of Duplication",
+          "Underworld Breach",
+          "Mnemonic Betrayal"
+        ],
+        "1": [
+          "Redirect Lightning",
+          "Notion Thief",
+          "Underground Sea",
+          "Watery Grave",
+          "Simian Spirit Guide",
+          "Demonic Consultation",
+          "Culling the Weak"
+        ],
+        "2": [
+          "Fabricate",
+          "Scalding Tarn",
+          "Tezzeret the Seeker",
+          "Flooded Strand",
+          "Wooded Foothills"
+        ],
+        "3": [
+          "Noxious Revival",
+          "Cyclonic Rift",
+          "Swan Song",
+          "Mindbreak Trap"
+        ]
+      },
+      "wallMs": 42519,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970205,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 799,
+      "promptRetries": 0,
+      "passRecoveries": 92,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "0": [
+          "Phyrexian Tower",
+          "Rain of Filth",
+          "Wishclaw Talisman",
+          "Chrome Mox",
+          "An Offer You Can't Refuse",
+          "Grim Tutor",
+          "Fierce Guardianship"
+        ],
+        "1": [
+          "Dragon's Rage Channeler",
+          "Mindbreak Trap",
+          "Mystic Remora",
+          "Mystical Tutor",
+          "Borne Upon a Wind",
+          "Misty Rainforest",
+          "Silence"
+        ],
+        "2": [
+          "Force of Will",
+          "Invasion of Ikoria",
+          "Waterlogged Grove",
+          "Forest",
+          "Misdirection",
+          "Borne Upon a Wind",
+          "Into the Flood Maw"
+        ],
+        "3": [
+          "Mental Misstep",
+          "Boseiju, Who Endures",
+          "Training Grounds",
+          "Cryptolith Rite",
+          "Chord of Calling",
+          "Growing Rites of Itlimoc",
+          "The Cabbage Merchant"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Phyrexian Tower",
+          "Rain of Filth",
+          "Wishclaw Talisman",
+          "Chrome Mox",
+          "An Offer You Can't Refuse",
+          "Grim Tutor",
+          "Fierce Guardianship"
+        ],
+        "1": [
+          "Chrome Mox",
+          "Tainted Pact",
+          "Watery Grave",
+          "Borne Upon a Wind",
+          "Tataru Taru",
+          "Notion Thief",
+          "Ranger-Captain of Eos"
+        ],
+        "2": [
+          "Force of Negation",
+          "Valley Floodcaller",
+          "Swan Song",
+          "Basalt Monolith",
+          "Breeding Pool",
+          "Yavimaya Coast",
+          "Forest"
+        ],
+        "3": [
+          "Veil of Summer",
+          "Chain of Vapor",
+          "Hidden Strings",
+          "Cryptolith Rite",
+          "Sol Ring",
+          "Snap",
+          "Command Tower"
+        ]
+      },
+      "wallMs": 37222,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970206,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 812,
+      "promptRetries": 0,
+      "passRecoveries": 108,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 2,
+        "2": 1,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Sol Ring",
+          "Redirect Lightning",
+          "Drannith Magistrate",
+          "Notion Thief",
+          "Tainted Pact",
+          "Gamble",
+          "Mindbreak Trap"
+        ],
+        "2": [
+          "Muddle the Mixture",
+          "Thrasios, Triton Hero",
+          "Grim Monolith",
+          "Chain of Vapor",
+          "Sol Ring",
+          "Gaea's Cradle",
+          "Fierce Guardianship"
+        ],
+        "3": [
+          "Birds of Paradise",
+          "Lotus Petal",
+          "Force of Negation",
+          "Earthcraft",
+          "Deserted Temple",
+          "Enduring Vitality",
+          "Windswept Heath"
+        ],
+        "0": [
+          "Springleaf Drum",
+          "Ad Nauseam",
+          "Verdant Catacombs",
+          "Diabolic Intent",
+          "Phyrexian Tower",
+          "Hexing Squelcher",
+          "Wishclaw Talisman"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Culling the Weak",
+          "Rhystic Study",
+          "Wooded Foothills",
+          "Tundra",
+          "Underground Sea"
+        ],
+        "2": [
+          "Defense Grid",
+          "Dispel",
+          "Neoform",
+          "Mana Confluence",
+          "Chrome Mox",
+          "Misty Rainforest"
+        ],
+        "3": [
+          "Mystic Remora",
+          "Mox Amber",
+          "Swan Song",
+          "Otawara, Soaring City",
+          "Earthcraft",
+          "Chain of Vapor",
+          "The Cabbage Merchant"
+        ],
+        "0": [
+          "Springleaf Drum",
+          "Ad Nauseam",
+          "Verdant Catacombs",
+          "Diabolic Intent",
+          "Phyrexian Tower",
+          "Hexing Squelcher",
+          "Wishclaw Talisman"
+        ]
+      },
+      "wallMs": 35859,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970207,
+      "kinnanSeat": 2,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "Kinnan",
+        "RogThras"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 891,
+      "promptRetries": 0,
+      "passRecoveries": 146,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "openingHands": {
+        "0": [
+          "Snap",
+          "Mystical Tutor",
+          "City of Brass",
+          "Grinding Station",
+          "Final Fortune",
+          "Gamble",
+          "Hexing Squelcher"
+        ],
+        "1": [
+          "Lion's Eye Diamond",
+          "Bloodstained Mire",
+          "Drannith Magistrate",
+          "Deadly Rollick",
+          "Scrubland",
+          "Ad Nauseam",
+          "Beseech the Mirror"
+        ],
+        "2": [
+          "Wooded Foothills",
+          "Tolaria West",
+          "Fierce Guardianship",
+          "City of Brass",
+          "Mox Opal",
+          "Mana Vault",
+          "Fyndhorn Elves"
+        ],
+        "3": [
+          "Scalding Tarn",
+          "Mox Diamond",
+          "Training Grounds",
+          "Badgermole Cub",
+          "Lotus Cobra",
+          "Force of Negation",
+          "Command Tower"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Command Tower",
+          "Demonic Counsel",
+          "Mystic Remora",
+          "Otawara, Soaring City",
+          "Brain Freeze",
+          "Gitaxian Probe",
+          "Talisman of Indulgence"
+        ],
+        "1": [
+          "Talisman of Conviction",
+          "Simian Spirit Guide",
+          "Mana Confluence",
+          "Displacer Kitten",
+          "Flooded Strand",
+          "Gamble",
+          "Force of Will"
+        ],
+        "2": [
+          "Springleaf Drum",
+          "Neoform",
+          "An Offer You Can't Refuse",
+          "Breeding Pool",
+          "Basalt Monolith",
+          "Shifting Woodland",
+          "Verdant Catacombs"
+        ],
+        "3": [
+          "Swan Song",
+          "Shifting Woodland",
+          "Biomancer's Familiar",
+          "Valley Floodcaller",
+          "Springleaf Drum",
+          "Chain of Vapor",
+          "Hidden Strings"
+        ]
+      },
+      "wallMs": 42366,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970300,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 817,
+      "promptRetries": 0,
+      "passRecoveries": 95,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 3,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Tainted Pact",
+          "Esper Sentinel",
+          "An Offer You Can't Refuse",
+          "Gifts Ungiven",
+          "Mana Vault",
+          "Flare of Duplication",
+          "Diabolic Intent"
+        ],
+        "2": [
+          "Tropical Island",
+          "Snow-Covered Island",
+          "Kinnan, Bonder Prodigy",
+          "Spellseeker",
+          "Pact of Negation",
+          "Chrome Mox",
+          "Flare of Denial"
+        ],
+        "3": [
+          "Boseiju, Who Endures",
+          "Neoform",
+          "Swan Song",
+          "Delighted Halfling",
+          "Talisman of Curiosity",
+          "Power Artifact",
+          "Rejuvenating Springs"
+        ],
+        "0": [
+          "Fierce Guardianship",
+          "Demonic Tutor",
+          "Beseech the Mirror",
+          "Talisman of Dominance",
+          "Gitaxian Probe",
+          "Daze",
+          "Bloodstained Mire"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Vampiric Tutor",
+          "Volcanic Island",
+          "Polluted Delta",
+          "Sol Ring",
+          "Esper Sentinel",
+          "Mana Confluence",
+          "Thassa's Oracle"
+        ],
+        "2": [
+          "Mindbreak Trap",
+          "Lotus Petal",
+          "Force of Will",
+          "Flusterstorm"
+        ],
+        "3": [
+          "Boseiju, Who Endures",
+          "Neoform",
+          "Swan Song",
+          "Delighted Halfling",
+          "Talisman of Curiosity",
+          "Power Artifact",
+          "Rejuvenating Springs"
+        ],
+        "0": [
+          "Fierce Guardianship",
+          "Demonic Tutor",
+          "Beseech the Mirror",
+          "Talisman of Dominance",
+          "Gitaxian Probe",
+          "Daze",
+          "Bloodstained Mire"
+        ]
+      },
+      "wallMs": 41515,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970301,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": 2,
+      "firstAttemptTurn": 3,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": "Grim Monolith observed net-positive loop -> Kinnan/deterministic outlet",
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 1758,
+      "promptRetries": 0,
+      "passRecoveries": 694,
+      "manaLoopCaps": 0,
+      "comboActionCount": 242,
+      "deterministicT3": true,
+      "deterministicT4": true,
+      "mulligans": {
+        "0": 2,
+        "1": 0,
+        "2": 3,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "Fabricate",
+          "Fyndhorn Elves",
+          "Grim Monolith",
+          "Valley Floodcaller",
+          "Force of Negation",
+          "Polluted Delta",
+          "Trophy Mage"
+        ],
+        "0": [
+          "Demonic Consultation",
+          "Final Fortune",
+          "Deadly Rollick",
+          "An Offer You Can't Refuse",
+          "Mox Diamond",
+          "Flare of Duplication",
+          "Flusterstorm"
+        ],
+        "1": [
+          "Jeska's Will",
+          "Arcane Signet",
+          "Steam Vents",
+          "Underworld Breach",
+          "Talisman of Indulgence",
+          "Dragon's Rage Channeler",
+          "Mystic Remora"
+        ],
+        "2": [
+          "Mindbreak Trap",
+          "Fierce Guardianship",
+          "Flooded Strand",
+          "Mistrise Village",
+          "Delighted Halfling",
+          "The Cabbage Merchant",
+          "Enduring Vitality"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Fabricate",
+          "Fyndhorn Elves",
+          "Grim Monolith",
+          "Valley Floodcaller",
+          "Force of Negation",
+          "Polluted Delta",
+          "Trophy Mage"
+        ],
+        "0": [
+          "Windfall",
+          "Sol Ring",
+          "Vampiric Tutor",
+          "Simian Spirit Guide",
+          "Talisman of Indulgence"
+        ],
+        "1": [
+          "Jeska's Will",
+          "Arcane Signet",
+          "Steam Vents",
+          "Underworld Breach",
+          "Talisman of Indulgence",
+          "Dragon's Rage Channeler",
+          "Mystic Remora"
+        ],
+        "2": [
+          "Mana Vault",
+          "Candelabra of Tawnos",
+          "Sowing Mycospawn",
+          "Mox Amber"
+        ]
+      },
+      "wallMs": 57462,
+      "primaryFailureCode": "UNRESOLVED_ATTEMPT"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970302,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 642,
+      "promptRetries": 0,
+      "passRecoveries": 67,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 3,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Diabolic Intent",
+          "Flooded Strand",
+          "Culling the Weak",
+          "Bloodstained Mire",
+          "Mockingbird",
+          "Volcanic Island",
+          "Arid Mesa"
+        ],
+        "2": [
+          "Mockingbird",
+          "Chain of Vapor",
+          "Birds of Paradise",
+          "Flesh Duplicate",
+          "Spellseeker",
+          "Cryptolith Rite",
+          "Sylvan Scrying"
+        ],
+        "3": [
+          "Force of Vigor",
+          "Verdant Catacombs",
+          "Boseiju, Who Endures",
+          "Forensic Gadgeteer",
+          "Endurance",
+          "Wooded Foothills",
+          "Chrome Mox"
+        ],
+        "0": [
+          "Arcane Signet",
+          "Valley Floodcaller",
+          "Ad Nauseam",
+          "Birgi, God of Storytelling",
+          "Jeska's Will",
+          "Talisman of Indulgence",
+          "Polluted Delta"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Diabolic Intent",
+          "Flooded Strand",
+          "Culling the Weak",
+          "Bloodstained Mire",
+          "Mockingbird",
+          "Volcanic Island",
+          "Arid Mesa"
+        ],
+        "2": [
+          "Force of Will",
+          "Island",
+          "Invasion of Ikoria",
+          "Flooded Strand"
+        ],
+        "3": [
+          "Ancient Tomb",
+          "Island",
+          "Chord of Calling",
+          "Summoner's Pact",
+          "Reshape",
+          "City of Brass",
+          "Sylvan Library"
+        ],
+        "0": [
+          "Arcane Signet",
+          "Valley Floodcaller",
+          "Ad Nauseam",
+          "Birgi, God of Storytelling",
+          "Jeska's Will",
+          "Talisman of Indulgence",
+          "Polluted Delta"
+        ]
+      },
+      "wallMs": 30042,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970303,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": 4,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": "Kinnan + Basalt -> exhaustive Kinnan activations -> Thrasios -> Ballista",
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 733,
+      "promptRetries": 0,
+      "passRecoveries": 114,
+      "manaLoopCaps": 0,
+      "comboActionCount": 21,
+      "deterministicT3": false,
+      "deterministicT4": true,
+      "mulligans": {
+        "0": 3,
+        "1": 1,
+        "2": 0,
+        "3": 1
+      },
+      "openingHands": {
+        "1": [
+          "Ragavan, Nimble Pilferer",
+          "Talisman of Progress",
+          "Dress Down",
+          "Tataru Taru",
+          "Lotho, Corrupt Shirriff",
+          "Flooded Strand",
+          "Ranger-Captain of Eos"
+        ],
+        "2": [
+          "Force of Will",
+          "Veil of Summer",
+          "Gut Shot",
+          "Chrome Mox",
+          "Pact of Negation",
+          "Boseiju, Who Endures",
+          "Noxious Revival"
+        ],
+        "3": [
+          "Nature's Rhythm",
+          "Energy Refractor",
+          "Rhystic Study",
+          "Mox Amber",
+          "Bloom Tender",
+          "Moonsilver Key",
+          "Drift of Phantasms"
+        ],
+        "0": [
+          "Mox Opal",
+          "Steam Vents",
+          "Command Tower",
+          "Deflecting Swat",
+          "City of Brass",
+          "Pact of Negation",
+          "Otawara, Soaring City"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Chrome Mox",
+          "Sacred Foundry",
+          "Demonic Consultation",
+          "Scrubland",
+          "Rain of Filth",
+          "Underground Sea"
+        ],
+        "2": [
+          "Force of Will",
+          "Veil of Summer",
+          "Gut Shot",
+          "Chrome Mox",
+          "Pact of Negation",
+          "Boseiju, Who Endures",
+          "Noxious Revival"
+        ],
+        "3": [
+          "City of Brass",
+          "Whir of Invention",
+          "Transmute Artifact",
+          "Power Artifact",
+          "Polluted Delta",
+          "Crop Rotation"
+        ],
+        "0": [
+          "Swan Song",
+          "Lion's Eye Diamond",
+          "Mystical Tutor",
+          "Culling the Weak"
+        ]
+      },
+      "wallMs": 34298,
+      "primaryFailureCode": "PILOT_ERROR"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970304,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 739,
+      "promptRetries": 0,
+      "passRecoveries": 76,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 1,
+        "3": 2
+      },
+      "openingHands": {
+        "0": [
+          "Necropotence",
+          "Watery Grave",
+          "Ancient Tomb",
+          "Beseech the Mirror",
+          "Simian Spirit Guide",
+          "Valley Floodcaller",
+          "Phyrexian Tower"
+        ],
+        "1": [
+          "Intuition",
+          "Brain Freeze",
+          "Imperial Seal",
+          "Talisman of Conviction",
+          "Underground Sea",
+          "Bloodstained Mire",
+          "Arcane Signet"
+        ],
+        "2": [
+          "Delighted Halfling",
+          "Gilded Drake",
+          "Cryptolith Rite",
+          "Command Tower",
+          "Chain of Vapor",
+          "Expedition Map",
+          "Valley Floodcaller"
+        ],
+        "3": [
+          "City of Brass",
+          "Pact of Negation",
+          "Invasion of Ikoria",
+          "Fabricate",
+          "Chord of Calling",
+          "Nature's Rhythm",
+          "Moonsilver Key"
+        ]
+      },
+      "keptHands": {
+        "0": [
+          "Necropotence",
+          "Watery Grave",
+          "Ancient Tomb",
+          "Beseech the Mirror",
+          "Simian Spirit Guide",
+          "Valley Floodcaller",
+          "Phyrexian Tower"
+        ],
+        "1": [
+          "Intuition",
+          "Brain Freeze",
+          "Imperial Seal",
+          "Talisman of Conviction",
+          "Underground Sea",
+          "Bloodstained Mire",
+          "Arcane Signet"
+        ],
+        "2": [
+          "Lotus Petal",
+          "Flooded Strand",
+          "Ancient Tomb",
+          "Veil of Summer",
+          "Borne Upon a Wind",
+          "This Town Ain't Big Enough"
+        ],
+        "3": [
+          "Trophy Mage",
+          "Polluted Delta",
+          "Trinket Mage",
+          "Otawara, Soaring City",
+          "Misdirection"
+        ]
+      },
+      "wallMs": 36470,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970305,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 657,
+      "promptRetries": 0,
+      "passRecoveries": 59,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 1,
+        "2": 2,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "Ancient Tomb",
+          "Tropical Island",
+          "Mox Opal",
+          "Crop Rotation",
+          "Thrasios, Triton Hero",
+          "Mystical Tutor",
+          "Mox Diamond"
+        ],
+        "0": [
+          "Pact of Negation",
+          "Mana Confluence",
+          "Rite of Flame",
+          "Diabolic Intent",
+          "Arid Mesa",
+          "Misty Rainforest",
+          "Chrome Mox"
+        ],
+        "1": [
+          "Sacred Foundry",
+          "Lotho, Corrupt Shirriff",
+          "Smothering Tithe",
+          "Windfall",
+          "Volcanic Island",
+          "Windswept Heath",
+          "Cabal Ritual"
+        ],
+        "2": [
+          "Delighted Halfling",
+          "Finale of Devastation",
+          "Sowing Mycospawn",
+          "Crop Rotation",
+          "Badgermole Cub",
+          "Deserted Temple",
+          "Invasion of Ikoria"
+        ]
+      },
+      "keptHands": {
+        "3": [
+          "Defense Grid",
+          "Enduring Vitality",
+          "Boseiju, Who Endures",
+          "Yavimaya Coast",
+          "Chord of Calling",
+          "Breeding Pool",
+          "Grim Monolith"
+        ],
+        "0": [
+          "Pact of Negation",
+          "Mana Confluence",
+          "Rite of Flame",
+          "Diabolic Intent",
+          "Arid Mesa",
+          "Misty Rainforest",
+          "Chrome Mox"
+        ],
+        "1": [
+          "Mox Diamond",
+          "Dark Ritual",
+          "Mental Misstep",
+          "Demonic Consultation",
+          "Necropotence",
+          "Dress Down"
+        ],
+        "2": [
+          "Mox Amber",
+          "Deflecting Swat",
+          "Springleaf Drum",
+          "Earthcraft",
+          "Cloud of Faeries"
+        ]
+      },
+      "wallMs": 31761,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970306,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 816,
+      "promptRetries": 0,
+      "passRecoveries": 108,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 2,
+        "3": 0
+      },
+      "openingHands": {
+        "1": [
+          "Demonic Consultation",
+          "Mystical Tutor",
+          "Plateau",
+          "Mox Amber",
+          "Intuition",
+          "Rain of Filth",
+          "Sol Ring"
+        ],
+        "2": [
+          "This Town Ain't Big Enough",
+          "Chord of Calling",
+          "Finale of Devastation",
+          "Expedition Map",
+          "Flare of Denial",
+          "Borne Upon a Wind",
+          "Nature's Rhythm"
+        ],
+        "3": [
+          "Finale of Devastation",
+          "Transmute Artifact",
+          "Chord of Calling",
+          "Muddle the Mixture",
+          "Llanowar Elves",
+          "Borne Upon a Wind",
+          "Windswept Heath"
+        ],
+        "0": [
+          "Flusterstorm",
+          "Defense Grid",
+          "Into the Flood Maw",
+          "Misty Rainforest",
+          "Chrome Mox",
+          "Grim Monolith",
+          "Mystic Remora"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Mystic Remora",
+          "Flusterstorm",
+          "Verdant Catacombs",
+          "Tundra",
+          "Fierce Guardianship",
+          "Lotho, Corrupt Shirriff",
+          "Volcanic Island"
+        ],
+        "2": [
+          "Springleaf Drum",
+          "Hidden Strings",
+          "Faerie Mastermind",
+          "Otawara, Soaring City",
+          "Rhystic Study"
+        ],
+        "3": [
+          "Finale of Devastation",
+          "Transmute Artifact",
+          "Chord of Calling",
+          "Muddle the Mixture",
+          "Llanowar Elves",
+          "Borne Upon a Wind",
+          "Windswept Heath"
+        ],
+        "0": [
+          "Flusterstorm",
+          "Defense Grid",
+          "Into the Flood Maw",
+          "Misty Rainforest",
+          "Chrome Mox",
+          "Grim Monolith",
+          "Mystic Remora"
+        ]
+      },
+      "wallMs": 45025,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    },
+    {
+      "pilotVersion": "arch-aware-v1.7",
+      "variant": "F10",
+      "seed": 1970307,
+      "kinnanSeat": 3,
+      "seatDecks": [
+        "RogSi",
+        "Blue Farm",
+        "RogThras",
+        "Kinnan"
+      ],
+      "seatDeckSha256s": [
+        "c24a9808503702f0f7c82d0f81fae5de55d1edda26623273feaeaae414c40655",
+        "ecdde6508bb23fb09d23b5aecd59d3ed6faaf8c5eab5588e2ddbbf96e6aefb1b",
+        "1e8576e90e293f504fb21f3c740fdbb0db082d72856f6a6aae51bb2be92e3255",
+        "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d"
+      ],
+      "variantDeckSha256": "6944c42b4cffe97b2e6dd55d4262220a8da5c947859d0cafe3b5d3754d12b98d",
+      "status": "horizon_complete",
+      "winnerSeat": null,
+      "kinnanWon": false,
+      "firstAssemblyTurn": null,
+      "firstAttemptTurn": null,
+      "protectedAttempt": false,
+      "attemptResolved": false,
+      "comboLine": null,
+      "protectionAvailable": [],
+      "globalTurn": 17,
+      "round": 5,
+      "prompts": 713,
+      "promptRetries": 0,
+      "passRecoveries": 122,
+      "manaLoopCaps": 0,
+      "comboActionCount": 0,
+      "deterministicT3": false,
+      "deterministicT4": false,
+      "mulligans": {
+        "0": 0,
+        "1": 0,
+        "2": 3,
+        "3": 0
+      },
+      "openingHands": {
+        "3": [
+          "Pact of Negation",
+          "Chrome Mox",
+          "Fyndhorn Elves",
+          "Borne Upon a Wind",
+          "Worldly Tutor",
+          "Swan Song",
+          "Flusterstorm"
+        ],
+        "0": [
+          "Mnemonic Betrayal",
+          "Praetor's Grasp",
+          "Fierce Guardianship",
+          "Gamble",
+          "Badlands",
+          "Talisman of Dominance",
+          "Scalding Tarn"
+        ],
+        "1": [
+          "Culling the Weak",
+          "Talisman of Conviction",
+          "Opposition Agent",
+          "Ad Nauseam",
+          "Necropotence",
+          "Scalding Tarn",
+          "Gemstone Caverns"
+        ],
+        "2": [
+          "Hedge Maze",
+          "Springleaf Drum",
+          "Springheart Nantuko",
+          "Gut Shot",
+          "Seedborn Muse",
+          "Gilded Drake",
+          "Minamo, School at Water's Edge"
+        ]
+      },
+      "keptHands": {
+        "1": [
+          "Culling the Weak",
+          "Talisman of Conviction",
+          "Opposition Agent",
+          "Ad Nauseam",
+          "Necropotence",
+          "Scalding Tarn",
+          "Gemstone Caverns"
+        ],
+        "3": [
+          "Mana Confluence",
+          "Fyndhorn Elves",
+          "Flooded Strand",
+          "Pact of Negation",
+          "Windswept Heath",
+          "Mox Amber",
+          "Reshape"
+        ],
+        "0": [
+          "Mnemonic Betrayal",
+          "Praetor's Grasp",
+          "Fierce Guardianship",
+          "Gamble",
+          "Badlands",
+          "Talisman of Dominance",
+          "Scalding Tarn"
+        ],
+        "2": [
+          "Mana Vault",
+          "Cyclonic Rift",
+          "Gene Pollinator",
+          "Clever Impersonator"
+        ]
+      },
+      "wallMs": 34905,
+      "primaryFailureCode": "NONDETERMINISTIC_ONLY"
+    }
+  ]
 }
