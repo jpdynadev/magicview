@@ -1,0 +1,237 @@
+name: Kinnan v144 Hidden Strings over Refractor 2k Serious Comparison
+
+on:
+  push:
+    branches: [agent/kinnan-v144-hiddenstrings-2k]
+    paths: [.github/workflows/kinnan-v144-hiddenstrings-refractor-2k.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v144-hiddenstrings-refractor-2k
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v144-hiddenstrings-refractor-2k-7000p-240s
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired v1.44 runtime and exact mutation
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v144_hiddenstrings_refractor.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_action_score_cancel_block 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block; do
+            [ -f "engine-tests/apply_arch_v${f}.py" ] && python3 "engine-tests/apply_arch_v${f}.py"
+          done
+          python3 engine-tests/apply_arch_v127_shang_legolas_roles.py
+          python3 engine-tests/apply_arch_v128_shang_spellskite_roles.py
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'" in t
+          assert '_v140_combo_monolith_affordability' in t
+          assert Path('engine-tests/sim_v2_worker_arch_v142.py').exists()
+          for key in ('F10','F10_HIDDENSTRINGS_REFR'):
+              q=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              ls=q.read_text().splitlines(); s=ls.index('[Main]')+1
+              cs=[x.split(' ',1)[1] for x in ls[s:] if x.strip()]
+              assert len(cs)==99 and len(set(cs))==99,(key,len(cs),len(set(cs)))
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Semantic and lifecycle gates
+        run: |
+          set -euo pipefail
+          mkdir -p gate
+          for SPEC in 'F10:7099000' 'F10_HIDDENSTRINGS_REFR:7099001'; do
+            VARIANT=${SPEC%%:*}; SEED=${SPEC##*:}
+            for SEAT in 0 1 2 3; do
+              case "$SEAT" in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+              OUT="gate/${VARIANT}-s${SEAT}-${POD}.json"
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$((SEED+SEAT))" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir ".sim-cache/v144gate-${GITHUB_RUN_ID}-${VARIANT}-${SEAT}" --retain-traces failures --engine-id "$MANABREW_REF:arch-v144-hiddenstrings-refractor-gate:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:${SEAT}" --exposure-card 'Energy Refractor' --exposure-card 'Hidden Strings' --exposure-card 'Misdirection' --output "$OUT"
+              python3 - "$OUT" "$VARIANT" "$SEAT" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and r.get('podProfile')==pod,r
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial',r
+          assert r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None,r
+          PY
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v144-gate
+          path: gate/**
+          retention-days: 14
+
+  paired:
+    needs: gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired v1.44 runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v144_hiddenstrings_refractor.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v127_shang_legolas_roles.py
+          python3 engine-tests/apply_arch_v128_shang_spellskite_roles.py
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Run 100 canonical paired keys for shard
+        run: |
+          set -euo pipefail
+          mkdir -p out/valid out/attempts out/errors
+          SHARD=${{ matrix.shard }}
+          START=$((SHARD*100)); END=$((START+99))
+          for VARIANT in F10 F10_HIDDENSTRINGS_REFR; do
+            ERR="out/errors/${VARIANT}-shard${SHARD}-errors.ndjson"; : > "$ERR"
+            for IDX in $(seq "$START" "$END"); do
+              SEAT=$((IDX % 4)); PODIDX=$(((IDX / 4) % 4)); SEED=$((7100000 + IDX))
+              case "$PODIDX" in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+              OK=0
+              for TRY in 1 2 3; do
+                ATT="out/attempts/${VARIANT}-idx${IDX}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+                LOG="out/attempts/${VARIANT}-idx${IDX}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log"
+                CACHE=".sim-cache/v144-${GITHUB_RUN_ID}-${VARIANT}-idx${IDX}-try${TRY}"
+                ENGINE="$MANABREW_REF:arch-v144-hiddenstrings-refractor-2k:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:idx${IDX}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+                set +e
+                CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures --engine-id "$ENGINE" --exposure-card 'Energy Refractor' --exposure-card 'Hidden Strings' --exposure-card 'Misdirection' --output "$ATT" > "$LOG" 2>&1
+                RC=$?; set -e
+                STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+                )
+                if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                  if python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and int(r.get('seed'))==int(seed) and r.get('podProfile')==pod,r
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial',r
+          assert r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None,r
+          PY
+                  then cp "$ATT" "out/valid/${VARIANT}-idx${IDX}.json"; OK=1; break; fi
+                fi
+                printf '{"variant":"%s","idx":%s,"seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$IDX" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "$ERR"
+              done
+              [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT idx=$IDX seat=$SEAT seed=$SEED pod=$POD" >&2
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v144-shard-${{ matrix.shard }}
+          path: |
+            out/valid/**
+            out/errors/**
+            out/attempts/*try2.json
+            out/attempts/*try2.log
+            out/attempts/*try3.json
+            out/attempts/*try3.log
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    needs: paired
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: v144-shard-*
+          path: all
+      - name: Strict 2,000-pair aggregate
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_HIDDENSTRINGS_REFR']; good={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}; errors={v:[] for v in variants}
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              try:d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              except Exception:continue
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('all/**/errors/*errors.ndjson',recursive=True):
+              for line in open(p):
+                  try:r=json.loads(line)
+                  except Exception:continue
+                  if r.get('variant') in errors: errors[r['variant']].append(r)
+          def key(r): return (int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def met(r,m):
+              if m=='assemblyT4': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attemptT4': return (r.get('firstAttemptTurn') or 99)<=4
+              return bool(r.get(m))
+          maps={v:{key(r):r for r in rows[v] if r.get('status') in good and r.get('pilotVersion')=='arch-aware-v1.40-adversarial' and r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None} for v in variants}
+          b=maps['F10']; c=maps['F10_HIDDENSTRINGS_REFR']; common=sorted(set(b)&set(c))
+          rep={'strictValid':False,'profile':'arch-repaired-v144-hiddenstrings-refractor-2k-7000p-240s','variants':{},'paired':{},'errorAttempts':{},'cacheReuse':{'compatiblePriorRowsReused':0},'exposure':{},'cardExposure':{},'canonical':{'targetPairsPerDeck':2000,'seedBase':7100000,'seatRule':'idx%4','podRule':'floor(idx/4)%4'}}
+          for v in variants:
+              xs=list(maps[v].values())
+              rep['variants'][v]={'records':len(rows[v]),'valid':len(xs),'uniqueKeys':len(maps[v]),'assemblyT4':sum(met(r,'assemblyT4') for r in xs),'attemptT4':sum(met(r,'attemptT4') for r in xs),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs),'wins':sum(met(r,'kinnanWon') for r in xs),'mulligans':sum(int(r.get('mulligans') or 0) for r in xs),'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in xs)),'pods':{pod:{'n':sum(r.get('podProfile')==pod for r in xs),'assemblyT4':sum(met(r,'assemblyT4') for r in xs if r.get('podProfile')==pod),'attemptT4':sum(met(r,'attemptT4') for r in xs if r.get('podProfile')==pod),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs if r.get('podProfile')==pod)} for pod in ('balanced','turbo','midrange','mixed')},'seats':{str(s):{'n':sum(int(r.get('kinnanSeat',-1))==s for r in xs),'assemblyT4':sum(met(r,'assemblyT4') for r in xs if int(r.get('kinnanSeat',-1))==s),'attemptT4':sum(met(r,'attemptT4') for r in xs if int(r.get('kinnanSeat',-1))==s),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs if int(r.get('kinnanSeat',-1))==s)} for s in range(4)}}
+              rep['errorAttempts'][v]=dict(collections.Counter(str(e.get('status') or 'missing') for e in errors[v]))
+          for m in ('assemblyT4','attemptT4','strictProtectedT4','kinnanWon'):
+              cv=sum(met(c[k],m) for k in common); bv=sum(met(b[k],m) for k in common)
+              a=sum(met(c[k],m) and not met(b[k],m) for k in common); z=sum(met(b[k],m) and not met(c[k],m) for k in common); n=a+z
+              p=1.0 if not n else min(1.0,2*sum(math.comb(n,i) for i in range(min(a,z)+1))/(2**n))
+              rep['paired'][m]={'keys':len(common),'candidate':cv,'baseline':bv,'deltaRate':(cv-bv)/len(common) if common else None,'candidateOnly':a,'baselineOnly':z,'pTwoSided':p}
+          changed=['Energy Refractor','Hidden Strings']
+          exposed=[k for k in common if set(b[k].get('observedCards') or []).intersection(changed) or set(c[k].get('observedCards') or []).intersection(changed)]
+          rep['exposure']={'pairedKeys':len(common),'exposedKeys':len(exposed),'baselineAssembly':sum(met(b[k],'assemblyT4') for k in exposed),'candidateAssembly':sum(met(c[k],'assemblyT4') for k in exposed),'baselineAttempts':sum(met(b[k],'attemptT4') for k in exposed),'candidateAttempts':sum(met(c[k],'attemptT4') for k in exposed),'baselineProtected':sum(met(b[k],'strictProtectedT4') for k in exposed),'candidateProtected':sum(met(c[k],'strictProtectedT4') for k in exposed)}
+          for card in ('Energy Refractor','Hidden Strings','Misdirection'):
+              ks=[k for k in common if card in set(b[k].get('observedCards') or []) or card in set(c[k].get('observedCards') or [])]
+              rep['cardExposure'][card]={'keys':len(ks),'baselineAssembly':sum(met(b[k],'assemblyT4') for k in ks),'candidateAssembly':sum(met(c[k],'assemblyT4') for k in ks),'baselineAttempts':sum(met(b[k],'attemptT4') for k in ks),'candidateAttempts':sum(met(c[k],'attemptT4') for k in ks),'baselineProtected':sum(met(b[k],'strictProtectedT4') for k in ks),'candidateProtected':sum(met(c[k],'strictProtectedT4') for k in ks)}
+          rep['strictValid']=(len(common)==2000 and all(len(rows[v])==2000 and len(maps[v])==2000 for v in variants) and set(b)==set(c))
+          out=pathlib.Path('engine-tests/results/kinnan-v144-hiddenstrings-refractor-2k-latest.json'); out.parent.mkdir(exist_ok=True); out.write_text(json.dumps(rep,indent=2,sort_keys=True)); print(json.dumps(rep,indent=2,sort_keys=True))
+          if not rep['strictValid']: raise SystemExit('STRICT_V144_HIDDENSTRINGS_REFR_2K_FAILED')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v144-hiddenstrings-refractor-2k-aggregate
+          path: engine-tests/results/kinnan-v144-hiddenstrings-refractor-2k-latest.json
+          if-no-files-found: error
+          retention-days: 14
