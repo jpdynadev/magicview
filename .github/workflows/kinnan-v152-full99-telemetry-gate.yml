@@ -1,0 +1,81 @@
+name: Kinnan v152 Full-99 Telemetry Gate
+
+on:
+  push:
+    branches: [agent/kinnan-v152-full99-telemetry-repair]
+    paths: [.github/workflows/kinnan-v152-full99-telemetry-gate.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v152-full99-telemetry-gate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v152-full99-gate-7000p-240s
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v152_ring_endurance.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Run four-game telemetry validation
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          for VARIANT in F10 F10_RING_ENDURANCE; do
+            for SEED in 6999100 6999101; do
+              POD=balanced; [ "$SEED" = 6999101 ] && POD=mixed
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v152_full99.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat $((SEED % 4)) --seeds "$SEED" \
+                --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 \
+                --xmx 1280m --xms 192m --cache-dir ".sim-cache/v152-${GITHUB_RUN_ID}-${VARIANT}-${SEED}" \
+                --retain-traces failures --engine-id "$MANABREW_REF:arch-v152-full99:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:${SEED}" \
+                --output "out/${VARIANT}-${SEED}.json"
+            done
+          done
+          python3 engine-tests/validate_full99_coverage.py 'out/*.json' --report out/full99-coverage.json
+          python3 - <<'PY'
+          import glob,json
+          for path in glob.glob('out/*.json'):
+              if path.endswith('full99-coverage.json'): continue
+              value=json.load(open(path)); game=value[0] if isinstance(value,list) else value
+              assert game.get('v2SessionCleanup') is True and game.get('v2SessionCleanupError') is None,game
+              assert game.get('cardTelemetrySchemaVersion')=='kinnan-full99-card-telemetry-v2',game
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v152-full99-telemetry-validation
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
