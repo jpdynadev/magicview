@@ -138,6 +138,8 @@ def install(runner: Any) -> None:
         current = _snapshot_zones(snapshot, seat)
         previous = ctx.get("zones") or {}
         clock = _clock(snapshot)
+        ctx["lastClock"] = dict(clock)
+        ctx["lastSnapshot"] = copy.deepcopy(snapshot)
 
         if ctx.get("firstVisibleHand") is None:
             hand = _hand_names(snapshot, seat)
@@ -367,13 +369,68 @@ def install(runner: Any) -> None:
 
     base.response_for = telemetry_response
 
+    # v8 handles payManaCost directly inside runner.run_game, bypassing
+    # base.response_for. Wrap the actual payment chooser so every automatic
+    # payment step and selected mana source is durable in the raw trace.
+    original_payment = runner.choose_productive_payment_v8
+
+    def telemetry_payment(inp: dict[str, Any], player: int):
+        answer, canceled = original_payment(inp, player)
+        ctx = state.get("ctx")
+        if not ctx or int(player) != int(ctx["seat"]):
+            return answer, canceled
+        output = (answer or {}).get("output") or {}
+        action_id = str(output.get("actionId") or "")
+        selected = next(
+            (a for a in (inp.get("actions") or []) if str(a.get("id") or "") == action_id),
+            None,
+        )
+        source_id = str((selected or {}).get("cardId") or "")
+        source_name = str(((ctx.get("zones") or {}).get(source_id) or {}).get("name") or "")
+        target_id = str(inp.get("cardId") or inp.get("card_id") or "")
+        target_name = str(inp.get("cardName") or "")
+        active = ctx.setdefault("activePaymentSessions", {})
+        key = target_id or target_name or "unknown"
+        session = active.get(key)
+        if session is None:
+            ctx["paymentSessionSeq"] = int(ctx.get("paymentSessionSeq") or 0) + 1
+            session = {
+                "id": ctx["paymentSessionSeq"],
+                "initialRemainingCost": str(inp.get("manaCost") or ""),
+            }
+            active[key] = session
+        _event(
+            "manaPaymentDecision",
+            paymentSession=session["id"],
+            card=target_name,
+            cardId=target_id,
+            initialRemainingCost=session["initialRemainingCost"],
+            remainingCost=str(inp.get("manaCost") or ""),
+            canConfirmFromPool=bool(inp.get("canConfirmFromPool")),
+            decisionType=str(output.get("type") or ""),
+            canceled=bool(canceled),
+            sourceCard=source_name,
+            sourceCardId=source_id,
+            selectedAction=copy.deepcopy(selected),
+            producedMana=copy.deepcopy((selected or {}).get("producedMana") or []),
+            chosenOutput=copy.deepcopy(output),
+            manaPoolBefore=_mana_pool(ctx.get("lastSnapshot") or {}, int(ctx["seat"])),
+            **(ctx.get("lastClock") or {}),
+        )
+        if canceled or output.get("type") in {"pay", "cancel"}:
+            active.pop(key, None)
+        return answer, canceled
+
+    runner.choose_productive_payment_v8 = telemetry_payment
+
     original_run = runner.run_game
     def telemetry_run_game(*args: Any, **kwargs: Any) -> dict[str, Any]:
         seat = _seat_from_args(args, kwargs)
         ctx = {
             "seat": seat, "seq": 0, "events": [], "mulliganHands": [],
             "putBack": [], "keptHand": None, "firstVisibleHand": None,
-            "zones": {}, "lastOpponentAction": None,
+            "zones": {}, "lastOpponentAction": None, "lastClock": {},
+            "lastSnapshot": {}, "activePaymentSessions": {}, "paymentSessionSeq": 0,
         }
         state["ctx"] = ctx
         try:
