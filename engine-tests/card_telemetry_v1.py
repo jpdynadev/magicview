@@ -217,6 +217,27 @@ def install(runner: Any) -> None:
         clock = _clock(snapshot)
         seat = int(ctx["seat"])
 
+        if player == seat:
+            input_summary = {
+                "type": ptype,
+                "keys": sorted(str(k) for k in inp.keys()),
+                "cardName": inp.get("cardName"),
+                "cardId": inp.get("cardId") or inp.get("card_id"),
+                "manaCost": inp.get("manaCost"),
+                "canConfirmFromPool": inp.get("canConfirmFromPool"),
+                "presentation": copy.deepcopy(inp.get("presentation") or {}),
+            }
+            if "mana" in ptype.lower():
+                input_summary["actions"] = copy.deepcopy(inp.get("actions") or [])
+            _event(
+                "promptDecision",
+                deck=deck,
+                promptType=ptype,
+                inputSummary=input_summary,
+                chosenOutput=copy.deepcopy((answer or {}).get("output") or {}),
+                **clock,
+            )
+
         if deck == "Kinnan" and player == seat and ptype == "payManaCost":
             output = (answer or {}).get("output") or {}
             selected = None
