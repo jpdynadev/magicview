@@ -164,8 +164,7 @@ def install(runner: Any) -> None:
                     _event("tapped", card=now["name"], cardId=cid, zone=now["zone"], **clock)
                 elif before.get("tapped") and not now.get("tapped"):
                     _event("untapped", card=now["name"], cardId=cid, zone=now["zone"], **clock)
-        ctx["zones"] = current
-
+        # Keep last-known identities across prompts where Forge temporarily hides\n        # zones/cards. Replacing the map caused a revealed card to disappear and\n        # then be misclassified as a new draw when it became visible again.\n        if previous:\n            previous.update(current)\n            ctx["zones"] = previous\n        else:\n            ctx["zones"] = current\n
     original_keep = base.keep_hand
     def telemetry_keep_hand(deck: str, hand: list[dict[str, Any]], mulligan_count: int) -> bool:
         decision = original_keep(deck, hand, mulligan_count)
