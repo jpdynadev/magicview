@@ -1,4 +1,5 @@
 name: Kinnan v152 Full-99 Telemetry Gate
+# Re-run after enforcing explicit engine identity in every game/card row.
 
 on:
   push:
