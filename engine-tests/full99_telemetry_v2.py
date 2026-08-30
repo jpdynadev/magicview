@@ -10,6 +10,27 @@ SCHEMA = "kinnan-full99-card-telemetry-v2"
 ACTION_KINDS = {"actionChosen"}
 
 
+def _prompt_cards(event: dict[str, Any]) -> list[dict[str, Any]]:
+    return list(((event.get("inputSummary") or {}).get("cards") or []))
+
+
+def _prompt_card_name(card: dict[str, Any]) -> str:
+    return str(((card.get("identity") or {}).get("name") or card.get("name") or ""))
+
+
+def _chosen_prompt_cards(event: dict[str, Any]) -> list[dict[str, Any]]:
+    chosen = {
+        str(value)
+        for value in ((event.get("chosenOutput") or {}).get("chosenCardIds") or [])
+    }
+    return [card for card in _prompt_cards(event) if str(card.get("id") or "") in chosen]
+
+
+def _source_title(event: dict[str, Any]) -> str:
+    presentation = (event.get("inputSummary") or {}).get("presentation") or {}
+    return str(presentation.get("title") or "")
+
+
 def deck_cards(path: Path) -> list[str]:
     lines = path.read_text().splitlines()
     start = lines.index("[Main]") + 1
@@ -34,6 +55,38 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
     cards = deck_cards(deck_path)
     telemetry = result.get("cardTelemetry") or {}
     events = list(telemetry.get("events") or [])
+    # Forge exposes library looks/search choices as structured prompt payloads.
+    # Preserve the distinction between cards shown by a reveal prompt and cards
+    # actually selected by a search effect; never infer either from deck membership.
+    source_text: dict[str, str] = {}
+    for event in events:
+        if event.get("kind") != "actionChosen":
+            continue
+        raw_card = event.get("rawCard") or {}
+        name = str(((raw_card.get("identity") or {}).get("name") or event.get("card") or ""))
+        text = str(raw_card.get("text") or "")
+        if name and text:
+            source_text[name] = text
+    reveal_events_by_card: dict[str, list[dict[str, Any]]] = {}
+    tutor_events_by_card: dict[str, list[dict[str, Any]]] = {}
+    for event in events:
+        if event.get("kind") != "promptDecision":
+            continue
+        ptype = str(event.get("promptType") or "")
+        if ptype == "revealCards":
+            for prompt_card in _prompt_cards(event):
+                name = _prompt_card_name(prompt_card)
+                if name:
+                    reveal_events_by_card.setdefault(name, []).append(event)
+        elif ptype == "chooseCards":
+            source = _source_title(event)
+            rules = source_text.get(source, "")
+            if "search your library" not in rules.lower():
+                continue
+            for prompt_card in _chosen_prompt_cards(event):
+                name = _prompt_card_name(prompt_card)
+                if name:
+                    tutor_events_by_card.setdefault(name, []).append(event)
     opening = set(telemetry.get("openingHand") or [])
     kept = set(telemetry.get("keptHand") or [])
     rejected = {
@@ -49,13 +102,22 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
     rows: list[dict[str, Any]] = []
 
     for card in cards:
-        card_events = [e for e in events if e.get("card") == card or e.get("targetCard") == card]
+        semantic_events = reveal_events_by_card.get(card, []) + tutor_events_by_card.get(card, [])
+        card_events = [e for e in events if e.get("card") == card or e.get("targetCard") == card] + semantic_events
         actions = [e for e in card_events if e.get("kind") in ACTION_KINDS]
         zone_changes = [e for e in card_events if e.get("kind") == "zoneTransition"]
         zones = sorted({str(e.get("toZone")) for e in zone_changes if e.get("toZone")})
         drawn = [e for e in card_events if e.get("kind") == "draw"]
-        casts = [e for e in actions if str(e.get("actionType") or "").lower() == "cast"]
-        plays = [e for e in actions if str(e.get("actionType") or "").lower() in {"play", "playland", "land"}]
+        casts = [
+            e for e in actions
+            if str(e.get("actionType") or "").lower() == "cast"
+            and not str(e.get("description") or "").lower().startswith("play ")
+        ]
+        plays = [
+            e for e in actions
+            if str(e.get("actionType") or "").lower() in {"play", "playland", "land"}
+            or str(e.get("description") or "").lower().startswith("play ")
+        ]
         activations = [e for e in actions if str(e.get("actionType") or "").lower() in {"activate", "ability", "mana"}]
         targeted = [e for e in card_events if e.get("kind") == "targeted"]
         protection = any(card in (e.get("protectionInHand") or []) or card in (e.get("protectionOnBattlefield") or []) for e in events)
@@ -83,12 +145,15 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
             "firstDrawnTurn": _first_turn(drawn, {"draw"}),
             "zonesSeen": zones,
             "zoneChanges": zone_changes,
-            "tutored": any(e.get("kind") == "tutored" for e in card_events),
-            "revealed": any(e.get("kind") == "revealed" for e in card_events),
+            "tutored": bool(tutor_events_by_card.get(card)),
+            "tutorEvents": tutor_events_by_card.get(card, []),
+            "revealed": bool(reveal_events_by_card.get(card)),
+            "revealEvents": reveal_events_by_card.get(card, []),
             "cast": bool(casts),
             "played": bool(plays),
             "manaProduced": 0,
             "manaSpent": 0,
+            "manaAttributionComplete": False,
             "activated": bool(activations),
             "used": bool(actions),
             "comboParticipation": combo,
