@@ -81,4 +81,4 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-# diagnostic: exact payment attribution with effective source context
+# diagnostic: exact payment attribution including commander exception
