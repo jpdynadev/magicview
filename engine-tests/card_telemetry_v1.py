@@ -217,6 +217,52 @@ def install(runner: Any) -> None:
         clock = _clock(snapshot)
         seat = int(ctx["seat"])
 
+        if deck == "Kinnan" and player == seat and ptype == "payManaCost":
+            output = (answer or {}).get("output") or {}
+            selected = None
+            action_id = str(output.get("actionId") or "")
+            if action_id:
+                selected = next(
+                    (a for a in (inp.get("actions") or []) if str(a.get("id") or "") == action_id),
+                    None,
+                )
+            source_card = runner._action_card(selected, snapshot) if selected else None
+            produced = copy.deepcopy((selected or {}).get("producedMana") or [])
+            _event(
+                "manaPaymentDecision",
+                card=str(inp.get("cardName") or ""),
+                cardId=str(inp.get("cardId") or inp.get("card_id") or ""),
+                manaCost=str(inp.get("manaCost") or ""),
+                canConfirmFromPool=bool(inp.get("canConfirmFromPool")),
+                decisionType=str(output.get("type") or ""),
+                sourceCard=source_card,
+                selectedAction=copy.deepcopy(selected),
+                producedMana=produced,
+                chosenOutput=copy.deepcopy(output),
+                manaPoolBefore=_mana_pool(snapshot, seat),
+                **clock,
+            )
+
+        if deck == "Kinnan" and player == seat and answer is not None:
+            visible = base.all_visible_cards(snapshot)
+            chosen = _chosen_ids((answer or {}).get("output") or {})
+            chosen_cards = []
+            for cid in sorted(chosen):
+                card_obj = visible.get(cid)
+                name = _name(card_obj) if card_obj else ""
+                if name:
+                    chosen_cards.append({"id": cid, "name": name})
+            if chosen_cards:
+                _event(
+                    "cardSelection",
+                    cards=chosen_cards,
+                    sourceCard=_source_name(inp, snapshot),
+                    promptType=ptype,
+                    presentation=copy.deepcopy(inp.get("presentation") or {}),
+                    chosenOutput=copy.deepcopy((answer or {}).get("output") or {}),
+                    **clock,
+                )
+
         if deck == "Kinnan" and player == seat and ptype == "mulliganPutBack":
             cards = {str(c.get("id") or ""): _name(c) for c in _zone(snapshot, seat, "hand")}
             ids = _chosen_ids((answer or {}).get("output") or {})
