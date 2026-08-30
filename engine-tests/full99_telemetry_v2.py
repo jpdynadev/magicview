@@ -65,12 +65,16 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
         essential = bool(combo or (strict_protected and protection and actions))
         rows.append({
             "schemaVersion": SCHEMA,
+            "engineId": compact.get("engineId") or result.get("engineId"),
+            "cacheKey": compact.get("cacheKey"),
+            "pilotVersion": compact.get("pilotVersion") or result.get("pilotVersion"),
             "deckHash": compact.get("variantDeckSha256") or result.get("variantDeckSha256"),
             "variant": compact.get("variant") or result.get("variant"),
             "card": card,
             "seed": compact.get("seed") or result.get("seed"),
             "seat": compact.get("kinnanSeat") or result.get("kinnanSeat"),
             "pod": compact.get("podProfile"),
+            "gameStatus": compact.get("status") or result.get("status"),
             "registeredPresent": True,
             "openingHand": card in opening,
             "kept": card in kept,
