@@ -67,6 +67,7 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
         text = str(raw_card.get("text") or "")
         if name and text:
             source_text[name] = text
+    looked_at_events_by_card: dict[str, list[dict[str, Any]]] = {}
     reveal_events_by_card: dict[str, list[dict[str, Any]]] = {}
     tutor_events_by_card: dict[str, list[dict[str, Any]]] = {}
     for event in events:
@@ -77,7 +78,7 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
             for prompt_card in _prompt_cards(event):
                 name = _prompt_card_name(prompt_card)
                 if name:
-                    reveal_events_by_card.setdefault(name, []).append(event)
+                    looked_at_events_by_card.setdefault(name, []).append(event)
         elif ptype == "chooseCards":
             source = _source_title(event)
             rules = source_text.get(source, "")
@@ -87,6 +88,8 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
                 name = _prompt_card_name(prompt_card)
                 if name:
                     tutor_events_by_card.setdefault(name, []).append(event)
+                    if "reveal" in rules.lower():
+                        reveal_events_by_card.setdefault(name, []).append(event)
     opening = set(telemetry.get("openingHand") or [])
     kept = set(telemetry.get("keptHand") or [])
     rejected = {
@@ -102,7 +105,7 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
     rows: list[dict[str, Any]] = []
 
     for card in cards:
-        semantic_events = reveal_events_by_card.get(card, []) + tutor_events_by_card.get(card, [])
+        semantic_events = looked_at_events_by_card.get(card, []) + reveal_events_by_card.get(card, []) + tutor_events_by_card.get(card, [])
         card_events = [e for e in events if e.get("card") == card or e.get("targetCard") == card] + semantic_events
         actions = [e for e in card_events if e.get("kind") in ACTION_KINDS]
         zone_changes = [e for e in card_events if e.get("kind") == "zoneTransition"]
@@ -149,6 +152,8 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
             "tutorEvents": tutor_events_by_card.get(card, []),
             "revealed": bool(reveal_events_by_card.get(card)),
             "revealEvents": reveal_events_by_card.get(card, []),
+            "lookedAt": bool(looked_at_events_by_card.get(card)),
+            "lookedAtEvents": looked_at_events_by_card.get(card, []),
             "cast": bool(casts),
             "played": bool(plays),
             "manaProduced": 0,
