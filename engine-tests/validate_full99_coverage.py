@@ -37,7 +37,7 @@ def main() -> int:
                 "missingEngineId": missing_engine,
             })
         trace = game.get("rawActionTrace") or []
-        has_reveal_prompt = any(
+        has_look_prompt = any(
             e.get("kind") == "promptDecision" and e.get("promptType") == "revealCards"
             and ((e.get("inputSummary") or {}).get("cards") or [])
             for e in trace
@@ -58,6 +58,14 @@ def main() -> int:
             ).lower()
             for e in trace
         )
+        has_search_reveal_choice = any(
+            e.get("kind") == "promptDecision" and e.get("promptType") == "chooseCards"
+            and ((e.get("chosenOutput") or {}).get("chosenCardIds") or [])
+            and "reveal" in source_text.get(
+                str((((e.get("inputSummary") or {}).get("presentation") or {}).get("title") or "")), ""
+            ).lower()
+            for e in trace
+        )
         paid_casts = [
             e for e in trace
             if e.get("kind") == "actionChosen" and e.get("actionType") == "cast"
@@ -65,10 +73,12 @@ def main() -> int:
             and int(((e.get("rawCard") or {}).get("cmc") or 0)) > 0
         ]
         reasons = []
-        if has_reveal_prompt and not any(r.get("revealed") for r in rows):
-            reasons.append("reveal prompts were observed but no per-card reveal attribution was persisted")
+        if has_look_prompt and not any(r.get("lookedAt") for r in rows):
+            reasons.append("card-look prompts were observed but no per-card looked-at attribution was persisted")
         if has_search_choice and not any(r.get("tutored") for r in rows):
             reasons.append("search choices were observed but no per-card tutor attribution was persisted")
+        if has_search_reveal_choice and not any(r.get("revealed") for r in rows):
+            reasons.append("a reveal-search choice was observed but no per-card reveal attribution was persisted")
         if paid_casts and not all(r.get("manaAttributionComplete") for r in rows if r.get("cast")):
             reasons.append("one or more paid casts lacks exact mana produced/spent attribution")
         if reasons:
