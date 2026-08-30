@@ -1,0 +1,311 @@
+name: Kinnan Full-99 Neon Ingest
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/fix-neon-full99-ingest-v2]
+    paths: [.github/workflows/kinnan-full99-neon-ingest.yml]
+
+concurrency:
+  group: kinnan-full99-neon-ingest
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
+env:
+  NEON_DATA_API: https://ep-dark-mud-axcpnjso.apirest.c-4.us-east-2.aws.neon.tech/neondb/rest/v1
+  SOURCE_RUN_ID: '33316320571'
+  SOURCE_ARTIFACT: full99-v2-validation-results
+  RUN_KEY: github-33316320571-full99-v2
+
+jobs:
+  ingest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download validated full-99 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.SOURCE_ARTIFACT }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+          github-token: ${{ github.token }}
+          path: validation
+
+      - name: Obtain GitHub OIDC token for Neon
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=neon-v2-ingest"
+          TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
+          test -n "$TOKEN" && test "$TOKEN" != null
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Create schema, ingest all 99-card rows, and verify coverage
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, tempfile
+
+          root = pathlib.Path("validation")
+          coverage = json.loads((root / "full99-coverage.json").read_text())
+          rows = [json.loads(line) for line in (root / "full99-per-game-card.ndjson").read_text().splitlines() if line.strip()]
+
+          assert coverage["schemaVersion"] == "kinnan-full99-card-telemetry-v2", coverage
+          assert coverage["telemetryComplete"] is True, coverage
+          assert coverage["validGames"] == 8, coverage
+          assert coverage["expectedRows"] == 792 and coverage["actualRows"] == 792, coverage
+          assert coverage["gamesWithExactly99"] == 8, coverage
+          assert coverage["duplicates"] == 0, coverage
+          assert not coverage["missingCards"], coverage
+          assert len(rows) == 792
+
+          keys = {(r["variant"], r["canonicalKey"], r["cardIdentity"]) for r in rows}
+          assert len(keys) == 792, len(keys)
+
+          api_root = os.environ["NEON_DATA_API"].rstrip("/")
+          ingest_api = api_root + "/rpc/exec_sim_ingest"
+          token = os.environ["OIDC_TOKEN"]
+          run_key = os.environ["RUN_KEY"]
+
+          def call(url, body):
+              payload = json.dumps(body, separators=(",", ":"))
+              with tempfile.NamedTemporaryFile("w", delete=False) as f:
+                  f.write(payload)
+                  p = f.name
+              try:
+                  proc = subprocess.run([
+                      "curl", "-sS", "--retry", "4", "--retry-all-errors",
+                      "-w", "\nHTTP_STATUS:%{http_code}\n",
+                      "-X", "POST", url,
+                      "-H", f"Authorization: Bearer {token}",
+                      "-H", "Content-Type: application/json",
+                      "--data-binary", f"@{p}",
+                  ], text=True, capture_output=True)
+              finally:
+                  pathlib.Path(p).unlink(missing_ok=True)
+              if proc.stderr:
+                  print(proc.stderr, flush=True)
+              print(proc.stdout, flush=True)
+              marker = "HTTP_STATUS:"
+              status = int(proc.stdout.rsplit(marker, 1)[1].strip()) if marker in proc.stdout else 0
+              if proc.returncode or not (200 <= status < 300):
+                  raise SystemExit(f"Neon Data API call failed: status={status} rc={proc.returncode}")
+              data = proc.stdout.rsplit(marker, 1)[0].strip()
+              return json.loads(data) if data else None
+
+          def exec_sql(statements):
+              print(json.dumps({"execStatements": len(statements), "first": statements[0][:100]}), flush=True)
+              return call(ingest_api, {"p_sql": json.dumps(statements)})
+
+          ddl = [
+          """CREATE SCHEMA IF NOT EXISTS cedh""",
+          """CREATE TABLE IF NOT EXISTS cedh.full99_telemetry_runs (
+              run_key text PRIMARY KEY,
+              source_run_id bigint,
+              artifact_name text NOT NULL,
+              schema_version text NOT NULL,
+              valid_games integer NOT NULL,
+              expected_rows integer NOT NULL,
+              actual_rows integer NOT NULL,
+              games_with_exactly_99 integer NOT NULL,
+              missing_cards jsonb NOT NULL DEFAULT '{}'::jsonb,
+              duplicate_rows integer NOT NULL DEFAULT 0,
+              telemetry_complete boolean NOT NULL DEFAULT false,
+              created_at timestamptz NOT NULL DEFAULT timezone('utc', now())
+          )""",
+          """CREATE TABLE IF NOT EXISTS cedh.full99_game_card_telemetry (
+              run_key text NOT NULL REFERENCES cedh.full99_telemetry_runs(run_key) ON DELETE CASCADE,
+              schema_version text NOT NULL,
+              deck_hash text NOT NULL,
+              variant text NOT NULL,
+              canonical_key text NOT NULL,
+              seed bigint NOT NULL,
+              seat integer NOT NULL,
+              pod text NOT NULL,
+              card_identity text NOT NULL,
+              present boolean NOT NULL DEFAULT true,
+              opening_hand boolean NOT NULL DEFAULT false,
+              kept boolean NOT NULL DEFAULT false,
+              mulliganed boolean NOT NULL DEFAULT false,
+              put_back boolean NOT NULL DEFAULT false,
+              seen boolean NOT NULL DEFAULT false,
+              first_seen_turn integer,
+              drawn boolean NOT NULL DEFAULT false,
+              first_drawn_turn integer,
+              zones_by_turn jsonb NOT NULL DEFAULT '[]'::jsonb,
+              zone_changes jsonb NOT NULL DEFAULT '[]'::jsonb,
+              tutored boolean NOT NULL DEFAULT false,
+              revealed boolean NOT NULL DEFAULT false,
+              cast_or_played boolean NOT NULL DEFAULT false,
+              cast_or_played_turns jsonb NOT NULL DEFAULT '[]'::jsonb,
+              mana_produced boolean NOT NULL DEFAULT false,
+              mana_spent boolean NOT NULL DEFAULT false,
+              mana_pool_before_actions jsonb NOT NULL DEFAULT '[]'::jsonb,
+              activated boolean NOT NULL DEFAULT false,
+              used boolean NOT NULL DEFAULT false,
+              combo_participation boolean NOT NULL DEFAULT false,
+              protection_participation boolean NOT NULL DEFAULT false,
+              interaction_participation boolean NOT NULL DEFAULT false,
+              outcome_attribution jsonb NOT NULL DEFAULT '{}'::jsonb,
+              assembly_t4 boolean NOT NULL DEFAULT false,
+              attempt_t4 boolean NOT NULL DEFAULT false,
+              protected_attempt_t4 boolean NOT NULL DEFAULT false,
+              natural_win boolean NOT NULL DEFAULT false,
+              package_execution boolean NOT NULL DEFAULT false,
+              failure_code text,
+              PRIMARY KEY (run_key, variant, canonical_key, card_identity)
+          )""",
+          """CREATE INDEX IF NOT EXISTS full99_card_run_variant_idx ON cedh.full99_game_card_telemetry(run_key, variant)""",
+          """CREATE INDEX IF NOT EXISTS full99_card_identity_idx ON cedh.full99_game_card_telemetry(card_identity)""",
+          """CREATE INDEX IF NOT EXISTS full99_card_outcomes_idx ON cedh.full99_game_card_telemetry(run_key, protected_attempt_t4, natural_win)""",
+          """CREATE OR REPLACE VIEW cedh.full99_card_metrics AS
+              SELECT
+                run_key, variant, deck_hash, card_identity,
+                count(*) AS games,
+                count(*) FILTER (WHERE seen) AS seen_games,
+                count(*) FILTER (WHERE opening_hand) AS opening_hand_games,
+                count(*) FILTER (WHERE cast_or_played) AS cast_or_played_games,
+                count(*) FILTER (WHERE combo_participation) AS combo_games,
+                count(*) FILTER (WHERE protection_participation) AS protection_games,
+                count(*) FILTER (WHERE interaction_participation) AS interaction_games,
+                count(*) FILTER (WHERE attempt_t4) AS attempt_presence_games,
+                count(*) FILTER (WHERE protected_attempt_t4) AS protected_attempt_presence_games,
+                count(*) FILTER (WHERE natural_win) AS natural_win_presence_games,
+                count(*) FILTER (WHERE package_execution) AS package_execution_games
+              FROM cedh.full99_game_card_telemetry
+              GROUP BY run_key, variant, deck_hash, card_identity""",
+          """CREATE OR REPLACE FUNCTION public.full99_telemetry_status(p_run_key text)
+              RETURNS jsonb
+              LANGUAGE sql
+              SECURITY DEFINER
+              SET search_path = public, cedh
+              AS $fn$
+                WITH per_game AS (
+                  SELECT variant, canonical_key, count(*) AS cards
+                  FROM cedh.full99_game_card_telemetry
+                  WHERE run_key = p_run_key
+                  GROUP BY variant, canonical_key
+                ),
+                dupes AS (
+                  SELECT count(*) AS n
+                  FROM (
+                    SELECT variant, canonical_key, card_identity, count(*)
+                    FROM cedh.full99_game_card_telemetry
+                    WHERE run_key = p_run_key
+                    GROUP BY variant, canonical_key, card_identity
+                    HAVING count(*) > 1
+                  ) x
+                )
+                SELECT jsonb_build_object(
+                  'runKey', p_run_key,
+                  'runRows', (SELECT count(*) FROM cedh.full99_telemetry_runs WHERE run_key = p_run_key),
+                  'telemetryComplete', (SELECT telemetry_complete FROM cedh.full99_telemetry_runs WHERE run_key = p_run_key),
+                  'rows', (SELECT count(*) FROM cedh.full99_game_card_telemetry WHERE run_key = p_run_key),
+                  'games', (SELECT count(*) FROM per_game),
+                  'minCardsPerGame', (SELECT min(cards) FROM per_game),
+                  'maxCardsPerGame', (SELECT max(cards) FROM per_game),
+                  'gamesWith99', (SELECT count(*) FROM per_game WHERE cards = 99),
+                  'duplicateKeys', (SELECT n FROM dupes),
+                  'variants', (SELECT jsonb_object_agg(variant, n) FROM (SELECT variant, count(*) n FROM cedh.full99_game_card_telemetry WHERE run_key=p_run_key GROUP BY variant) v)
+                )
+              $fn$""",
+          """GRANT EXECUTE ON FUNCTION public.full99_telemetry_status(text) TO PUBLIC"""
+          ]
+          exec_sql(ddl)
+
+          def q(v):
+              if v is None:
+                  return "NULL"
+              if isinstance(v, bool):
+                  return "TRUE" if v else "FALSE"
+              if isinstance(v, (int, float)):
+                  return str(v)
+              return "'" + str(v).replace("'", "''") + "'"
+
+          def qjson(v):
+              return q(json.dumps(v, separators=(",", ":"), ensure_ascii=False)) + "::jsonb"
+
+          run_stmt = (
+              "INSERT INTO cedh.full99_telemetry_runs "
+              "(run_key,source_run_id,artifact_name,schema_version,valid_games,expected_rows,actual_rows,games_with_exactly_99,missing_cards,duplicate_rows,telemetry_complete) VALUES ("
+              + ",".join([
+                  q(run_key), q(int(os.environ["SOURCE_RUN_ID"])), q(os.environ["SOURCE_ARTIFACT"]),
+                  q(coverage["schemaVersion"]), q(coverage["validGames"]), q(coverage["expectedRows"]),
+                  q(coverage["actualRows"]), q(coverage["gamesWithExactly99"]), qjson(coverage["missingCards"]),
+                  q(coverage["duplicates"]), q(coverage["telemetryComplete"])
+              ])
+              + ") ON CONFLICT (run_key) DO UPDATE SET "
+                "source_run_id=EXCLUDED.source_run_id,artifact_name=EXCLUDED.artifact_name,"
+                "schema_version=EXCLUDED.schema_version,valid_games=EXCLUDED.valid_games,"
+                "expected_rows=EXCLUDED.expected_rows,actual_rows=EXCLUDED.actual_rows,"
+                "games_with_exactly_99=EXCLUDED.games_with_exactly_99,missing_cards=EXCLUDED.missing_cards,"
+                "duplicate_rows=EXCLUDED.duplicate_rows,telemetry_complete=EXCLUDED.telemetry_complete"
+          )
+          exec_sql([run_stmt, f"DELETE FROM cedh.full99_game_card_telemetry WHERE run_key={q(run_key)}"])
+
+          cols = [
+              "run_key","schema_version","deck_hash","variant","canonical_key","seed","seat","pod","card_identity",
+              "present","opening_hand","kept","mulliganed","put_back","seen","first_seen_turn","drawn","first_drawn_turn",
+              "zones_by_turn","zone_changes","tutored","revealed","cast_or_played","cast_or_played_turns",
+              "mana_produced","mana_spent","mana_pool_before_actions","activated","used","combo_participation",
+              "protection_participation","interaction_participation","outcome_attribution","assembly_t4","attempt_t4",
+              "protected_attempt_t4","natural_win","package_execution","failure_code"
+          ]
+
+          def values(r):
+              vals = [
+                  run_key, r["schemaVersion"], r["deckHash"], r["variant"], r["canonicalKey"], r["seed"], r["seat"], r["pod"], r["cardIdentity"],
+                  r["present"], r["openingHand"], r["kept"], r["mulliganed"], r["putBack"], r["seen"], r["firstSeenTurn"], r["drawn"], r["firstDrawnTurn"],
+                  ("JSON", r["zonesByTurn"]), ("JSON", r["zoneChanges"]), r["tutored"], r["revealed"], r["castOrPlayed"], ("JSON", r["castOrPlayedTurns"]),
+                  r["manaProduced"], r["manaSpent"], ("JSON", r["manaPoolBeforeActions"]), r["activated"], r["used"], r["comboParticipation"],
+                  r["protectionParticipation"], r["interactionParticipation"], ("JSON", r["outcomeAttribution"]), r["assemblyT4"], r["attemptT4"],
+                  r["protectedAttemptT4"], r["naturalWin"], r["packageExecution"], r.get("failureCode")
+              ]
+              return "(" + ",".join(qjson(v[1]) if isinstance(v, tuple) and v[0] == "JSON" else q(v) for v in vals) + ")"
+
+          batch_size = 40
+          for start in range(0, len(rows), batch_size):
+              batch = rows[start:start+batch_size]
+              stmt = (
+                  "INSERT INTO cedh.full99_game_card_telemetry (" + ",".join(cols) + ") VALUES\n"
+                  + ",\n".join(values(r) for r in batch)
+                  + " ON CONFLICT (run_key,variant,canonical_key,card_identity) DO UPDATE SET "
+                    "schema_version=EXCLUDED.schema_version,deck_hash=EXCLUDED.deck_hash,seed=EXCLUDED.seed,"
+                    "seat=EXCLUDED.seat,pod=EXCLUDED.pod,present=EXCLUDED.present,opening_hand=EXCLUDED.opening_hand,"
+                    "kept=EXCLUDED.kept,mulliganed=EXCLUDED.mulliganed,put_back=EXCLUDED.put_back,seen=EXCLUDED.seen,"
+                    "first_seen_turn=EXCLUDED.first_seen_turn,drawn=EXCLUDED.drawn,first_drawn_turn=EXCLUDED.first_drawn_turn,"
+                    "zones_by_turn=EXCLUDED.zones_by_turn,zone_changes=EXCLUDED.zone_changes,tutored=EXCLUDED.tutored,"
+                    "revealed=EXCLUDED.revealed,cast_or_played=EXCLUDED.cast_or_played,cast_or_played_turns=EXCLUDED.cast_or_played_turns,"
+                    "mana_produced=EXCLUDED.mana_produced,mana_spent=EXCLUDED.mana_spent,mana_pool_before_actions=EXCLUDED.mana_pool_before_actions,"
+                    "activated=EXCLUDED.activated,used=EXCLUDED.used,combo_participation=EXCLUDED.combo_participation,"
+                    "protection_participation=EXCLUDED.protection_participation,interaction_participation=EXCLUDED.interaction_participation,"
+                    "outcome_attribution=EXCLUDED.outcome_attribution,assembly_t4=EXCLUDED.assembly_t4,attempt_t4=EXCLUDED.attempt_t4,"
+                    "protected_attempt_t4=EXCLUDED.protected_attempt_t4,natural_win=EXCLUDED.natural_win,"
+                    "package_execution=EXCLUDED.package_execution,failure_code=EXCLUDED.failure_code"
+              )
+              exec_sql([stmt])
+              print(json.dumps({"ingested": min(start+batch_size, len(rows)), "total": len(rows)}), flush=True)
+
+          status_api = api_root + "/rpc/full99_telemetry_status"
+          status = call(status_api, {"p_run_key": run_key})
+          if isinstance(status, list) and len(status) == 1:
+              status = status[0]
+          print("FULL99_STATUS=" + json.dumps(status, sort_keys=True), flush=True)
+          assert status["runRows"] == 1, status
+          assert status["telemetryComplete"] is True, status
+          assert status["rows"] == 792, status
+          assert status["games"] == 8, status
+          assert status["minCardsPerGame"] == 99 and status["maxCardsPerGame"] == 99, status
+          assert status["gamesWith99"] == 8, status
+          assert status["duplicateKeys"] == 0, status
+          assert status["variants"] == {"F10": 396, "F10_RING_SINGLETON": 396}, status
+          PY
