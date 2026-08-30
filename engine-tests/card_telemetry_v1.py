@@ -123,7 +123,11 @@ def install(runner: Any) -> None:
         for zone in ("hand", "battlefield", "graveyard", "exile", "command"):
             for row in _named_zone(snapshot, seat, zone):
                 if row["id"]:
-                    result[row["id"]] = {"name": row["name"], "zone": zone}
+                    card_obj = next((x for x in _zone(snapshot, seat, zone) if str(x.get("id") or "") == row["id"]), {})
+                    result[row["id"]] = {
+                        "name": row["name"], "zone": zone,
+                        "tapped": bool(card_obj.get("tapped") or card_obj.get("isTapped")),
+                    }
         return result
 
     def _observe_snapshot(snapshot: dict[str, Any]) -> None:
@@ -156,6 +160,10 @@ def install(runner: Any) -> None:
                         lastOpponentAction=copy.deepcopy(ctx.get("lastOpponentAction")),
                         **clock,
                     )
+                if not before.get("tapped") and now.get("tapped"):
+                    _event("tapped", card=now["name"], cardId=cid, zone=now["zone"], **clock)
+                elif before.get("tapped") and not now.get("tapped"):
+                    _event("untapped", card=now["name"], cardId=cid, zone=now["zone"], **clock)
         ctx["zones"] = current
 
     original_keep = base.keep_hand
@@ -229,6 +237,14 @@ def install(runner: Any) -> None:
             }
             if "mana" in ptype.lower():
                 input_summary["actions"] = copy.deepcopy(inp.get("actions") or [])
+            if ptype == "chooseAction":
+                input_summary["manaActions"] = [
+                    copy.deepcopy(a) for a in (inp.get("actions") or [])
+                    if a.get("isManaAbility") or a.get("type") == "activateManaAbility"
+                ]
+            if ptype in {"chooseCards", "revealCards", "chooseFromSelection"}:
+                input_summary["cards"] = copy.deepcopy(inp.get("cards") or [])
+                input_summary["options"] = copy.deepcopy(inp.get("options") or [])
             _event(
                 "promptDecision",
                 deck=deck,
@@ -310,6 +326,7 @@ def install(runner: Any) -> None:
                         # human-readable description alone is not sufficient.
                         "rawAction": copy.deepcopy(action),
                         "chosenOutput": copy.deepcopy(output),
+                        "rawCard": copy.deepcopy((base.all_visible_cards(snapshot) or {}).get(str(action.get("cardId") or "")) or {}),
                         **clock,
                     }
                     if deck == "Kinnan" and player == seat and card:
