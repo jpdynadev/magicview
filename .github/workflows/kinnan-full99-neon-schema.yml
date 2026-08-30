@@ -1,0 +1,161 @@
+name: Kinnan Full-99 Neon Schema
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.github/workflows/kinnan-full99-neon-schema.yml]
+
+concurrency:
+  group: kinnan-full99-neon-schema
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NEON_DATA_API: https://ep-dark-mud-axcpnjso.apirest.c-4.us-east-2.aws.neon.tech/neondb/rest/v1
+
+jobs:
+  schema:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Obtain GitHub OIDC token for Neon
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          URL="${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=neon-v2-ingest"
+          TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
+          test -n "$TOKEN" && test "$TOKEN" != null
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+      - name: Apply full-99 telemetry schema through authorized Neon RPC
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json, os, pathlib, subprocess, tempfile
+          api=os.environ['NEON_DATA_API'].rstrip('/')+'/rpc/exec_sim_ingest'
+          token=os.environ['OIDC_TOKEN']
+          statements=[
+          "CREATE SCHEMA IF NOT EXISTS cedh",
+          """CREATE TABLE IF NOT EXISTS cedh.full99_telemetry_runs (
+            run_key text PRIMARY KEY,
+            source_run_id bigint,
+            artifact_name text NOT NULL,
+            schema_version text NOT NULL,
+            valid_games integer NOT NULL,
+            expected_rows integer NOT NULL,
+            actual_rows integer NOT NULL,
+            games_with_exactly_99 integer NOT NULL,
+            missing_cards jsonb NOT NULL DEFAULT '{}'::jsonb,
+            duplicate_rows integer NOT NULL DEFAULT 0,
+            telemetry_complete boolean NOT NULL DEFAULT false,
+            created_at timestamptz NOT NULL DEFAULT timezone('utc', now())
+          )""",
+          """CREATE TABLE IF NOT EXISTS cedh.full99_game_card_telemetry (
+            run_key text NOT NULL REFERENCES cedh.full99_telemetry_runs(run_key) ON DELETE CASCADE,
+            schema_version text NOT NULL,
+            deck_hash text NOT NULL,
+            variant text NOT NULL,
+            canonical_key text NOT NULL,
+            seed bigint NOT NULL,
+            seat integer NOT NULL,
+            pod text NOT NULL,
+            card_identity text NOT NULL,
+            present boolean NOT NULL DEFAULT true,
+            opening_hand boolean NOT NULL DEFAULT false,
+            kept boolean NOT NULL DEFAULT false,
+            mulliganed boolean NOT NULL DEFAULT false,
+            put_back boolean NOT NULL DEFAULT false,
+            seen boolean NOT NULL DEFAULT false,
+            first_seen_turn integer,
+            drawn boolean NOT NULL DEFAULT false,
+            first_drawn_turn integer,
+            zones_by_turn jsonb NOT NULL DEFAULT '[]'::jsonb,
+            zone_changes jsonb NOT NULL DEFAULT '[]'::jsonb,
+            tutored boolean NOT NULL DEFAULT false,
+            revealed boolean NOT NULL DEFAULT false,
+            cast_or_played boolean NOT NULL DEFAULT false,
+            cast_or_played_turns jsonb NOT NULL DEFAULT '[]'::jsonb,
+            mana_produced boolean NOT NULL DEFAULT false,
+            mana_spent boolean NOT NULL DEFAULT false,
+            mana_pool_before_actions jsonb NOT NULL DEFAULT '[]'::jsonb,
+            activated boolean NOT NULL DEFAULT false,
+            used boolean NOT NULL DEFAULT false,
+            combo_participation boolean NOT NULL DEFAULT false,
+            protection_participation boolean NOT NULL DEFAULT false,
+            interaction_participation boolean NOT NULL DEFAULT false,
+            outcome_attribution jsonb NOT NULL DEFAULT '{}'::jsonb,
+            assembly_t4 boolean NOT NULL DEFAULT false,
+            attempt_t4 boolean NOT NULL DEFAULT false,
+            protected_attempt_t4 boolean NOT NULL DEFAULT false,
+            natural_win boolean NOT NULL DEFAULT false,
+            package_execution boolean NOT NULL DEFAULT false,
+            failure_code text,
+            PRIMARY KEY (run_key, variant, canonical_key, card_identity)
+          )""",
+          "CREATE INDEX IF NOT EXISTS full99_card_run_variant_idx ON cedh.full99_game_card_telemetry(run_key,variant)",
+          "CREATE INDEX IF NOT EXISTS full99_card_identity_idx ON cedh.full99_game_card_telemetry(card_identity)",
+          "CREATE INDEX IF NOT EXISTS full99_card_outcomes_idx ON cedh.full99_game_card_telemetry(run_key,protected_attempt_t4,natural_win)",
+          """CREATE OR REPLACE VIEW cedh.full99_card_metrics AS
+          SELECT run_key,variant,deck_hash,card_identity,
+            count(*) AS games,
+            count(*) FILTER (WHERE seen) AS seen_games,
+            count(*) FILTER (WHERE opening_hand) AS opening_hand_games,
+            count(*) FILTER (WHERE cast_or_played) AS cast_or_played_games,
+            count(*) FILTER (WHERE combo_participation) AS combo_games,
+            count(*) FILTER (WHERE protection_participation) AS protection_games,
+            count(*) FILTER (WHERE interaction_participation) AS interaction_games,
+            count(*) FILTER (WHERE attempt_t4) AS attempt_presence_games,
+            count(*) FILTER (WHERE protected_attempt_t4) AS protected_attempt_presence_games,
+            count(*) FILTER (WHERE natural_win) AS natural_win_presence_games,
+            count(*) FILTER (WHERE package_execution) AS package_execution_games
+          FROM cedh.full99_game_card_telemetry
+          GROUP BY run_key,variant,deck_hash,card_identity""",
+          """CREATE OR REPLACE FUNCTION public.full99_telemetry_status(p_run_key text)
+          RETURNS jsonb LANGUAGE sql SECURITY DEFINER SET search_path=public,cedh AS $fn$
+          WITH per_game AS (
+            SELECT variant,canonical_key,count(*) AS cards
+            FROM cedh.full99_game_card_telemetry
+            WHERE run_key=p_run_key GROUP BY variant,canonical_key
+          ), dupes AS (
+            SELECT count(*) AS n FROM (
+              SELECT variant,canonical_key,card_identity,count(*)
+              FROM cedh.full99_game_card_telemetry
+              WHERE run_key=p_run_key
+              GROUP BY variant,canonical_key,card_identity HAVING count(*)>1
+            ) x
+          )
+          SELECT jsonb_build_object(
+            'runKey',p_run_key,
+            'runRows',(SELECT count(*) FROM cedh.full99_telemetry_runs WHERE run_key=p_run_key),
+            'telemetryComplete',(SELECT telemetry_complete FROM cedh.full99_telemetry_runs WHERE run_key=p_run_key),
+            'rows',(SELECT count(*) FROM cedh.full99_game_card_telemetry WHERE run_key=p_run_key),
+            'games',(SELECT count(*) FROM per_game),
+            'minCardsPerGame',(SELECT min(cards) FROM per_game),
+            'maxCardsPerGame',(SELECT max(cards) FROM per_game),
+            'gamesWith99',(SELECT count(*) FROM per_game WHERE cards=99),
+            'duplicateKeys',(SELECT n FROM dupes),
+            'variants',(SELECT jsonb_object_agg(variant,n) FROM (SELECT variant,count(*) n FROM cedh.full99_game_card_telemetry WHERE run_key=p_run_key GROUP BY variant) v)
+          ) $fn$""",
+          "GRANT EXECUTE ON FUNCTION public.full99_telemetry_status(text) TO PUBLIC"
+          ]
+          payload=json.dumps({'p_sql':json.dumps(statements)},separators=(',',':'))
+          with tempfile.NamedTemporaryFile('w',delete=False) as f:
+            f.write(payload); p=f.name
+          try:
+            proc=subprocess.run(['curl','-sS','--retry','4','--retry-all-errors','-w','\nHTTP_STATUS:%{http_code}\n','-X','POST',api,'-H',f'Authorization: Bearer {token}','-H','Content-Type: application/json','--data-binary',f'@{p}'],text=True,capture_output=True)
+          finally:
+            pathlib.Path(p).unlink(missing_ok=True)
+          print(proc.stdout)
+          if proc.stderr: print(proc.stderr)
+          status=int(proc.stdout.rsplit('HTTP_STATUS:',1)[1].strip()) if 'HTTP_STATUS:' in proc.stdout else 0
+          if proc.returncode or not 200 <= status < 300:
+            raise SystemExit(f'schema RPC failed status={status} rc={proc.returncode}')
+          PY
