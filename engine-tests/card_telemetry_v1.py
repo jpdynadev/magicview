@@ -386,7 +386,13 @@ def install(runner: Any) -> None:
             None,
         )
         source_id = str((selected or {}).get("cardId") or "")
-        source_name = str(((ctx.get("zones") or {}).get(source_id) or {}).get("name") or "")
+        last_snapshot = ctx.get("lastSnapshot") or {}
+        source_obj = copy.deepcopy((base.all_visible_cards(last_snapshot) or {}).get(source_id) or {})
+        source_name = (
+            _name(source_obj)
+            or str(((ctx.get("zones") or {}).get(source_id) or {}).get("name") or "")
+            or str((selected or {}).get("description") or "")
+        )
         target_id = str(inp.get("cardId") or inp.get("card_id") or "")
         target_name = str(inp.get("cardName") or "")
         active = ctx.setdefault("activePaymentSessions", {})
@@ -411,6 +417,8 @@ def install(runner: Any) -> None:
             canceled=bool(canceled),
             sourceCard=source_name,
             sourceCardId=source_id,
+            sourceCardSnapshot=source_obj,
+            battlefieldBefore=_battlefield_names(last_snapshot, int(ctx["seat"])),
             selectedAction=copy.deepcopy(selected),
             producedMana=copy.deepcopy((selected or {}).get("producedMana") or []),
             chosenOutput=copy.deepcopy(output),
