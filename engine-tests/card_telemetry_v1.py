@@ -237,6 +237,12 @@ def install(runner: Any) -> None:
                         "actionType": atype,
                         "description": str(action.get("description") or action.get("label") or "")[:320],
                         "player": int(player),
+                        # Preserve the selected action and answer as a durable
+                        # machine-readable trace.  This is required for exact
+                        # tutor, reveal, activation and mana attribution; a
+                        # human-readable description alone is not sufficient.
+                        "rawAction": copy.deepcopy(action),
+                        "chosenOutput": copy.deepcopy(output),
                         **clock,
                     }
                     if deck == "Kinnan" and player == seat and card:
