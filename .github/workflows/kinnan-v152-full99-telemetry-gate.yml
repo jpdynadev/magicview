@@ -1,5 +1,5 @@
 name: Kinnan v152 Full-99 Telemetry Gate
-# Re-run after capturing mana-payment and card-selection semantics.
+# Re-run to discover actual payment prompt schemas without assumptions.
 
 on:
   push:
