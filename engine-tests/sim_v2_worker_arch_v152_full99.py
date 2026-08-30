@@ -25,10 +25,12 @@ def main() -> int:
     import sim_v2_worker
     original = sim_v2_worker.compact_result
     deck_path = Path(config.runner.base.DECK_DIR) / config.runner.VARIANT_FILES[variant]
+    engine_id = ultra._arg_value("--engine-id", "")
 
     def compact_full99(result, exposure_cards):
         item = original(result, exposure_cards)
         item["podProfile"] = os.getenv("CEDH_POD", "balanced") if mode == "adversarial" else "screen"
+        item["engineId"] = engine_id
         return attach(item, result, deck_path)
 
     sim_v2_worker.compact_result = compact_full99
