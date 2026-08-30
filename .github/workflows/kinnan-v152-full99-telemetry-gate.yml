@@ -1,5 +1,5 @@
 name: Kinnan v152 Full-99 Telemetry Gate
-# Re-run after retaining raw selected actions for semantic attribution.
+# Re-run after capturing mana-payment and card-selection semantics.
 
 on:
   push:
