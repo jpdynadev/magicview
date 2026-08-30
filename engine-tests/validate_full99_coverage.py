@@ -26,12 +26,14 @@ def main() -> int:
         rows = game.get("cardTelemetryRows") or []
         names = [r.get("card") for r in rows]
         missing_schema = [r.get("card") for r in rows if r.get("schemaVersion") != SCHEMA]
-        if len(rows) != 99 or len(set(names)) != 99 or missing_schema:
+        missing_engine = [r.get("card") for r in rows if not r.get("engineId")]
+        if len(rows) != 99 or len(set(names)) != 99 or missing_schema or missing_engine or not game.get("engineId"):
             failures.append({
                 "key": [game.get("variant"), game.get("seed"), game.get("kinnanSeat"), game.get("podProfile")],
                 "rows": len(rows), "distinct": len(set(names)),
                 "duplicates": sorted({n for n in names if names.count(n) > 1}),
                 "schemaMismatches": missing_schema,
+                "missingEngineId": missing_engine,
             })
     report = {
         "schemaVersion": SCHEMA,
