@@ -22,9 +22,13 @@ text = P.read_text()
 if "arch-aware-v1.40-adversarial" in text and "_v140_combo_monolith_affordability" in text:
     print('v1.40 combo Monolith affordability guard already applied')
     raise SystemExit(0)
-old = "runner.PILOT_VERSION = 'arch-aware-v1.28-shang-spellskite-adversarial'"
-if old not in text:
-    raise SystemExit('expected v1.28 pilot identity; apply v1.12-v1.28 first')
+old_candidates = (
+    "runner.PILOT_VERSION = 'arch-aware-v1.28-shang-spellskite-adversarial'",
+    "runner.PILOT_VERSION = 'arch-aware-v1.31-dramatic-single-adversarial'",
+)
+old = next((candidate for candidate in old_candidates if candidate in text), None)
+if old is None:
+    raise SystemExit('expected v1.28 or v1.31 compatible pilot identity before v1.40 repair')
 text = text.replace(old, "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'", 1)
 
 text += r'''
