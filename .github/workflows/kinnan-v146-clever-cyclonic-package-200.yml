@@ -1,0 +1,236 @@
+name: Kinnan v146 Clever Cyclonic Package 200 Paired
+
+on:
+  push:
+    branches: [agent/kinnan-v146-clever-cyclonic-package]
+    paths: [.github/workflows/kinnan-v146-clever-cyclonic-package-200.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v146-clever-cyclonic-package-200
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v146-clever-cyclonic-200-7000p-240s
+
+jobs:
+  semantic-gates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v146_clever_cyclonic_package.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'" in t
+          assert '_v140_combo_monolith_affordability' in t
+          for key in ('F10','F10_CLEVER_CYCLONIC_PACKAGE'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Semantic gates
+        run: |
+          set -euo pipefail
+          mkdir -p gate
+          for SPEC in 'F10:6983000' 'F10_CLEVER_CYCLONIC_PACKAGE:6983001'; do
+            VARIANT=${SPEC%%:*}; SEED=${SPEC##*:}
+            CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat 0 --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir ".sim-cache/v146gate-${GITHUB_RUN_ID}-${VARIANT}" --retain-traces failures --engine-id "$MANABREW_REF:arch-v146-clever-cyclonic-gate:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:$SEED" --exposure-card 'Energy Refractor' --exposure-card "Nature's Rhythm" --exposure-card 'Clever Impersonator' --exposure-card 'Cyclonic Rift' --output "gate/${VARIANT}.json"
+            python3 - "gate/${VARIANT}.json" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2]
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True,r
+          assert r.get('v2SessionCleanupError') is None,r
+          PY
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v146-semantic-gates
+          path: gate/**
+          retention-days: 14
+
+  simulate:
+    needs: semantic-gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [F10, F10_CLEVER_CYCLONIC_PACKAGE]
+        seat: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v146_clever_cyclonic_package.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Run 50 canonical keys
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          set -euo pipefail
+          mkdir -p out/valid out/attempts
+          : > "out/${VARIANT}-s${SEAT}-errors.ndjson"
+          BASE=$((6900000 + SEAT * 10000))
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET)); case $((OFFSET % 4)) in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/v146-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v146-clever-cyclonic-200:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+              set +e
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures --engine-id "$ENGINE" --exposure-card 'Energy Refractor' --exposure-card "Nature's Rhythm" --exposure-card 'Clever Impersonator' --exposure-card 'Cyclonic Rift' --output "$ATT" > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?; set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                if python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and int(r.get('seed'))==int(seed) and r.get('podProfile')==pod
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True,r
+          assert r.get('v2SessionCleanupError') is None,r
+          PY
+                then cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"; OK=1; break; fi
+              fi
+              printf '{"variant":"%s","seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-s${SEAT}-errors.ndjson"
+            done
+            [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v146-shard-${{ matrix.variant }}-s${{ matrix.seat }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    needs: simulate
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: v146-shard-*
+          path: shards
+          merge-multiple: true
+      - name: Strict aggregate
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_CLEVER_CYCLONIC_PACKAGE']; good={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}; errs={v:[] for v in variants}
+          for p in glob.glob('shards/valid/*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('shards/*-errors.ndjson'):
+              for line in open(p):
+                  try:r=json.loads(line)
+                  except Exception:continue
+                  if r.get('variant') in errs: errs[r['variant']].append(r)
+          key=lambda r:(int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def metric(r,m):
+              if m=='assembly': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attempt': return (r.get('firstAttemptTurn') or 99)<=4
+              if m=='protected': return bool(r.get('strictProtectedT4'))
+              if m=='win': return bool(r.get('kinnanWon'))
+          maps={v:{key(r):r for r in rows[v] if r.get('status') in good and r.get('pilotVersion')=='arch-aware-v1.40-adversarial' and r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None} for v in variants}
+          expected=set()
+          for seat in range(4):
+              base=6900000+seat*10000
+              for off in range(50):
+                  pod=('balanced','turbo','midrange','mixed')[off%4]
+                  expected.add((base+off,seat,pod))
+          assert all(len(rows[v])==200 for v in variants),{v:len(rows[v]) for v in variants}
+          assert all(len(maps[v])==200 for v in variants),{v:len(maps[v]) for v in variants}
+          assert all(set(maps[v])==expected for v in variants),'missing/extra canonical keys'
+          common=sorted(set(maps['F10']) & set(maps['F10_CLEVER_CYCLONIC_PACKAGE'])); assert len(common)==200
+          rep={'strictValid':True,'profile':'arch-repaired-v146-clever-cyclonic-200-7000p-240s','change':{'cuts':['Energy Refractor',"Nature's Rhythm"],'adds':['Clever Impersonator','Cyclonic Rift']},'cacheReuse':{'compatiblePriorRowsReused':0},'variants':{},'paired':{},'errorAttempts':{},'exposure':{}}
+          for v in variants:
+              xs=list(maps[v].values()); asm=sum(metric(r,'assembly') for r in xs); att=sum(metric(r,'attempt') for r in xs)
+              rep['variants'][v]={'valid':len(xs),'assemblyT4':asm,'attemptT4':att,'protectedT4':sum(metric(r,'protected') for r in xs),'wins':sum(metric(r,'win') for r in xs),'mulligans':sum(int(r.get('mulligans') or 0) for r in xs),'assemblyToAttemptRate':att/asm if asm else None,'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in xs)),'pods':{},'seats':{}}
+              for pod in ('balanced','turbo','midrange','mixed'):
+                  ys=[r for r in xs if r.get('podProfile')==pod]
+                  rep['variants'][v]['pods'][pod]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              for s in range(4):
+                  ys=[r for r in xs if int(r.get('kinnanSeat'))==s]
+                  rep['variants'][v]['seats'][str(s)]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              rep['errorAttempts'][v]=dict(collections.Counter(str(r.get('status','missing')) for r in errs[v]))
+          for m in ('assembly','attempt','protected','win'):
+              b=[metric(maps['F10'][k],m) for k in common]; c=[metric(maps['F10_CLEVER_CYCLONIC_PACKAGE'][k],m) for k in common]
+              bv=sum(b); cv=sum(c); plus=sum((not x) and y for x,y in zip(b,c)); minus=sum(x and (not y) for x,y in zip(b,c)); n=plus+minus
+              if n:
+                  lo=min(plus,minus); p=min(1.0,2*sum(math.comb(n,i) for i in range(lo+1))/(2**n))
+              else:p=1.0
+              rep['paired'][m]={'baseline':bv,'challenger':cv,'deltaRate':(cv-bv)/200,'discordantPlus':plus,'discordantMinus':minus,'mcnemarExactP':p}
+          changed=['Energy Refractor',"Nature's Rhythm",'Clever Impersonator','Cyclonic Rift']
+          for card in changed:
+              ks=[k for k in common if card in (maps['F10_CLEVER_CYCLONIC_PACKAGE'][k].get('observedCards') or []) or card in (maps['F10'][k].get('observedCards') or [])]
+              rep['exposure'][card]={'keys':len(ks)}
+              for m in ('assembly','attempt','protected','win'):
+                  rep['exposure'][card][m]={'baseline':sum(metric(maps['F10'][k],m) for k in ks),'challenger':sum(metric(maps['F10_CLEVER_CYCLONIC_PACKAGE'][k],m) for k in ks)}
+          pathlib.Path('results').mkdir(exist_ok=True)
+          pathlib.Path('results/kinnan-v146-clever-cyclonic-200-latest.json').write_text(json.dumps(rep,indent=2))
+          print(json.dumps(rep,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v146-clever-cyclonic-results
+          path: results/**
+          retention-days: 14
