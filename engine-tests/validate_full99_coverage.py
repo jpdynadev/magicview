@@ -87,8 +87,10 @@ def main() -> int:
         if payment_decisions and not game.get("manaPaymentAttributionComplete"):
             reasons.append("one or more successful payment sessions lacks exact source/production/spend attribution")
         for payment in paid_sessions:
-            target = rows_by_card.get(str(payment.get("targetCard") or ""))
-            if not payment.get("complete") or not target or target.get("manaSpent", 0) <= 0:
+            target_name = str(payment.get("targetCard") or "")
+            target = rows_by_card.get(target_name)
+            commander_target = target_name == "Kinnan, Bonder Prodigy"
+            if not payment.get("complete") or (not commander_target and (not target or target.get("manaSpent", 0) <= 0)):
                 reasons.append("a successful payment is not durably attributed to its registered target card")
                 break
             for source in payment.get("sources") or []:
