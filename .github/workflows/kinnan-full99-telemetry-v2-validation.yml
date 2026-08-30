@@ -3,7 +3,7 @@ name: Kinnan Full-99 Telemetry v2 Validation
 on:
   push:
     branches: [agent/kinnan-full99-telemetry-v2-validation]
-    paths: [.github/workflows/kinnan-full99-telemetry-v2-validation.yml]
+    paths: [.github/workflows/kinnan-full99-telemetry-v2-validation.yml, .runs/kinnan-full99-telemetry-v2-validation.txt]
   workflow_dispatch:
 
 concurrency:
