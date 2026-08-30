@@ -80,3 +80,5 @@ jobs:
           path: out/**
           if-no-files-found: error
           retention-days: 14
+
+# diagnostic: exact payment attribution with effective source context
