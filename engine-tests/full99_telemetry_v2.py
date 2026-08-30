@@ -3,11 +3,134 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 SCHEMA = "kinnan-full99-card-telemetry-v2"
 ACTION_KINDS = {"actionChosen"}
+MANA_COLORS = {
+    "White": "W", "Blue": "U", "Black": "B", "Red": "R", "Green": "G",
+    "Colorless": "C", "W": "W", "U": "U", "B": "B", "R": "R", "G": "G", "C": "C",
+}
+
+
+def _mana_value(cost: str) -> int | None:
+    """Return the exact value of a concrete Manabrew cost, or None if ambiguous."""
+    symbols = re.findall(r"\{([^}]+)\}", str(cost or ""))
+    if not symbols and cost:
+        return None
+    total = 0
+    for symbol in symbols:
+        if symbol.isdigit():
+            total += int(symbol)
+        elif symbol in {"W", "U", "B", "R", "G", "C", "S"}:
+            total += 1
+        else:
+            # X, hybrid, phyrexian and other alternate/resource costs require
+            # their own observed payment record.  Never estimate them here.
+            return None
+    return total
+
+
+def _payment_attribution(events: list[dict[str, Any]]) -> tuple[dict[str, dict[str, Any]], dict[str, int], list[dict[str, Any]]]:
+    """Derive exact target spend and source production from observed payment sessions."""
+    sessions: dict[str, list[dict[str, Any]]] = {}
+    ordered = sorted(events, key=lambda event: int(event.get("seq") or 0))
+    for event in ordered:
+        if event.get("kind") == "manaPaymentDecision":
+            sessions.setdefault(str(event.get("paymentSession")), []).append(event)
+
+    # Flexible mana abilities (for example Arcane Signet) advertise the source
+    # action first and then ask chooseColor.  Pair only the immediately following
+    # observed color decision before the next payment decision.
+    color_after_seq: dict[int, list[dict[str, Any]]] = {}
+    for index, event in enumerate(ordered):
+        if event.get("kind") != "manaPaymentDecision" or event.get("decisionType") != "act":
+            continue
+        colors: list[dict[str, Any]] = []
+        for following in ordered[index + 1:]:
+            if following.get("kind") == "manaPaymentDecision":
+                break
+            if following.get("kind") == "promptDecision" and following.get("promptType") == "chooseColor":
+                chosen = (following.get("chosenOutput") or {}).get("chosenColors") or {}
+                for color, amount in chosen.items():
+                    normalized = MANA_COLORS.get(str(color))
+                    if normalized and isinstance(amount, int) and amount > 0:
+                        colors.append({"color": normalized, "amount": amount})
+        color_after_seq[int(event.get("seq") or 0)] = colors
+
+    targets: dict[str, dict[str, Any]] = {}
+    produced_by_card: dict[str, int] = {}
+    payment_traces: list[dict[str, Any]] = []
+    for session_id, decisions in sessions.items():
+        first = decisions[0]
+        final = decisions[-1]
+        target = str(first.get("card") or "")
+        target_id = str(first.get("cardId") or "")
+        cost = str(first.get("initialRemainingCost") or "")
+        successful = final.get("decisionType") == "pay" and not final.get("canceled")
+        exact_cost = _mana_value(cost)
+        source_events = []
+        sources_complete = True
+        for decision in decisions:
+            if decision.get("decisionType") != "act":
+                continue
+            action = decision.get("selectedAction") or {}
+            source = str(decision.get("sourceCard") or action.get("description") or "")
+            source_snapshot = decision.get("sourceCardSnapshot") or {}
+            mana = list(decision.get("producedMana") or action.get("producedMana") or [])
+            if not mana:
+                mana = color_after_seq.get(int(decision.get("seq") or 0), [])
+            valid_mana = bool(mana) and all(
+                MANA_COLORS.get(str(item.get("color"))) and isinstance(item.get("amount"), int)
+                and item.get("amount") > 0 for item in mana
+            )
+            battlefield = set(decision.get("battlefieldBefore") or [])
+            type_line = str(source_snapshot.get("typeLine") or source_snapshot.get("type") or "")
+            taps_source = "{T}" in str(action.get("cost") or "")
+            kinnan_bonus = "Kinnan, Bonder Prodigy" in battlefield and taps_source and "Land" not in type_line
+            if kinnan_bonus:
+                distinct = {MANA_COLORS.get(str(item.get("color"))) for item in mana}
+                distinct.discard(None)
+                if valid_mana and len(distinct) == 1:
+                    mana = list(mana) + [{"color": next(iter(distinct)), "amount": 1, "source": "Kinnan bonus"}]
+                else:
+                    # The effective bonus type is not exact unless the trace
+                    # contains one unambiguous produced type.
+                    valid_mana = False
+            sources_complete = sources_complete and bool(source) and valid_mana
+            amount = sum(int(item.get("amount") or 0) for item in mana) if valid_mana else 0
+            if source and amount:
+                produced_by_card[source] = produced_by_card.get(source, 0) + amount
+            source_events.append({
+                "sourceCard": source,
+                "sourceCardId": decision.get("sourceCardId") or action.get("cardId"),
+                "sourceCardSnapshot": source_snapshot,
+                "action": action,
+                "producedMana": mana,
+                "amount": amount,
+                "exact": bool(source) and valid_mana,
+            })
+        complete = bool(successful and target and exact_cost is not None and sources_complete)
+        trace = {
+            "paymentSession": session_id,
+            "targetCard": target,
+            "targetCardId": target_id,
+            "initialRemainingCost": cost,
+            "manaSpent": exact_cost if successful and exact_cost is not None else 0,
+            "successful": successful,
+            "complete": complete,
+            "sources": source_events,
+        }
+        payment_traces.append(trace)
+        if target:
+            entry = targets.setdefault(target, {"manaSpent": 0, "complete": True, "sessions": []})
+            entry["sessions"].append(trace)
+            if successful:
+                entry["manaSpent"] += trace["manaSpent"]
+                entry["complete"] = bool(entry["complete"] and complete)
+    return targets, produced_by_card, payment_traces
 
 
 def _prompt_cards(event: dict[str, Any]) -> list[dict[str, Any]]:
@@ -102,6 +225,7 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
     combo_text = json.dumps(result.get("comboLine") or "", sort_keys=True)
     win = bool(result.get("kinnanWon"))
     strict_protected = bool(result.get("strictProtectedT4"))
+    payment_targets, produced_by_card, payment_traces = _payment_attribution(events)
     rows: list[dict[str, Any]] = []
 
     for card in cards:
@@ -156,9 +280,10 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
             "lookedAtEvents": looked_at_events_by_card.get(card, []),
             "cast": bool(casts),
             "played": bool(plays),
-            "manaProduced": 0,
-            "manaSpent": 0,
-            "manaAttributionComplete": False,
+            "manaProduced": produced_by_card.get(card, 0),
+            "manaSpent": (payment_targets.get(card) or {}).get("manaSpent", 0),
+            "manaPaymentEvents": (payment_targets.get(card) or {}).get("sessions", []),
+            "manaAttributionComplete": (payment_targets.get(card) or {}).get("complete", True),
             "activated": bool(activations),
             "used": bool(actions),
             "comboParticipation": combo,
@@ -182,4 +307,8 @@ def attach(compact: dict[str, Any], result: dict[str, Any], deck_path: Path) -> 
         "duplicates": sorted(card for card in cards if sum(r["card"] == card for r in rows) > 1),
     }
     compact["rawActionTrace"] = events
+    compact["manaPaymentTrace"] = payment_traces
+    compact["manaPaymentAttributionComplete"] = all(
+        not trace["successful"] or trace["complete"] for trace in payment_traces
+    )
     return compact
