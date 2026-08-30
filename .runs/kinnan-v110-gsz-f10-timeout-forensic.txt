@@ -1,0 +1,1 @@
+2026-08-22 replay persistent GSZ confirmation baseline timeout: F10 seed 3320350 seat 2 midrange under v1.10; diagnostic only, do not substitute into canonical promotion sample.

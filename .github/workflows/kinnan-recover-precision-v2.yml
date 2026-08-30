@@ -1,0 +1,168 @@
+name: Kinnan recover precision v2 corpus
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-recover-precision-v2.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: kinnan-recover-precision-v2
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-expanded-architecture
+      - name: Download historical precision artifacts without Forge compute
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -rf /tmp/precision-artifacts
+          mkdir -p /tmp/precision-artifacts
+          gh run download 31888564541 -R "$GITHUB_REPOSITORY" -D /tmp/precision-artifacts
+          find /tmp/precision-artifacts -type f | sort > /tmp/precision-files.txt
+          wc -l /tmp/precision-files.txt
+      - name: Normalize game records and compute card metrics
+        run: |
+          python3 - <<'PY'
+          import json, hashlib, re
+          from pathlib import Path
+          from collections import defaultdict
+
+          ROOT=Path('/tmp/precision-artifacts')
+          OUT=Path('engine-tests/v2-export/precision-31888564541')
+          OUT.mkdir(parents=True,exist_ok=True)
+          completed={'game_over','horizon_complete'}
+          records={}
+          source_files=[]
+
+          def infer_variant(path,obj):
+              for k in ('variant','code','deckVariant'):
+                  if obj.get(k): return str(obj[k])
+              s=str(path)
+              m=re.search(r'(P0[0-7]_[A-Z0-9_]+|P0[0-7]|F10)',s,re.I)
+              return m.group(1).upper() if m else 'UNKNOWN'
+          def infer_pod(path,obj):
+              return str(obj.get('podProfile') or obj.get('pod') or ('screen' if 'screen' in str(path).lower() else 'unknown'))
+          def seat(obj):
+              v=obj.get('kinnanSeat',obj.get('seat'))
+              try:return int(v)
+              except:return -1
+          def seed(obj):
+              try:return int(obj.get('seed'))
+              except:return None
+          def normalize_cards(v):
+              if isinstance(v,list): return [str(x) for x in v if isinstance(x,(str,int,float))]
+              return []
+
+          for p in ROOT.rglob('*.json'):
+              try:data=json.loads(p.read_text(errors='replace'))
+              except:continue
+              objs=[]
+              if isinstance(data,list): objs=[x for x in data if isinstance(x,dict)]
+              elif isinstance(data,dict):
+                  for key in ('games','results','records'):
+                      if isinstance(data.get(key),list): objs.extend(x for x in data[key] if isinstance(x,dict))
+                  if 'seed' in data and ('status' in data or 'kinnanSeat' in data): objs.append(data)
+              used=0
+              for o in objs:
+                  sd=seed(o)
+                  st=seat(o)
+                  if sd is None or st<0: continue
+                  variant=infer_variant(p,o)
+                  pod=infer_pod(p,o)
+                  mode=str(o.get('mode') or ('adversarial' if pod not in ('screen','unknown') else 'screen'))
+                  opening=o.get('openingHand')
+                  kept=o.get('keptHand')
+                  if not isinstance(opening,list):
+                      oh=o.get('openingHands') or {}; opening=oh.get(str(st),[]) if isinstance(oh,dict) else []
+                  if not isinstance(kept,list):
+                      kh=o.get('keptHands') or {}; kept=kh.get(str(st),[]) if isinstance(kh,dict) else []
+                  protection=normalize_cards(o.get('protectionAvailable'))
+                  observed=sorted(set(normalize_cards(opening)+normalize_cards(kept)+protection))
+                  strict=bool(o.get('strictProtectedT4'))
+                  if 'strictProtectedT4' not in o:
+                      t=o.get('firstAttemptTurn')
+                      certified=bool(o.get('certifiedDeterministicAttempt') or (o.get('deterministicT4') and isinstance(t,(int,float)) and t<=4))
+                      strict=bool(o.get('protectedAttempt')) and certified
+                  rec={
+                    'variant':variant,'seed':sd,'seat':st,'pod':pod,'mode':mode,
+                    'status':str(o.get('status') or 'unknown'),
+                    'winnerSeat':o.get('winnerSeat'),'kinnanWon':bool(o.get('kinnanWon')),
+                    'firstAssemblyTurn':o.get('firstAssemblyTurn'),'firstAttemptTurn':o.get('firstAttemptTurn'),
+                    'deterministicT4':bool(o.get('deterministicT4')),'protectedAttempt':bool(o.get('protectedAttempt')),
+                    'strictProtectedT4':strict,'comboLine':o.get('comboLine'),'failureCode':o.get('primaryFailureCode') or o.get('failureCode'),
+                    'openingHand':normalize_cards(opening),'keptHand':normalize_cards(kept),'observedCards':observed,
+                    'exposureQuality':'opening_kept_protection_only','sourceFile':str(p.relative_to(ROOT))
+                  }
+                  key=(variant,sd,st,pod,mode)
+                  # Prefer detailed raw game over accidental duplicate summary.
+                  score=len(rec['openingHand'])+len(rec['keptHand'])+len(rec['observedCards'])+(10 if rec['status'] in completed else 0)
+                  old=records.get(key)
+                  if old is None or score>old[0]: records[key]=(score,rec)
+                  used+=1
+              if used: source_files.append(str(p.relative_to(ROOT)))
+
+          games=[v[1] for v in records.values()]
+          games.sort(key=lambda g:(g['mode'],g['variant'],g['pod'],g['seat'],g['seed']))
+          with (OUT/'games.ndjson').open('w') as f:
+              for g in games:f.write(json.dumps(g,separators=(',',':'))+'\n')
+
+          by_variant=defaultdict(lambda:{'records':0,'valid':0,'errors':0,'strictProtectedT4':0,'assemblyT4':0,'attemptT4':0,'wins':0})
+          card=defaultdict(lambda:{'games':0,'seen':0,'opening':0,'kept':0,'strictProtectedT4Seen':0,'assemblyT4Seen':0,'attemptT4Seen':0,'winsSeen':0})
+          valid_games=[g for g in games if g['status'] in completed]
+          for g in games:
+              v=by_variant[g['variant']]; v['records']+=1
+              if g['status'] in completed:
+                  v['valid']+=1
+                  v['strictProtectedT4']+=int(g['strictProtectedT4'])
+                  v['assemblyT4']+=int(isinstance(g['firstAssemblyTurn'],(int,float)) and g['firstAssemblyTurn']<=4)
+                  v['attemptT4']+=int(isinstance(g['firstAttemptTurn'],(int,float)) and g['firstAttemptTurn']<=4)
+                  v['wins']+=int(g['kinnanWon'])
+              else:v['errors']+=1
+          for g in valid_games:
+              seen=set(g['observedCards']); opening=set(g['openingHand']); kept=set(g['keptHand'])
+              universe=seen|opening|kept
+              for c in universe:
+                  d=card[c]; d['games']+=1
+                  if c in seen:
+                      d['seen']+=1; d['strictProtectedT4Seen']+=int(g['strictProtectedT4']); d['winsSeen']+=int(g['kinnanWon'])
+                      d['assemblyT4Seen']+=int(isinstance(g['firstAssemblyTurn'],(int,float)) and g['firstAssemblyTurn']<=4)
+                      d['attemptT4Seen']+=int(isinstance(g['firstAttemptTurn'],(int,float)) and g['firstAttemptTurn']<=4)
+                  d['opening']+=int(c in opening); d['kept']+=int(c in kept)
+          metrics=[]
+          total_valid=len(valid_games)
+          for c,d in card.items():
+              n=d['seen']
+              metrics.append({'card':c,**d,'showUpRate':n/total_valid if total_valid else 0,
+                'strictProtectedT4WhenSeen':d['strictProtectedT4Seen']/n if n else 0,
+                'assemblyT4WhenSeen':d['assemblyT4Seen']/n if n else 0,
+                'attemptT4WhenSeen':d['attemptT4Seen']/n if n else 0,
+                'naturalWinWhenSeen':d['winsSeen']/n if n else 0,
+                'exposureQuality':'opening_kept_protection_only'})
+          metrics.sort(key=lambda x:(x['seen'],x['strictProtectedT4WhenSeen']),reverse=True)
+          (OUT/'card-metrics.json').write_text(json.dumps(metrics,indent=2))
+          manifest={'runId':31888564541,'records':len(games),'validTotal':sum(x['valid'] for x in by_variant.values()),'errorTotal':sum(x['errors'] for x in by_variant.values()),'variants':dict(sorted(by_variant.items())),'sourceFiles':len(source_files),'complete':len(games)>=8800,'exposureQuality':'opening_kept_protection_only'}
+          (OUT/'manifest.json').write_text(json.dumps(manifest,indent=2))
+          print(json.dumps(manifest,indent=2))
+          PY
+      - name: Commit durable recovery corpus
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/precision-31888564541
+          if git diff --cached --quiet; then
+            echo 'No recovery changes.'
+          else
+            git commit -m 'recover precision 31888564541 durable v2 corpus [skip ci]'
+            git push origin HEAD:agent/kinnan-expanded-architecture
+          fi

@@ -1,0 +1,294 @@
+name: Kinnan v117 Four Architecture Card Telemetry 2k
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v117-four-architecture-card-telemetry-2k.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v19-high-value-confirmation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v117-fourarch-cardtelemetry-2k-7000p-240s
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Validate four explicit 99s and build repaired runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 engine-tests/apply_arch_v116_replicate_number_fix.py
+          python3 engine-tests/apply_arch_v117_fourarch_roles.py
+          python3 - <<'PY'
+          from pathlib import Path
+          files={
+            'F10':'Kinnan_ARCH_F10.dck',
+            'TOURNAMENT_SIEGE_2026_LOGAN':'Kinnan_ARCH_TOURNAMENT_SIEGE_2026_LOGAN.dck',
+            'DORKMAX_F10':'Kinnan_ARCH_DORKMAX_F10.dck',
+            'NODEMAX_F10':'Kinnan_ARCH_NODEMAX_F10.dck',
+          }
+          for key,name in files.items():
+              p=Path('engine-tests/decks')/name
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          pilot=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert 'arch-aware-v1.17-fourarch-adversarial' in pilot
+          PY
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-v117-fourarch-telemetry.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fourarch-v117-runtime
+          path: manabrew-v117-fourarch-telemetry.tgz
+          compression-level: 0
+          retention-days: 2
+
+  semantic-gate:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        variant: [F10, TOURNAMENT_SIEGE_2026_LOGAN, DORKMAX_F10, NODEMAX_F10]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: fourarch-v117-runtime, path: runtime}
+      - name: One production-profile semantic load/play gate per architecture
+        env:
+          VARIANT: ${{ matrix.variant }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew gate/card-telemetry
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v117-fourarch-telemetry.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 engine-tests/apply_arch_v116_replicate_number_fix.py
+          python3 engine-tests/apply_arch_v117_fourarch_roles.py
+          case "$VARIANT" in
+            F10) SEED=4999000 ;;
+            TOURNAMENT_SIEGE_2026_LOGAN) SEED=4999001 ;;
+            DORKMAX_F10) SEED=4999002 ;;
+            NODEMAX_F10) SEED=4999003 ;;
+          esac
+          OK=0
+          for TRY in 1 2; do
+            OUT="gate/${VARIANT}-try${TRY}.json"
+            CARD_TELEMETRY_DIR="$PWD/gate/card-telemetry" CEDH_POD=balanced \
+              python3 engine-tests/sim_v2_worker_arch_cardtelemetry.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --mode adversarial --variant "$VARIANT" --fixed-seat 0 --seeds "$SEED" \
+              --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 \
+              --xmx 1280m --xms 192m --cache-dir ".sim-cache/gate-${GITHUB_RUN_ID}-${VARIANT}-${TRY}" \
+              --retain-traces failures --engine-id "$MANABREW_REF:v117-fourarch-gate:${GITHUB_RUN_ID}:${VARIANT}:${TRY}" \
+              --output "$OUT" > "gate/${VARIANT}-try${TRY}.log" 2>&1 || true
+            STATUS=$(python3 - "$OUT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
+              print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+            )
+            if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+              python3 - "$OUT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('pilotVersion')=='arch-aware-v1.17-fourarch-adversarial',r.get('pilotVersion')
+          PY
+              OK=1; break
+            fi
+          done
+          [ "$OK" -eq 1 ] || { echo "semantic gate failed for $VARIANT"; cat gate/*.log; exit 1; }
+          test -n "$(find gate/card-telemetry -name '*.json' -print -quit)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourarch-v117-gate-${{ matrix.variant }}
+          path: gate/**
+          retention-days: 14
+
+  confirm:
+    needs: semantic-gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 480
+    strategy:
+      fail-fast: false
+      max-parallel: 24
+      matrix:
+        variant: [F10, TOURNAMENT_SIEGE_2026_LOGAN, DORKMAX_F10, NODEMAX_F10]
+        seat: [0,1,2,3]
+        shard: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: fourarch-v117-runtime, path: runtime}
+      - name: Run 50 strict canonical keys with card telemetry
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts out/card-telemetry
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v117-fourarch-telemetry.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 engine-tests/apply_arch_v116_replicate_number_fix.py
+          python3 engine-tests/apply_arch_v117_fourarch_roles.py
+          BASE=$((5000000 + SEAT * 10000 + SHARD * 50))
+          : > "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson"
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET))
+            GLOBAL=$((SHARD * 50 + OFFSET))
+            case $((GLOBAL % 4)) in
+              0) POD=balanced ;;
+              1) POD=turbo ;;
+              2) POD=midrange ;;
+              3) POD=mixed ;;
+            esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/fourarchv117-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v117-fourarch-cardtelemetry-7000p-240s:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+              set +e
+              CARD_TELEMETRY_DIR="$PWD/out/card-telemetry" CEDH_POD="$POD" \
+                python3 engine-tests/sim_v2_worker_arch_cardtelemetry.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" \
+                --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 \
+                --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures \
+                --engine-id "$ENGINE" --output "$ATT" \
+                > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?
+              set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
+              print(r.get('status','missing') if isinstance(r,dict) else 'missing')
+          except Exception: print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]
+          d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v
+          assert int(r.get('kinnanSeat'))==int(seat)
+          assert int(r.get('seed'))==int(seed)
+          assert r.get('podProfile')==pod
+          assert r.get('pilotVersion')=='arch-aware-v1.17-fourarch-adversarial'
+          PY
+                test -f "out/card-telemetry/${VARIANT}-s${SEAT}-seed${SEED}-${POD}.json"
+                cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"
+                OK=1; break
+              fi
+              printf '{"variant":"%s","seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson"
+            done
+            [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+          done
+          python3 - "$VARIANT" "$SEAT" "$SHARD" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2]); shard=int(sys.argv[3]); rows=[]
+          lo=5000000+seat*10000+shard*50; hi=lo+49
+          for p in glob.glob(f'out/valid/{v}-s{seat}-seed*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if lo <= int(r['seed']) <= hi: rows.append(r)
+          keys={(int(r['seed']),int(r['kinnanSeat']),r.get('podProfile')) for r in rows if r.get('status') in {'game_over','horizon_complete'} and r.get('pilotVersion')=='arch-aware-v1.17-fourarch-adversarial'}
+          telemetry=glob.glob('out/card-telemetry/*.json')
+          assert len(rows)==50 and len(keys)==50,(v,seat,shard,len(rows),len(keys))
+          assert len(telemetry)>=50,(v,seat,shard,'telemetry',len(telemetry))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourarchv117-${{ matrix.variant }}-seat${{ matrix.seat }}-shard${{ matrix.shard }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate:
+    needs: confirm
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with: {pattern: fourarchv117-*, path: all}
+      - name: Strict architecture and card-level analysis
+        run: |
+          python3 engine-tests/analyze_four_arch_card_telemetry.py \
+            --all all --deck-dir engine-tests/decks \
+            --out engine-tests/results/kinnan-v117-four-architecture-card-telemetry-2k-latest.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fourarch-v117-card-analytics
+          path: |
+            engine-tests/results/kinnan-v117-four-architecture-card-telemetry-2k-latest.json
+            engine-tests/results/kinnan-v117-four-architecture-card-telemetry-2k-latest.cards.csv
+          if-no-files-found: error
+          retention-days: 90
+      - name: Commit strict report
+        if: success()
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add engine-tests/results/kinnan-v117-four-architecture-card-telemetry-2k-latest.json engine-tests/results/kinnan-v117-four-architecture-card-telemetry-2k-latest.cards.csv
+          git commit -m 'results: four-architecture v117 card telemetry 2k' || exit 0
+          git pull --rebase origin agent/kinnan-expanded-architecture
+          git push origin HEAD:agent/kinnan-expanded-architecture

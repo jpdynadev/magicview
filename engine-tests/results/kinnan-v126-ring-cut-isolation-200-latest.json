@@ -1,0 +1,330 @@
+{
+  "cacheReuse": {
+    "compatiblePriorRowsReused": 0
+  },
+  "errorAttempts": {
+    "F10": {},
+    "F10_RING_OVER_ENDURANCE": {},
+    "F10_RING_OVER_RHYTHM": {}
+  },
+  "exposure": {
+    "F10_RING_OVER_ENDURANCE": {
+      "baselineAttempts": 5,
+      "baselineProtected": 3,
+      "candidateAttempts": 9,
+      "candidateProtected": 1,
+      "keys": 50
+    },
+    "F10_RING_OVER_RHYTHM": {
+      "baselineAttempts": 5,
+      "baselineProtected": 3,
+      "candidateAttempts": 5,
+      "candidateProtected": 1,
+      "keys": 45
+    }
+  },
+  "paired": {
+    "F10_RING_OVER_ENDURANCE": {
+      "assemblyT4": {
+        "baseline": 42,
+        "baselineOnly": 26,
+        "candidate": 44,
+        "candidateOnly": 28,
+        "deltaRate": 0.01,
+        "pTwoSided": 0.8919231511047494
+      },
+      "attemptT4": {
+        "baseline": 22,
+        "baselineOnly": 19,
+        "candidate": 17,
+        "candidateOnly": 14,
+        "deltaRate": -0.025,
+        "pTwoSided": 0.48685024166479707
+      },
+      "keys": 200,
+      "kinnanWon": {
+        "baseline": 1,
+        "baselineOnly": 1,
+        "candidate": 3,
+        "candidateOnly": 3,
+        "deltaRate": 0.01,
+        "pTwoSided": 0.625
+      },
+      "strictProtectedT4": {
+        "baseline": 6,
+        "baselineOnly": 5,
+        "candidate": 6,
+        "candidateOnly": 5,
+        "deltaRate": 0.0,
+        "pTwoSided": 1.0
+      }
+    },
+    "F10_RING_OVER_RHYTHM": {
+      "assemblyT4": {
+        "baseline": 42,
+        "baselineOnly": 28,
+        "candidate": 34,
+        "candidateOnly": 20,
+        "deltaRate": -0.04,
+        "pTwoSided": 0.31232680747326924
+      },
+      "attemptT4": {
+        "baseline": 22,
+        "baselineOnly": 17,
+        "candidate": 17,
+        "candidateOnly": 12,
+        "deltaRate": -0.025,
+        "pTwoSided": 0.45825831964612007
+      },
+      "keys": 200,
+      "kinnanWon": {
+        "baseline": 1,
+        "baselineOnly": 1,
+        "candidate": 1,
+        "candidateOnly": 1,
+        "deltaRate": 0.0,
+        "pTwoSided": 1.0
+      },
+      "strictProtectedT4": {
+        "baseline": 6,
+        "baselineOnly": 4,
+        "candidate": 7,
+        "candidateOnly": 5,
+        "deltaRate": 0.005,
+        "pTwoSided": 1.0
+      }
+    }
+  },
+  "profile": "arch-repaired-v126-ring-cut-isolation-200-7000p-240s",
+  "strictValid": true,
+  "variants": {
+    "F10": {
+      "assemblyT4": 42,
+      "attemptT4": 22,
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 157,
+        "NONE": 1,
+        "PILOT_ERROR": 20,
+        "UNRESOLVED_ATTEMPT": 22
+      },
+      "mulligans": 90,
+      "pods": {
+        "balanced": {
+          "assemblyT4": 13,
+          "attemptT4": 5,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 1
+        },
+        "midrange": {
+          "assemblyT4": 6,
+          "attemptT4": 2,
+          "n": 48,
+          "protectedT4": 0,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 12,
+          "attemptT4": 9,
+          "n": 48,
+          "protectedT4": 4,
+          "wins": 0
+        },
+        "turbo": {
+          "assemblyT4": 11,
+          "attemptT4": 6,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 0
+        }
+      },
+      "protectedT4": 6,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 11,
+          "attemptT4": 5,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "1": {
+          "assemblyT4": 9,
+          "attemptT4": 5,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 12,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 1
+        },
+        "3": {
+          "assemblyT4": 10,
+          "attemptT4": 5,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 0
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 1
+    },
+    "F10_RING_OVER_ENDURANCE": {
+      "assemblyT4": 44,
+      "attemptT4": 17,
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 154,
+        "NONE": 3,
+        "PILOT_ERROR": 26,
+        "UNRESOLVED_ATTEMPT": 17
+      },
+      "mulligans": 102,
+      "pods": {
+        "balanced": {
+          "assemblyT4": 13,
+          "attemptT4": 3,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "midrange": {
+          "assemblyT4": 9,
+          "attemptT4": 4,
+          "n": 48,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 8,
+          "attemptT4": 4,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 2
+        },
+        "turbo": {
+          "assemblyT4": 14,
+          "attemptT4": 6,
+          "n": 52,
+          "protectedT4": 2,
+          "wins": 1
+        }
+      },
+      "protectedT4": 6,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 12,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 3,
+          "wins": 1
+        },
+        "1": {
+          "assemblyT4": 11,
+          "attemptT4": 4,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 1
+        },
+        "2": {
+          "assemblyT4": 10,
+          "attemptT4": 3,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 11,
+          "attemptT4": 3,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 1
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 3
+    },
+    "F10_RING_OVER_RHYTHM": {
+      "assemblyT4": 34,
+      "attemptT4": 17,
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 165,
+        "NONE": 1,
+        "PILOT_ERROR": 17,
+        "UNRESOLVED_ATTEMPT": 17
+      },
+      "mulligans": 89,
+      "pods": {
+        "balanced": {
+          "assemblyT4": 11,
+          "attemptT4": 4,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "midrange": {
+          "assemblyT4": 5,
+          "attemptT4": 2,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 7,
+          "attemptT4": 3,
+          "n": 48,
+          "protectedT4": 0,
+          "wins": 1
+        },
+        "turbo": {
+          "assemblyT4": 11,
+          "attemptT4": 8,
+          "n": 52,
+          "protectedT4": 4,
+          "wins": 0
+        }
+      },
+      "protectedT4": 7,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 7,
+          "attemptT4": 5,
+          "n": 50,
+          "protectedT4": 3,
+          "wins": 0
+        },
+        "1": {
+          "assemblyT4": 6,
+          "attemptT4": 1,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 10,
+          "attemptT4": 5,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 11,
+          "attemptT4": 6,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 1
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 1
+    }
+  }
+}

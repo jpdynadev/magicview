@@ -1,0 +1,404 @@
+{
+  "baselineKeyCount": 198,
+  "cacheReuse": false,
+  "challengerKeyCount": 198,
+  "enginePolicy": "arch-aware-v1.7-adversarial",
+  "exposure": {
+    "F10": {
+      "seen": {
+        "assemblyT4Rate": 0.18439716312056736,
+        "attemptT4Rate": 0.0851063829787234,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 115,
+          "PILOT_ERROR": 14,
+          "UNRESOLVED_ATTEMPT": 12
+        },
+        "mulliganMean": 0.5673758865248227,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.028368794326241134,
+        "slotExposureRate": 1.0,
+        "strictProtectedT4Rate": 0.028368794326241134,
+        "valid": 141
+      },
+      "unseen": {
+        "assemblyT4Rate": 0.23636363636363636,
+        "attemptT4Rate": 0.16363636363636364,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 42,
+          "PILOT_ERROR": 4,
+          "UNRESOLVED_ATTEMPT": 9
+        },
+        "mulliganMean": 0.09090909090909091,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.05454545454545454,
+        "slotExposureRate": 0.0,
+        "strictProtectedT4Rate": 0.05454545454545454,
+        "valid": 55
+      }
+    },
+    "TURBO_F10": {
+      "seen": {
+        "assemblyT4Rate": 0.23129251700680273,
+        "attemptT4Rate": 0.1292517006802721,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 113,
+          "PILOT_ERROR": 15,
+          "UNRESOLVED_ATTEMPT": 19
+        },
+        "mulliganMean": 0.2789115646258503,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.04081632653061224,
+        "slotExposureRate": 1.0,
+        "strictProtectedT4Rate": 0.04081632653061224,
+        "valid": 147
+      },
+      "unseen": {
+        "assemblyT4Rate": 0.24489795918367346,
+        "attemptT4Rate": 0.10204081632653061,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 37,
+          "PILOT_ERROR": 7,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.30612244897959184,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.02040816326530612,
+        "slotExposureRate": 0.0,
+        "strictProtectedT4Rate": 0.02040816326530612,
+        "valid": 49
+      }
+    }
+  },
+  "invalidAttemptStatuses": {
+    "unsupported_prompt": 12
+  },
+  "invalidAttempts": 12,
+  "metrics": {
+    "F10": {
+      "assemblyT4Rate": 0.19696969696969696,
+      "attemptT4Rate": 0.10606060606060606,
+      "failureLabels": {
+        "NONDETERMINISTIC_ONLY": 159,
+        "PILOT_ERROR": 18,
+        "UNRESOLVED_ATTEMPT": 21
+      },
+      "mulliganMean": 0.4444444444444444,
+      "naturalWinRate": 0.0,
+      "protectedAttemptRate": 0.03535353535353535,
+      "slotExposureRate": 0.7171717171717171,
+      "strictProtectedT4Rate": 0.03535353535353535,
+      "valid": 198
+    },
+    "TURBO_F10": {
+      "assemblyT4Rate": 0.23232323232323232,
+      "attemptT4Rate": 0.12121212121212122,
+      "failureLabels": {
+        "NONDETERMINISTIC_ONLY": 152,
+        "PILOT_ERROR": 22,
+        "UNRESOLVED_ATTEMPT": 24
+      },
+      "mulliganMean": 0.2828282828282828,
+      "naturalWinRate": 0.0,
+      "protectedAttemptRate": 0.03535353535353535,
+      "slotExposureRate": 0.7474747474747475,
+      "strictProtectedT4Rate": 0.03535353535353535,
+      "valid": 198
+    }
+  },
+  "pairedMetrics": {
+    "F10": {
+      "assemblyT4Rate": 0.1989795918367347,
+      "attemptT4Rate": 0.10714285714285714,
+      "failureLabels": {
+        "NONDETERMINISTIC_ONLY": 157,
+        "PILOT_ERROR": 18,
+        "UNRESOLVED_ATTEMPT": 21
+      },
+      "mulliganMean": 0.4336734693877551,
+      "naturalWinRate": 0.0,
+      "protectedAttemptRate": 0.03571428571428571,
+      "slotExposureRate": 0.7193877551020408,
+      "strictProtectedT4Rate": 0.03571428571428571,
+      "valid": 196
+    },
+    "TURBO_F10": {
+      "assemblyT4Rate": 0.23469387755102042,
+      "attemptT4Rate": 0.12244897959183673,
+      "failureLabels": {
+        "NONDETERMINISTIC_ONLY": 150,
+        "PILOT_ERROR": 22,
+        "UNRESOLVED_ATTEMPT": 24
+      },
+      "mulliganMean": 0.2857142857142857,
+      "naturalWinRate": 0.0,
+      "protectedAttemptRate": 0.03571428571428571,
+      "slotExposureRate": 0.75,
+      "strictProtectedT4Rate": 0.03571428571428571,
+      "valid": 196
+    }
+  },
+  "pairedN": 196,
+  "podSplits": {
+    "F10": {
+      "balanced": {
+        "assemblyT4Rate": 0.2549019607843137,
+        "attemptT4Rate": 0.17647058823529413,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 38,
+          "PILOT_ERROR": 4,
+          "UNRESOLVED_ATTEMPT": 9
+        },
+        "mulliganMean": 0.4117647058823529,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.0784313725490196,
+        "slotExposureRate": 0.7647058823529411,
+        "strictProtectedT4Rate": 0.0784313725490196,
+        "valid": 51
+      },
+      "midrange": {
+        "assemblyT4Rate": 0.14583333333333334,
+        "attemptT4Rate": 0.08333333333333333,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 41,
+          "PILOT_ERROR": 3,
+          "UNRESOLVED_ATTEMPT": 4
+        },
+        "mulliganMean": 0.5416666666666666,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.041666666666666664,
+        "slotExposureRate": 0.6458333333333334,
+        "strictProtectedT4Rate": 0.041666666666666664,
+        "valid": 48
+      },
+      "mixed": {
+        "assemblyT4Rate": 0.1956521739130435,
+        "attemptT4Rate": 0.06521739130434782,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 37,
+          "PILOT_ERROR": 6,
+          "UNRESOLVED_ATTEMPT": 3
+        },
+        "mulliganMean": 0.34782608695652173,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.021739130434782608,
+        "slotExposureRate": 0.7391304347826086,
+        "strictProtectedT4Rate": 0.021739130434782608,
+        "valid": 46
+      },
+      "turbo": {
+        "assemblyT4Rate": 0.19607843137254902,
+        "attemptT4Rate": 0.09803921568627451,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 41,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.43137254901960786,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.0,
+        "slotExposureRate": 0.7254901960784313,
+        "strictProtectedT4Rate": 0.0,
+        "valid": 51
+      }
+    },
+    "TURBO_F10": {
+      "balanced": {
+        "assemblyT4Rate": 0.21568627450980393,
+        "attemptT4Rate": 0.09803921568627451,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 40,
+          "PILOT_ERROR": 6,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.21568627450980393,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.0196078431372549,
+        "slotExposureRate": 0.7254901960784313,
+        "strictProtectedT4Rate": 0.0196078431372549,
+        "valid": 51
+      },
+      "midrange": {
+        "assemblyT4Rate": 0.2916666666666667,
+        "attemptT4Rate": 0.16666666666666666,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 34,
+          "PILOT_ERROR": 6,
+          "UNRESOLVED_ATTEMPT": 8
+        },
+        "mulliganMean": 0.3333333333333333,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.041666666666666664,
+        "slotExposureRate": 0.8541666666666666,
+        "strictProtectedT4Rate": 0.041666666666666664,
+        "valid": 48
+      },
+      "mixed": {
+        "assemblyT4Rate": 0.17391304347826086,
+        "attemptT4Rate": 0.06521739130434782,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 38,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 3
+        },
+        "mulliganMean": 0.391304347826087,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.043478260869565216,
+        "slotExposureRate": 0.5869565217391305,
+        "strictProtectedT4Rate": 0.043478260869565216,
+        "valid": 46
+      },
+      "turbo": {
+        "assemblyT4Rate": 0.2549019607843137,
+        "attemptT4Rate": 0.1568627450980392,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 38,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 8
+        },
+        "mulliganMean": 0.21568627450980393,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.0392156862745098,
+        "slotExposureRate": 0.8235294117647058,
+        "strictProtectedT4Rate": 0.0392156862745098,
+        "valid": 51
+      }
+    }
+  },
+  "primaryEndpoint": {
+    "deltaTurboMinusF10": 0.0,
+    "discordantF10Only": 6,
+    "discordantTurboOnly": 6,
+    "mcnemarExactP": 1.0,
+    "metric": "strictProtectedT4"
+  },
+  "profile": "arch-repaired-v17-turbo-screen",
+  "requiredPerVariant": 200,
+  "screenComplete": false,
+  "seatSplits": {
+    "F10": {
+      "0": {
+        "assemblyT4Rate": 0.1276595744680851,
+        "attemptT4Rate": 0.0425531914893617,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 41,
+          "PILOT_ERROR": 4,
+          "UNRESOLVED_ATTEMPT": 2
+        },
+        "mulliganMean": 0.44680851063829785,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.02127659574468085,
+        "slotExposureRate": 0.723404255319149,
+        "strictProtectedT4Rate": 0.02127659574468085,
+        "valid": 47
+      },
+      "1": {
+        "assemblyT4Rate": 0.2,
+        "attemptT4Rate": 0.1,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 40,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.6,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.02,
+        "slotExposureRate": 0.72,
+        "strictProtectedT4Rate": 0.02,
+        "valid": 50
+      },
+      "2": {
+        "assemblyT4Rate": 0.22,
+        "attemptT4Rate": 0.12,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 39,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 6
+        },
+        "mulliganMean": 0.32,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.04,
+        "slotExposureRate": 0.74,
+        "strictProtectedT4Rate": 0.04,
+        "valid": 50
+      },
+      "3": {
+        "assemblyT4Rate": 0.24489795918367346,
+        "attemptT4Rate": 0.16326530612244897,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 37,
+          "PILOT_ERROR": 4,
+          "UNRESOLVED_ATTEMPT": 8
+        },
+        "mulliganMean": 0.3673469387755102,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.061224489795918366,
+        "slotExposureRate": 0.6938775510204082,
+        "strictProtectedT4Rate": 0.061224489795918366,
+        "valid": 49
+      }
+    },
+    "TURBO_F10": {
+      "0": {
+        "assemblyT4Rate": 0.2553191489361702,
+        "attemptT4Rate": 0.14893617021276595,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 35,
+          "PILOT_ERROR": 5,
+          "UNRESOLVED_ATTEMPT": 7
+        },
+        "mulliganMean": 0.1702127659574468,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.0425531914893617,
+        "slotExposureRate": 0.7659574468085106,
+        "strictProtectedT4Rate": 0.0425531914893617,
+        "valid": 47
+      },
+      "1": {
+        "assemblyT4Rate": 0.22,
+        "attemptT4Rate": 0.1,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 39,
+          "PILOT_ERROR": 6,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.26,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.02,
+        "slotExposureRate": 0.76,
+        "strictProtectedT4Rate": 0.02,
+        "valid": 50
+      },
+      "2": {
+        "assemblyT4Rate": 0.28,
+        "attemptT4Rate": 0.14,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 36,
+          "PILOT_ERROR": 7,
+          "UNRESOLVED_ATTEMPT": 7
+        },
+        "mulliganMean": 0.2,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.02,
+        "slotExposureRate": 0.72,
+        "strictProtectedT4Rate": 0.02,
+        "valid": 50
+      },
+      "3": {
+        "assemblyT4Rate": 0.1836734693877551,
+        "attemptT4Rate": 0.10204081632653061,
+        "failureLabels": {
+          "NONDETERMINISTIC_ONLY": 40,
+          "PILOT_ERROR": 4,
+          "UNRESOLVED_ATTEMPT": 5
+        },
+        "mulliganMean": 0.5102040816326531,
+        "naturalWinRate": 0.0,
+        "protectedAttemptRate": 0.061224489795918366,
+        "slotExposureRate": 0.7551020408163265,
+        "strictProtectedT4Rate": 0.061224489795918366,
+        "valid": 49
+      }
+    }
+  },
+  "sourceRunId": "32330232125"
+}

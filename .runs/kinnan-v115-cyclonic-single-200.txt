@@ -1,0 +1,1 @@
+Trigger fresh v1.15 F10 vs F10_CYCLONIC_SINGLE strict 200-pair screen after Commandeer clean triage rejection. Seed bank 4100000+, 7000 prompts, 240s, no incompatible cache reuse. Hypothesis: replace Energy Refractor with Cyclonic Rift to improve stax/interaction resilience while preserving Dispel and Hydroelectric Specimen.

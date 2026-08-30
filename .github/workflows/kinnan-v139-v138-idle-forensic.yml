@@ -1,0 +1,125 @@
+name: Kinnan v139 v138 Idle Forensic Replay
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.github/workflows/kinnan-v139-v138-idle-forensic.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v139-v138-idle-forensic
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v139-v138-idle-forensic
+
+jobs:
+  forensic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+
+      - name: Build repaired v1.38 runtime and exact mutation
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path('engine-tests/decks/Kinnan_ARCH_F10.dck')
+          dst=Path('engine-tests/decks/Kinnan_ARCH_F10_SPELLSKITE_REFR.dck')
+          lines=src.read_text().splitlines(); start=lines.index('[Main]')+1
+          header=lines[:start]; cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+          cards.remove('Energy Refractor'); cards.append('Spellskite')
+          assert len(cards)==99 and len(set(cards))==99
+          header[1]='Name=Kinnan ARCH F10 Spellskite Refractor'
+          dst.write_text('\n'.join(header+[f'1 {c}' for c in cards])+'\n')
+          PY
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v127_shang_legolas_roles.py
+          python3 engine-tests/apply_arch_v128_shang_spellskite_roles.py
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('engine-tests/manabrew_pilot_arch_adv.py'); t=p.read_text()
+          old="runner.PILOT_VERSION = 'arch-aware-v1.28-shang-spellskite-adversarial'"
+          assert old in t
+          p.write_text(t.replace(old,"runner.PILOT_VERSION = 'arch-aware-v1.39-v138-idle-forensic'",1))
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+
+      - name: Replay canonical failing key with full forensic capture
+        run: |
+          set -euo pipefail
+          mkdir -p forensic
+          for VARIANT in F10 F10_SPELLSKITE_REFR; do
+            for TRY in 1 2 3; do
+              OUT="forensic/${VARIANT}-s3-seed6930008-balanced-try${TRY}.json"
+              LOG="forensic/${VARIANT}-s3-seed6930008-balanced-try${TRY}.log"
+              CACHE=".sim-cache/v139-${GITHUB_RUN_ID}-${VARIANT}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v139-v138-idle-forensic:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s3:6930008:balanced:try${TRY}"
+              set +e
+              CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat 3 --seeds 6930008 \
+                --max-round 4 --max-prompts 9000 --max-seconds 240 --jvm-reuse 1 \
+                --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces all \
+                --engine-id "$ENGINE" \
+                --exposure-card 'Energy Refractor' --exposure-card 'Spellskite' --exposure-card 'Misdirection' \
+                --output "$OUT" > "$LOG" 2>&1
+              RC=$?
+              set -e
+              echo "$VARIANT try=$TRY rc=$RC"
+              python3 - "$OUT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+              print(json.dumps({k:r.get(k) for k in ('variant','seed','kinnanSeat','podProfile','status','wallMs','prompts','turn','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','primaryFailureCode','v2SemanticPromptAdvances','v2DuplicateSubmitsSuppressed','v2SessionCleanup','v2SessionCleanupError','error')},sort_keys=True))
+          except Exception as e:
+              print('UNREADABLE',repr(e))
+          PY
+            done
+          done
+
+      - name: Summarize forensic replay
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import glob,json,pathlib
+          rows=[]
+          for p in sorted(glob.glob('forensic/*.json')):
+              try:
+                  d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              except Exception as e:
+                  rows.append({'file':p,'readError':repr(e)}); continue
+              rows.append({'file':p,**{k:r.get(k) for k in ('variant','seed','kinnanSeat','podProfile','status','wallMs','prompts','turn','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','primaryFailureCode','v2SemanticPromptAdvances','v2DuplicateSubmitsSuppressed','v2SessionCleanup','v2SessionCleanupError','error','v2JvmStderrTail','v2HarnessActionTail','v2PilotTraceTail')}})
+          pathlib.Path('forensic/summary.json').write_text(json.dumps(rows,indent=2,sort_keys=True))
+          print(json.dumps(rows,indent=2,sort_keys=True))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v139-v138-idle-forensic
+          path: forensic/**
+          if-no-files-found: error
+          retention-days: 14

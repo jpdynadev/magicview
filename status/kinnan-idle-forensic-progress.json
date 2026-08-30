@@ -1,0 +1,18 @@
+{
+  "found": true,
+  "runId": 32312215353,
+  "status": "in_progress",
+  "conclusion": null,
+  "headSha": "aa72d786506d0b00741431e431b9637d7e0dab36",
+  "createdAt": "2026-08-19T23:11:59Z",
+  "updatedAt": "2026-08-19T23:12:04Z",
+  "jobs": [
+    {
+      "id": 96257345082,
+      "name": "build",
+      "status": "in_progress",
+      "conclusion": null
+    }
+  ],
+  "artifacts": []
+}

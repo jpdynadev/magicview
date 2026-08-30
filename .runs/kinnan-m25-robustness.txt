@@ -1,0 +1,2 @@
+Launch M25 paired robustness confirmation on public runners.
+Seeds 300000-301023, balanced seats, paired B0/B2 comparison.

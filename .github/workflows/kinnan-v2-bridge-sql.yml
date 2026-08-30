@@ -1,0 +1,86 @@
+name: Kinnan v2 bridge SQL export
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v2-bridge-sql.txt]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: kinnan-v2-data-export
+  cancel-in-progress: false
+
+jobs:
+  export-sql:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build idempotent Neon SQL batches from committed bridge corpus
+        run: |
+          PYTHONPATH=engine-tests python3 - <<'PY'
+          import json, os, hashlib
+          from pathlib import Path
+          from generate_architecture_decks_v2 import SPECS
+
+          EXP='0bb9a2b3-55ce-4b07-a957-209787e30834'
+          root=Path('engine-tests/v2-export/bridge/latest')
+          out=root/'sql'
+          out.mkdir(parents=True,exist_ok=True)
+          variants=['F10','COPY_CORE','COPY_CREATURE','DRUID_EFFIGY','COPY_DRUID','COPY_HEAVY','COPY_ARTIFACT','COPY_PROTECTED','DRUID_TUTOR','TUTOR_DENSE','NODE_DENSE','COPY_VALUE']
+          manifest=json.loads((root/'manifest.json').read_text())
+          if manifest.get('expectedTotal')!=480 or manifest.get('rawRecords')!=480 or not manifest.get('complete'):
+              raise SystemExit('bridge manifest not complete')
+
+          def q(v):
+              if v is None: return 'NULL'
+              return "'"+str(v).replace("'","''")+"'"
+          def jb(v): return q(json.dumps(v,separators=(',',':')))+'::jsonb'
+          def arr(v): return 'ARRAY['+','.join(q(x) for x in (v or []))+']::text[]'
+          def b(v): return 'true' if v else 'false'
+          def n(v): return 'NULL' if v is None else str(int(v))
+
+          all_games=[]; variant_meta={}
+          for code in variants:
+              games=json.loads((root/f'{code}.json').read_text())
+              if len(games)!=40: raise SystemExit(f'{code} expected 40 got {len(games)}')
+              g0=games[0]
+              cuts,adds=SPECS[code]
+              variant_meta[code]=(g0['variantDeckSha256'],cuts,adds)
+              for g in games: all_games.append((code,g))
+
+          vs=[]
+          for code,(sha,cuts,adds) in variant_meta.items():
+              mutation={'cuts':cuts,'adds':adds,'source':'bridge-32168795879'}
+              exposure=adds
+              vs.append(f"INSERT INTO sim_variants(experiment_id,code,deck_name,deck_sha256,parent_code,mutation,exposure_cards) VALUES ({q(EXP)}::uuid,{q(code)},{q('Kinnan ARCH '+code)},{q(sha)},{q(None if code=='F10' else 'F10')},{jb(mutation)},{arr(exposure)}) ON CONFLICT (experiment_id,code) DO UPDATE SET deck_sha256=EXCLUDED.deck_sha256, mutation=EXCLUDED.mutation, exposure_cards=EXCLUDED.exposure_cards;")
+          (out/'000-variants.sql').write_text('\n'.join(vs)+'\n')
+
+          batch_size=20
+          files=[]
+          for bi in range(0,len(all_games),batch_size):
+              stmts=[]
+              for code,g in all_games[bi:bi+batch_size]:
+                  cache=g['cacheKey']; status=g.get('status') or 'unknown'
+                  audit={'source':'bridge-32168795879','variant':code,'slotExposed':bool(g.get('slotExposed')),'exposureCards':g.get('exposureCards') or [],'exposureEvents':g.get('exposureEvents') or [],'v2SessionCleanup':g.get('v2SessionCleanup'),'v2SessionCleanupError':g.get('v2SessionCleanupError'),'exposureQuality':'observedCards_livezones'}
+                  stmt=f"""INSERT INTO sim_game_results(cache_key,engine_id,pilot_version,optimizer_id,execution_profile,deck_sha256,pod_deck_sha256,seat_deck_sha256s,mode,pod,seed,seat,max_round,status,winner_seat,kinnan_won,first_assembly_turn,first_attempt_turn,deterministic_t4,certified_attempt,protected_attempt,strict_protected_t4,combo_line,failure_code,wall_ms,prompts,mulligans,opening_hand,kept_hand,observed_cards,observed_card_events,v2_positive_early_exit,v2_deadline_early_exit,audit) VALUES ({q(cache)},{q('8a1380e5a59986ea3fed143b85f710f9ee3888dc:arch-cold-v1')},{q(g.get('pilotVersion') or 'unknown')},{q(g.get('optimizerId') or 'unknown')},{q(g.get('executionProfile') or 'arch-cold-v1')},{q(g.get('variantDeckSha256'))},{q(g.get('podDeckSha256'))},{arr(g.get('seatDeckSha256s'))},{q(g.get('mode') or 'screen')},{q(g.get('pod') or 'screen')},{n(g.get('seed'))},{n(g.get('kinnanSeat'))},4,{q(status)},{n(g.get('winnerSeat'))},{b(g.get('kinnanWon'))},{n(g.get('firstAssemblyTurn'))},{n(g.get('firstAttemptTurn'))},{b(g.get('deterministicT4'))},{b(g.get('certifiedDeterministicAttempt'))},{b(g.get('protectedAttempt'))},{b(g.get('strictProtectedT4'))},{q(g.get('comboLine'))},{q(g.get('primaryFailureCode'))},{n(g.get('wallMs'))},{n(g.get('prompts'))},{n(g.get('mulligans'))},{jb(g.get('openingHand') or [])},{jb(g.get('keptHand') or [])},{arr(g.get('observedCards') or [])},{jb(g.get('observedCardEvents') or [])},{b(g.get('v2EarlyExit'))},{b(g.get('v2DeadlineExit'))},{jb(audit)}) ON CONFLICT (cache_key) DO NOTHING;"""
+                  stmts.append(stmt)
+                  stmts.append(f"INSERT INTO sim_experiment_games(experiment_id,variant_id,cache_key,stage,exposure_cards) SELECT {q(EXP)}::uuid,id,{q(cache)},'screen',{arr(g.get('exposureCards') or [])} FROM sim_variants WHERE experiment_id={q(EXP)}::uuid AND code={q(code)} ON CONFLICT DO NOTHING;")
+              name=f'{1+bi//batch_size:03d}-games.sql'
+              (out/name).write_text('\n'.join(stmts)+'\n')
+              files.append(name)
+          sql_manifest={'experimentId':EXP,'sourceRunId':32168795879,'records':len(all_games),'batchSize':batch_size,'files':['000-variants.sql']+files,'sha256':{}}
+          for f in sql_manifest['files']:
+              sql_manifest['sha256'][f]=hashlib.sha256((out/f).read_bytes()).hexdigest()
+          (out/'manifest.json').write_text(json.dumps(sql_manifest,indent=2)+'\n')
+          print(json.dumps(sql_manifest,indent=2))
+          PY
+      - name: Commit SQL export
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/bridge/latest/sql
+          git commit -m "export bridge corpus Neon SQL [skip ci]"
+          git push origin HEAD:agent/kinnan-expanded-architecture

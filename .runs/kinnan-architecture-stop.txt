@@ -1,0 +1,1 @@
+2026-08-19 stop strict repaired 12x200 screen after deterministic idle_timeout regression on F10 across all four seats

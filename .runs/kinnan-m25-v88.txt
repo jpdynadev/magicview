@@ -1,0 +1,1 @@
+corrected color protocol replay + 1024 paired seeds

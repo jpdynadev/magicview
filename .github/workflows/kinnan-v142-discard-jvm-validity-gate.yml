@@ -1,0 +1,160 @@
+name: Kinnan v142 Discard JVM Validity Gate
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.github/workflows/kinnan-v142-discard-jvm-validity-gate.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v142-discard-jvm-validity-gate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v142-discard-jvm1-gate
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+
+      - name: Build repaired v1.42 runtime and exact v138 mutation
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 - <<'PY'
+          from pathlib import Path
+          src=Path('engine-tests/decks/Kinnan_ARCH_F10.dck')
+          dst=Path('engine-tests/decks/Kinnan_ARCH_F10_SPELLSKITE_REFR.dck')
+          lines=src.read_text().splitlines(); start=lines.index('[Main]')+1
+          header=lines[:start]; cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+          cards.remove('Energy Refractor'); cards.append('Spellskite')
+          assert len(cards)==99 and len(set(cards))==99
+          header[1]='Name=Kinnan ARCH F10 Spellskite Refractor'
+          dst.write_text('\n'.join(header+[f'1 {c}' for c in cards])+'\n')
+          PY
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v127_shang_legolas_roles.py
+          python3 engine-tests/apply_arch_v128_shang_spellskite_roles.py
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'" in t
+          assert '_v140_combo_monolith_affordability' in t
+          assert Path('engine-tests/sim_v2_worker_arch_v142.py').exists()
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+
+      - name: Replay exact canonical failure three times per deck
+        run: |
+          set -euo pipefail
+          mkdir -p out/exact out/forensics
+          for VARIANT in F10 F10_SPELLSKITE_REFR; do
+            for TRY in 1 2 3; do
+              OUT="out/exact/${VARIANT}-try${TRY}.json"
+              CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch_v142.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat 3 --seeds 6930008 \
+                --max-round 4 --max-prompts 9000 --max-seconds 240 --jvm-reuse 1 \
+                --xmx 1280m --xms 192m --cache-dir ".sim-cache/v142-${GITHUB_RUN_ID}-${VARIANT}-${TRY}" \
+                --retain-traces all --engine-id "$MANABREW_REF:v142:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:6930008:s3:balanced:${TRY}" \
+                --exposure-card 'Energy Refractor' --exposure-card 'Spellskite' --output "$OUT"
+              python3 - "$OUT" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'}, r
+          assert r.get('variant')==sys.argv[2]
+          assert int(r.get('seed'))==6930008 and int(r.get('kinnanSeat'))==3 and r.get('podProfile')=='balanced'
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True, r
+          assert r.get('v2SessionCleanupError') is None, r
+          print(json.dumps({k:r.get(k) for k in ('variant','status','wallMs','prompts','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','primaryFailureCode','v2SessionCleanup','v2SessionCleanupError')},sort_keys=True))
+          PY
+            done
+          done
+          find engine-tests -type f \( -name 'pilot-errors-*.json' -o -name 'pilot-trace-*.json' -o -name 'pilot-stderr-*.log' \) -exec cp {} out/forensics/ \; 2>/dev/null || true
+
+      - name: Cold semantic validity bank across seats and pods
+        run: |
+          set -euo pipefail
+          mkdir -p out/bank
+          I=0
+          for VARIANT in F10 F10_SPELLSKITE_REFR; do
+            for SEAT in 0 1 2 3; do
+              for POD in balanced turbo midrange mixed; do
+                SEED=$((6960000 + I)); I=$((I+1))
+                OUT="out/bank/${VARIANT}-s${SEAT}-${POD}.json"
+                CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v142.py \
+                  /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                  /tmp/manabrew/forge/forge-gui/ \
+                  --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" \
+                  --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 \
+                  --xmx 1280m --xms 192m --cache-dir ".sim-cache/v142-bank-${GITHUB_RUN_ID}-${VARIANT}-${SEAT}-${POD}" \
+                  --retain-traces failures --engine-id "$MANABREW_REF:v142-bank:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:${SEED}:s${SEAT}:${POD}" \
+                  --output "$OUT"
+                python3 - "$OUT" "$VARIANT" "$SEAT" "$POD" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2] and int(r.get('kinnanSeat'))==int(sys.argv[3]) and r.get('podProfile')==sys.argv[4]
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True, r
+          assert r.get('v2SessionCleanupError') is None, r
+          PY
+              done
+            done
+          done
+          find engine-tests -type f \( -name 'pilot-errors-*.json' -o -name 'pilot-trace-*.json' -o -name 'pilot-stderr-*.log' \) -exec cp {} out/forensics/ \; 2>/dev/null || true
+
+      - name: Summarize strict validity and failure labels
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,pathlib,statistics
+          rows=[]
+          for p in sorted(glob.glob('out/exact/*.json')+glob.glob('out/bank/*.json')):
+              try:
+                  d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+                  rows.append({'file':p,**{k:r.get(k) for k in ('variant','seed','kinnanSeat','podProfile','status','wallMs','prompts','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','primaryFailureCode','v2SessionCleanup','v2SessionCleanupError')}})
+              except Exception as e: rows.append({'file':p,'readError':repr(e)})
+          good=[r for r in rows if r.get('status') in {'game_over','horizon_complete'}]
+          clean=[r for r in good if r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None]
+          report={'records':len(rows),'valid':len(good),'clean':len(clean),'invalid':len(rows)-len(good),'failureLabels':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in good)),'rows':rows}
+          if good:
+              ws=sorted(int(r['wallMs']) for r in good if r.get('wallMs') is not None)
+              report['wallMs']={'min':min(ws),'median':statistics.median(ws),'max':max(ws)}
+          pathlib.Path('out/summary.json').write_text(json.dumps(report,indent=2,sort_keys=True))
+          print(json.dumps(report,indent=2,sort_keys=True))
+          assert len(rows)==38 and len(good)==38 and len(clean)==38, report
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v142-discard-jvm-validity-gate
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14

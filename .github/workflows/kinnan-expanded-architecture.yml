@@ -1,0 +1,225 @@
+name: Kinnan expanded architecture sim-v2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths:
+      - .runs/kinnan-expanded-architecture.txt
+      - .github/workflows/kinnan-expanded-architecture.yml
+
+concurrency:
+  group: kinnan-expanded-architecture
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_PROFILE: arch-root-v8-cold
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require healthy 96-game protocol validation
+        run: |
+          python3 - <<'PY'
+          import json
+          path='engine-tests/results/stale-prompt-validation/latest.json'
+          d=json.load(open(path))
+          assert d.get('records') == 96, d
+          assert d.get('valid', 0) >= 90, d
+          assert d.get('stalePromptTimeouts', 0) == 0, d
+          print(json.dumps({
+              'records': d.get('records'),
+              'valid': d.get('valid'),
+              'stalePromptTimeouts': d.get('stalePromptTimeouts'),
+              'idleTimeouts': d.get('idleTimeouts'),
+              'wallTimeouts': d.get('wallTimeouts'),
+              'engineErrors': d.get('engineErrors'),
+              'sourceRunId': d.get('sourceRunId'),
+          }, sort_keys=True))
+          PY
+
+  build:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-arch-root-v8-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned Manabrew/Forge on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-v2-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [F10, COPY_CORE, COPY_CREATURE, DRUID_EFFIGY, COPY_DRUID, COPY_HEAVY, COPY_ARTIFACT, COPY_PROTECTED, DRUID_TUTOR, TUTOR_DENSE, NODE_DENSE, COPY_VALUE]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: arch-v2-runtime, path: runtime}
+      - name: Restore runtime and generate architecture decks
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 -m py_compile engine-tests/manabrew_pilot_arch.py engine-tests/sim_v2_worker.py engine-tests/sim_v2_worker_ultra.py engine-tests/sim_v2_worker_arch.py engine-tests/rank_architecture_screen_v2.py
+      - name: Run 50 canonical paired screen games
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          START=$((1800000 + SEAT * 50))
+          mapfile -t EXPOSE < <(python3 - "$VARIANT" <<'PY'
+          import sys
+          from generate_architecture_decks_v2 import SPECS
+          for card in SPECS[sys.argv[1]][1]: print(card)
+          PY
+          )
+          ARGS=()
+          for card in "${EXPOSE[@]}"; do ARGS+=(--exposure-card "$card"); done
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant "$VARIANT" --fixed-seat "$SEAT" \
+            --seeds $(seq "$START" $((START+49))) \
+            --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 4 --max-prompts 3500 --max-seconds 100 \
+            --cache-dir ".sim-cache/arch-screen-v8-${GITHUB_RUN_ID}" \
+            --engine-id "$MANABREW_REF:arch-root-v8:${GITHUB_RUN_ID}" \
+            --retain-traces failures --audit-every 25 "${ARGS[@]}" \
+            --output "out/${VARIANT}-seat${SEAT}.json" | tee "out/${VARIANT}-seat${SEAT}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arch-v2-${{ matrix.variant }}-seat${{ matrix.seat }}
+          path: out/*
+          if-no-files-found: warn
+          retention-days: 10
+
+  rank:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    outputs:
+      confirm: ${{ steps.rank.outputs.confirm }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: arch-v2-*
+          path: all
+          merge-multiple: true
+      - id: rank
+        name: Enforce 200-valid and exact paired-key completeness
+        run: |
+          python3 engine-tests/rank_architecture_screen_v2.py \
+            --input 'all/**/*.json' \
+            --output arch-v2-screen-ranking.json
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d=json.load(open('arch-v2-screen-ranking.json'))
+          print('confirm='+json.dumps(d.get('confirm',[]),separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch-v2-screen-ranking
+          path: arch-v2-screen-ranking.json
+          retention-days: 14
+
+  confirm:
+    needs: [build, rank]
+    if: ${{ always() && needs.build.result == 'success' && needs.rank.outputs.confirm != '' && needs.rank.outputs.confirm != '[]' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: ${{ fromJSON(needs.rank.outputs.confirm) }}
+        pod: [balanced, turbo, midrange, mixed]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: arch-v2-runtime, path: runtime}
+      - name: Restore runtime and decks
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+      - name: Run 50 adversarial paired games
+        env:
+          CEDH_POD: ${{ matrix.pod }}
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          POD: ${{ matrix.pod }}
+        run: |
+          case "$POD" in balanced) BASE=1810000;; turbo) BASE=1820000;; midrange) BASE=1830000;; mixed) BASE=1840000;; esac
+          START=$((BASE + SEAT * 50))
+          mapfile -t EXPOSE < <(python3 - "$VARIANT" <<'PY'
+          import sys
+          from generate_architecture_decks_v2 import SPECS
+          for card in SPECS[sys.argv[1]][1]: print(card)
+          PY
+          )
+          ARGS=()
+          for card in "${EXPOSE[@]}"; do ARGS+=(--exposure-card "$card"); done
+          python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" \
+            --seeds $(seq "$START" $((START+49))) \
+            --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 5 --max-prompts 4500 --max-seconds 130 \
+            --cache-dir ".sim-cache/arch-confirm-v8-${GITHUB_RUN_ID}" \
+            --engine-id "$MANABREW_REF:arch-root-v8-confirm:${GITHUB_RUN_ID}" \
+            --retain-traces failures --audit-every 25 "${ARGS[@]}" \
+            --output "out/${VARIANT}-${POD}-seat${SEAT}.json" | tee "out/${VARIANT}-${POD}-seat${SEAT}.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arch-v2-confirm-${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}
+          path: out/*
+          if-no-files-found: warn
+          retention-days: 14

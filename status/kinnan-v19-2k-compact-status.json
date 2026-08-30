@@ -1,0 +1,2610 @@
+{
+  "kinnan-v115-consign-idle-forensic.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T06:06:42Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32695966174",
+    "id": 32695966174,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9508907427,
+        "name": "v115-consign-idle-forensic-seat2-seed4420038-rep1"
+      },
+      {
+        "id": 9508899817,
+        "name": "v115-consign-idle-forensic-seat2-seed4420038-rep2"
+      },
+      {
+        "id": 9508891778,
+        "name": "v115-consign-idle-forensic-seat0-seed4400046-rep1"
+      },
+      {
+        "id": 9508886381,
+        "name": "v115-consign-idle-forensic-seat0-seed4400046-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T06:11:34Z"
+  },
+  "kinnan-v115-consign-single-200.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-24T03:09:33Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 97310622703,
+        "name": "screen (F10_CONSIGN_SINGLE, 0)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97310622730,
+        "name": "screen (F10_CONSIGN_SINGLE, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 97317002895,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32685473052",
+    "id": 32685473052,
+    "jobCounts": {
+      "failure": 3,
+      "success": 7
+    },
+    "reports": [
+      {
+        "id": 9506365577,
+        "name": "v115-consign-report"
+      },
+      {
+        "id": 9506361199,
+        "name": "v115-consign-F10_CONSIGN_SINGLE-seat0"
+      },
+      {
+        "id": 9506337282,
+        "name": "v115-consign-F10_CONSIGN_SINGLE-seat2"
+      },
+      {
+        "id": 9506335281,
+        "name": "v115-consign-F10-seat1"
+      },
+      {
+        "id": 9506319427,
+        "name": "v115-consign-F10-seat0"
+      },
+      {
+        "id": 9506283157,
+        "name": "v115-consign-F10-seat3"
+      },
+      {
+        "id": 9506245236,
+        "name": "v115-consign-F10_CONSIGN_SINGLE-seat3"
+      },
+      {
+        "id": 9506170535,
+        "name": "v115-consign-F10_CONSIGN_SINGLE-seat1"
+      },
+      {
+        "id": 9506019752,
+        "name": "v115-consign-F10-seat2"
+      },
+      {
+        "id": 9505609908,
+        "name": "v115-consign-single-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T03:56:52Z"
+  },
+  "kinnan-v115-cyclonic-single-2k.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-23T22:02:30Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32669357722",
+    "id": 32669357722,
+    "jobCounts": {
+      "success": 82
+    },
+    "reports": [
+      {
+        "id": 9503842726,
+        "name": "cyclonicv115-2k-report"
+      },
+      {
+        "id": 9503838271,
+        "name": "cyclonicv115-F10-seat2-shard0"
+      },
+      {
+        "id": 9503023136,
+        "name": "cyclonicv115-2k-report"
+      },
+      {
+        "id": 9503019051,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard7"
+      },
+      {
+        "id": 9502985155,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard4"
+      },
+      {
+        "id": 9502984903,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard8"
+      },
+      {
+        "id": 9502981775,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard6"
+      },
+      {
+        "id": 9502948275,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard5"
+      },
+      {
+        "id": 9502910118,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard2"
+      },
+      {
+        "id": 9502874909,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard9"
+      },
+      {
+        "id": 9502858811,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard1"
+      },
+      {
+        "id": 9502852749,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard8"
+      },
+      {
+        "id": 9502848165,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard0"
+      },
+      {
+        "id": 9502834911,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard9"
+      },
+      {
+        "id": 9502830713,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard6"
+      },
+      {
+        "id": 9502823242,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard4"
+      },
+      {
+        "id": 9502810100,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat3-shard3"
+      },
+      {
+        "id": 9502809325,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard7"
+      },
+      {
+        "id": 9502787912,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard5"
+      },
+      {
+        "id": 9502723987,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard2"
+      },
+      {
+        "id": 9502604611,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard1"
+      },
+      {
+        "id": 9502546877,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard3"
+      },
+      {
+        "id": 9502441300,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard9"
+      },
+      {
+        "id": 9502436127,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard6"
+      },
+      {
+        "id": 9502429330,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat2-shard0"
+      },
+      {
+        "id": 9502424900,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard7"
+      },
+      {
+        "id": 9502424755,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard4"
+      },
+      {
+        "id": 9502408029,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard3"
+      },
+      {
+        "id": 9502399566,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard5"
+      },
+      {
+        "id": 9502398512,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard0"
+      },
+      {
+        "id": 9502353017,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard8"
+      },
+      {
+        "id": 9502352833,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard1"
+      },
+      {
+        "id": 9502341446,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard9"
+      },
+      {
+        "id": 9502341070,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard2"
+      },
+      {
+        "id": 9502318827,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard6"
+      },
+      {
+        "id": 9502300465,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat1-shard8"
+      },
+      {
+        "id": 9502284155,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard4"
+      },
+      {
+        "id": 9502277084,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard3"
+      },
+      {
+        "id": 9502275297,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard5"
+      },
+      {
+        "id": 9502242961,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard2"
+      },
+      {
+        "id": 9502238119,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard7"
+      },
+      {
+        "id": 9502230161,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard0"
+      },
+      {
+        "id": 9502071915,
+        "name": "cyclonicv115-F10_CYCLONIC_SINGLE-seat0-shard1"
+      },
+      {
+        "id": 9501973759,
+        "name": "cyclonicv115-F10-seat3-shard4"
+      },
+      {
+        "id": 9501973192,
+        "name": "cyclonicv115-F10-seat3-shard8"
+      },
+      {
+        "id": 9501969980,
+        "name": "cyclonicv115-F10-seat3-shard2"
+      },
+      {
+        "id": 9501967724,
+        "name": "cyclonicv115-F10-seat2-shard0"
+      },
+      {
+        "id": 9501964324,
+        "name": "cyclonicv115-F10-seat3-shard7"
+      },
+      {
+        "id": 9501945179,
+        "name": "cyclonicv115-F10-seat3-shard5"
+      },
+      {
+        "id": 9501939608,
+        "name": "cyclonicv115-F10-seat3-shard1"
+      },
+      {
+        "id": 9501932842,
+        "name": "cyclonicv115-F10-seat2-shard7"
+      },
+      {
+        "id": 9501916590,
+        "name": "cyclonicv115-F10-seat2-shard4"
+      },
+      {
+        "id": 9501915028,
+        "name": "cyclonicv115-F10-seat2-shard9"
+      },
+      {
+        "id": 9501878135,
+        "name": "cyclonicv115-F10-seat2-shard5"
+      },
+      {
+        "id": 9501873998,
+        "name": "cyclonicv115-F10-seat2-shard1"
+      },
+      {
+        "id": 9501872398,
+        "name": "cyclonicv115-F10-seat2-shard3"
+      },
+      {
+        "id": 9501851604,
+        "name": "cyclonicv115-F10-seat3-shard6"
+      },
+      {
+        "id": 9501833525,
+        "name": "cyclonicv115-F10-seat2-shard2"
+      },
+      {
+        "id": 9501818671,
+        "name": "cyclonicv115-F10-seat3-shard9"
+      },
+      {
+        "id": 9501816712,
+        "name": "cyclonicv115-F10-seat3-shard0"
+      },
+      {
+        "id": 9501762065,
+        "name": "cyclonicv115-F10-seat3-shard3"
+      },
+      {
+        "id": 9501749197,
+        "name": "cyclonicv115-F10-seat2-shard6"
+      },
+      {
+        "id": 9501736166,
+        "name": "cyclonicv115-F10-seat2-shard8"
+      },
+      {
+        "id": 9501505056,
+        "name": "cyclonicv115-F10-seat0-shard7"
+      },
+      {
+        "id": 9501502732,
+        "name": "cyclonicv115-F10-seat0-shard0"
+      },
+      {
+        "id": 9501498233,
+        "name": "cyclonicv115-F10-seat0-shard8"
+      },
+      {
+        "id": 9501491976,
+        "name": "cyclonicv115-F10-seat1-shard0"
+      },
+      {
+        "id": 9501487470,
+        "name": "cyclonicv115-F10-seat1-shard3"
+      },
+      {
+        "id": 9501483601,
+        "name": "cyclonicv115-F10-seat1-shard5"
+      },
+      {
+        "id": 9501480538,
+        "name": "cyclonicv115-F10-seat1-shard9"
+      },
+      {
+        "id": 9501480029,
+        "name": "cyclonicv115-F10-seat1-shard8"
+      },
+      {
+        "id": 9501477366,
+        "name": "cyclonicv115-F10-seat1-shard2"
+      },
+      {
+        "id": 9501468382,
+        "name": "cyclonicv115-F10-seat0-shard3"
+      },
+      {
+        "id": 9501465562,
+        "name": "cyclonicv115-F10-seat0-shard2"
+      },
+      {
+        "id": 9501454064,
+        "name": "cyclonicv115-F10-seat0-shard4"
+      },
+      {
+        "id": 9501452173,
+        "name": "cyclonicv115-F10-seat1-shard4"
+      },
+      {
+        "id": 9501447937,
+        "name": "cyclonicv115-F10-seat0-shard9"
+      },
+      {
+        "id": 9501420864,
+        "name": "cyclonicv115-F10-seat0-shard5"
+      },
+      {
+        "id": 9501408984,
+        "name": "cyclonicv115-F10-seat1-shard7"
+      },
+      {
+        "id": 9501389752,
+        "name": "cyclonicv115-F10-seat1-shard1"
+      },
+      {
+        "id": 9501369339,
+        "name": "cyclonicv115-F10-seat0-shard1"
+      },
+      {
+        "id": 9501362612,
+        "name": "cyclonicv115-F10-seat0-shard6"
+      },
+      {
+        "id": 9501351631,
+        "name": "cyclonicv115-F10-seat1-shard6"
+      },
+      {
+        "id": 9500962928,
+        "name": "cyclonic-single-v115-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T01:31:23Z"
+  },
+  "kinnan-v115-strix-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T02:02:06Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32681702740",
+    "id": 32681702740,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9505053842,
+        "name": "v115-strix-report"
+      },
+      {
+        "id": 9505047923,
+        "name": "v115-strix-F10_STRIX_SINGLE-seat0"
+      },
+      {
+        "id": 9505042003,
+        "name": "v115-strix-F10-seat3"
+      },
+      {
+        "id": 9505035180,
+        "name": "v115-strix-F10_STRIX_SINGLE-seat2"
+      },
+      {
+        "id": 9505026046,
+        "name": "v115-strix-F10-seat2"
+      },
+      {
+        "id": 9505021557,
+        "name": "v115-strix-F10_STRIX_SINGLE-seat1"
+      },
+      {
+        "id": 9504982275,
+        "name": "v115-strix-F10-seat1"
+      },
+      {
+        "id": 9504944623,
+        "name": "v115-strix-F10_STRIX_SINGLE-seat3"
+      },
+      {
+        "id": 9504781461,
+        "name": "v115-strix-F10-seat0"
+      },
+      {
+        "id": 9504393654,
+        "name": "v115-strix-single-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T02:44:56Z"
+  },
+  "kinnan-v116-consign-key-revalidation.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T07:36:16Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32702246999",
+    "id": 32702246999,
+    "jobCounts": {
+      "success": 4
+    },
+    "reports": [
+      {
+        "id": 9511030199,
+        "name": "v116-consign-key-seat0-seed4400046-rep1"
+      },
+      {
+        "id": 9511020633,
+        "name": "v116-consign-key-seat0-seed4400046-rep2"
+      },
+      {
+        "id": 9511019680,
+        "name": "v116-consign-key-seat2-seed4420038-rep1"
+      },
+      {
+        "id": 9511007344,
+        "name": "v116-consign-key-seat2-seed4420038-rep2"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T07:40:21Z"
+  },
+  "kinnan-v116-consign-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T09:07:48Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32709837128",
+    "id": 32709837128,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9515049502,
+        "name": "v116-consign-report"
+      },
+      {
+        "id": 9515042428,
+        "name": "v116-consign-F10_CONSIGN_SINGLE-seat2"
+      },
+      {
+        "id": 9515011871,
+        "name": "v116-consign-F10_CONSIGN_SINGLE-seat3"
+      },
+      {
+        "id": 9515009978,
+        "name": "v116-consign-F10-seat2"
+      },
+      {
+        "id": 9514981593,
+        "name": "v116-consign-F10-seat3"
+      },
+      {
+        "id": 9514902193,
+        "name": "v116-consign-F10_CONSIGN_SINGLE-seat1"
+      },
+      {
+        "id": 9514866646,
+        "name": "v116-consign-F10-seat1"
+      },
+      {
+        "id": 9514656571,
+        "name": "v116-consign-F10_CONSIGN_SINGLE-seat0"
+      },
+      {
+        "id": 9514496897,
+        "name": "v116-consign-F10-seat0"
+      },
+      {
+        "id": 9513744996,
+        "name": "v116-consign-single-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T09:50:22Z"
+  },
+  "kinnan-v116-flash-photography-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T14:02:12Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32736212389",
+    "id": 32736212389,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9525094213,
+        "name": "v116-flash-photography-report"
+      },
+      {
+        "id": 9525079773,
+        "name": "v116-flashphoto-F10_FLASH_PHOTOGRAPHY_SINGLE-seat1"
+      },
+      {
+        "id": 9525009128,
+        "name": "v116-flashphoto-F10_FLASH_PHOTOGRAPHY_SINGLE-seat0"
+      },
+      {
+        "id": 9524884414,
+        "name": "v116-flashphoto-F10-seat1"
+      },
+      {
+        "id": 9524860604,
+        "name": "v116-flashphoto-F10-seat3"
+      },
+      {
+        "id": 9524859602,
+        "name": "v116-flashphoto-F10_FLASH_PHOTOGRAPHY_SINGLE-seat2"
+      },
+      {
+        "id": 9524844316,
+        "name": "v116-flashphoto-F10_FLASH_PHOTOGRAPHY_SINGLE-seat3"
+      },
+      {
+        "id": 9524753282,
+        "name": "v116-flashphoto-F10-seat2"
+      },
+      {
+        "id": 9524688550,
+        "name": "v116-flashphoto-F10-seat0"
+      },
+      {
+        "id": 9523414723,
+        "name": "v116-flash-photography-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T14:48:00Z"
+  },
+  "kinnan-v116-pongify-single-200.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T10:05:58Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32715028653",
+    "id": 32715028653,
+    "jobCounts": {
+      "success": 10
+    },
+    "reports": [
+      {
+        "id": 9516858194,
+        "name": "v116-pongify-report"
+      },
+      {
+        "id": 9516848993,
+        "name": "v116-pongify-F10_PONGIFY_SINGLE-seat2"
+      },
+      {
+        "id": 9516824146,
+        "name": "v116-pongify-F10_PONGIFY_SINGLE-seat3"
+      },
+      {
+        "id": 9516811193,
+        "name": "v116-pongify-F10-seat3"
+      },
+      {
+        "id": 9516782928,
+        "name": "v116-pongify-F10-seat0"
+      },
+      {
+        "id": 9516780344,
+        "name": "v116-pongify-F10_PONGIFY_SINGLE-seat0"
+      },
+      {
+        "id": 9516744824,
+        "name": "v116-pongify-F10-seat1"
+      },
+      {
+        "id": 9516678473,
+        "name": "v116-pongify-F10_PONGIFY_SINGLE-seat1"
+      },
+      {
+        "id": 9516453088,
+        "name": "v116-pongify-F10-seat2"
+      },
+      {
+        "id": 9515664924,
+        "name": "v116-pongify-single-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T10:48:07Z"
+  },
+  "kinnan-v116-pongify-single-2k.yml": {
+    "conclusion": "success",
+    "createdAt": "2026-08-24T11:02:05Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32719774570",
+    "id": 32719774570,
+    "jobCounts": {
+      "success": 82
+    },
+    "reports": [
+      {
+        "id": 9522254192,
+        "name": "pongifyv116-2k-report"
+      },
+      {
+        "id": 9522242112,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard8"
+      },
+      {
+        "id": 9522192928,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard9"
+      },
+      {
+        "id": 9522146883,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard7"
+      },
+      {
+        "id": 9522101306,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard5"
+      },
+      {
+        "id": 9522099582,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard2"
+      },
+      {
+        "id": 9522008651,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard4"
+      },
+      {
+        "id": 9521990467,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard3"
+      },
+      {
+        "id": 9521907302,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard1"
+      },
+      {
+        "id": 9521881886,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard0"
+      },
+      {
+        "id": 9521795677,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard8"
+      },
+      {
+        "id": 9521770597,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard7"
+      },
+      {
+        "id": 9521734792,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat3-shard6"
+      },
+      {
+        "id": 9521721844,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard4"
+      },
+      {
+        "id": 9521639642,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard5"
+      },
+      {
+        "id": 9521594343,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard9"
+      },
+      {
+        "id": 9521497847,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard2"
+      },
+      {
+        "id": 9521459930,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard3"
+      },
+      {
+        "id": 9521400445,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard6"
+      },
+      {
+        "id": 9521395802,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard1"
+      },
+      {
+        "id": 9521330710,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat2-shard0"
+      },
+      {
+        "id": 9520954193,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard6"
+      },
+      {
+        "id": 9520938101,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard9"
+      },
+      {
+        "id": 9520903317,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard7"
+      },
+      {
+        "id": 9520837855,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard5"
+      },
+      {
+        "id": 9520801148,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard4"
+      },
+      {
+        "id": 9520716062,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard3"
+      },
+      {
+        "id": 9520669798,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard6"
+      },
+      {
+        "id": 9520666333,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard1"
+      },
+      {
+        "id": 9520630132,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard2"
+      },
+      {
+        "id": 9520565928,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard5"
+      },
+      {
+        "id": 9520500375,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard1"
+      },
+      {
+        "id": 9520456927,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard8"
+      },
+      {
+        "id": 9520442926,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard0"
+      },
+      {
+        "id": 9520424419,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard3"
+      },
+      {
+        "id": 9520407639,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard7"
+      },
+      {
+        "id": 9520323818,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard8"
+      },
+      {
+        "id": 9520220237,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat1-shard0"
+      },
+      {
+        "id": 9520123841,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard9"
+      },
+      {
+        "id": 9520117628,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard2"
+      },
+      {
+        "id": 9520088808,
+        "name": "pongifyv116-F10_PONGIFY_SINGLE-seat0-shard4"
+      },
+      {
+        "id": 9519701985,
+        "name": "pongifyv116-F10-seat3-shard3"
+      },
+      {
+        "id": 9519684461,
+        "name": "pongifyv116-F10-seat3-shard7"
+      },
+      {
+        "id": 9519669722,
+        "name": "pongifyv116-F10-seat3-shard5"
+      },
+      {
+        "id": 9519651471,
+        "name": "pongifyv116-F10-seat2-shard9"
+      },
+      {
+        "id": 9519620436,
+        "name": "pongifyv116-F10-seat3-shard4"
+      },
+      {
+        "id": 9519530820,
+        "name": "pongifyv116-F10-seat2-shard7"
+      },
+      {
+        "id": 9519526878,
+        "name": "pongifyv116-F10-seat2-shard6"
+      },
+      {
+        "id": 9519506100,
+        "name": "pongifyv116-F10-seat3-shard8"
+      },
+      {
+        "id": 9519429186,
+        "name": "pongifyv116-F10-seat2-shard4"
+      },
+      {
+        "id": 9519422230,
+        "name": "pongifyv116-F10-seat3-shard9"
+      },
+      {
+        "id": 9519395928,
+        "name": "pongifyv116-F10-seat3-shard0"
+      },
+      {
+        "id": 9519372257,
+        "name": "pongifyv116-F10-seat2-shard1"
+      },
+      {
+        "id": 9519365897,
+        "name": "pongifyv116-F10-seat2-shard2"
+      },
+      {
+        "id": 9519348432,
+        "name": "pongifyv116-F10-seat3-shard6"
+      },
+      {
+        "id": 9519335278,
+        "name": "pongifyv116-F10-seat2-shard0"
+      },
+      {
+        "id": 9519309578,
+        "name": "pongifyv116-F10-seat2-shard3"
+      },
+      {
+        "id": 9519295977,
+        "name": "pongifyv116-F10-seat2-shard8"
+      },
+      {
+        "id": 9519172121,
+        "name": "pongifyv116-F10-seat3-shard2"
+      },
+      {
+        "id": 9519147549,
+        "name": "pongifyv116-F10-seat2-shard5"
+      },
+      {
+        "id": 9519137271,
+        "name": "pongifyv116-F10-seat3-shard1"
+      },
+      {
+        "id": 9518605747,
+        "name": "pongifyv116-F10-seat1-shard9"
+      },
+      {
+        "id": 9518555928,
+        "name": "pongifyv116-F10-seat0-shard0"
+      },
+      {
+        "id": 9518553609,
+        "name": "pongifyv116-F10-seat1-shard4"
+      },
+      {
+        "id": 9518553088,
+        "name": "pongifyv116-F10-seat1-shard5"
+      },
+      {
+        "id": 9518524540,
+        "name": "pongifyv116-F10-seat1-shard3"
+      },
+      {
+        "id": 9518491399,
+        "name": "pongifyv116-F10-seat0-shard8"
+      },
+      {
+        "id": 9518484444,
+        "name": "pongifyv116-F10-seat1-shard1"
+      },
+      {
+        "id": 9518474640,
+        "name": "pongifyv116-F10-seat1-shard8"
+      },
+      {
+        "id": 9518465425,
+        "name": "pongifyv116-F10-seat0-shard7"
+      },
+      {
+        "id": 9518462267,
+        "name": "pongifyv116-F10-seat0-shard1"
+      },
+      {
+        "id": 9518433958,
+        "name": "pongifyv116-F10-seat0-shard2"
+      },
+      {
+        "id": 9518425128,
+        "name": "pongifyv116-F10-seat0-shard5"
+      },
+      {
+        "id": 9518407512,
+        "name": "pongifyv116-F10-seat0-shard9"
+      },
+      {
+        "id": 9518378685,
+        "name": "pongifyv116-F10-seat0-shard4"
+      },
+      {
+        "id": 9518341199,
+        "name": "pongifyv116-F10-seat1-shard6"
+      },
+      {
+        "id": 9518311741,
+        "name": "pongifyv116-F10-seat1-shard2"
+      },
+      {
+        "id": 9518244003,
+        "name": "pongifyv116-F10-seat0-shard3"
+      },
+      {
+        "id": 9518158845,
+        "name": "pongifyv116-F10-seat1-shard0"
+      },
+      {
+        "id": 9518077998,
+        "name": "pongifyv116-F10-seat0-shard6"
+      },
+      {
+        "id": 9518030727,
+        "name": "pongifyv116-F10-seat1-shard7"
+      },
+      {
+        "id": 9517365910,
+        "name": "pongify-single-v116-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-24T13:33:35Z"
+  },
+  "kinnan-v117-four-architecture-card-telemetry-2k.yml": {
+    "conclusion": null,
+    "createdAt": "2026-08-24T15:16:34Z",
+    "failedJobs": [],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32743860847",
+    "id": 32743860847,
+    "jobCounts": {
+      "in_progress": 18,
+      "queued": 74,
+      "success": 8
+    },
+    "reports": [
+      {
+        "id": 9537476193,
+        "name": "fourarchv117-F10-seat1-shard7"
+      },
+      {
+        "id": 9537436007,
+        "name": "fourarchv117-F10-seat2-shard3"
+      },
+      {
+        "id": 9537300273,
+        "name": "fourarchv117-F10-seat2-shard1"
+      },
+      {
+        "id": 9536554634,
+        "name": "fourarch-v117-gate-F10"
+      },
+      {
+        "id": 9536544710,
+        "name": "fourarch-v117-gate-DORKMAX_F10"
+      },
+      {
+        "id": 9536540687,
+        "name": "fourarch-v117-gate-NODEMAX_F10"
+      },
+      {
+        "id": 9536536577,
+        "name": "fourarch-v117-gate-TOURNAMENT_SIEGE_2026_LOGAN"
+      },
+      {
+        "id": 9536506919,
+        "name": "fourarch-v117-runtime"
+      }
+    ],
+    "status": "queued",
+    "updatedAt": "2026-08-24T20:07:45Z"
+  },
+  "kinnan-v19-copy-tutor-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-21T03:17:25Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96722882413,
+        "name": "confirm (F10_COPY_TUTOR, 0, 3)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96733314024,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32442855543",
+    "id": 32442855543,
+    "jobCounts": {
+      "failure": 2,
+      "queued": 1,
+      "success": 79
+    },
+    "reports": [
+      {
+        "id": 9441983222,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9441975464,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard3"
+      },
+      {
+        "id": 9441928608,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard6"
+      },
+      {
+        "id": 9438654150,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9438648342,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard6"
+      },
+      {
+        "id": 9438629861,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard3"
+      },
+      {
+        "id": 9438538949,
+        "name": "copytutor2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9436672618,
+        "name": "copytutor2k-report"
+      },
+      {
+        "id": 9436665879,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard7"
+      },
+      {
+        "id": 9436607559,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard6"
+      },
+      {
+        "id": 9436596176,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard8"
+      },
+      {
+        "id": 9436568839,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard3"
+      },
+      {
+        "id": 9436557994,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard9"
+      },
+      {
+        "id": 9436514621,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard2"
+      },
+      {
+        "id": 9436490885,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard0"
+      },
+      {
+        "id": 9436433137,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard1"
+      },
+      {
+        "id": 9436431889,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard9"
+      },
+      {
+        "id": 9436430302,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard6"
+      },
+      {
+        "id": 9436359999,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard5"
+      },
+      {
+        "id": 9436338967,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard8"
+      },
+      {
+        "id": 9436323770,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat3-shard4"
+      },
+      {
+        "id": 9436285066,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard5"
+      },
+      {
+        "id": 9436276773,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard7"
+      },
+      {
+        "id": 9436172337,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard3"
+      },
+      {
+        "id": 9436142191,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard2"
+      },
+      {
+        "id": 9436074699,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard0"
+      },
+      {
+        "id": 9436062796,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard1"
+      },
+      {
+        "id": 9436057805,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat2-shard4"
+      },
+      {
+        "id": 9435921660,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard9"
+      },
+      {
+        "id": 9435902625,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard7"
+      },
+      {
+        "id": 9435887410,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard8"
+      },
+      {
+        "id": 9435869492,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard3"
+      },
+      {
+        "id": 9435858679,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard2"
+      },
+      {
+        "id": 9435851354,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard1"
+      },
+      {
+        "id": 9435842554,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard5"
+      },
+      {
+        "id": 9435747082,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard0"
+      },
+      {
+        "id": 9435736812,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard3"
+      },
+      {
+        "id": 9435733547,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard4"
+      },
+      {
+        "id": 9435669621,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard7"
+      },
+      {
+        "id": 9435628708,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat1-shard6"
+      },
+      {
+        "id": 9435617569,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard2"
+      },
+      {
+        "id": 9435555214,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard5"
+      },
+      {
+        "id": 9435542572,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard8"
+      },
+      {
+        "id": 9435513711,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard9"
+      },
+      {
+        "id": 9435494936,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard6"
+      },
+      {
+        "id": 9435414268,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard0"
+      },
+      {
+        "id": 9435391976,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard4"
+      },
+      {
+        "id": 9435330234,
+        "name": "copytutor2k-F10_COPY_TUTOR-seat0-shard1"
+      },
+      {
+        "id": 9435235743,
+        "name": "copytutor2k-F10-seat3-shard9"
+      },
+      {
+        "id": 9435183649,
+        "name": "copytutor2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9435177614,
+        "name": "copytutor2k-F10-seat3-shard2"
+      },
+      {
+        "id": 9435169591,
+        "name": "copytutor2k-F10-seat3-shard0"
+      },
+      {
+        "id": 9435158600,
+        "name": "copytutor2k-F10-seat2-shard8"
+      },
+      {
+        "id": 9435149139,
+        "name": "copytutor2k-F10-seat3-shard5"
+      },
+      {
+        "id": 9435146163,
+        "name": "copytutor2k-F10-seat3-shard6"
+      },
+      {
+        "id": 9435134959,
+        "name": "copytutor2k-F10-seat3-shard8"
+      },
+      {
+        "id": 9435097506,
+        "name": "copytutor2k-F10-seat3-shard7"
+      },
+      {
+        "id": 9435057918,
+        "name": "copytutor2k-F10-seat2-shard5"
+      },
+      {
+        "id": 9435038235,
+        "name": "copytutor2k-F10-seat2-shard6"
+      },
+      {
+        "id": 9435006184,
+        "name": "copytutor2k-F10-seat3-shard1"
+      },
+      {
+        "id": 9434951509,
+        "name": "copytutor2k-F10-seat2-shard4"
+      },
+      {
+        "id": 9434941959,
+        "name": "copytutor2k-F10-seat2-shard3"
+      },
+      {
+        "id": 9434940362,
+        "name": "copytutor2k-F10-seat2-shard2"
+      },
+      {
+        "id": 9434924968,
+        "name": "copytutor2k-F10-seat3-shard3"
+      },
+      {
+        "id": 9434882151,
+        "name": "copytutor2k-F10-seat2-shard0"
+      },
+      {
+        "id": 9434880410,
+        "name": "copytutor2k-F10-seat3-shard4"
+      },
+      {
+        "id": 9434773603,
+        "name": "copytutor2k-F10-seat2-shard7"
+      },
+      {
+        "id": 9434662846,
+        "name": "copytutor2k-F10-seat2-shard1"
+      },
+      {
+        "id": 9434510082,
+        "name": "copytutor2k-F10-seat0-shard9"
+      },
+      {
+        "id": 9434499787,
+        "name": "copytutor2k-F10-seat1-shard6"
+      },
+      {
+        "id": 9434489211,
+        "name": "copytutor2k-F10-seat1-shard4"
+      },
+      {
+        "id": 9434480339,
+        "name": "copytutor2k-F10-seat1-shard8"
+      },
+      {
+        "id": 9434474120,
+        "name": "copytutor2k-F10-seat1-shard3"
+      },
+      {
+        "id": 9434471094,
+        "name": "copytutor2k-F10-seat0-shard4"
+      },
+      {
+        "id": 9434470699,
+        "name": "copytutor2k-F10-seat1-shard2"
+      },
+      {
+        "id": 9434459233,
+        "name": "copytutor2k-F10-seat0-shard1"
+      },
+      {
+        "id": 9434450452,
+        "name": "copytutor2k-F10-seat0-shard6"
+      },
+      {
+        "id": 9434449307,
+        "name": "copytutor2k-F10-seat0-shard5"
+      },
+      {
+        "id": 9434435998,
+        "name": "copytutor2k-F10-seat1-shard5"
+      },
+      {
+        "id": 9434435063,
+        "name": "copytutor2k-F10-seat0-shard2"
+      },
+      {
+        "id": 9434389495,
+        "name": "copytutor2k-F10-seat1-shard1"
+      },
+      {
+        "id": 9434324130,
+        "name": "copytutor2k-F10-seat0-shard7"
+      },
+      {
+        "id": 9434272621,
+        "name": "copytutor2k-F10-seat1-shard9"
+      },
+      {
+        "id": 9434266931,
+        "name": "copytutor2k-F10-seat0-shard3"
+      },
+      {
+        "id": 9434251217,
+        "name": "copytutor2k-F10-seat0-shard0"
+      },
+      {
+        "id": 9434244209,
+        "name": "copytutor2k-F10-seat1-shard0"
+      },
+      {
+        "id": 9434233894,
+        "name": "copytutor2k-F10-seat0-shard8"
+      },
+      {
+        "id": 9434203670,
+        "name": "copytutor2k-F10-seat1-shard7"
+      },
+      {
+        "id": 9433771234,
+        "name": "copy-tutor-v19-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T09:47:42Z"
+  },
+  "kinnan-v19-druid-tutor-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T15:10:11Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96654530730,
+        "name": "confirm (DRUID_TUTOR, 0, 7)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96661507650,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32384510087",
+    "id": 32384510087,
+    "jobCounts": {
+      "failure": 2,
+      "success": 80
+    },
+    "reports": [
+      {
+        "id": 9433587562,
+        "name": "druid2k-report"
+      },
+      {
+        "id": 9433583176,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard7"
+      },
+      {
+        "id": 9421549829,
+        "name": "druid2k-report"
+      },
+      {
+        "id": 9421541826,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard7"
+      },
+      {
+        "id": 9421486540,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard9"
+      },
+      {
+        "id": 9421441195,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard8"
+      },
+      {
+        "id": 9421399904,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard5"
+      },
+      {
+        "id": 9421329420,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard6"
+      },
+      {
+        "id": 9421309368,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard3"
+      },
+      {
+        "id": 9421292549,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard4"
+      },
+      {
+        "id": 9421204981,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard0"
+      },
+      {
+        "id": 9421194362,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard2"
+      },
+      {
+        "id": 9421165549,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard8"
+      },
+      {
+        "id": 9420997818,
+        "name": "druid2k-DRUID_TUTOR-seat3-shard1"
+      },
+      {
+        "id": 9420987533,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard9"
+      },
+      {
+        "id": 9420779399,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard7"
+      },
+      {
+        "id": 9420739818,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard5"
+      },
+      {
+        "id": 9420716619,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard4"
+      },
+      {
+        "id": 9420675977,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard6"
+      },
+      {
+        "id": 9420436013,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard9"
+      },
+      {
+        "id": 9420434835,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard6"
+      },
+      {
+        "id": 9420419096,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard3"
+      },
+      {
+        "id": 9420319748,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard7"
+      },
+      {
+        "id": 9420216307,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard4"
+      },
+      {
+        "id": 9420182718,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard0"
+      },
+      {
+        "id": 9420126846,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard2"
+      },
+      {
+        "id": 9420037320,
+        "name": "druid2k-DRUID_TUTOR-seat2-shard1"
+      },
+      {
+        "id": 9420030527,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard5"
+      },
+      {
+        "id": 9420024121,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard8"
+      },
+      {
+        "id": 9419981759,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard3"
+      },
+      {
+        "id": 9419787656,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard1"
+      },
+      {
+        "id": 9419468898,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard0"
+      },
+      {
+        "id": 9419394132,
+        "name": "druid2k-DRUID_TUTOR-seat1-shard2"
+      },
+      {
+        "id": 9419244720,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard7"
+      },
+      {
+        "id": 9419197549,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard9"
+      },
+      {
+        "id": 9419163917,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard8"
+      },
+      {
+        "id": 9418946306,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard5"
+      },
+      {
+        "id": 9418772028,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard4"
+      },
+      {
+        "id": 9418729274,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard3"
+      },
+      {
+        "id": 9418529398,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard6"
+      },
+      {
+        "id": 9418461681,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard2"
+      },
+      {
+        "id": 9418234833,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard0"
+      },
+      {
+        "id": 9418052285,
+        "name": "druid2k-F10-seat3-shard9"
+      },
+      {
+        "id": 9418033768,
+        "name": "druid2k-F10-seat3-shard8"
+      },
+      {
+        "id": 9417983611,
+        "name": "druid2k-DRUID_TUTOR-seat0-shard1"
+      },
+      {
+        "id": 9417959568,
+        "name": "druid2k-F10-seat3-shard3"
+      },
+      {
+        "id": 9417869415,
+        "name": "druid2k-F10-seat3-shard6"
+      },
+      {
+        "id": 9417850656,
+        "name": "druid2k-F10-seat3-shard4"
+      },
+      {
+        "id": 9417789247,
+        "name": "druid2k-F10-seat3-shard5"
+      },
+      {
+        "id": 9417677025,
+        "name": "druid2k-F10-seat3-shard7"
+      },
+      {
+        "id": 9417648042,
+        "name": "druid2k-F10-seat3-shard1"
+      },
+      {
+        "id": 9417552237,
+        "name": "druid2k-F10-seat3-shard0"
+      },
+      {
+        "id": 9417539386,
+        "name": "druid2k-F10-seat3-shard2"
+      },
+      {
+        "id": 9416800414,
+        "name": "druid2k-F10-seat2-shard8"
+      },
+      {
+        "id": 9416757236,
+        "name": "druid2k-F10-seat2-shard7"
+      },
+      {
+        "id": 9416529005,
+        "name": "druid2k-F10-seat2-shard6"
+      },
+      {
+        "id": 9416424747,
+        "name": "druid2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9416373804,
+        "name": "druid2k-F10-seat2-shard3"
+      },
+      {
+        "id": 9416371960,
+        "name": "druid2k-F10-seat2-shard4"
+      },
+      {
+        "id": 9416078832,
+        "name": "druid2k-F10-seat2-shard5"
+      },
+      {
+        "id": 9415597050,
+        "name": "druid2k-F10-seat2-shard0"
+      },
+      {
+        "id": 9415525605,
+        "name": "druid2k-F10-seat2-shard2"
+      },
+      {
+        "id": 9415512556,
+        "name": "druid2k-F10-seat1-shard8"
+      },
+      {
+        "id": 9415483842,
+        "name": "druid2k-F10-seat1-shard4"
+      },
+      {
+        "id": 9415475365,
+        "name": "druid2k-F10-seat1-shard3"
+      },
+      {
+        "id": 9415471903,
+        "name": "druid2k-F10-seat0-shard3"
+      },
+      {
+        "id": 9415384531,
+        "name": "druid2k-F10-seat0-shard5"
+      },
+      {
+        "id": 9415345691,
+        "name": "druid2k-F10-seat1-shard6"
+      },
+      {
+        "id": 9415344474,
+        "name": "druid2k-F10-seat1-shard5"
+      },
+      {
+        "id": 9415238186,
+        "name": "druid2k-F10-seat0-shard7"
+      },
+      {
+        "id": 9415207981,
+        "name": "druid2k-F10-seat1-shard7"
+      },
+      {
+        "id": 9415175430,
+        "name": "druid2k-F10-seat2-shard1"
+      },
+      {
+        "id": 9414754338,
+        "name": "druid2k-F10-seat1-shard9"
+      },
+      {
+        "id": 9414463214,
+        "name": "druid2k-F10-seat1-shard1"
+      },
+      {
+        "id": 9414308769,
+        "name": "druid2k-F10-seat0-shard9"
+      },
+      {
+        "id": 9414296238,
+        "name": "druid2k-F10-seat1-shard0"
+      },
+      {
+        "id": 9414278608,
+        "name": "druid2k-F10-seat0-shard1"
+      },
+      {
+        "id": 9414276549,
+        "name": "druid2k-F10-seat0-shard8"
+      },
+      {
+        "id": 9414225968,
+        "name": "druid2k-F10-seat0-shard4"
+      },
+      {
+        "id": 9414219923,
+        "name": "druid2k-F10-seat0-shard6"
+      },
+      {
+        "id": 9414206492,
+        "name": "druid2k-F10-seat0-shard0"
+      },
+      {
+        "id": 9414013520,
+        "name": "druid2k-F10-seat1-shard2"
+      },
+      {
+        "id": 9414000298,
+        "name": "druid2k-F10-seat0-shard2"
+      },
+      {
+        "id": 9412463406,
+        "name": "druid-v19-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T03:45:54Z"
+  },
+  "kinnan-v19-turbo-2k-confirm.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-20T14:08:56Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96654552236,
+        "name": "screen (TURBO_F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552247,
+        "name": "screen (TURBO_F10, 1, 1)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552258,
+        "name": "screen (F10, 0, 2)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96654552409,
+        "name": "screen (TURBO_F10, 2, 4)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96662314462,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32378390116",
+    "id": 32378390116,
+    "jobCounts": {
+      "failure": 5,
+      "success": 77
+    },
+    "reports": [
+      {
+        "id": 9433683687,
+        "name": "turbo-v19-2k-report"
+      },
+      {
+        "id": 9433678444,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard4"
+      },
+      {
+        "id": 9433673065,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard2"
+      },
+      {
+        "id": 9433670842,
+        "name": "turbo-v19-2k-F10-seat0-shard2"
+      },
+      {
+        "id": 9433569162,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard1"
+      },
+      {
+        "id": 9420231819,
+        "name": "turbo-v19-2k-report"
+      },
+      {
+        "id": 9420188087,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard9"
+      },
+      {
+        "id": 9420187897,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard7"
+      },
+      {
+        "id": 9420159143,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard8"
+      },
+      {
+        "id": 9420003683,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard5"
+      },
+      {
+        "id": 9419968334,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard6"
+      },
+      {
+        "id": 9419511360,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard3"
+      },
+      {
+        "id": 9419468943,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard4"
+      },
+      {
+        "id": 9419428338,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard2"
+      },
+      {
+        "id": 9419273484,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard0"
+      },
+      {
+        "id": 9419218969,
+        "name": "turbo-v19-2k-TURBO_F10-seat3-shard1"
+      },
+      {
+        "id": 9419209710,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard8"
+      },
+      {
+        "id": 9419187725,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard7"
+      },
+      {
+        "id": 9419058436,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard5"
+      },
+      {
+        "id": 9418934184,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard9"
+      },
+      {
+        "id": 9418918912,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard4"
+      },
+      {
+        "id": 9418826090,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard3"
+      },
+      {
+        "id": 9418805465,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard2"
+      },
+      {
+        "id": 9418619570,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard6"
+      },
+      {
+        "id": 9418034198,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard0"
+      },
+      {
+        "id": 9417964411,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard7"
+      },
+      {
+        "id": 9417947292,
+        "name": "turbo-v19-2k-TURBO_F10-seat2-shard1"
+      },
+      {
+        "id": 9417924332,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard8"
+      },
+      {
+        "id": 9417918984,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard9"
+      },
+      {
+        "id": 9417599345,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard5"
+      },
+      {
+        "id": 9417510536,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard6"
+      },
+      {
+        "id": 9417320688,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard3"
+      },
+      {
+        "id": 9417010969,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard1"
+      },
+      {
+        "id": 9416991011,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard4"
+      },
+      {
+        "id": 9416985990,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard2"
+      },
+      {
+        "id": 9416821063,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard9"
+      },
+      {
+        "id": 9416761281,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard0"
+      },
+      {
+        "id": 9416728867,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard8"
+      },
+      {
+        "id": 9416701446,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard3"
+      },
+      {
+        "id": 9416700737,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard6"
+      },
+      {
+        "id": 9416651193,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard5"
+      },
+      {
+        "id": 9416610843,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard2"
+      },
+      {
+        "id": 9416551160,
+        "name": "turbo-v19-2k-TURBO_F10-seat1-shard0"
+      },
+      {
+        "id": 9416537414,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard7"
+      },
+      {
+        "id": 9416348503,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard1"
+      },
+      {
+        "id": 9416237101,
+        "name": "turbo-v19-2k-TURBO_F10-seat0-shard4"
+      },
+      {
+        "id": 9415616740,
+        "name": "turbo-v19-2k-F10-seat3-shard5"
+      },
+      {
+        "id": 9415608425,
+        "name": "turbo-v19-2k-F10-seat3-shard7"
+      },
+      {
+        "id": 9415601803,
+        "name": "turbo-v19-2k-F10-seat3-shard4"
+      },
+      {
+        "id": 9415600792,
+        "name": "turbo-v19-2k-F10-seat3-shard6"
+      },
+      {
+        "id": 9415572205,
+        "name": "turbo-v19-2k-F10-seat3-shard3"
+      },
+      {
+        "id": 9415486234,
+        "name": "turbo-v19-2k-F10-seat3-shard9"
+      },
+      {
+        "id": 9415467660,
+        "name": "turbo-v19-2k-F10-seat3-shard8"
+      },
+      {
+        "id": 9415380780,
+        "name": "turbo-v19-2k-F10-seat3-shard2"
+      },
+      {
+        "id": 9414563866,
+        "name": "turbo-v19-2k-F10-seat3-shard1"
+      },
+      {
+        "id": 9414560333,
+        "name": "turbo-v19-2k-F10-seat3-shard0"
+      },
+      {
+        "id": 9414333936,
+        "name": "turbo-v19-2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9414271794,
+        "name": "turbo-v19-2k-F10-seat2-shard5"
+      },
+      {
+        "id": 9414193276,
+        "name": "turbo-v19-2k-F10-seat2-shard7"
+      },
+      {
+        "id": 9414175805,
+        "name": "turbo-v19-2k-F10-seat2-shard8"
+      },
+      {
+        "id": 9414147367,
+        "name": "turbo-v19-2k-F10-seat2-shard6"
+      },
+      {
+        "id": 9414033182,
+        "name": "turbo-v19-2k-F10-seat2-shard3"
+      },
+      {
+        "id": 9413924527,
+        "name": "turbo-v19-2k-F10-seat2-shard2"
+      },
+      {
+        "id": 9413767564,
+        "name": "turbo-v19-2k-F10-seat2-shard0"
+      },
+      {
+        "id": 9413655704,
+        "name": "turbo-v19-2k-F10-seat2-shard4"
+      },
+      {
+        "id": 9413484592,
+        "name": "turbo-v19-2k-F10-seat2-shard1"
+      },
+      {
+        "id": 9413266099,
+        "name": "turbo-v19-2k-F10-seat0-shard2"
+      },
+      {
+        "id": 9413008494,
+        "name": "turbo-v19-2k-F10-seat1-shard1"
+      },
+      {
+        "id": 9412997378,
+        "name": "turbo-v19-2k-F10-seat0-shard0"
+      },
+      {
+        "id": 9412915446,
+        "name": "turbo-v19-2k-F10-seat0-shard9"
+      },
+      {
+        "id": 9412910726,
+        "name": "turbo-v19-2k-F10-seat1-shard3"
+      },
+      {
+        "id": 9412902075,
+        "name": "turbo-v19-2k-F10-seat0-shard3"
+      },
+      {
+        "id": 9412901176,
+        "name": "turbo-v19-2k-F10-seat1-shard7"
+      },
+      {
+        "id": 9412898608,
+        "name": "turbo-v19-2k-F10-seat0-shard4"
+      },
+      {
+        "id": 9412875741,
+        "name": "turbo-v19-2k-F10-seat0-shard7"
+      },
+      {
+        "id": 9412875394,
+        "name": "turbo-v19-2k-F10-seat1-shard5"
+      },
+      {
+        "id": 9412872134,
+        "name": "turbo-v19-2k-F10-seat0-shard5"
+      },
+      {
+        "id": 9412852642,
+        "name": "turbo-v19-2k-F10-seat1-shard0"
+      },
+      {
+        "id": 9412824221,
+        "name": "turbo-v19-2k-F10-seat1-shard9"
+      },
+      {
+        "id": 9412811439,
+        "name": "turbo-v19-2k-F10-seat0-shard8"
+      },
+      {
+        "id": 9412786938,
+        "name": "turbo-v19-2k-F10-seat1-shard8"
+      },
+      {
+        "id": 9412698472,
+        "name": "turbo-v19-2k-F10-seat0-shard1"
+      },
+      {
+        "id": 9412488327,
+        "name": "turbo-v19-2k-F10-seat1-shard4"
+      },
+      {
+        "id": 9412430058,
+        "name": "turbo-v19-2k-F10-seat0-shard6"
+      },
+      {
+        "id": 9412336942,
+        "name": "turbo-v19-2k-F10-seat1-shard2"
+      },
+      {
+        "id": 9412318265,
+        "name": "turbo-v19-2k-F10-seat1-shard6"
+      },
+      {
+        "id": 9411474723,
+        "name": "turbo-v19-2k-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T03:50:50Z"
+  },
+  "kinnan-v19-tutor-pair-2k.yml": {
+    "conclusion": "failure",
+    "createdAt": "2026-08-21T13:12:24Z",
+    "failedJobs": [
+      {
+        "conclusion": "failure",
+        "id": 96861949571,
+        "name": "confirm (F10, 2, 9)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96861949626,
+        "name": "confirm (F10_TUTOR_PAIR, 2, 9)"
+      },
+      {
+        "conclusion": "failure",
+        "id": 96872728445,
+        "name": "aggregate"
+      }
+    ],
+    "htmlUrl": "https://github.com/jpdynadev/magicview/actions/runs/32485636013",
+    "id": 32485636013,
+    "jobCounts": {
+      "failure": 3,
+      "success": 79
+    },
+    "reports": [
+      {
+        "id": 9458224683,
+        "name": "tutorpair2k-report"
+      },
+      {
+        "id": 9458217324,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9"
+      },
+      {
+        "id": 9458213819,
+        "name": "tutorpair2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9456497843,
+        "name": "tutorpair2k-report"
+      },
+      {
+        "id": 9456489982,
+        "name": "tutorpair2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9456482319,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1"
+      },
+      {
+        "id": 9456354426,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9"
+      },
+      {
+        "id": 9453920389,
+        "name": "tutorpair2k-report"
+      },
+      {
+        "id": 9453912431,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard6"
+      },
+      {
+        "id": 9453893821,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard8"
+      },
+      {
+        "id": 9453850753,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard9"
+      },
+      {
+        "id": 9453847668,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard7"
+      },
+      {
+        "id": 9453707246,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard3"
+      },
+      {
+        "id": 9453678217,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard2"
+      },
+      {
+        "id": 9453639809,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard4"
+      },
+      {
+        "id": 9453506759,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard1"
+      },
+      {
+        "id": 9453488825,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard1"
+      },
+      {
+        "id": 9453457491,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard8"
+      },
+      {
+        "id": 9453441123,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard5"
+      },
+      {
+        "id": 9453426831,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard7"
+      },
+      {
+        "id": 9453355235,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard6"
+      },
+      {
+        "id": 9453276788,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard2"
+      },
+      {
+        "id": 9453260172,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard5"
+      },
+      {
+        "id": 9453238857,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard3"
+      },
+      {
+        "id": 9453231058,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat3-shard0"
+      },
+      {
+        "id": 9453219440,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard9"
+      },
+      {
+        "id": 9453150137,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard4"
+      },
+      {
+        "id": 9452720646,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard9"
+      },
+      {
+        "id": 9452715138,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat2-shard0"
+      },
+      {
+        "id": 9452699630,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard7"
+      },
+      {
+        "id": 9452689659,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard6"
+      },
+      {
+        "id": 9452679827,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard8"
+      },
+      {
+        "id": 9452553857,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard5"
+      },
+      {
+        "id": 9452543442,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard4"
+      },
+      {
+        "id": 9452538938,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard2"
+      },
+      {
+        "id": 9452506885,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard3"
+      },
+      {
+        "id": 9452348413,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard1"
+      },
+      {
+        "id": 9452319600,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard6"
+      },
+      {
+        "id": 9452318866,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard8"
+      },
+      {
+        "id": 9452240647,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard9"
+      },
+      {
+        "id": 9452227099,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard7"
+      },
+      {
+        "id": 9452129152,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat1-shard0"
+      },
+      {
+        "id": 9452095054,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard5"
+      },
+      {
+        "id": 9452065825,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard3"
+      },
+      {
+        "id": 9452055320,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard4"
+      },
+      {
+        "id": 9451893607,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard1"
+      },
+      {
+        "id": 9451887480,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard0"
+      },
+      {
+        "id": 9451641663,
+        "name": "tutorpair2k-F10_TUTOR_PAIR-seat0-shard2"
+      },
+      {
+        "id": 9451537587,
+        "name": "tutorpair2k-F10-seat3-shard9"
+      },
+      {
+        "id": 9451403297,
+        "name": "tutorpair2k-F10-seat3-shard6"
+      },
+      {
+        "id": 9451342182,
+        "name": "tutorpair2k-F10-seat2-shard8"
+      },
+      {
+        "id": 9451318485,
+        "name": "tutorpair2k-F10-seat2-shard5"
+      },
+      {
+        "id": 9451309275,
+        "name": "tutorpair2k-F10-seat3-shard5"
+      },
+      {
+        "id": 9451267906,
+        "name": "tutorpair2k-F10-seat3-shard2"
+      },
+      {
+        "id": 9451210335,
+        "name": "tutorpair2k-F10-seat3-shard0"
+      },
+      {
+        "id": 9451193725,
+        "name": "tutorpair2k-F10-seat3-shard8"
+      },
+      {
+        "id": 9451149443,
+        "name": "tutorpair2k-F10-seat2-shard1"
+      },
+      {
+        "id": 9451110244,
+        "name": "tutorpair2k-F10-seat2-shard4"
+      },
+      {
+        "id": 9451057091,
+        "name": "tutorpair2k-F10-seat2-shard0"
+      },
+      {
+        "id": 9450998526,
+        "name": "tutorpair2k-F10-seat3-shard3"
+      },
+      {
+        "id": 9450986045,
+        "name": "tutorpair2k-F10-seat2-shard7"
+      },
+      {
+        "id": 9450930853,
+        "name": "tutorpair2k-F10-seat3-shard7"
+      },
+      {
+        "id": 9450908704,
+        "name": "tutorpair2k-F10-seat2-shard9"
+      },
+      {
+        "id": 9450874914,
+        "name": "tutorpair2k-F10-seat3-shard4"
+      },
+      {
+        "id": 9450798599,
+        "name": "tutorpair2k-F10-seat3-shard1"
+      },
+      {
+        "id": 9450791283,
+        "name": "tutorpair2k-F10-seat2-shard6"
+      },
+      {
+        "id": 9450773112,
+        "name": "tutorpair2k-F10-seat2-shard3"
+      },
+      {
+        "id": 9450662538,
+        "name": "tutorpair2k-F10-seat2-shard2"
+      },
+      {
+        "id": 9450318371,
+        "name": "tutorpair2k-F10-seat0-shard8"
+      },
+      {
+        "id": 9450154914,
+        "name": "tutorpair2k-F10-seat0-shard6"
+      },
+      {
+        "id": 9450139201,
+        "name": "tutorpair2k-F10-seat1-shard2"
+      },
+      {
+        "id": 9450082199,
+        "name": "tutorpair2k-F10-seat1-shard3"
+      },
+      {
+        "id": 9450074996,
+        "name": "tutorpair2k-F10-seat1-shard7"
+      },
+      {
+        "id": 9450037182,
+        "name": "tutorpair2k-F10-seat1-shard9"
+      },
+      {
+        "id": 9450031842,
+        "name": "tutorpair2k-F10-seat1-shard8"
+      },
+      {
+        "id": 9450029150,
+        "name": "tutorpair2k-F10-seat0-shard7"
+      },
+      {
+        "id": 9450021272,
+        "name": "tutorpair2k-F10-seat0-shard0"
+      },
+      {
+        "id": 9450020572,
+        "name": "tutorpair2k-F10-seat0-shard3"
+      },
+      {
+        "id": 9450017525,
+        "name": "tutorpair2k-F10-seat1-shard5"
+      },
+      {
+        "id": 9450010907,
+        "name": "tutorpair2k-F10-seat0-shard4"
+      },
+      {
+        "id": 9450010685,
+        "name": "tutorpair2k-F10-seat1-shard6"
+      },
+      {
+        "id": 9450000293,
+        "name": "tutorpair2k-F10-seat1-shard1"
+      },
+      {
+        "id": 9449968352,
+        "name": "tutorpair2k-F10-seat0-shard9"
+      },
+      {
+        "id": 9449964271,
+        "name": "tutorpair2k-F10-seat0-shard2"
+      },
+      {
+        "id": 9449904040,
+        "name": "tutorpair2k-F10-seat0-shard1"
+      },
+      {
+        "id": 9449804817,
+        "name": "tutorpair2k-F10-seat0-shard5"
+      },
+      {
+        "id": 9449771648,
+        "name": "tutorpair2k-F10-seat1-shard4"
+      },
+      {
+        "id": 9449635598,
+        "name": "tutorpair2k-F10-seat1-shard0"
+      },
+      {
+        "id": 9448809728,
+        "name": "tutor-pair-v19-runtime"
+      }
+    ],
+    "status": "completed",
+    "updatedAt": "2026-08-21T18:39:17Z"
+  }
+}

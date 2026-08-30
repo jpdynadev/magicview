@@ -1,0 +1,250 @@
+name: Kinnan v116 F10 vs Pongify Single 2k
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v116-pongify-single-2k.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v19-high-value-confirmation
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v116-pongify-single-2k-7000p-240s
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v116_pongify_single.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 engine-tests/apply_arch_v116_replicate_number_fix.py
+          python3 - <<'PY'
+          from pathlib import Path
+          for key in ('F10','F10_PONGIFY_SINGLE'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          assert 'arch-aware-v1.16-adversarial' in Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          PY
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-v116-pongify-single-2k.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pongify-single-v116-runtime
+          path: manabrew-v116-pongify-single-2k.tgz
+          compression-level: 0
+          retention-days: 2
+
+  confirm:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [F10, F10_PONGIFY_SINGLE]
+        seat: [0,1,2,3]
+        shard: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: pongify-single-v116-runtime, path: runtime}
+      - name: Run 50 strict canonical paired keys
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v116-pongify-single-2k.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v116_pongify_single.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 engine-tests/apply_arch_v113_payment_scope_fix.py
+          python3 engine-tests/apply_arch_v114_monolith_affordability_fix.py
+          python3 engine-tests/apply_arch_v115_monolith_payment_progress_fix.py
+          python3 engine-tests/apply_arch_v116_replicate_number_fix.py
+          EXP_ARGS=(--exposure-card 'Energy Refractor' --exposure-card 'Pongify')
+          BASE=$((4700000 + SEAT * 10000 + SHARD * 50))
+          : > "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson"
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET))
+            GLOBAL=$((SHARD * 50 + OFFSET))
+            case $((GLOBAL % 4)) in
+              0) POD=balanced ;;
+              1) POD=turbo ;;
+              2) POD=midrange ;;
+              3) POD=mixed ;;
+            esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/pongifyv116-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v116-pongify2k-7000p-240s:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+              set +e
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch.py \
+                /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+                /tmp/manabrew/forge/forge-gui/ \
+                --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" \
+                --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 \
+                --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures \
+                --engine-id "$ENGINE" "${EXP_ARGS[@]}" --output "$ATT" \
+                > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?
+              set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d
+              print(r.get('status','missing') if isinstance(r,dict) else 'missing')
+          except Exception: print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]
+          d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v
+          assert int(r.get('kinnanSeat'))==int(seat)
+          assert int(r.get('seed'))==int(seed)
+          assert r.get('podProfile')==pod
+          assert r.get('pilotVersion')=='arch-aware-v1.16-adversarial'
+          PY
+                cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"
+                OK=1; break
+              fi
+              printf '{"variant":"%s","seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-shard${SHARD}-errors.ndjson"
+            done
+            [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+          done
+          python3 - "$VARIANT" "$SEAT" "$SHARD" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2]); shard=int(sys.argv[3]); rows=[]
+          lo=4700000+seat*10000+shard*50; hi=lo+49
+          for p in glob.glob(f'out/valid/{v}-s{seat}-seed*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if lo <= int(r['seed']) <= hi: rows.append(r)
+          keys={(int(r['seed']),int(r['kinnanSeat']),r.get('podProfile')) for r in rows if r.get('status') in {'game_over','horizon_complete'} and r.get('pilotVersion')=='arch-aware-v1.16-adversarial'}
+          assert len(rows)==50 and len(keys)==50,(v,seat,shard,len(rows),len(keys))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pongifyv116-${{ matrix.variant }}-seat${{ matrix.seat }}-shard${{ matrix.shard }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    needs: confirm
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with: {pattern: pongifyv116-*, path: all}
+      - name: Strict 2k paired analysis
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_PONGIFY_SINGLE']; valid_status={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}; errors={v:[] for v in variants}
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('all/**/*errors.ndjson',recursive=True):
+              for line in open(p):
+                  try:
+                      r=json.loads(line); v=r.get('variant')
+                      if v in errors: errors[v].append(r)
+                  except Exception: pass
+          def key(r): return (int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def met(r,m):
+              if m=='assemblyT4': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attemptT4': return (r.get('firstAttemptTurn') or 99)<=4
+              return bool(r.get(m))
+          maps={v:{key(r):r for r in rr if r.get('status') in valid_status and r.get('pilotVersion')=='arch-aware-v1.16-adversarial'} for v,rr in rows.items()}
+          base=maps['F10']; cand=maps['F10_PONGIFY_SINGLE']
+          report={'profile':'arch-repaired-v116-pongify-single-2k-7000p-240s','strictValid':False,'variants':{},'paired':{},'errorAttempts':{},'exposure':{}}
+          for v in variants:
+              good=list(maps[v].values())
+              st={'records':len(rows[v]),'valid':len(good),'uniqueKeys':len(maps[v]),'pilotVersions':sorted(set(str(r.get('pilotVersion')) for r in good)),'deckHashes':sorted(set(str(r.get('variantDeckSha256')) for r in good)),'assemblyT4':sum(met(r,'assemblyT4') for r in good),'attemptT4':sum(met(r,'attemptT4') for r in good),'protectedT4':sum(met(r,'strictProtectedT4') for r in good),'wins':sum(met(r,'kinnanWon') for r in good),'mulligans':sum(int(r.get('mulligans') or 0) for r in good),'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in good)),'pods':{},'seats':{}}
+              for pod in ('balanced','turbo','midrange','mixed'):
+                  x=[r for r in good if r.get('podProfile')==pod]
+                  st['pods'][pod]={'n':len(x),'assemblyT4':sum(met(r,'assemblyT4') for r in x),'attemptT4':sum(met(r,'attemptT4') for r in x),'protectedT4':sum(met(r,'strictProtectedT4') for r in x),'wins':sum(met(r,'kinnanWon') for r in x)}
+              for s in range(4):
+                  x=[r for r in good if int(r.get('kinnanSeat',-1))==s]
+                  st['seats'][str(s)]={'n':len(x),'assemblyT4':sum(met(r,'assemblyT4') for r in x),'attemptT4':sum(met(r,'attemptT4') for r in x),'protectedT4':sum(met(r,'strictProtectedT4') for r in x),'wins':sum(met(r,'kinnanWon') for r in x)}
+              report['variants'][v]=st
+              report['errorAttempts'][v]=dict(collections.Counter(str(e.get('status') or 'missing') for e in errors[v]))
+          common=sorted(set(base)&set(cand))
+          for m in ('assemblyT4','attemptT4','strictProtectedT4','kinnanWon'):
+              cv=sum(met(cand[k],m) for k in common); bv=sum(met(base[k],m) for k in common)
+              a=sum(met(cand[k],m) and not met(base[k],m) for k in common); c=sum(met(base[k],m) and not met(cand[k],m) for k in common); n=a+c
+              p=1.0 if not n else min(1.0,2*sum(math.comb(n,i) for i in range(min(a,c)+1))/(2**n))
+              report['paired'][m]={'keys':len(common),'candidate':cv,'baseline':bv,'deltaRate':(cv-bv)/len(common) if common else None,'candidateOnly':a,'baselineOnly':c,'pTwoSided':p}
+          exposed=[]
+          for k in common:
+              text=json.dumps(base[k],sort_keys=True)+' '+json.dumps(cand[k],sort_keys=True)
+              if 'Energy Refractor' in text or 'Pongify' in text: exposed.append(k)
+          report['exposure']={'pairedKeys':len(common),'exposedKeys':len(exposed),'baselineProtected':sum(met(base[k],'strictProtectedT4') for k in exposed),'candidateProtected':sum(met(cand[k],'strictProtectedT4') for k in exposed)}
+          report['strictValid']=(all(report['variants'][v]['records']==2000 and report['variants'][v]['valid']==2000 and report['variants'][v]['uniqueKeys']==2000 and report['variants'][v]['pilotVersions']==['arch-aware-v1.16-adversarial'] for v in variants) and set(base)==set(cand))
+          out=pathlib.Path('results/kinnan-v116-pongify-single-2k-latest.json'); out.parent.mkdir(exist_ok=True); out.write_text(json.dumps(report,indent=2,sort_keys=True)); print(json.dumps(report,indent=2,sort_keys=True))
+          if not report['strictValid']: raise SystemExit('STRICT_V116_PONGIFY_2K_PAIRING_FAILED')
+          PY
+      - name: Commit report
+        if: success()
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add results/kinnan-v116-pongify-single-2k-latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record Kinnan v1.16 Pongify singleton 2k confirmation [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pongifyv116-2k-report
+          path: results/kinnan-v116-pongify-single-2k-latest.json
+          if-no-files-found: warn
+          retention-days: 14

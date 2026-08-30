@@ -1,0 +1,136 @@
+name: Kinnan sim v2 smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/sim-v2-overopt]
+    paths:
+      - ".github/workflows/kinnan-sim-v2-smoke.yml"
+      - ".runs/kinnan-sim-v2-smoke.txt"
+      - "engine-tests/sim_v2_worker.py"
+      - "engine-tests/sim_v2_rank.py"
+
+concurrency:
+  group: kinnan-sim-v2-smoke
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: "21"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" \
+            forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-v2-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  equivalence:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: "21"}
+      - uses: actions/download-artifact@v4
+        with: {name: sim-v2-runtime, path: runtime}
+      - name: Restore runtime and generate current precision decks
+        run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+      - name: Run cold control - restart JVM every game
+        run: |
+          mkdir -p out
+          /usr/bin/time -v python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1700000 1700011) \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 1 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/control \
+            --retain-traces none \
+            --output out/control.json \
+            2>&1 | tee out/control.log
+      - name: Run optimized - reuse JVM
+        run: |
+          /usr/bin/time -v python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1700000 1700011) \
+            --max-round 4 --max-prompts 3500 --max-seconds 90 \
+            --jvm-reuse 6 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/reuse \
+            --retain-traces none \
+            --output out/reuse.json \
+            2>&1 | tee out/reuse.log
+      - name: Verify deterministic equivalence
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/control.json'))
+          b=json.load(open('out/reuse.json'))
+          assert len(a)==len(b)==12
+          fields=('seed','kinnanSeat','status','firstAssemblyTurn','firstAttemptTurn',
+                  'strictProtectedT4','kinnanWon','primaryFailureCode')
+          mismatches=[]
+          for x,y in zip(a,b):
+              diff={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if diff:mismatches.append({'seed':x.get('seed'),'diff':diff})
+          print(json.dumps({'mismatches':mismatches},indent=2))
+          if mismatches:
+              raise SystemExit(f'v2 equivalence failed on {len(mismatches)} seeds')
+          PY
+      - name: Verify cache replay does zero Forge work
+        run: |
+          python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 \
+            --seeds $(seq 1700000 1700011) \
+            --jvm-reuse 6 --xmx 1536m --xms 256m \
+            --cache-dir .sim-cache/reuse \
+            --retain-traces none \
+            --output out/cached.json \
+            | tee out/cached.log
+          grep -q '"cacheHits": 12' out/cached.log
+          grep -q '"jvmStarts": 0' out/cached.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sim-v2-smoke-results
+          path: out/
+          retention-days: 7

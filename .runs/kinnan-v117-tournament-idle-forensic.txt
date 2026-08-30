@@ -1,0 +1,1 @@
+Replay exact failing architecture key: TOURNAMENT_SIEGE_2026_LOGAN / seat 1 / seed 5010140 / balanced, alongside F10 control, with full v1.17 forensic tracing after three deterministic idle_timeout attempts in the strict 2k architecture run.

@@ -1,0 +1,102 @@
+name: Kinnan v112 Evolution key revalidation
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v112-evolution-key-revalidation.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v19-high-value-confirmation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v112-evolution-key-revalidation-240s
+
+jobs:
+  revalidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [F10, F10_EVOLUTION_SINGLE]
+        rep: [1, 2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired v1.12 runtime
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/apply_arch_v112_payment_repair.py
+          python3 - <<'PY'
+          from pathlib import Path
+          adv=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert 'arch-aware-v1.12-adversarial' in adv
+          assert '_v112_productive_kinnan_payment' in adv
+          for key in ('F10','F10_EVOLUTION_SINGLE'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          PY
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+      - name: Replay formerly idle key under production envelope
+        env:
+          VARIANT: ${{ matrix.variant }}
+          REP: ${{ matrix.rep }}
+        run: |
+          set -euo pipefail
+          mkdir -p out
+          OUT="out/${VARIANT}-rep${REP}-seed3430166-seat3-midrange.json"
+          CACHE=".sim-cache/v112-evolution-key-revalidation-${GITHUB_RUN_ID}-${VARIANT}-rep${REP}"
+          ENGINE="$MANABREW_REF:arch-v112-evolution-key-revalidation:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:rep${REP}"
+          CEDH_POD=midrange python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode adversarial --variant "$VARIANT" --fixed-seat 3 --seeds 3430166 \
+            --max-round 4 --max-prompts 5000 --max-seconds 240 --jvm-reuse 1 \
+            --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces all \
+            --engine-id "$ENGINE" \
+            --exposure-card 'Hydroelectric Specimen' --exposure-card 'Eldritch Evolution' \
+            --output "$OUT"
+          python3 - "$OUT" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2],r
+          assert int(r.get('seed'))==3430166 and int(r.get('kinnanSeat'))==3,r
+          assert r.get('podProfile')=='midrange',r
+          assert r.get('pilotVersion')=='arch-aware-v1.12-adversarial',r
+          print(json.dumps({k:r.get(k) for k in ['status','variant','pilotVersion','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','kinnanWon','prompts','wallMs','primaryFailureCode']},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v112-evolution-key-revalidation-${{ matrix.variant }}-rep${{ matrix.rep }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,53 @@
+name: Kinnan architecture progress observer
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-architecture-observer.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - name: Find latest high-value Kinnan runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p status
+          RUNS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=100")
+          jq -n --argjson runs "$RUNS" '
+            {observedAt:(now|todateiso8601), targets:[
+              $runs.workflow_runs[]
+              | select(.name=="Kinnan v117 Four Architecture Card Telemetry 2k" or .name=="Kinnan v116 F10 vs Pongify Single 2k" or .name=="Kinnan v116 Flash Photography Single 200")
+              | {id,name,status,conclusion,head_sha,created_at,updated_at,run_attempt}
+            ]}' > status/kinnan-high-value-progress.json
+          python3 - <<'PY'
+          import json, os, subprocess
+          p='status/kinnan-high-value-progress.json'
+          d=json.load(open(p))
+          for r in d.get('targets',[]):
+              rid=str(r['id'])
+              jobs=json.loads(subprocess.check_output(['gh','api',f'/repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{rid}/jobs?per_page=100']))
+              arts=json.loads(subprocess.check_output(['gh','api',f'/repos/{os.environ["GITHUB_REPOSITORY"]}/actions/runs/{rid}/artifacts?per_page=100']))
+              r['jobs']=[{k:j.get(k) for k in ('id','name','status','conclusion','started_at','completed_at')} for j in jobs.get('jobs',[])]
+              r['artifacts']=[{k:a.get(k) for k in ('id','name','size_in_bytes','expired')} for a in arts.get('artifacts',[])]
+          json.dump(d,open(p,'w'),indent=2,sort_keys=True)
+          PY
+          cat status/kinnan-high-value-progress.json
+      - name: Commit progress snapshot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add status/kinnan-high-value-progress.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record Kinnan high-value progress [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

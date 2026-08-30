@@ -1,0 +1,5 @@
+Kinnan pilot v8.7.0 simulation-validity engineering gate.
+
+Replays exact invalid v8.6 cases B0/100032/s0, B2/100050/s2, and B0/100091/s3; requires the previously abandoned B2/100042/s2 Kinnan-Basalt line to become a real Kinnan win; preserves the B0+B2 100163/s3 Consultation regression; and runs exactly two fresh audit games at seed 900005/s1. A fresh 200-pair deck-mutation screen remains gated on manual trace audit.
+
+Public-run retrigger: 2026-08-13.

@@ -1,0 +1,1 @@
+2026-08-21 diagnose shared seed 3020454 seat 2 midrange at Xmx 1280m vs 2048m for F10 and F10_TUTOR_PAIR; forensic only, not promotion evidence

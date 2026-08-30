@@ -1,0 +1,12 @@
+2026-08-18 OIDC ingest: precision 8800 + bridge 480 durable v2 records
+2026-08-18 retrigger with durable ingestion diagnostics
+2026-08-18 retrigger after Data API RPC role grant
+2026-08-18 retrigger after allowing ON CONFLICT DO NOTHING
+2026-08-18 retrigger with bridge per-record SQL support
+2026-08-18 retrigger after bridge INSERT syntax allowlist fix
+2026-08-18 bridge-only ingestion after historical cache dedupe
+2026-08-18 retrigger after literal-card-name-safe SQL guard
+2026-08-18 batched bridge ingestion transaction per export file
+2026-08-18 retrigger after Data API schema cache reload
+2026-08-18 batched via existing cached exec_sim_ingest(text) RPC
+2026-08-18 payload files avoid ARG_MAX for observed-card telemetry

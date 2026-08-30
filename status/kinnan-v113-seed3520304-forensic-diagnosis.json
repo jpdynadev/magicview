@@ -1,0 +1,30 @@
+{
+  "pilotVersion": "arch-aware-v1.13-adversarial",
+  "variant": "F10",
+  "seed": 3520304,
+  "seat": 2,
+  "pod": "balanced",
+  "forensicRunId": 32619415048,
+  "forensicJobs": 4,
+  "forensicConclusion": "success",
+  "representativeReplay": {
+    "xmxMb": 1280,
+    "rep": 1,
+    "status": "idle_timeout",
+    "wallMs": 131819,
+    "prompts": 1056,
+    "firstAssemblyTurn": 2,
+    "firstAttemptTurn": 2,
+    "strictProtectedT4": false,
+    "kinnanWon": false,
+    "semanticPromptAdvances": 0
+  },
+  "rootCause": "The Kinnan pilot repeatedly selected Basalt Monolith's {3}: untap activation. Forge then produced payManaCost with canConfirmFromPool=false; the payment policy canceled, and the next chooseAction selected the same Basalt untap again. The visible loop repeated until idle_timeout. The chooseAction mana upper bound incorrectly counted Basalt Monolith's own mana ability as capacity that could finance its own untap cost.",
+  "repair": {
+    "pilotVersion": "arch-aware-v1.14-adversarial",
+    "script": "engine-tests/apply_arch_v114_monolith_affordability_fix.py",
+    "behavior": "Before selecting Basalt/Grim Monolith mana-costed untap abilities, compute floating mana plus other advertised mana sources while excluding the Monolith being untapped. If the external optimistic capacity is below the untap cost, filter that action and let the existing policy choose another legal action."
+  },
+  "revalidationWorkflow": ".github/workflows/kinnan-v114-evolution-key-revalidation.yml",
+  "promotionPolicy": "v1.13 results remain hypothesis evidence only after the pilot-version change. Require v1.14 canonical revalidation before any new 2k scaling; v1.14 promotion evidence must use fresh compatible identities/cache."
+}

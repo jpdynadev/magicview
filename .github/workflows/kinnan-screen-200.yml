@@ -1,0 +1,109 @@
+name: Kinnan v8.7 simulation-validity gate
+
+on:
+  pull_request:
+    branches:
+      - agent/kinnan-v8-certification
+    paths:
+      - ".runs/kinnan-v83-screen-200.txt"
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+
+jobs:
+  engineering-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Maven and test policy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+          (cd engine-tests && python3 -m unittest -v test_kinnan_policy_v8.py)
+          python3 -m py_compile engine-tests/kinnan_policy_v8.py engine-tests/manabrew_pilot_v8.py
+
+      - name: Build pinned Forge harness with audited adapter patch
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/engine-tests/results"
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply --check "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          {
+            echo "MANABREW_COMMIT=$(git rev-parse HEAD)"
+            echo "FORGE_COMMIT=$(git -C forge rev-parse HEAD)"
+            echo "MANABREW_PATCH_SHA256=$(sha256sum "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch" | cut -d' ' -f1)"
+          } > "$GITHUB_WORKSPACE/engine-tests/results/engine-pins.env"
+
+      - name: Replay exact v8.6 failures and Consultation regression
+        run: |
+          set -euo pipefail
+          while read -r variant seed seat; do
+            timeout --signal=TERM --kill-after=10s 240s \
+              python3 engine-tests/manabrew_pilot_v8.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant "$variant" --seeds "$seed" --seat-offset "$seat" \
+              --max-round 4 --max-prompts 3500 --max-seconds 180
+          done <<'CASES'
+          B0 100032 0
+          B2 100050 2
+          B0 100091 3
+          B2 100042 2
+          B0 100163 3
+          B2 100163 3
+          CASES
+
+      - name: Require the known Kinnan-Basalt line to resolve
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("engine-tests/results/pilot-result-B2-100042-s2.json")
+          result = json.loads(path.read_text())
+          assert result["status"] == "game_over", result
+          assert result["kinnanWon"] is True, result
+          assert result["attemptResolved"] is True, result
+          assert result["firstAttemptTurn"] <= 4, result
+          PY
+
+      - name: Run exactly two fresh engineering-audit games
+        run: |
+          set -euo pipefail
+          for variant in B0 B2; do
+            timeout --signal=TERM --kill-after=10s 240s \
+              python3 engine-tests/manabrew_pilot_v8.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant "$variant" --seeds 900005 --seat-offset 1 \
+              --max-round 4 --max-prompts 3500 --max-seconds 180
+          done
+
+      - name: Upload immutable engineering traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-v87-engineering-gate
+          path: engine-tests/results/
+          if-no-files-found: error
+          retention-days: 90

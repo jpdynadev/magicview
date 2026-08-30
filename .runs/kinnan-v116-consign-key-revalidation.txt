@@ -1,0 +1,1 @@
+Revalidate the two persistent F10_CONSIGN_SINGLE midrange keys under arch-aware-v1.16-adversarial after bounding Consign to Memory Replicate chooseNumber. Require 4/4 valid production-profile completions before any further deck scaling.

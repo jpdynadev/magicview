@@ -1,0 +1,180 @@
+name: Kinnan Phase 2 adversarial pods fast
+
+on:
+  push:
+    branches: [agent/kinnan-2k-search]
+    paths: [.runs/kinnan-adversarial-phase2-fast.txt]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build pinned Manabrew/Forge once
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" \
+            forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manabrew-runtime
+          path: manabrew-runtime.tgz
+          compression-level: 0
+          retention-days: 2
+
+  stress:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        variant: [B0, M2K0026, M2K0023, M2K0017, M2K0011, M2K0029, M2K0030, M2K0010]
+        pod: [balanced, turbo, midrange, mixed]
+        seat: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/download-artifact@v4
+        with:
+          name: manabrew-runtime
+          path: runtime
+      - name: Restore shared runtime
+        run: |
+          mkdir -p /tmp/manabrew
+          tar -C /tmp/manabrew -xzf runtime/manabrew-runtime.tgz
+      - run: python3 engine-tests/generate_2k_mutations.py --count 2000
+      - name: Run 25 games as two concurrent 12/13-game lanes
+        env:
+          CEDH_POD: ${{ matrix.pod }}
+        run: |
+          case '${{ matrix.pod }}' in
+            balanced) PODBASE=940000 ;;
+            turbo) PODBASE=941000 ;;
+            midrange) PODBASE=942000 ;;
+            mixed) PODBASE=943000 ;;
+          esac
+          OFFSET=$(( ${{ matrix.seat }} * 25 ))
+          START=$((PODBASE + OFFSET))
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-a
+          cp -a "$GITHUB_WORKSPACE" /tmp/lane-b
+          (
+            cd /tmp/lane-a
+            CEDH_POD='${{ matrix.pod }}' python3 engine-tests/manabrew_pilot_v91_adversarial.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' \
+              --seeds $(seq "$START" $((START + 12))) \
+              --seat-offset '${{ matrix.seat }}' \
+              --max-round 5 --max-prompts 4500 --max-seconds 120 || true
+          ) &
+          P1=$!
+          (
+            cd /tmp/lane-b
+            CEDH_POD='${{ matrix.pod }}' python3 engine-tests/manabrew_pilot_v91_adversarial.py \
+              /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+              /tmp/manabrew/forge/forge-gui/ \
+              --variant '${{ matrix.variant }}' \
+              --seeds $(seq $((START + 13)) $((START + 24))) \
+              --seat-offset '${{ matrix.seat }}' \
+              --max-round 5 --max-prompts 4500 --max-seconds 120 || true
+          ) &
+          P2=$!
+          wait $P1 || true
+          wait $P2 || true
+          mkdir -p out
+          python3 - <<'PY'
+          import json, os
+          v='${{ matrix.variant }}'
+          games=[]
+          for lane in ('/tmp/lane-a','/tmp/lane-b'):
+              p=f'{lane}/engine-tests/results/pilot-summary-{v}.json'
+              if os.path.exists(p): games += json.load(open(p))
+          json.dump(games, open('out/${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}.json','w'), indent=2)
+          print('games', len(games))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: adv-${{ matrix.variant }}-${{ matrix.pod }}-seat${{ matrix.seat }}
+          path: out/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  aggregate:
+    needs: stress
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: adv-*
+          path: all
+          merge-multiple: true
+      - name: Aggregate adversarial results
+        run: |
+          python3 - <<'PY'
+          import csv, glob, json, os, re
+          from collections import defaultdict
+          completed={'game_over','horizon_complete'}
+          rows=[]; by=defaultdict(list)
+          for path in glob.glob('all/*.json'):
+              m=re.search(r'(B0|M2K\d+)-(balanced|turbo|midrange|mixed)-seat(\d)',os.path.basename(path))
+              if not m: continue
+              variant,pod,seat=m.group(1),m.group(2),int(m.group(3))
+              games=json.load(open(path)); valid=[g for g in games if g.get('status') in completed]
+              r={'variant':variant,'pod':pod,'seat':seat,'games':len(games),'valid':len(valid),'errors':len(games)-len(valid),
+                 'kinnanWins':sum((g.get('winner') in {f'player-{seat}',seat,str(seat)}) or g.get('kinnanWon') for g in valid),
+                 'assembly':sum(bool(g.get('deterministicT4')) for g in valid),
+                 'attempt':sum(bool(g.get('certifiedDeterministicAttempt') or g.get('attemptResolved')) for g in valid),
+                 'protected':sum(bool(g.get('protectedAttempt')) for g in valid)}
+              rows.append(r); by[variant].append(r)
+          with open('adversarial-by-pod-seat.csv','w',newline='') as f:
+              fields=['variant','pod','seat','games','valid','errors','kinnanWins','assembly','attempt','protected']; w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(rows)
+          totals=[]
+          for v,rs in by.items():
+              n=sum(x['valid'] for x in rs); wins=sum(x['kinnanWins'] for x in rs); prot=sum(x['protected'] for x in rs); att=sum(x['attempt'] for x in rs)
+              totals.append({'variant':v,'valid':n,'errors':sum(x['errors'] for x in rs),'kinnanWins':wins,'assembly':sum(x['assembly'] for x in rs),'attempt':att,'protected':prot,'winRate':wins/max(n,1),'protectedRate':prot/max(n,1)})
+          totals.sort(key=lambda x:(x['winRate'],x['protectedRate'],x['attempt']/max(x['valid'],1)),reverse=True)
+          fields=['variant','valid','errors','kinnanWins','assembly','attempt','protected','winRate','protectedRate']
+          with open('adversarial-ranking.csv','w',newline='') as f:
+              w=csv.DictWriter(f,fieldnames=fields); w.writeheader(); w.writerows(totals)
+          json.dump({'ranking':totals,'byPodSeat':rows},open('adversarial-ranking.json','w'),indent=2)
+          print(json.dumps(totals,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-phase2-adversarial-ranking-fast
+          path: |
+            adversarial-ranking.csv
+            adversarial-ranking.json
+            adversarial-by-pod-seat.csv
+          retention-days: 14

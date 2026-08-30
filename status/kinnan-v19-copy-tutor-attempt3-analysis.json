@@ -1,0 +1,30 @@
+{
+  "sourceRun": 32442855543,
+  "sourceArtifact": 9441983222,
+  "profile": "arch-repaired-v19-copy-tutor-2k",
+  "strictValid": false,
+  "variants": {
+    "F10": {"valid": 2000, "uniqueKeys": 2000, "assemblyT4": 430, "attemptT4": 232, "protectedT4": 84, "wins": 4, "mulligans": 856, "wallTimeoutAttempts": 2},
+    "F10_COPY_TUTOR": {"valid": 1998, "uniqueKeys": 1998, "assemblyT4": 409, "attemptT4": 196, "protectedT4": 75, "wins": 7, "mulligans": 827, "wallTimeoutAttempts": 6}
+  },
+  "paired": {
+    "keys": 1998,
+    "assemblyT4": {"baseline": 430, "candidate": 409, "deltaRate": -0.010510510510510511, "pTwoSided": 0.41847199141969277},
+    "attemptT4": {"baseline": 232, "candidate": 196, "deltaRate": -0.018018018018018018, "pTwoSided": 0.06047260307688209},
+    "strictProtectedT4": {"baseline": 84, "candidate": 75, "deltaRate": -0.0045045045045045045, "pTwoSided": 0.5036394897297799},
+    "kinnanWon": {"baseline": 4, "candidate": 7, "deltaRate": 0.0015015015015015015, "pTwoSided": 0.5078125}
+  },
+  "exposure": {"pairedKeys": 1998, "exposedKeys": 1739, "baselineProtected": 75, "candidateProtected": 66},
+  "pods": {
+    "balanced": {"F10": {"n":500,"protectedT4":20}, "F10_COPY_TUTOR": {"n":498,"protectedT4":15}},
+    "turbo": {"F10": {"n":500,"protectedT4":21}, "F10_COPY_TUTOR": {"n":500,"protectedT4":25}},
+    "midrange": {"F10": {"n":500,"protectedT4":15}, "F10_COPY_TUTOR": {"n":500,"protectedT4":15}},
+    "mixed": {"F10": {"n":500,"protectedT4":28}, "F10_COPY_TUTOR": {"n":500,"protectedT4":20}}
+  },
+  "unresolvedCanonicalKeys": [
+    {"variant":"F10_COPY_TUTOR","seed":2800160,"seat":0,"pod":"balanced"},
+    {"variant":"F10_COPY_TUTOR","seed":2820348,"seat":2,"pod":"balanced"}
+  ],
+  "decision": "No promotion. Stop scaling and forensic-replay the two persistent candidate keys before resuming deck search.",
+  "nextMutationHypothesis": {"name":"F10_TUTOR_PAIR","cuts":["Energy Refractor","Hydroelectric Specimen"],"adds":["Green Sun's Zenith","Eldritch Evolution"],"rationale":"Preserve Reshape, Spellseeker, interaction, and value core while testing whether two additional high-quality tutors improve conversion without the broader Druid/clone package costs."}
+}

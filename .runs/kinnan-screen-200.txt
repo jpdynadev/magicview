@@ -1,0 +1,7 @@
+stage=screening
+pairs=200
+seed_start=100000
+seed_end=100199
+shards=10
+pilot_version=v8.1.0
+manabrew_commit=8a1380e5a59986ea3fed143b85f710f9ee3888dc

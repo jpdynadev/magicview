@@ -1,0 +1,5 @@
+trigger 2026-08-25T16:00Z
+F10 vs F10_DRUID_EFFIGY_COMPACT
+200 exact paired games per deck
+fresh seed bank 5300000+
+primary endpoint strict protected deterministic attempt by Kinnan T4

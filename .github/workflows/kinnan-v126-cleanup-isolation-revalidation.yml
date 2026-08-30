@@ -1,0 +1,93 @@
+name: Kinnan v126 Cleanup Isolation Revalidation
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v126-cleanup-isolation-revalidation.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v19-high-value-confirmation
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v126-cleanup-isolation-9000p-320s
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired v1.26 runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_planner_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_sim_v2_cleanup_isolation_fix.py
+          grep -q 'arch-aware-v1.26-adversarial' engine-tests/manabrew_pilot_arch_adv.py
+          grep -q 'hard-stop-after-cleanup-error' engine-tests/sim_v2_worker_ultra.py
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew && git remote add origin https://github.com/witchesofthehill/manabrew.git && git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD && git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-v126-cleanup-isolation.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with: {name: v126-cleanup-isolation-runtime, path: manabrew-v126-cleanup-isolation.tgz, compression-level: 0, retention-days: 2}
+
+  replay:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: [F10, TOURNAMENT_SIEGE_2026_LOGAN]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: v126-cleanup-isolation-runtime, path: runtime}
+      - name: Revalidate exact canonical key and isolation cleanup
+        env: {VARIANT: '${{ matrix.variant }}'}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v126-cleanup-isolation.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_planner_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_sim_v2_cleanup_isolation_fix.py
+          export MANABREW_HARNESS_TRACE="$PWD/out/${VARIANT}-harness-trace.log"
+          CACHE=".sim-cache/v126-cleanup-isolation-${GITHUB_RUN_ID}-${VARIANT}-s1-5010140-balanced"
+          ENGINE="$MANABREW_REF:arch-v126-cleanup-isolation:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s1:5010140:balanced"
+          CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat 1 --seeds 5010140 --max-round 4 --max-prompts 9000 --max-seconds 320 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces all --engine-id "$ENGINE" --output "out/${VARIANT}.json" > "out/${VARIANT}.log" 2>&1
+          cat "out/${VARIANT}.log"
+          python3 - "out/${VARIANT}.json" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==sys.argv[2]
+          assert r.get('pilotVersion')=='arch-aware-v1.26-adversarial'
+          assert int(r.get('seed'))==5010140 and int(r.get('kinnanSeat'))==1 and r.get('podProfile')=='balanced'
+          assert r.get('status') in {'game_over','horizon_complete'}, r.get('status')
+          assert r.get('v2SessionCleanup') is True, (r.get('v2SessionCleanupMode'),r.get('v2SessionCleanupError'))
+          assert r.get('v2SessionCleanupIsolated') is True
+          assert r.get('v2SessionCleanupMode') in {'abort+reset','hard-stop-after-cleanup-error'}, r.get('v2SessionCleanupMode')
+          print(json.dumps({k:r.get(k) for k in ['variant','status','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4','kinnanWon','primaryFailureCode','prompts','wallMs','v2SessionCleanup','v2SessionCleanupIsolated','v2SessionCleanupMode','v2SessionCleanupError']},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: 'v126-cleanup-isolation-${{ matrix.variant }}', path: 'out/**', if-no-files-found: error, retention-days: 5}

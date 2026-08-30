@@ -1,0 +1,4 @@
+2026-08-25T16:06:47-04:00
+Launch strict 2,000 exact paired games per deck: F10 vs F10_DRUID_EFFIGY_HYBRID.
+Mutation: -Valley Floodcaller, -Nature's Rhythm, +Devoted Druid, +Machine God's Effigy.
+Fresh canonical keys start at 5,200,000; four seats; balanced/turbo/midrange/mixed pods; jvm-reuse=1; fresh v1.26 engine/cache identities; require safe cleanup isolation and exact 2,000/2,000 unique matching keys before promotion.

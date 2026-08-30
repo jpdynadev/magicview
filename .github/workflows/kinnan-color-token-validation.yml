@@ -1,0 +1,149 @@
+name: Kinnan adversarial color-token validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-color-token-validation.txt]
+
+concurrency:
+  group: kinnan-color-token-validation
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '1'
+  SIM_V2_CAPTURE_STDERR: '1'
+  SIM_V2_PROFILE: arch-repaired-v19-color-token-gate
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Build exact repaired runtime
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-color-token-gate.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: color-token-runtime
+          path: manabrew-color-token-gate.tgz
+          compression-level: 0
+          retention-days: 2
+
+  regression:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {variant: F10, seat: 0, seed: 2100007, pod: mixed}
+          - {variant: TURBO_F10, seat: 0, seed: 2100021, pod: turbo}
+          - {variant: TURBO_F10, seat: 0, seed: 2100044, pod: balanced}
+          - {variant: F10, seat: 3, seed: 2100189, pod: mixed}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v4
+        with: {name: color-token-runtime, path: runtime}
+      - name: Replay exact deterministic failure key
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+          SEED: ${{ matrix.seed }}
+          POD: ${{ matrix.pod }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf runtime/manabrew-color-token-gate.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 -m py_compile engine-tests/manabrew_pilot_arch_adv.py engine-tests/sim_v2_worker_arch.py
+          CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" \
+            --max-round 4 --max-prompts 5000 --max-seconds 160 \
+            --jvm-reuse 1 --xmx 1280m --xms 192m \
+            --cache-dir ".sim-cache/color-token-v19-${GITHUB_RUN_ID}-${VARIANT}-${SEAT}-${SEED}-${POD}" \
+            --retain-traces all \
+            --engine-id "$MANABREW_REF:arch-v19-color-token-gate:${GITHUB_RUN_ID}" \
+            --output "out/result-${VARIANT}-s${SEAT}-${SEED}.json" \
+            > "out/worker-${VARIANT}-s${SEAT}-${SEED}.log" 2>&1
+          python3 - "out/result-${VARIANT}-s${SEAT}-${SEED}.json" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          path,variant,seat,seed,pod=sys.argv[1:]
+          d=json.load(open(path)); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'}, r
+          assert r.get('variant') == variant, r
+          assert int(r.get('kinnanSeat')) == int(seat), r
+          assert int(r.get('seed')) == int(seed), r
+          assert r.get('podProfile') == pod, r
+          assert r.get('pilotVersion') == 'arch-aware-v1.9-adversarial', r
+          print(json.dumps({'variant':variant,'seat':int(seat),'seed':int(seed),'pod':pod,'status':r.get('status'),'pilotVersion':r.get('pilotVersion')},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: color-token-${{ matrix.variant }}-s${{ matrix.seat }}-${{ matrix.seed }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 7
+
+  aggregate:
+    needs: regression
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: color-token-*
+          path: all
+      - name: Enforce four-key regression gate
+        run: |
+          python3 - <<'PY'
+          import glob,json,pathlib,collections
+          rows=[]
+          for p in glob.glob('all/**/result-*.json',recursive=True):
+              d=json.load(open(p)); rows.extend(d if isinstance(d,list) else [d])
+          valid=[r for r in rows if r.get('status') in {'game_over','horizon_complete'}]
+          keys={(r.get('variant'),int(r.get('kinnanSeat')),int(r.get('seed')),r.get('podProfile')) for r in valid}
+          expected={('F10',0,2100007,'mixed'),('TURBO_F10',0,2100021,'turbo'),('TURBO_F10',0,2100044,'balanced'),('F10',3,2100189,'mixed')}
+          report={'records':len(rows),'valid':len(valid),'keys':sorted(map(list,keys)),'expected':sorted(map(list,expected)),'statuses':dict(collections.Counter(str(r.get('status')) for r in rows)),'pilotVersions':dict(collections.Counter(str(r.get('pilotVersion')) for r in rows)),'passed':keys==expected and len(valid)==4 and len(rows)==4 and all(r.get('pilotVersion')=='arch-aware-v1.9-adversarial' for r in valid)}
+          pathlib.Path('color-token-v19-report.json').write_text(json.dumps(report,indent=2,sort_keys=True))
+          print(json.dumps(report,indent=2,sort_keys=True))
+          assert report['passed'], report
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: color-token-v19-report, path: color-token-v19-report.json, retention-days: 7}

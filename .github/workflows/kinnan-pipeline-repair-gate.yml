@@ -1,0 +1,235 @@
+name: Kinnan repaired pipeline gate
+
+on:
+  push:
+    branches:
+      - agent/kinnan-expanded-architecture
+    paths:
+      - "engine-tests/manabrew_pilot_arch.py"
+      - "engine-tests/manabrew_pilot_v8.py"
+      - "engine-tests/apply_manabrew_repairs.py"
+      - ".github/workflows/kinnan-pipeline-repair-gate.yml"
+  pull_request:
+    branches:
+      - main
+      - agent/kinnan-engine-tests
+    paths:
+      - "engine-tests/manabrew_pilot_arch.py"
+      - "engine-tests/manabrew_pilot_v8.py"
+      - "engine-tests/apply_manabrew_repairs.py"
+      - "engine-tests/generate_architecture_decks_v2.py"
+      - ".github/workflows/kinnan-pipeline-repair-gate.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-pipeline-repair-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  JAR: /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar
+  FORGE_HOME: /tmp/manabrew/forge/forge-gui/
+
+jobs:
+  forensic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Clone pinned runtime and apply exact-content repairs
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+      - name: Build clean Forge harness
+        working-directory: /tmp/manabrew
+        run: node scripts/harness.mjs build
+      - name: Record runtime identity
+        run: |
+          mkdir -p engine-tests/results
+          {
+            echo "manabrew=$(git -C /tmp/manabrew rev-parse HEAD)"
+            echo "forge=$(git -C /tmp/manabrew/forge rev-parse HEAD)"
+            echo "repair_sha=$(sha256sum engine-tests/apply_manabrew_repairs.py | cut -d' ' -f1)"
+            echo "pilot_sha=$(sha256sum engine-tests/manabrew_pilot_arch.py | cut -d' ' -f1)"
+            echo "jar_sha=$(sha256sum $JAR | cut -d' ' -f1)"
+            java -version 2>&1 | head -n 1
+          } | tee engine-tests/results/runtime-manifest.txt
+      - name: Exact regression seeds
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The base pilot writes to engine-tests/results directly. Clear only
+          # runtime pilot artifacts so the gate validates this run, not checked-in history.
+          rm -f engine-tests/results/pilot-result-F10-*.json \
+                engine-tests/results/pilot-trace-F10-*.json \
+                engine-tests/results/pilot-stderr-F10-*.log \
+                engine-tests/results/pilot-errors-F10-*.json \
+                engine-tests/results/pilot-summary-F10.json
+          run_case() {
+            local seed="$1" seat="$2"
+            echo "=== forensic seed=$seed seat=$seat ==="
+            python3 engine-tests/manabrew_pilot_arch.py "$JAR" "$FORGE_HOME" --variant F10 --seeds "$seed" --seat-offset "$seat" --max-round 4 --max-prompts 5000 --max-seconds 160
+          }
+          run_case 1960000 0
+          run_case 1960002 0
+          run_case 1960071 1
+          run_case 1960124 2
+          run_case 1960162 3
+      - name: Validate forensic records, not workflow color
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          root=pathlib.Path('engine-tests/results')
+          expected=[
+              root/'pilot-result-F10-1960000-s0.json',
+              root/'pilot-result-F10-1960002-s0.json',
+              root/'pilot-result-F10-1960071-s1.json',
+              root/'pilot-result-F10-1960124-s2.json',
+              root/'pilot-result-F10-1960162-s3.json',
+          ]
+          rows=[]
+          missing=[]
+          for p in expected:
+              if not p.exists(): missing.append(str(p)); continue
+              rows.append(json.loads(p.read_text()))
+          valid={'game_over','horizon_complete'}
+          statuses=sorted({r.get('status') for r in rows})
+          summary={'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':{s:sum(r.get('status')==s for r in rows) for s in statuses},'missing':missing,'rows':rows}
+          pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary,indent=2))
+          print(json.dumps(summary,indent=2))
+          if missing or len(rows)!=5 or summary['valid']!=5: raise SystemExit('forensic validity gate failed')
+          PY
+      - name: Persist forensic failure for next repair cycle
+        if: failure() && github.event_name == 'push'
+        run: |
+          python3 - <<'PY'
+          import json,pathlib
+          out=pathlib.Path('engine-tests/results/pipeline-gate-latest.json')
+          if not out.exists():
+              rows=[]
+              for p in pathlib.Path('engine-tests/results').glob('pilot-result-F10-196*.json'):
+                  try: rows.append(json.loads(p.read_text()))
+                  except Exception: pass
+              out.parent.mkdir(parents=True,exist_ok=True); out.write_text(json.dumps({'gate':'forensic','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'rows':rows,'infrastructureFailure':True},indent=2))
+          PY
+          mkdir -p engine-tests/evidence
+          cp engine-tests/results/pipeline-gate-latest.json engine-tests/evidence/pipeline-gate-latest.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/pipeline-gate-latest.json
+          git commit -m "Record failed Kinnan forensic gate ${{ github.run_id }}" || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
+      - name: Upload forensic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-pipeline-forensic-${{ github.run_id }}
+          path: engine-tests/results/
+          if-no-files-found: warn
+          retention-days: 90
+
+  cold-validity:
+    needs: forensic
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Clean-build repaired runtime
+        run: |
+          rm -rf /tmp/manabrew
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+      - name: 32-game balanced-seat cold gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f engine-tests/results/pilot-result-F10-*.json \
+                engine-tests/results/pilot-trace-F10-*.json \
+                engine-tests/results/pilot-stderr-F10-*.log \
+                engine-tests/results/pilot-errors-F10-*.json \
+                engine-tests/results/pilot-summary-F10.json
+          for seat in 0 1 2 3; do
+            for i in $(seq 0 7); do
+              seed=$((1970000 + seat*100 + i))
+              python3 engine-tests/manabrew_pilot_arch.py "$JAR" "$FORGE_HOME" --variant F10 --seeds "$seed" --seat-offset "$seat" --max-round 4 --max-prompts 5000 --max-seconds 160
+            done
+          done
+      - name: Strict cold validity summary
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json,pathlib,collections
+          root=pathlib.Path('engine-tests/results')
+          expected=[]
+          for seat in range(4):
+              for i in range(8):
+                  seed=1970000 + seat*100 + i
+                  expected.append(root/f'pilot-result-F10-{seed}-s{seat}.json')
+          rows=[]; missing=[]
+          for p in expected:
+              if not p.exists(): missing.append(str(p)); continue
+              try: rows.append(json.loads(p.read_text()))
+              except Exception: missing.append(str(p)+':unreadable')
+          valid={'game_over','horizon_complete'}; counts=collections.Counter(r.get('status') for r in rows); seats=collections.Counter(r.get('kinnanSeat') for r in rows if r.get('status') in valid)
+          summary={'gate':'cold-validity','runId':'${{ github.run_id }}','commit':'${{ github.sha }}','total':len(rows),'valid':sum(r.get('status') in valid for r in rows),'statuses':dict(counts),'validBySeat':{str(s):seats[s] for s in range(4)},'missing':missing,'rows':rows}
+          pathlib.Path('engine-tests/results/pipeline-gate-latest.json').write_text(json.dumps(summary,indent=2)); print(json.dumps(summary,indent=2))
+          if missing or len(rows)!=32 or summary['valid']!=32 or any(seats[s]!=8 for s in range(4)): raise SystemExit('cold validity gate failed')
+          PY
+      - name: Persist cold-gate result
+        if: always() && github.event_name == 'push'
+        run: |
+          mkdir -p engine-tests/evidence
+          cp engine-tests/results/pipeline-gate-latest.json engine-tests/evidence/pipeline-gate-latest.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add engine-tests/evidence/pipeline-gate-latest.json
+          git commit -m "Record Kinnan cold validity gate ${{ github.run_id }}" || exit 0
+          git push origin HEAD:agent/kinnan-expanded-architecture
+      - name: Upload cold validity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-pipeline-cold-${{ github.run_id }}
+          path: engine-tests/results/
+          if-no-files-found: warn
+          retention-days: 90

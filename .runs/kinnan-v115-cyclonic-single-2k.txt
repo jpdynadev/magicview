@@ -1,0 +1,1 @@
+Fresh strict v1.15 F10 vs F10_CYCLONIC_SINGLE 2k confirmation after fixing shared deck generation. Use new 4,200,000+ canonical keys, matched 7,000-prompt/240s profile, exact 2,000/2,000 pairing, no incompatible cache reuse. Retriggered 2026-08-23 after build-only failure produced zero simulation evidence.

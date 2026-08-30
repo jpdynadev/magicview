@@ -1,0 +1,240 @@
+{
+  "errorAttempts": {
+    "F10": {},
+    "F10_GSZ_RING_QUALITY": {}
+  },
+  "exposure": {
+    "anyChanged": {
+      "baselineAttempts": 14,
+      "baselineProtected": 3,
+      "candidateAttempts": 16,
+      "candidateProtected": 8,
+      "keys": 136
+    },
+    "coExposure": {
+      "baselineAttempts": 2,
+      "baselineProtected": 0,
+      "candidateAttempts": 3,
+      "candidateProtected": 0,
+      "keys": 10
+    },
+    "gsz": {
+      "baselineAttempts": 8,
+      "baselineProtected": 3,
+      "candidateAttempts": 8,
+      "candidateProtected": 3,
+      "keys": 38
+    },
+    "ring": {
+      "baselineAttempts": 4,
+      "baselineProtected": 0,
+      "candidateAttempts": 8,
+      "candidateProtected": 3,
+      "keys": 48
+    }
+  },
+  "paired": {
+    "assemblyT4": {
+      "baseline": 42,
+      "baselineOnly": 29,
+      "candidate": 39,
+      "candidateOnly": 26,
+      "deltaRate": -0.015,
+      "keys": 200,
+      "pTwoSided": 0.7877061896700435
+    },
+    "attemptT4": {
+      "baseline": 23,
+      "baselineOnly": 15,
+      "candidate": 23,
+      "candidateOnly": 15,
+      "deltaRate": 0.0,
+      "keys": 200,
+      "pTwoSided": 1.0
+    },
+    "kinnanWon": {
+      "baseline": 0,
+      "baselineOnly": 0,
+      "candidate": 0,
+      "candidateOnly": 0,
+      "deltaRate": 0.0,
+      "keys": 200,
+      "pTwoSided": 1.0
+    },
+    "strictProtectedT4": {
+      "baseline": 5,
+      "baselineOnly": 5,
+      "candidate": 10,
+      "candidateOnly": 10,
+      "deltaRate": 0.025,
+      "keys": 200,
+      "pTwoSided": 0.3017578125
+    }
+  },
+  "profile": "arch-repaired-v126-gsz-ring-quality-200b-7000p-240s",
+  "strictValid": true,
+  "variants": {
+    "F10": {
+      "assemblyT4": 42,
+      "attemptT4": 23,
+      "deckHashes": [
+        "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559"
+      ],
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 158,
+        "PILOT_ERROR": 19,
+        "UNRESOLVED_ATTEMPT": 23
+      },
+      "mulligans": 81,
+      "pilotVersions": [
+        "arch-aware-v1.26-adversarial"
+      ],
+      "pods": {
+        "balanced": {
+          "assemblyT4": 12,
+          "attemptT4": 7,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "midrange": {
+          "assemblyT4": 11,
+          "attemptT4": 6,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 9,
+          "attemptT4": 6,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "turbo": {
+          "assemblyT4": 10,
+          "attemptT4": 4,
+          "n": 52,
+          "protectedT4": 0,
+          "wins": 0
+        }
+      },
+      "protectedT4": 5,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 15,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "1": {
+          "assemblyT4": 10,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 10,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 7,
+          "attemptT4": 2,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 0
+    },
+    "F10_GSZ_RING_QUALITY": {
+      "assemblyT4": 39,
+      "attemptT4": 23,
+      "deckHashes": [
+        "6b0bc488f08d54ad191a31063ad7277ceafcedd5f486262d9fe5730deccf2be3"
+      ],
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 161,
+        "PILOT_ERROR": 16,
+        "UNRESOLVED_ATTEMPT": 23
+      },
+      "mulligans": 68,
+      "pilotVersions": [
+        "arch-aware-v1.26-adversarial"
+      ],
+      "pods": {
+        "balanced": {
+          "assemblyT4": 11,
+          "attemptT4": 7,
+          "n": 52,
+          "protectedT4": 3,
+          "wins": 0
+        },
+        "midrange": {
+          "assemblyT4": 9,
+          "attemptT4": 6,
+          "n": 48,
+          "protectedT4": 3,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 9,
+          "attemptT4": 5,
+          "n": 48,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "turbo": {
+          "assemblyT4": 10,
+          "attemptT4": 5,
+          "n": 52,
+          "protectedT4": 3,
+          "wins": 0
+        }
+      },
+      "protectedT4": 10,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 11,
+          "attemptT4": 9,
+          "n": 50,
+          "protectedT4": 5,
+          "wins": 0
+        },
+        "1": {
+          "assemblyT4": 10,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 4,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 10,
+          "attemptT4": 4,
+          "n": 50,
+          "protectedT4": 0,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 8,
+          "attemptT4": 3,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 0
+    }
+  }
+}

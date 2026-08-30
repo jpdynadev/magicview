@@ -1,0 +1,38 @@
+name: Kinnan precision Neon SQL export
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-precision-neon-export.txt]
+permissions:
+  contents: write
+jobs:
+  export:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/kinnan-expanded-architecture
+      - name: Build idempotent SQL batches from recovered 8,800-game corpus
+        run: |
+          python3 engine-tests/build_precision_neon_sql_from_ndjson.py \
+            --root engine-tests/v2-export/precision-31888564541 \
+            --experiment-id c1150747-149a-453c-a429-b8250fbc7c26 \
+            --batch-size 100
+          python3 - <<'PY'
+          import json
+          p='engine-tests/v2-export/precision-31888564541/sql/manifest.json'
+          m=json.load(open(p))
+          assert m['records']==8800,m
+          assert len(m['sqlFiles'])==89,m
+          print(json.dumps(m,indent=2))
+          PY
+      - name: Commit durable SQL export
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add engine-tests/v2-export/precision-31888564541/sql
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'export recovered precision corpus for Neon ingestion [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

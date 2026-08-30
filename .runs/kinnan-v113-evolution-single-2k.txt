@@ -1,0 +1,1 @@
+2026-08-22 retrigger fresh strict v1.13 F10 vs F10_EVOLUTION_SINGLE 2k after fixing build/confirm pilot preparation; retain fresh 3,500,000+ canonical seed bank, matched 240s profile, and no v1.10-v1.12 cache reuse.

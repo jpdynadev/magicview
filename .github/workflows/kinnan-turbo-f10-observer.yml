@@ -1,0 +1,48 @@
+name: Kinnan Turbo F10 progress observer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-turbo-f10-observer.txt]
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  observe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - name: Capture latest Turbo F10 strict screen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p status
+          RUN=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs?branch=agent/kinnan-expanded-architecture&per_page=100" --jq '[.workflow_runs[] | select(.name=="Kinnan Turbo F10 strict paired screen")][0]')
+          ID=$(jq -r '.id // empty' <<<"${RUN:-null}")
+          if [ -z "$ID" ]; then
+            jq -n '{found:false,checkedAt:(now|todateiso8601)}' > status/kinnan-turbo-f10-progress.json
+          else
+            JOBS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/jobs?per_page=100")
+            ARTS=$(gh api "/repos/$GITHUB_REPOSITORY/actions/runs/$ID/artifacts?per_page=100")
+            jq -n --argjson run "$RUN" --argjson jobs "$JOBS" --argjson arts "$ARTS" '{
+              found:true,checkedAt:(now|todateiso8601),runId:$run.id,runNumber:$run.run_number,event:$run.event,
+              headSha:$run.head_sha,status:$run.status,conclusion:$run.conclusion,createdAt:$run.created_at,updatedAt:$run.updated_at,htmlUrl:$run.html_url,
+              jobs:[$jobs.jobs[]|{id,name,status,conclusion,started_at,completed_at}],
+              artifacts:[$arts.artifacts[]|{id,name,size_in_bytes,expired}]
+            }' > status/kinnan-turbo-f10-progress.json
+          fi
+          cat status/kinnan-turbo-f10-progress.json
+      - name: Commit snapshot
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add status/kinnan-turbo-f10-progress.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record Turbo F10 screen progress [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

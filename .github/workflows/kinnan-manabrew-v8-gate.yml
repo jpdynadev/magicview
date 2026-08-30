@@ -1,0 +1,122 @@
+name: Kinnan Forge-Manabrew v8 gate
+
+on:
+  pull_request:
+    branches:
+      - agent/kinnan-engine-tests
+    paths:
+      - "engine-tests/**"
+      - ".github/workflows/kinnan-manabrew-v8-gate.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v8-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+
+jobs:
+  two-game-gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+
+    steps:
+      - name: Check out benchmark branch
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+
+      - name: Unit-test protocol policy and validate deck sizes
+        run: |
+          (cd engine-tests && python3 -m unittest -v test_kinnan_policy_v8.py)
+          python3 - <<'PY'
+          from pathlib import Path
+          for path in sorted(Path("engine-tests/decks").glob("*.dck")):
+              section = None
+              total = 0
+              for raw in path.read_text().splitlines():
+                  line = raw.strip()
+                  if line.startswith("[") and line.endswith("]"):
+                      section = line.lower()
+                  elif line and line[0].isdigit() and " " in line and section in {"[commander]", "[main]"}:
+                      total += int(line.split(" ", 1)[0])
+              if total != 100:
+                  raise SystemExit(f"{path}: expected 100 cards, found {total}")
+              print(f"{path}: {total}")
+          PY
+
+      - name: Clone pinned Manabrew and Forge submodule
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/engine-tests/results"
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          {
+            echo "MANABREW_COMMIT=$(git rev-parse HEAD)"
+            echo "FORGE_COMMIT=$(git -C forge rev-parse HEAD)"
+          } > "$GITHUB_WORKSPACE/engine-tests/results/engine-pins.env"
+
+      - name: Build Java Forge harness
+        working-directory: /tmp/manabrew
+        run: node scripts/harness.mjs build
+
+      - name: Run paired B0/B2 engineering games
+        id: games
+        shell: bash
+        run: |
+          set +e
+          python3 engine-tests/manabrew_pilot_v8.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant B0 --seeds 100005 --seat-offset 1 --max-round 4 --max-prompts 3500
+          b0_status=$?
+
+          python3 engine-tests/manabrew_pilot_v8.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --variant B2 --seeds 100005 --seat-offset 1 --max-round 4 --max-prompts 3500
+          b2_status=$?
+          set -e
+
+          echo "b0_status=$b0_status" >> "$GITHUB_OUTPUT"
+          echo "b2_status=$b2_status" >> "$GITHUB_OUTPUT"
+
+      - name: Build engineering report
+        if: always()
+        run: python3 engine-tests/gate_report.py
+
+      - name: Upload complete traces and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-v8-two-game-gate
+          path: engine-tests/results/
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Enforce successful external-controller games
+        if: always()
+        run: |
+          test "${{ steps.games.outputs.b0_status }}" = "0"
+          test "${{ steps.games.outputs.b2_status }}" = "0"

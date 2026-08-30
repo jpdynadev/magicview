@@ -1,0 +1,1 @@
+2026-08-21 trigger strict 200-pair F10 vs F10_TUTOR_PAIR after forensic timeout revalidation

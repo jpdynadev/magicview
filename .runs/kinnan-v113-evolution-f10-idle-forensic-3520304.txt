@@ -1,0 +1,2 @@
+Replay F10 seed 3520304 seat 2 balanced under v1.13 with 1280m/2048m forensic diagnostics after repeated idle_timeout in Evolution 2k repair attempts. Diagnostic only; do not substitute for canonical promotion evidence.
+Retriggered after Evolution v1.13 attempt 4 remained 1999/2000 baseline; 2026-08-23 forensic priority.

@@ -1,0 +1,63 @@
+{
+  "created": "2026-08-17",
+  "updated": "2026-08-19",
+  "baseline": "F10_BLUE/F10",
+  "purpose": "Predeclare package hypotheses to test only after the active expanded architecture wave completes; do not trigger a competing workflow.",
+  "promotion_gate": "Controlled paired sim-v2 confirmation remains authoritative; tournament prevalence is hypothesis generation only.",
+  "packages": [
+    {
+      "id": "PKG_COPY_META_1",
+      "class": "2-6_card_package",
+      "adds": ["Mirage Mirror", "Clever Impersonator", "Imposter Mech", "Copy Enchantment"],
+      "hypothesis": "A current-metagame copy-density package improves self-contained redundancy and opportunistic value without requiring the full heavy-copy architecture.",
+      "priority": 1,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Clever Impersonator 90.1% inclusion with +0.17 PPG association (90% interval +0.06 to +0.29); Mirage Mirror 89.6% with +0.12 association; current architecture screen remains the controlled gate."
+    },
+    {
+      "id": "PKG_COPY_META_2",
+      "class": "2-6_card_package",
+      "adds": ["Mirage Mirror", "Phyrexian Metamorph", "Imposter Mech", "Copy Artifact"],
+      "hypothesis": "Artifact-weighted copy density may preserve Kinnan/rock synergy while adding flexible clone redundancy with fewer context-dependent enchantment slots.",
+      "priority": 2,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Phyrexian Metamorph 75.0% inclusion; observational effect is near-neutral, so simulation must determine whether the slot is useful in F10 specifically."
+    },
+    {
+      "id": "PKG_DRUID_COMPACT",
+      "class": "2-6_card_package",
+      "adds": ["Devoted Druid", "Machine God's Effigy", "Green Sun's Zenith", "Eldritch Evolution"],
+      "hypothesis": "Compact Druid/Effigy plus creature-tutor access may outperform broad clone density if the extra deterministic node is the actual source of architecture gains.",
+      "priority": 3,
+      "evidence_note": "Recent six-month tournament search contains 555 Kinnan lists with Devoted Druid, including multiple 2026 top finishes; this is prevalence/hypothesis evidence only."
+    },
+    {
+      "id": "PKG_TUTOR_QUALITY_FLASH",
+      "class": "2-4_card_package",
+      "adds": ["Wan Shi Tong, Librarian", "Nature's Rhythm", "Chord of Calling"],
+      "hypothesis": "A high-card-quality flash/value plus creature-tutor package may improve resilience in tutor-heavy pods without adding a dedicated combo brick, while retaining compact access to deterministic creatures.",
+      "priority": 4,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Wan Shi Tong, Librarian 85.1% inclusion with +0.12 PPG association and 90% interval +0.01 to +0.22; Nature's Rhythm 91.5% with +0.24 and interval +0.12 to +0.36; Chord of Calling 89.6% with +0.16 and interval +0.04 to +0.27. Controlled paired simulation remains authoritative."
+    },
+    {
+      "id": "PKG_FLASH_ENGINE_QUALITY",
+      "class": "2-4_card_package",
+      "adds": ["Valley Floodcaller", "Wan Shi Tong, Librarian", "Clever Impersonator"],
+      "hypothesis": "A flash-oriented value package may improve card quality and interaction timing while keeping clone connectivity; test primarily in midrange and mixed adversarial pods after architecture screening.",
+      "priority": 5,
+      "evidence_note": "cEDHStats six-month Kinnan card corpus updated 2026-08-02: Valley Floodcaller 89.3%, Wan Shi Tong 85.1%, Clever Impersonator 90.1%. Observational correlations are hypothesis-only."
+    },
+    {
+      "id": "PKG_STEAL_COPY",
+      "class": "2-4_card_package",
+      "adds": ["Steal Enchantment", "Copy Enchantment", "Clever Impersonator"],
+      "hypothesis": "A compact enchantment-copy/theft package may outperform pure clone density in midrange and mixed pods by converting opposing Rhystic Study, Mystic Remora and other high-value enchantments into card advantage while retaining flexible copy connectivity.",
+      "priority": 6,
+      "evidence_note": "Fresh 2026-08-19 research: cEDHStats six-month Kinnan decklist search reports 203 tournament lists containing Steal Enchantment, including Robert R 6/195 at Pittsburgh 2026 (2026-07-11), EnderMorph 1/90 at TM Circuit Verse 2: Song (2026-07-11), Clorox Mox 1/62 at Mox Diamond $5k (2026-06-28), and Robert R 6/137 at NJcEDH SINKHOLE 2 (2026-07-19). This is hypothesis-generation evidence only; controlled paired simulation remains the promotion gate."
+    }
+  ],
+  "measurement": {
+    "screen": "100-200 paired games as rejection/ranking only",
+    "confirmation": "2,000-5,000+ paired games adaptively only while decision-relevant",
+    "primary_endpoint": "strict protected deterministic attempt by end of Kinnan T4",
+    "report": ["natural deck-level paired effect", "conditional paired effect when package slot exposed", "exposure frequency", "pod/seat splits", "valid/error counts", "cache hits", "JVM starts", "wall time"]
+  }
+}

@@ -1,0 +1,5 @@
+2026-08-18 check forensic run status
+2026-08-18 recheck after forensic workflow registration/retrigger
+2026-08-18 refresh after chooseColor + prompt-id root-fix v6
+2026-08-18 observe final v6 exact-seed forensic run
+2026-08-19 observe git-apply-recount repaired forensic rerun

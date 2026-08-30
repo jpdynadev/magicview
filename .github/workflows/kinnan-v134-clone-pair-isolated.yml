@@ -1,0 +1,177 @@
+name: Kinnan v134 Flexible Clone Pair Isolated Screen
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-v134-clone-pair.txt]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v134-clone-pair-screen
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v134-flexible-clone-pair-200-7000p-240s
+
+jobs:
+  screen:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build exact repaired runtime and candidate
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_v134_clone_pair.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 - <<'PY'
+          from pathlib import Path
+          for key in ('F10','F10_CLONE_PAIR'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          c=Path('engine-tests/decks/Kinnan_ARCH_F10_CLONE_PAIR.dck').read_text()
+          assert '1 Flesh Duplicate' in c and '1 Clever Impersonator' in c
+          assert '1 Misdirection' not in c and "1 Nature's Rhythm" not in c
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+      - name: Semantic gates
+        run: |
+          set -euo pipefail
+          mkdir -p gate
+          for SPEC in 'F10:6199000' 'F10_CLONE_PAIR:6199001'; do
+            VARIANT=${SPEC%%:*}; SEED=${SPEC##*:}
+            CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat 0 --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir ".sim-cache/v134clonegate-${GITHUB_RUN_ID}-${VARIANT}" --retain-traces failures --engine-id "$MANABREW_REF:arch-v134-clone-gate:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:$SEED" --exposure-card 'Misdirection' --exposure-card "Nature's Rhythm" --exposure-card 'Flesh Duplicate' --exposure-card 'Clever Impersonator' --output "gate/${VARIANT}.json"
+            python3 - "gate/${VARIANT}.json" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2],r
+          assert str(r.get('pilotVersion') or '').startswith('arch-aware-'),r
+          assert r.get('podProfile')=='balanced',r
+          PY
+          done
+      - name: Run strict 200 exact paired games per deck
+        run: |
+          set -euo pipefail
+          mkdir -p out/valid out/attempts
+          for VARIANT in F10 F10_CLONE_PAIR; do
+            : > "out/${VARIANT}-errors.ndjson"
+            for SEAT in 0 1 2 3; do
+              BASE=$((6200000 + SEAT * 10000))
+              for OFFSET in $(seq 0 49); do
+                SEED=$((BASE + OFFSET)); case $((OFFSET % 4)) in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+                OK=0
+                for TRY in 1 2 3; do
+                  ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+                  CACHE=".sim-cache/v134clone-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+                  ENGINE="$MANABREW_REF:arch-v134-clone-pair:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+                  set +e
+                  CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures --engine-id "$ENGINE" --exposure-card 'Misdirection' --exposure-card "Nature's Rhythm" --exposure-card 'Flesh Duplicate' --exposure-card 'Clever Impersonator' --output "$ATT" > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+                  RC=$?; set -e
+                  STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+                  )
+                  if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                    python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and int(r.get('seed'))==int(seed),r
+          assert r.get('podProfile')==pod,r
+          assert str(r.get('pilotVersion') or '').startswith('arch-aware-'),r
+          PY
+                    cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"; OK=1; break
+                  fi
+                  python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-errors.ndjson" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod,attempt,status,rc=sys.argv[1:]
+          row={'variant':v,'seat':int(seat),'seed':int(seed),'pod':pod,'try':int(attempt),'status':status,'rc':int(rc)}
+          try:
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) and d else d
+              if isinstance(r,dict): row.update({k:r.get(k) for k in ('primaryFailureCode','wallMs','error') if r.get(k) is not None})
+          except Exception as e: row['parseError']=repr(e)
+          print(json.dumps(row,sort_keys=True))
+          PY
+                done
+                [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+              done
+            done
+          done
+      - name: Strict aggregate and paired inference
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_CLONE_PAIR']; good={'game_over','horizon_complete'}; rows={v:[] for v in variants}; errors={v:[] for v in variants}
+          for p in glob.glob('out/valid/*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('out/*-errors.ndjson'):
+              for line in open(p):
+                  try:r=json.loads(line)
+                  except Exception:continue
+                  if r.get('variant') in errors: errors[r['variant']].append(r)
+          def key(r): return (int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def met(r,m):
+              if m=='assemblyT4': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attemptT4': return (r.get('firstAttemptTurn') or 99)<=4
+              return bool(r.get(m))
+          maps={v:{key(r):r for r in rows[v] if r.get('status') in good and str(r.get('pilotVersion') or '').startswith('arch-aware-')} for v in variants}
+          base=maps['F10']; cand=maps['F10_CLONE_PAIR']; common=sorted(set(base)&set(cand))
+          rep={'strictValid':False,'profile':'arch-repaired-v134-flexible-clone-pair-200-7000p-240s','sourceRunId':__import__('os').environ.get('GITHUB_RUN_ID'),'variants':{},'paired':{},'errorAttempts':{},'cacheReuse':{'compatiblePriorRowsReused':0},'exposure':{}}
+          for v in variants:
+              xs=list(maps[v].values())
+              rep['variants'][v]={'records':len(rows[v]),'valid':len(xs),'uniqueKeys':len(maps[v]),'assemblyT4':sum(met(r,'assemblyT4') for r in xs),'attemptT4':sum(met(r,'attemptT4') for r in xs),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs),'wins':sum(met(r,'kinnanWon') for r in xs),'mulligans':sum(int(r.get('mulligans') or 0) for r in xs),'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in xs)),'pods':{pod:{'n':sum(r.get('podProfile')==pod for r in xs),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs if r.get('podProfile')==pod)} for pod in ('balanced','turbo','midrange','mixed')},'seats':{str(s):{'n':sum(int(r.get('kinnanSeat',-1))==s for r in xs),'protectedT4':sum(met(r,'strictProtectedT4') for r in xs if int(r.get('kinnanSeat',-1))==s)} for s in range(4)}}
+              rep['errorAttempts'][v]=dict(collections.Counter(str(e.get('status') or 'missing') for e in errors[v]))
+          for m in ('assemblyT4','attemptT4','strictProtectedT4','kinnanWon'):
+              cv=sum(met(cand[k],m) for k in common); bv=sum(met(base[k],m) for k in common); a=sum(met(cand[k],m) and not met(base[k],m) for k in common); c=sum(met(base[k],m) and not met(cand[k],m) for k in common); n=a+c
+              p=1.0 if not n else min(1.0,2*sum(math.comb(n,i) for i in range(min(a,c)+1))/(2**n))
+              rep['paired'][m]={'keys':len(common),'candidate':cv,'baseline':bv,'deltaRate':(cv-bv)/len(common) if common else None,'candidateOnly':a,'baselineOnly':c,'pTwoSided':p}
+          changed={'Misdirection',"Nature's Rhythm",'Flesh Duplicate','Clever Impersonator'}
+          exposed=[k for k in common if set(base[k].get('observedCards') or []).intersection(changed) or set(cand[k].get('observedCards') or []).intersection(changed)]
+          rep['exposure']={'pairedKeys':len(common),'exposedKeys':len(exposed),'baselineProtected':sum(met(base[k],'strictProtectedT4') for k in exposed),'candidateProtected':sum(met(cand[k],'strictProtectedT4') for k in exposed),'baselineAttempts':sum(met(base[k],'attemptT4') for k in exposed),'candidateAttempts':sum(met(cand[k],'attemptT4') for k in exposed),'candidateSeen':{card:sum(card in set(cand[k].get('observedCards') or []) for k in common) for card in ('Flesh Duplicate','Clever Impersonator')}}
+          rep['strictValid']=(len(common)==200 and all(len(maps[v])==200 and len(rows[v])==200 for v in variants) and set(base)==set(cand))
+          out=pathlib.Path('engine-tests/results/kinnan-v134-clone-pair-200-latest.json'); out.parent.mkdir(exist_ok=True); out.write_text(json.dumps(rep,indent=2,sort_keys=True)); print(json.dumps(rep,indent=2,sort_keys=True))
+          if not rep['strictValid']: raise SystemExit('STRICT_V134_CLONE_PAIR_200_FAILED')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v134-clone-pair-isolated-results
+          path: |
+            out/**
+            gate/**
+            engine-tests/results/kinnan-v134-clone-pair-200-latest.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Commit strict report
+        if: success()
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add engine-tests/results/kinnan-v134-clone-pair-200-latest.json
+          git diff --cached --quiet || git commit -m 'Record v134 clone pair 200 result [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

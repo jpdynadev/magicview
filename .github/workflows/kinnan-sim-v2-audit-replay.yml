@@ -1,0 +1,125 @@
+name: Kinnan sim v2 targeted audit replay
+
+on:
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: 'Exact precision variant code'
+        required: true
+        default: 'P00_F10'
+        type: string
+      mode:
+        description: 'screen or adversarial'
+        required: true
+        default: 'adversarial'
+        type: choice
+        options: [screen, adversarial]
+      pod:
+        description: 'balanced/turbo/midrange/mixed (adversarial only)'
+        required: true
+        default: 'balanced'
+        type: choice
+        options: [balanced, turbo, midrange, mixed]
+      seat:
+        description: 'Kinnan seat 0-3'
+        required: true
+        default: '0'
+        type: choice
+        options: ['0','1','2','3']
+      seeds:
+        description: 'Space-separated exact seeds to replay'
+        required: true
+        type: string
+      xmx:
+        description: 'Audit heap; conservative because speed is secondary'
+        required: true
+        default: '1536m'
+        type: string
+
+concurrency:
+  group: kinnan-v2-audit-${{ inputs.variant }}-${{ inputs.mode }}-${{ inputs.pod }}-s${{ inputs.seat }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: '1'
+  SIM_V2_TRACE: '1'
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_PROFILE: 'audit-full-resolution-v1'
+
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - name: Restore runtime and decks
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+      - name: Replay exact seeds with full traces
+        env:
+          CEDH_POD: ${{ inputs.pod }}
+        run: |
+          MODE='${{ inputs.mode }}'
+          MAX_PROMPTS=4500
+          MAX_SECONDS=150
+          [ "$MODE" = screen ] && MAX_PROMPTS=3500 && MAX_SECONDS=120
+          python3 engine-tests/sim_v2_worker_ultra.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --mode "$MODE" --variant '${{ inputs.variant }}' --fixed-seat '${{ inputs.seat }}' \
+            --seeds ${{ inputs.seeds }} --max-round 5 --max-prompts "$MAX_PROMPTS" --max-seconds "$MAX_SECONDS" \
+            --jvm-reuse 1 --xmx '${{ inputs.xmx }}' --xms 256m \
+            --cache-dir .sim-cache/audit-throwaway --engine-id "$MANABREW_REF:audit-v1" \
+            --retain-traces all --audit-every 1 --output out/audit-summary.json | tee out/audit.log
+          cp -a engine-tests/results out/engine-results
+      - name: Build audit index
+        run: |
+          python3 - <<'PY'
+          import json,glob,os
+          rows=json.load(open('out/audit-summary.json'))
+          index={
+            'games':len(rows),
+            'statuses':{},
+            'strictProtectedT4':sum(bool(x.get('strictProtectedT4')) for x in rows),
+            'seeds':[x.get('seed') for x in rows],
+            'traceFiles':[os.path.basename(p) for p in glob.glob('out/engine-results/pilot-trace-*.json')],
+            'errorFiles':[os.path.basename(p) for p in glob.glob('out/engine-results/pilot-errors-*.json')],
+          }
+          for x in rows:index['statuses'][x.get('status')]=index['statuses'].get(x.get('status'),0)+1
+          open('out/audit-index.json','w').write(json.dumps(index,indent=2))
+          print(json.dumps(index,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-v2-audit-${{ inputs.variant }}-${{ inputs.mode }}-${{ inputs.pod }}-s${{ inputs.seat }}
+          path: out/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,52 @@
+{
+  "experiment": "kinnan-v117-four-architecture-card-telemetry-2k",
+  "gamesPerDeck": 2000,
+  "totalDeckGames": 8000,
+  "canonicalSeedBase": 5000000,
+  "primaryEndpoint": "strict protected deterministic attempt by end of Kinnan turn 4",
+  "pilotVersion": "arch-aware-v1.17-fourarch-adversarial",
+  "profile": "7000 prompts / 240 seconds / 1280 MB / jvm-reuse=1",
+  "architectures": {
+    "F10": {
+      "file": "decks/Kinnan_ARCH_F10.dck",
+      "role": "validated incumbent control",
+      "changesFromF10": {"cuts": [], "adds": []}
+    },
+    "TOURNAMENT_SIEGE_2026_LOGAN": {
+      "file": "decks/Kinnan_ARCH_TOURNAMENT_SIEGE_2026_LOGAN.dck",
+      "role": "top tournament architecture",
+      "source": "Logan Doan // CriticalEDH, 2nd place, SIEGE cEDH 10K, June 13 2026, 308 players",
+      "sourceUrl": "https://topdeck.gg/deck/level-7s-siege-at-the-castle-10k/H6Kc1xyFqKNlQiv303NwudLq0Qx2",
+      "note": "Exact 99 transcribed from the tournament deck page; front-face deck names are used for MDFCs/battles in Forge."
+    },
+    "DORKMAX_F10": {
+      "file": "decks/Kinnan_ARCH_DORKMAX_F10.dck",
+      "role": "mana-creature density extreme",
+      "changesFromF10": {
+        "cuts": ["Energy Refractor", "Defense Grid", "Sylvan Library", "Tezzeret the Seeker", "Nature's Rhythm", "Misdirection", "Hydroelectric Specimen", "Mockingbird", "Borne Upon a Wind", "Endurance"],
+        "adds": ["Arbor Elf", "Boreal Druid", "Paradise Druid", "Incubation Druid", "Priest of Titania", "Kiora's Follower", "Devoted Druid", "Wall of Roots", "Elvish Archdruid", "Gyre Engineer"]
+      }
+    },
+    "NODEMAX_F10": {
+      "file": "decks/Kinnan_ARCH_NODEMAX_F10.dck",
+      "role": "maximum engine/outlet/connectivity density extreme",
+      "changesFromF10": {
+        "cuts": ["Energy Refractor", "Defense Grid", "Sylvan Library", "Tezzeret the Seeker", "Nature's Rhythm", "Misdirection", "Hydroelectric Specimen", "Mockingbird", "Borne Upon a Wind", "Endurance"],
+        "adds": ["Devoted Druid", "Machine God's Effigy", "Copy Artifact", "Flesh Duplicate", "Tribute Mage", "Rings of Brighthearth", "Freed from the Real", "Pemmin's Aura", "Training Grounds", "Biomancer's Familiar"]
+      }
+    }
+  },
+  "cardTelemetry": [
+    "every mulligan hand and keep/reject decision",
+    "cards put back after the kept London mulligan",
+    "opening and kept hands",
+    "inferred post-start draws and draw round",
+    "hand/battlefield/graveyard/exile transitions",
+    "chosen cast/play/activation events and round",
+    "full hand and battlefield when a card is played",
+    "protection cards available in hand/on battlefield when played",
+    "hostile target events and source card when exposed by the Forge prompt",
+    "top hand co-occurrence context per played card",
+    "conditional protected-T4 and win rates when seen/played"
+  ]
+}

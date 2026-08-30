@@ -1,0 +1,81 @@
+{
+  "sourceRunId": 32442855543,
+  "sourceAttempt": 2,
+  "profile": "arch-repaired-v19-copy-tutor-2k",
+  "strictValid": false,
+  "baseline": {
+    "variant": "F10",
+    "valid": 2000,
+    "uniqueKeys": 2000,
+    "assemblyT4": 430,
+    "attemptT4": 232,
+    "protectedT4": 84,
+    "wins": 4,
+    "mulligans": 856,
+    "errorAttempts": {"wall_timeout": 2}
+  },
+  "candidate": {
+    "variant": "F10_COPY_TUTOR",
+    "valid": 1998,
+    "uniqueKeys": 1998,
+    "assemblyT4": 409,
+    "attemptT4": 196,
+    "protectedT4": 75,
+    "wins": 7,
+    "mulligans": 827,
+    "errorAttempts": {"wall_timeout": 6}
+  },
+  "paired": {
+    "keys": 1998,
+    "assemblyT4": {"baseline": 430, "candidate": 409, "deltaRate": -0.010510510510510511, "pTwoSided": 0.41847199141969277},
+    "attemptT4": {"baseline": 232, "candidate": 196, "deltaRate": -0.018018018018018018, "pTwoSided": 0.06047260307688209},
+    "protectedT4": {"baseline": 84, "candidate": 75, "deltaRate": -0.0045045045045045045, "pTwoSided": 0.5036394897297799},
+    "wins": {"baseline": 4, "candidate": 7, "deltaRate": 0.0015015015015015015, "pTwoSided": 0.5078125}
+  },
+  "exposure": {
+    "pairedKeys": 1998,
+    "exposedKeys": 1739,
+    "baselineProtected": 75,
+    "candidateProtected": 66
+  },
+  "pods": {
+    "F10": {
+      "balanced": {"n": 500, "assemblyT4": 104, "attemptT4": 60, "protectedT4": 20, "wins": 0},
+      "turbo": {"n": 500, "assemblyT4": 123, "attemptT4": 58, "protectedT4": 21, "wins": 2},
+      "midrange": {"n": 500, "assemblyT4": 93, "attemptT4": 46, "protectedT4": 15, "wins": 2},
+      "mixed": {"n": 500, "assemblyT4": 110, "attemptT4": 68, "protectedT4": 28, "wins": 0}
+    },
+    "F10_COPY_TUTOR": {
+      "balanced": {"n": 498, "assemblyT4": 104, "attemptT4": 44, "protectedT4": 15, "wins": 1},
+      "turbo": {"n": 500, "assemblyT4": 106, "attemptT4": 51, "protectedT4": 25, "wins": 2},
+      "midrange": {"n": 500, "assemblyT4": 87, "attemptT4": 45, "protectedT4": 15, "wins": 3},
+      "mixed": {"n": 500, "assemblyT4": 112, "attemptT4": 56, "protectedT4": 20, "wins": 1}
+    }
+  },
+  "missingCanonicalKeys": [
+    {
+      "variant": "F10_COPY_TUTOR",
+      "seed": 2800160,
+      "seat": 0,
+      "pod": "balanced",
+      "retries": 3,
+      "status": "wall_timeout",
+      "slotExposed": true,
+      "observedChangedCards": ["Eldritch Evolution", "Flesh Duplicate"],
+      "matchingBaseline": {"status": "horizon_complete", "assemblyT4": false, "attemptT4": false, "protectedT4": false, "win": false}
+    },
+    {
+      "variant": "F10_COPY_TUTOR",
+      "seed": 2820348,
+      "seat": 2,
+      "pod": "balanced",
+      "retries": 3,
+      "status": "wall_timeout",
+      "slotExposed": true,
+      "observedChangedCards": ["Clever Impersonator"],
+      "timeoutState": {"firstAssemblyTurn": 3, "firstAttemptTurn": 4, "certifiedDeterministicAttempt": true, "protectedAttempt": false},
+      "matchingBaseline": {"status": "horizon_complete", "assemblyT4": false, "attemptT4": false, "protectedT4": false, "win": false}
+    }
+  ],
+  "interpretation": "Not promotion evidence. Candidate trails F10 on assembly, attempt and protected T4 across 1998 paired usable keys; attempt deficit is near conventional significance. Changed-slot-exposed protected conversion also favors F10. Two persistent candidate-only balanced-pod timeout keys require forensic revalidation before scaling another challenger."
+}

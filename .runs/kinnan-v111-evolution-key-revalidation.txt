@@ -1,0 +1,1 @@
+2026-08-22T17:11:00Z canonical 240s revalidation of seed 3430166 seat 3 midrange for F10 and F10_EVOLUTION_SINGLE after v1.11 Kinnan affordability guard; fresh evidence only

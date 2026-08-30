@@ -1,0 +1,218 @@
+{
+  "errorAttempts": {
+    "F10": {},
+    "F10_STRIX_SINGLE": {}
+  },
+  "exposure": {
+    "baselineProtected": 3,
+    "candidateProtected": 1,
+    "exposedKeys": 77,
+    "pairedKeys": 200
+  },
+  "paired": {
+    "assemblyT4": {
+      "baseline": 41,
+      "baselineOnly": 30,
+      "candidate": 37,
+      "candidateOnly": 26,
+      "deltaRate": -0.02,
+      "keys": 200,
+      "pTwoSided": 0.6888797607233396
+    },
+    "attemptT4": {
+      "baseline": 19,
+      "baselineOnly": 15,
+      "candidate": 16,
+      "candidateOnly": 12,
+      "deltaRate": -0.015,
+      "keys": 200,
+      "pTwoSided": 0.7011080384254456
+    },
+    "kinnanWon": {
+      "baseline": 1,
+      "baselineOnly": 0,
+      "candidate": 1,
+      "candidateOnly": 0,
+      "deltaRate": 0.0,
+      "keys": 200,
+      "pTwoSided": 1.0
+    },
+    "strictProtectedT4": {
+      "baseline": 6,
+      "baselineOnly": 6,
+      "candidate": 6,
+      "candidateOnly": 6,
+      "deltaRate": 0.0,
+      "keys": 200,
+      "pTwoSided": 1.0
+    }
+  },
+  "profile": "arch-repaired-v115-strix-single-200-7000p-240s",
+  "strictValid": true,
+  "variants": {
+    "F10": {
+      "assemblyT4": 41,
+      "attemptT4": 19,
+      "deckHashes": [
+        "d790f3ee2dd59d24b137b543e0990ac332dd77a1de12e5ec46235a7f58d68559"
+      ],
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 159,
+        "NONE": 1,
+        "PILOT_ERROR": 22,
+        "UNRESOLVED_ATTEMPT": 18
+      },
+      "mulligans": 88,
+      "pilotVersions": [
+        "arch-aware-v1.15-adversarial"
+      ],
+      "pods": {
+        "balanced": {
+          "assemblyT4": 7,
+          "attemptT4": 3,
+          "n": 52,
+          "protectedT4": 0,
+          "wins": 1
+        },
+        "midrange": {
+          "assemblyT4": 13,
+          "attemptT4": 7,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 9,
+          "attemptT4": 3,
+          "n": 48,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "turbo": {
+          "assemblyT4": 12,
+          "attemptT4": 6,
+          "n": 52,
+          "protectedT4": 3,
+          "wins": 0
+        }
+      },
+      "protectedT4": 6,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 9,
+          "attemptT4": 2,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 1
+        },
+        "1": {
+          "assemblyT4": 7,
+          "attemptT4": 6,
+          "n": 50,
+          "protectedT4": 3,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 14,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 11,
+          "attemptT4": 4,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 1
+    },
+    "F10_STRIX_SINGLE": {
+      "assemblyT4": 37,
+      "attemptT4": 16,
+      "deckHashes": [
+        "06ab84e1fa31e98efca20cdb07296fb9ccf4f798e93353eb834494e7dad42e79"
+      ],
+      "failureCodes": {
+        "NONDETERMINISTIC_ONLY": 163,
+        "NONE": 1,
+        "PILOT_ERROR": 21,
+        "UNRESOLVED_ATTEMPT": 15
+      },
+      "mulligans": 73,
+      "pilotVersions": [
+        "arch-aware-v1.15-adversarial"
+      ],
+      "pods": {
+        "balanced": {
+          "assemblyT4": 11,
+          "attemptT4": 5,
+          "n": 52,
+          "protectedT4": 2,
+          "wins": 1
+        },
+        "midrange": {
+          "assemblyT4": 8,
+          "attemptT4": 5,
+          "n": 48,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "mixed": {
+          "assemblyT4": 6,
+          "attemptT4": 3,
+          "n": 48,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "turbo": {
+          "assemblyT4": 12,
+          "attemptT4": 3,
+          "n": 52,
+          "protectedT4": 1,
+          "wins": 0
+        }
+      },
+      "protectedT4": 6,
+      "records": 200,
+      "seats": {
+        "0": {
+          "assemblyT4": 9,
+          "attemptT4": 3,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 1
+        },
+        "1": {
+          "assemblyT4": 9,
+          "attemptT4": 4,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 0
+        },
+        "2": {
+          "assemblyT4": 6,
+          "attemptT4": 2,
+          "n": 50,
+          "protectedT4": 1,
+          "wins": 0
+        },
+        "3": {
+          "assemblyT4": 13,
+          "attemptT4": 7,
+          "n": 50,
+          "protectedT4": 2,
+          "wins": 0
+        }
+      },
+      "uniqueKeys": 200,
+      "valid": 200,
+      "wins": 1
+    }
+  }
+}

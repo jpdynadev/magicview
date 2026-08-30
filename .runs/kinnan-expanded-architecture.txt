@@ -1,0 +1,1 @@
+2026-08-18 expanded architecture search v4: sim-v2 cold path, 12 variants, 200-game screens, 800-game finalist confirmations, architecture-aware runner preserved through sim_v2_worker.main, copy-target/Mirage Mirror fixes, adversarial opponent action scoring preserved

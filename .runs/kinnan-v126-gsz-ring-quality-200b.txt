@@ -1,0 +1,3 @@
+trigger 2026-08-25T17:08:00-04:00
+F10_GSZ_RING_QUALITY = -Nature's Rhythm -Endurance +Green Sun's Zenith +The One Ring
+strict 200 exact paired v1.26 triage; fresh engine/cache identity; no incompatible reuse

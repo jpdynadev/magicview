@@ -1,0 +1,3 @@
+trigger=2026-08-25T21:01:12-04:00
+hypothesis=F10 - Nature's Rhythm - Endurance + Shang-Chi, Master of Kung Fu + Legolas's Quick Reflexes
+protocol=v1.27 semantic gate then strict 200 exact paired games; fresh 5.7M canonical bank; no prior cache reuse

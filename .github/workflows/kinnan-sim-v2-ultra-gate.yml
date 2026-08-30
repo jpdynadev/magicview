@@ -1,0 +1,194 @@
+name: Kinnan sim v2 safety and equivalence gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [agent/sim-v2-overopt]
+    paths:
+      - ".github/workflows/kinnan-sim-v2-ultra-gate.yml"
+      - "engine-tests/sim_v2_hotpatch.py"
+      - "engine-tests/sim_v2_worker.py"
+      - "engine-tests/sim_v2_worker_ultra.py"
+      - "engine-tests/sim_v2_parallel.py"
+      - "engine-tests/sim_v2_heap_tune.py"
+      - "engine-tests/sim_v2_rank.py"
+
+concurrency:
+  group: kinnan-sim-v2-ultra-latest-gate
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  PYTHONUNBUFFERED: "1"
+  SIM_V2_EARLY_SUCCESS: "0"
+  SIM_V2_EXACT_DEADLINE: "0"
+  SIM_V2_TRACE: "0"
+
+jobs:
+  gate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: "21"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - id: runtime-cache
+        uses: actions/cache@v4
+        with:
+          path: manabrew-runtime.tgz
+          key: manabrew-runtime-v2-${{ runner.os }}-${{ env.MANABREW_REF }}-${{ hashFiles('engine-tests/patches/manabrew-card-name-runaway.patch') }}
+      - name: Build pinned runtime on cache miss
+        if: steps.runtime-cache.outputs.cache-hit != 'true'
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          git apply "$GITHUB_WORKSPACE/engine-tests/patches/manabrew-card-name-runaway.patch"
+          node scripts/harness.mjs build
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-runtime.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - name: Restore runtime and decks
+        run: |
+          mkdir -p /tmp/manabrew out
+          tar -C /tmp/manabrew -xzf manabrew-runtime.tgz
+          python3 engine-tests/generate_f10_precision_decks.py
+      - name: Compile optimization scripts
+        run: |
+          python3 -m py_compile engine-tests/sim_v2_hotpatch.py engine-tests/sim_v2_worker.py engine-tests/sim_v2_worker_ultra.py engine-tests/sim_v2_parallel.py engine-tests/sim_v2_heap_tune.py engine-tests/sim_v2_rank.py
+
+      - name: Restart-per-game endpoint control
+        run: |
+          python3 engine-tests/sim_v2_worker.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
+            --jvm-reuse 1 --xmx 1536m --xms 192m --max-round 4 --max-seconds 90 \
+            --cache-dir .sim-cache/gate-control --engine-id "$MANABREW_REF:control" --retain-traces none --output out/control.json
+
+      - name: Experimental dual persistent workers
+        run: |
+          python3 engine-tests/sim_v2_parallel.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
+            --workers 2 --jvm-reuse 3 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
+            --cache-dir .sim-cache/gate-persistent-v6 --engine-id "$MANABREW_REF:ultra-v6:persistent-experimental" --retain-traces none \
+            --exposure-card 'Staff of Domination' --output out/persistent.json | tee out/persistent.log
+
+      - name: Record persistent equivalence result without trusting it
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/control.json')); b=json.load(open('out/persistent.json'))
+          fields=('seed','kinnanSeat','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')
+          bad=[]
+          for x,y in zip(a,b):
+              d={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if d: bad.append({'seed':x.get('seed'),'diff':d})
+          report={
+            'equivalent': not bad,
+            'mismatches': bad,
+            'positiveEarlyExits': sum(bool(x.get('v2EarlyExit')) for x in b),
+            'deadlineEarlyExits': sum(bool(x.get('v2DeadlineExit')) for x in b),
+            'observedCardCounts': [len(x.get('observedCards') or []) for x in b],
+          }
+          open('out/persistent-equivalence.json','w').write(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          PY
+
+      - name: Persistent first-game probe for seed 1720003
+        run: |
+          python3 engine-tests/sim_v2_worker_ultra.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 --seeds 1720003 \
+            --jvm-reuse 3 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
+            --cache-dir .sim-cache/gate-first-v6 --engine-id "$MANABREW_REF:ultra-v6:first-game-probe" --retain-traces none \
+            --exposure-card 'Staff of Domination' --output out/first-game-probe.json
+          python3 - <<'PY'
+          import json
+          control={x['seed']:x for x in json.load(open('out/control.json'))}[1720003]
+          probe=json.load(open('out/first-game-probe.json'))[0]
+          fields=('firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')
+          diff={k:(control.get(k),probe.get(k)) for k in fields if control.get(k)!=probe.get(k)}
+          batch=json.load(open('out/persistent-equivalence.json'))
+          diagnosis={
+            'seed':1720003,
+            'firstGameMatchesCold':not diff,
+            'firstGameDiff':diff,
+            'batchPersistentEquivalent':bool(batch.get('equivalent')),
+            'orderEffectLikely':(not diff) and (not batch.get('equivalent')),
+          }
+          open('out/persistent-diagnosis.json','w').write(json.dumps(diagnosis,indent=2))
+          print(json.dumps(diagnosis,indent=2))
+          PY
+
+      - name: Trusted cold-parallel v2 workers
+        run: |
+          python3 engine-tests/sim_v2_parallel.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
+            --workers 2 --jvm-reuse 1 --xmx 1280m --xms 192m --max-round 4 --max-seconds 90 \
+            --cache-dir .sim-cache/gate-cold-v7 --engine-id "$MANABREW_REF:cold-v7" --retain-traces none \
+            --exposure-card 'Staff of Domination' --output out/cold-v2.json | tee out/cold-v2.log
+
+      - name: Verify trusted cold-parallel equivalence and observation schema
+        run: |
+          python3 - <<'PY'
+          import json
+          a=json.load(open('out/control.json')); b=json.load(open('out/cold-v2.json'))
+          assert len(a)==len(b)==6
+          fields=('seed','kinnanSeat','firstAssemblyTurn','firstAttemptTurn','strictProtectedT4')
+          bad=[]
+          for x,y in zip(a,b):
+              d={k:(x.get(k),y.get(k)) for k in fields if x.get(k)!=y.get(k)}
+              if d: bad.append({'seed':x.get('seed'),'diff':d})
+              for field in ('observedCards','observedCardEvents','exposureEvents','slotExposed','v2EarlyExit','v2DeadlineExit','optimizerId','executionProfile','podDeckSha256'):
+                  assert field in y,(field,y.get('seed'))
+              assert len(y['observedCards']) < 100, ('prompt exposure leaked full deck', y.get('seed'))
+          report={
+            'mismatches':bad,
+            'positiveEarlyExits':sum(bool(x['v2EarlyExit']) for x in b),
+            'deadlineEarlyExits':sum(bool(x['v2DeadlineExit']) for x in b),
+            'observedCardCounts':[len(x['observedCards']) for x in b],
+          }
+          print(json.dumps(report,indent=2))
+          if bad: raise SystemExit(f'cold-parallel primary endpoint mismatch on {len(bad)} seeds')
+          if report['positiveEarlyExits'] != 0: raise SystemExit('unsafe positive early exit unexpectedly active')
+          if report['deadlineEarlyExits'] != 0: raise SystemExit('unsafe deadline exit unexpectedly active')
+          PY
+
+      - name: Verify cached replay can relabel exposure with zero JVM starts
+        run: |
+          python3 engine-tests/sim_v2_parallel.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --mode screen --variant P00_F10 --fixed-seat 0 --seeds $(seq 1720000 1720005) \
+            --workers 2 --jvm-reuse 1 --xmx 1280m --xms 192m --max-round 4 \
+            --cache-dir .sim-cache/gate-cold-v7 --engine-id "$MANABREW_REF:cold-v7" --retain-traces none \
+            --exposure-card 'Mystical Tutor' --output out/cached.json | tee out/cached.log
+          grep -q '"cacheHits": 6' out/cached.log
+          grep -q '"jvmStarts": 0' out/cached.log
+          python3 - <<'PY'
+          import json
+          g=json.load(open('out/cached.json'))
+          assert all(set(x.get('exposureCards',[])) <= {'Mystical Tutor'} for x in g)
+          print('cache relabel validated')
+          PY
+
+      - name: Cold-equivalent heap autotune smoke
+        run: |
+          python3 engine-tests/sim_v2_heap_tune.py \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ \
+            --games 2 --seed-base 1721000 --heaps 1024m 1280m 1536m --output out/heap.json
+          python3 -c "import json; x=json.load(open('out/heap.json')); assert x['selected'] in {'1024m','1280m','1536m'}; assert x['executionPath']=='cold-equivalent'; print(x)"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sim-v2-safety-latest-gate
+          path: out/
+          retention-days: 14

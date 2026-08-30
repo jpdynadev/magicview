@@ -1,0 +1,84 @@
+name: Kinnan Turbo v19 reaggregate
+
+on:
+  push:
+    branches: [agent/kinnan-expanded-architecture]
+    paths: [.runs/kinnan-turbo-v19-reaggregate.txt]
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: agent/kinnan-expanded-architecture}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: turbo-v19-*
+          path: all
+          repository: jpdynadev/magicview
+          run-id: 32347043088
+          github-token: ${{ github.token }}
+      - name: Build strict paired report from completed artifacts
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','TURBO_F10']; valid_status={'game_over','horizon_complete'}
+          cuts={'Tezzeret the Seeker','Rhystic Study','Sylvan Library','Energy Refractor','Hydroelectric Specimen'}
+          adds={"Green Sun's Zenith",'Eldritch Evolution','Tribute Mage','Devoted Druid','Copy Artifact'}
+          rows={v:[] for v in variants}
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          def key(r): return (int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def met(r,m):
+              if m=='assemblyT4': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attemptT4': return (r.get('firstAttemptTurn') or 99)<=4
+              return bool(r.get(m))
+          report={'profile':'arch-repaired-v19-turbo-paired-200','sourceRun':32347043088,'variants':{},'paired':{},'strictValid':False}
+          maps={}
+          for v in variants:
+              rr=rows[v]; good=[r for r in rr if r.get('status') in valid_status]; km={key(r):r for r in good}; maps[v]=km
+              exposed_set=cuts if v=='F10' else adds; exposed=[r for r in good if exposed_set & set(r.get('exposureCards') or [])]
+              fc=collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in good)
+              st={'records':len(rr),'valid':len(good),'uniqueKeys':len(km),'statuses':dict(collections.Counter(str(r.get('status')) for r in rr)),
+                  'pilotVersions':sorted(set(str(r.get('pilotVersion')) for r in good)),'deckHashes':sorted(set(str(r.get('variantDeckSha256')) for r in good)),
+                  'assemblyT4':sum(met(r,'assemblyT4') for r in good),'attemptT4':sum(met(r,'attemptT4') for r in good),
+                  'protectedT4':sum(met(r,'strictProtectedT4') for r in good),'wins':sum(met(r,'kinnanWon') for r in good),
+                  'mulligans':sum(int(r.get('mulligans') or 0) for r in good),'failureCodes':dict(fc),
+                  'exposed':len(exposed),'exposedProtectedT4':sum(met(r,'strictProtectedT4') for r in exposed),'pods':{},'seats':{}}
+              for pod in ('balanced','turbo','midrange','mixed'):
+                  x=[r for r in good if r.get('podProfile')==pod]
+                  st['pods'][pod]={'n':len(x),'assemblyT4':sum(met(r,'assemblyT4') for r in x),'attemptT4':sum(met(r,'attemptT4') for r in x),'protectedT4':sum(met(r,'strictProtectedT4') for r in x),'wins':sum(met(r,'kinnanWon') for r in x)}
+              for s in range(4):
+                  x=[r for r in good if int(r.get('kinnanSeat',-1))==s]
+                  st['seats'][str(s)]={'n':len(x),'assemblyT4':sum(met(r,'assemblyT4') for r in x),'attemptT4':sum(met(r,'attemptT4') for r in x),'protectedT4':sum(met(r,'strictProtectedT4') for r in x),'wins':sum(met(r,'kinnanWon') for r in x)}
+              report['variants'][v]=st
+          b,t=maps['F10'],maps['TURBO_F10']; common=sorted(set(b)&set(t))
+          def mc(m):
+              a=sum(met(t[k],m) and not met(b[k],m) for k in common); c=sum(met(b[k],m) and not met(t[k],m) for k in common); n=a+c
+              p=1.0 if not n else min(1.0,2*sum(math.comb(n,i) for i in range(min(a,c)+1))/(2**n))
+              return {'turboOnly':a,'f10Only':c,'discordant':n,'pTwoSided':p}
+          for m in ('assemblyT4','attemptT4','strictProtectedT4','kinnanWon'):
+              tv=sum(met(t[k],m) for k in common); bv=sum(met(b[k],m) for k in common)
+              report['paired'][m]={'keys':len(common),'turbo':tv,'f10':bv,'deltaRate':(tv-bv)/len(common) if common else None,'mcnemar':mc(m)}
+          exposure=[k for k in common if (adds & set(t[k].get('exposureCards') or [])) or (cuts & set(b[k].get('exposureCards') or []))]
+          report['paired']['changedSlotExposure']={'keys':len(exposure),'protectedTurbo':sum(met(t[k],'strictProtectedT4') for k in exposure),'protectedF10':sum(met(b[k],'strictProtectedT4') for k in exposure)}
+          report['strictValid']=(all(report['variants'][v]['records']==200 and report['variants'][v]['valid']==200 and report['variants'][v]['uniqueKeys']==200 and report['variants'][v]['pilotVersions']==['arch-aware-v1.9-adversarial'] for v in variants) and len(common)==200 and set(b)==set(t))
+          pathlib.Path('results').mkdir(exist_ok=True)
+          out=pathlib.Path('results/kinnan-turbo-v19-paired-200-latest.json'); out.write_text(json.dumps(report,indent=2,sort_keys=True))
+          print(json.dumps(report,indent=2,sort_keys=True))
+          if not report['strictValid']: raise SystemExit('STRICT_PAIRING_FAILED')
+          PY
+      - name: Commit durable report
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add results/kinnan-turbo-v19-paired-200-latest.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Record repaired Turbo v19 paired 200 report [skip ci]'
+          git push origin HEAD:agent/kinnan-expanded-architecture

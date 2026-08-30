@@ -1,0 +1,72 @@
+{
+  "created": "2026-08-19",
+  "baseline": "F10",
+  "status": "queued_only_do_not_trigger_until_strict_200_key_architecture_screen_resolves",
+  "promotion_gate": "Controlled paired repaired sim-v2 only; tournament prevalence/correlation is hypothesis generation only.",
+  "packages": [
+    {
+      "id": "PKG_COPY_COMPACT_A",
+      "priority": 1,
+      "adds": ["Clever Impersonator", "Flesh Duplicate", "Copy Enchantment"],
+      "hypothesis": "Compact flexible copy density may preserve F10 tutor quality while adding Kinnan-hittable redundancy and access to either own combo permanents or opposing engines.",
+      "current_signal": "2026-08-19 cEDHStats: Clever Impersonator 89.9% inclusion, +0.18 PPG clear 90% signal; Flesh Duplicate 65.8%, +0.16 clear; Copy Enchantment 51.4%, +0.07 non-clear."
+    },
+    {
+      "id": "PKG_COPY_COMPACT_B",
+      "priority": 2,
+      "adds": ["Mirage Mirror", "Phyrexian Metamorph", "Imposter Mech"],
+      "hypothesis": "Artifact-weighted copy package may improve Basalt/rock redundancy while staying broadly useful against opposing permanents.",
+      "current_signal": "2026-08-19 cEDHStats: Mirage Mirror 89.4%; Phyrexian Metamorph 73.8%; Imposter Mech 53.6%."
+    },
+    {
+      "id": "PKG_FLASH_COPY",
+      "priority": 3,
+      "adds": ["Flash Photography", "Clever Impersonator", "Flesh Duplicate"],
+      "hypothesis": "Flash Photography can copy an already-resolved Basalt Monolith or another premium permanent while Clever/Flesh add Kinnan-hittable copy redundancy; test whether the four-mana sorcery-copy slot is actually fast enough by T4.",
+      "current_signal": "2026-08-19 cEDHStats: Flash Photography 60.8% inclusion, +0.16 PPG clear 90% signal; Clever +0.18 clear; Flesh +0.16 clear."
+    },
+    {
+      "id": "PKG_TUTOR_QUALITY",
+      "priority": 4,
+      "adds": ["Nature's Rhythm", "Chord of Calling", "Transmute Artifact"],
+      "hypothesis": "Lean on the strongest current access signals rather than adding more generic mana or expensive standalone value; all three are already structurally aligned with compact deterministic lines.",
+      "current_signal": "2026-08-19 cEDHStats: Nature's Rhythm 91.4%, +0.20 clear; Chord 89.2%, +0.13 clear; Transmute Artifact 86.5%, +0.19 clear."
+    },
+    {
+      "id": "PKG_DRUID_COMPACT",
+      "priority": 5,
+      "adds": ["Devoted Druid", "Machine God's Effigy", "Green Sun's Zenith", "Eldritch Evolution"],
+      "hypothesis": "Test whether adding one additional compact deterministic node plus creature-tutor access raises protected T4 attempts more efficiently than broad clone density.",
+      "current_signal": "Retained from prior queue; controlled architecture evidence remains more important than prevalence."
+    },
+    {
+      "id": "PKG_PROTECTION_SPLIT",
+      "priority": 6,
+      "adds": ["Sudden Substitution", "Misdirection", "Chain of Vapor"],
+      "hypothesis": "A resilience package may trade a small amount of goldfish speed for better protected attempts in turbo/mixed pods; Sudden Substitution is especially interesting because split second can force through unusual stack exchanges.",
+      "current_signal": "2026-08-19 cEDHStats hot-lead signal for Sudden Substitution: +0.21 PPG, 90% interval +0.07 to +0.34; Misdirection +0.11 clear."
+    },
+    {
+      "id": "PKG_FAERIE_REENTRY",
+      "priority": 7,
+      "adds": ["Faerie Mastermind"],
+      "hypothesis": "F10 cut Faerie Mastermind for tutor density, but current tournament association is now positive enough to justify a later singleton re-entry test against the weakest confirmed F10 add after package search.",
+      "current_signal": "2026-08-19 cEDHStats: Faerie Mastermind 88.8% inclusion, +0.14 PPG clear 90% signal. Do not test until architecture/package stages narrow the cut candidate."
+    },
+    {
+      "id": "PKG_STEAL_COPY",
+      "priority": 8,
+      "adds": ["Steal Enchantment", "Copy Enchantment", "Clever Impersonator"],
+      "hypothesis": "Midrange/mixed-pod package can convert opposing Rhystic Study/Mystic Remora-style engines into advantage while retaining copy connectivity.",
+      "current_signal": "2026-08-19 cEDHStats: Steal Enchantment 6.5% inclusion but +0.25 PPG clear 90% signal; low prevalence means high uncertainty and pod dependence."
+    }
+  ],
+  "measurement": {
+    "triage": "100-200 exact-paired valid games only for rejection/ranking",
+    "confirmation": "Escalate only decision-relevant survivors to about 2000-5000+ paired games",
+    "primary": "protected deterministic attempt by end of Kinnan T4",
+    "secondary": ["assembly", "attempt", "natural win", "mulligans", "failure labels", "seat split", "pod split"],
+    "exposure": ["natural deck-level effect", "changed-slot seen/exposed frequency", "conditional effect when exposed"],
+    "validity": "exact engine/pilot/deck-hash/seed/seat/pod/horizon identity; stale/idle/wall/engine errors separate; no incomplete promotion"
+  }
+}

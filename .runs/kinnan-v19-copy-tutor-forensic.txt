@@ -1,0 +1,1 @@
+2026-08-21 forensic replay for persistent F10_COPY_TUTOR canonical timeouts: seed 2800160 seat 0 balanced; seed 2820348 seat 2 balanced. Diagnostic only; do not substitute 320s results into canonical 160s promotion sample.
