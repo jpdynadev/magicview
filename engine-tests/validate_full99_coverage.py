@@ -72,6 +72,9 @@ def main() -> int:
             and not str(e.get("description") or "").lower().startswith("play ")
             and int(((e.get("rawCard") or {}).get("cmc") or 0)) > 0
         ]
+        payment_decisions = [e for e in trace if e.get("kind") == "manaPaymentDecision"]
+        paid_sessions = [p for p in (game.get("manaPaymentTrace") or []) if p.get("successful")]
+        rows_by_card = {str(r.get("card") or ""): r for r in rows}
         reasons = []
         if has_look_prompt and not any(r.get("lookedAt") for r in rows):
             reasons.append("card-look prompts were observed but no per-card looked-at attribution was persisted")
@@ -81,6 +84,18 @@ def main() -> int:
             reasons.append("a reveal-search choice was observed but no per-card reveal attribution was persisted")
         if paid_casts and not all(r.get("manaAttributionComplete") for r in rows if r.get("cast")):
             reasons.append("one or more paid casts lacks exact mana produced/spent attribution")
+        if payment_decisions and not game.get("manaPaymentAttributionComplete"):
+            reasons.append("one or more successful payment sessions lacks exact source/production/spend attribution")
+        for payment in paid_sessions:
+            target = rows_by_card.get(str(payment.get("targetCard") or ""))
+            if not payment.get("complete") or not target or target.get("manaSpent", 0) <= 0:
+                reasons.append("a successful payment is not durably attributed to its registered target card")
+                break
+            for source in payment.get("sources") or []:
+                source_row = rows_by_card.get(str(source.get("sourceCard") or ""))
+                if not source.get("exact") or not source_row or source_row.get("manaProduced", 0) <= 0:
+                    reasons.append("a successful payment source is not durably attributed to its registered source card")
+                    break
         if reasons:
             semantic_failures.append({
                 "key": [game.get("variant"), game.get("seed"), game.get("kinnanSeat"), game.get("podProfile")],
