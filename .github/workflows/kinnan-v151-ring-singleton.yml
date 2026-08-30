@@ -1,0 +1,234 @@
+name: Kinnan v151 Ring Singleton 200
+
+on:
+  push:
+    branches: [agent/kinnan-v151-ring-singleton]
+    paths: [.github/workflows/kinnan-v151-ring-singleton.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v151-ring-singleton
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-repaired-v151-ring-single-7000p-240s
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired runtime and semantic gate
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v151_ring_singleton.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'" in t
+          for key in ('F10','F10_RING_SINGLE'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p gate
+          for SPEC in 'F10:6986200' 'F10_RING_SINGLE:6986201'; do
+            VARIANT=${SPEC%%:*}; SEED=${SPEC##*:}
+            CEDH_POD=balanced python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat 0 --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir ".sim-cache/v151gate-${GITHUB_RUN_ID}-${VARIANT}" --retain-traces failures --engine-id "$MANABREW_REF:arch-v151-ring-gate:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:$SEED" --exposure-card Endurance --exposure-card 'The One Ring' --output "gate/${VARIANT}.json"
+            python3 - "gate/${VARIANT}.json" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2]
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True,r
+          assert r.get('v2SessionCleanupError') is None,r
+          PY
+          done
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-v151-ring.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v151-ring-runtime
+          path: |
+            manabrew-v151-ring.tgz
+            gate/**
+          compression-level: 0
+          retention-days: 3
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        variant: [F10, F10_RING_SINGLE]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v5
+        with: {name: v151-ring-runtime, path: runtime}
+      - name: Run 50 canonical paired keys
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v151-ring.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v151_ring_singleton.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          BASE=$((6900000 + SEAT * 10000))
+          : > "out/${VARIANT}-seat${SEAT}-errors.ndjson"
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET))
+            case $((OFFSET % 4)) in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/v151-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v151-ring:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+              set +e
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v142.py /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar /tmp/manabrew/forge/forge-gui/ --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED" --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures --engine-id "$ENGINE" --exposure-card Endurance --exposure-card 'The One Ring' --output "$ATT" > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?; set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                if python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and int(r.get('seed'))==int(seed) and r.get('podProfile')==pod
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None,r
+          PY
+                then cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"; OK=1; break; fi
+              fi
+              printf '{"variant":"%s","seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-errors.ndjson"
+            done
+            [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+          done
+          python3 - "$VARIANT" "$SEAT" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2]); lo=6900000+seat*10000; hi=lo+49; rows=[]
+          for p in glob.glob(f'out/valid/{v}-s{seat}-seed*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if lo <= int(r['seed']) <= hi: rows.append(r)
+          keys={(int(r['seed']),int(r['kinnanSeat']),r.get('podProfile')) for r in rows if r.get('status') in {'game_over','horizon_complete'} and r.get('pilotVersion')=='arch-aware-v1.40-adversarial' and r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None}
+          assert len(rows)==50 and len(keys)==50,(v,seat,len(rows),len(keys))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v151-${{ matrix.variant }}-seat${{ matrix.seat }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: v151-*-seat*
+          path: all
+      - name: Strict 200 paired aggregate
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_RING_SINGLE']; good={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}; errs={v:[] for v in variants}
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('all/**/*errors.ndjson',recursive=True):
+              for line in open(p):
+                  try:r=json.loads(line)
+                  except Exception:continue
+                  if r.get('variant') in errs: errs[r['variant']].append(r)
+          key=lambda r:(int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def metric(r,m):
+              if m=='assembly': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attempt': return (r.get('firstAttemptTurn') or 99)<=4
+              if m=='protected': return bool(r.get('strictProtectedT4'))
+              if m=='win': return bool(r.get('kinnanWon'))
+          maps={v:{key(r):r for r in rows[v] if r.get('status') in good and r.get('pilotVersion')=='arch-aware-v1.40-adversarial' and r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None} for v in variants}
+          expected={(6900000+s*10000+off,s,('balanced','turbo','midrange','mixed')[off%4]) for s in range(4) for off in range(50)}
+          assert all(len(rows[v])==200 for v in variants),{v:len(rows[v]) for v in variants}
+          assert all(len(maps[v])==200 for v in variants),{v:len(maps[v]) for v in variants}
+          assert all(set(maps[v])==expected for v in variants),'missing/extra canonical keys'
+          common=sorted(expected)
+          rep={'strictValid':True,'profile':'arch-repaired-v151-ring-single-7000p-240s','change':{'cuts':['Endurance'],'adds':['The One Ring']},'cacheReuse':{'compatiblePriorRowsReused':0},'variants':{},'paired':{},'errorAttempts':{},'exposure':{}}
+          for v in variants:
+              xs=list(maps[v].values()); asm=sum(metric(r,'assembly') for r in xs); att=sum(metric(r,'attempt') for r in xs)
+              rep['variants'][v]={'valid':len(xs),'assemblyT4':asm,'attemptT4':att,'protectedT4':sum(metric(r,'protected') for r in xs),'wins':sum(metric(r,'win') for r in xs),'mulligans':sum(int(r.get('mulligans') or 0) for r in xs),'assemblyToAttemptRate':att/asm if asm else None,'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in xs)),'pods':{},'seats':{}}
+              for pod in ('balanced','turbo','midrange','mixed'):
+                  ys=[r for r in xs if r.get('podProfile')==pod]; rep['variants'][v]['pods'][pod]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              for s in range(4):
+                  ys=[r for r in xs if int(r.get('kinnanSeat'))==s]; rep['variants'][v]['seats'][str(s)]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              rep['errorAttempts'][v]=dict(collections.Counter(str(r.get('status')) for r in errs[v]))
+          def exact_binom_two_sided(a,b):
+              n=a+b
+              if not n:return 1.0
+              import math
+              probs=[math.comb(n,k)*(0.5**n) for k in range(n+1)]; obs=probs[a]
+              return min(1.0,sum(p for p in probs if p<=obs+1e-15))
+          for m in ('assembly','attempt','protected','win'):
+              plus=minus=0
+              for k in common:
+                  a=metric(maps['F10'][k],m); b=metric(maps['F10_RING_SINGLE'][k],m)
+                  plus += int((not a) and b); minus += int(a and (not b))
+              ba=sum(metric(maps['F10'][k],m) for k in common); ca=sum(metric(maps['F10_RING_SINGLE'][k],m) for k in common)
+              rep['paired'][m]={'keys':200,'baseline':ba,'challenger':ca,'deltaRate':(ca-ba)/200,'discordantPlus':plus,'discordantMinus':minus,'mcnemarExactP':exact_binom_two_sided(plus,minus)}
+          for card in ('Endurance','The One Ring'):
+              ks=[k for k in common if bool((maps['F10'][k].get('cardExposure') or {}).get(card)) or bool((maps['F10_RING_SINGLE'][k].get('cardExposure') or {}).get(card))]
+              z={'keys':len(ks)}
+              for m in ('assembly','attempt','protected','win'):
+                  z[m]={'baseline':sum(metric(maps['F10'][k],m) for k in ks),'challenger':sum(metric(maps['F10_RING_SINGLE'][k],m) for k in ks)}
+              rep['exposure'][card]=z
+          pathlib.Path('kinnan-v151-ring-singleton-200-latest.json').write_text(json.dumps(rep,indent=2)+'\n')
+          print(json.dumps(rep,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v151-ring-200-results
+          path: kinnan-v151-ring-singleton-200-latest.json
+          retention-days: 14
