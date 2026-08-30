@@ -1,5 +1,5 @@
 name: Kinnan v152 Full-99 Telemetry Gate
-# Re-run with semantic attribution hard-fail enabled.
+# Re-run with the actual v8 payment chooser instrumented.
 
 on:
   push:
