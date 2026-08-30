@@ -27,7 +27,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
       - name: Download validated full-99 artifact
         uses: actions/download-artifact@v4
         with:
@@ -35,7 +34,6 @@ jobs:
           run-id: ${{ env.SOURCE_RUN_ID }}
           github-token: ${{ github.token }}
           path: validation
-
       - name: Obtain GitHub OIDC token for Neon
         id: oidc
         shell: bash
@@ -45,7 +43,6 @@ jobs:
           TOKEN=$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "$URL" | jq -r .value)
           test -n "$TOKEN" && test "$TOKEN" != null
           echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
-
       - name: Persist exact 99-card game records through sanctioned Neon INSERT RPC
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
@@ -54,127 +51,54 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           import collections, hashlib, json, os, pathlib, subprocess, tempfile
-
-          root = pathlib.Path('validation')
-          coverage = json.loads((root/'full99-coverage.json').read_text())
-          rows = [json.loads(x) for x in (root/'full99-per-game-card.ndjson').read_text().splitlines() if x.strip()]
-          assert coverage == {
-              'actualRows': 792,
-              'duplicates': 0,
-              'expectedRows': 792,
-              'gamesWithExactly99': 8,
-              'missingCards': {},
-              'schemaVersion': 'kinnan-full99-card-telemetry-v2',
-              'telemetryComplete': True,
-              'validGames': 8,
-          }, coverage
-          assert len(rows) == 792
-
-          groups = collections.defaultdict(list)
-          for r in rows:
-              groups[(r['variant'], r['canonicalKey'])].append(r)
-          assert len(groups) == 8
-          assert all(len(v) == 99 for v in groups.values())
-          assert len({(r['variant'],r['canonicalKey'],r['cardIdentity']) for r in rows}) == 792
-
+          root=pathlib.Path('validation')
+          coverage=json.loads((root/'full99-coverage.json').read_text())
+          rows=[json.loads(x) for x in (root/'full99-per-game-card.ndjson').read_text().splitlines() if x.strip()]
+          assert coverage['schemaVersion']=='kinnan-full99-card-telemetry-v2'
+          assert coverage['telemetryComplete'] is True
+          assert coverage['validGames']==8 and coverage['expectedRows']==792 and coverage['actualRows']==792
+          assert coverage['gamesWithExactly99']==8 and coverage['duplicates']==0 and not coverage['missingCards']
+          assert len(rows)==792
+          groups=collections.defaultdict(list)
+          for r in rows: groups[(r['variant'],r['canonicalKey'])].append(r)
+          assert len(groups)==8 and all(len(v)==99 for v in groups.values())
+          assert len({(r['variant'],r['canonicalKey'],r['cardIdentity']) for r in rows})==792
           def q(v):
-              if v is None: return 'NULL'
-              if isinstance(v, bool): return 'TRUE' if v else 'FALSE'
-              if isinstance(v, (int,float)): return str(v)
-              return "'" + str(v).replace("'","''") + "'"
-          def qjson(v): return q(json.dumps(v,separators=(',',':'),ensure_ascii=False)) + '::jsonb'
-          def arr(v): return 'ARRAY['+','.join(q(x) for x in v)+']::text[]'
-
-          statements=[]
-          expected_cache_keys=[]
-          for (variant, canonical), cards in sorted(groups.items()):
-              cards=sorted(cards,key=lambda x:x['cardIdentity'])
-              first=cards[0]
-              identities=[c['cardIdentity'] for c in cards]
-              assert len(identities)==99 and len(set(identities))==99
-              assert all(c['variant']==variant and c['canonicalKey']==canonical for c in cards)
+              if v is None:return 'NULL'
+              if isinstance(v,bool):return 'TRUE' if v else 'FALSE'
+              if isinstance(v,(int,float)):return str(v)
+              return "'"+str(v).replace("'","''")+"'"
+          def qjson(v):return q(json.dumps(v,separators=(',',':'),ensure_ascii=False))+'::jsonb'
+          def arr(v):return 'ARRAY['+','.join(q(x) for x in v)+']::text[]'
+          statements=[]; keys=[]
+          for (variant,canonical),cards in sorted(groups.items()):
+              cards=sorted(cards,key=lambda x:x['cardIdentity']); first=cards[0]
+              ids=[c['cardIdentity'] for c in cards]
+              assert len(ids)==99 and len(set(ids))==99
               assert len({c['deckHash'] for c in cards})==1
               assert len({c['seed'] for c in cards})==1 and len({c['seat'] for c in cards})==1 and len({c['pod'] for c in cards})==1
-              cache_key=hashlib.sha256(f"full99-v2|33316320571|{variant}|{canonical}".encode()).hexdigest()
-              expected_cache_keys.append(cache_key)
+              cache=hashlib.sha256(f'full99-v2|33316320571|{variant}|{canonical}'.encode()).hexdigest(); keys.append(cache)
               opening=[c['cardIdentity'] for c in cards if c['openingHand']]
               kept=[c['cardIdentity'] for c in cards if c['kept']]
-              actually_seen=[c['cardIdentity'] for c in cards if c['seen']]
-              outcomes={k:bool(first[k]) for k in ('assemblyT4','attemptT4','protectedAttemptT4','naturalWin')}
-              assert all(all(bool(c[k])==outcomes[k] for c in cards) for k in outcomes)
-              event_payload=[]
-              for c in cards:
-                  event_payload.append({
-                      'schemaVersion': c['schemaVersion'], 'deckHash': c['deckHash'], 'variant': c['variant'],
-                      'canonicalKey': c['canonicalKey'], 'seed': c['seed'], 'seat': c['seat'], 'pod': c['pod'],
-                      'cardIdentity': c['cardIdentity'], 'present': c['present'], 'openingHand': c['openingHand'],
-                      'kept': c['kept'], 'mulliganed': c['mulliganed'], 'putBack': c['putBack'], 'seen': c['seen'],
-                      'firstSeenTurn': c['firstSeenTurn'], 'drawn': c['drawn'], 'firstDrawnTurn': c['firstDrawnTurn'],
-                      'zonesByTurn': c['zonesByTurn'], 'zoneChanges': c['zoneChanges'], 'tutored': c['tutored'],
-                      'revealed': c['revealed'], 'castOrPlayed': c['castOrPlayed'], 'castOrPlayedTurns': c['castOrPlayedTurns'],
-                      'manaProduced': c['manaProduced'], 'manaSpent': c['manaSpent'],
-                      'manaPoolBeforeActions': c['manaPoolBeforeActions'], 'activated': c['activated'], 'used': c['used'],
-                      'comboParticipation': c['comboParticipation'], 'protectionParticipation': c['protectionParticipation'],
-                      'interactionParticipation': c['interactionParticipation'], 'outcomeAttribution': c['outcomeAttribution'],
-                      'assemblyT4': c['assemblyT4'], 'attemptT4': c['attemptT4'],
-                      'protectedAttemptT4': c['protectedAttemptT4'], 'naturalWin': c['naturalWin'],
-                      'packageExecution': c['packageExecution'], 'failureCode': c.get('failureCode')
-                  })
-              audit={
-                  'source':'github-run-33316320571/full99-v2-validation-results',
-                  'telemetrySchemaVersion':'kinnan-full99-card-telemetry-v2',
-                  'telemetryComplete':True,
-                  'registeredCardCount':99,
-                  'perCardRecordCount':len(event_payload),
-                  'expectedRowsForSourceRun':792,
-                  'actualRowsForSourceRun':792,
-                  'gamesWithExactly99':8,
-                  'missingCards':{},
-                  'duplicateRows':0,
-                  'storage':'sim_game_results.observed_card_events',
-                  'legacyFull99TablePending':True,
-                  'canonicalKey':canonical,
-                  'variant':variant,
-              }
-              stmt=f"""INSERT INTO sim_game_results(
-                cache_key,engine_id,pilot_version,optimizer_id,execution_profile,deck_sha256,pod_deck_sha256,
-                seat_deck_sha256s,mode,pod,seed,seat,max_round,status,winner_seat,kinnan_won,first_assembly_turn,
-                first_attempt_turn,deterministic_t4,certified_attempt,protected_attempt,strict_protected_t4,combo_line,
-                failure_code,wall_ms,prompts,mulligans,opening_hand,kept_hand,observed_cards,observed_card_events,
-                v2_positive_early_exit,v2_deadline_early_exit,audit
-              ) VALUES (
-                {q(cache_key)},{q('8a1380e5a59986ea3fed143b85f710f9ee3888dc:full99-telemetry-v2')},
-                {q('arch-v140-v142-full99')},{q('telemetry-validation')},{q(os.environ['PROFILE'])},{q(first['deckHash'])},
-                {q(first['deckHash'])},{arr([first['deckHash']])},{q('telemetry-validation')},{q(first['pod'])},
-                {q(first['seed'])},{q(first['seat'])},4,{q('horizon_complete')},NULL,{q(outcomes['naturalWin'])},NULL,NULL,
-                {q(outcomes['attemptT4'])},{q(outcomes['attemptT4'])},{q(outcomes['protectedAttemptT4'])},{q(outcomes['protectedAttemptT4'])},
-                NULL,{q(first.get('failureCode'))},NULL,NULL,NULL,{qjson(opening)},{qjson(kept)},{arr(actually_seen)},
-                {qjson(event_payload)},FALSE,FALSE,{qjson(audit)}
-              ) ON CONFLICT (cache_key) DO NOTHING"""
+              seen=[c['cardIdentity'] for c in cards if c['seen']]
+              out={k:bool(first[k]) for k in ('assemblyT4','attemptT4','protectedAttemptT4','naturalWin')}
+              assert all(all(bool(c[k])==out[k] for c in cards) for k in out)
+              events=[{k:c[k] for k in c} for c in cards]
+              audit={'source':'github-run-33316320571/full99-v2-validation-results','telemetrySchemaVersion':'kinnan-full99-card-telemetry-v2','telemetryComplete':True,'registeredCardCount':99,'perCardRecordCount':99,'expectedRowsForSourceRun':792,'actualRowsForSourceRun':792,'gamesWithExactly99':8,'missingCards':{},'duplicateRows':0,'storage':'sim_game_results.observed_card_events','dedicatedFull99TablePending':True,'canonicalKey':canonical,'variant':variant}
+              stmt=f"""INSERT INTO sim_game_results(cache_key,engine_id,pilot_version,optimizer_id,execution_profile,deck_sha256,pod_deck_sha256,seat_deck_sha256s,mode,pod,seed,seat,max_round,status,winner_seat,kinnan_won,first_assembly_turn,first_attempt_turn,deterministic_t4,certified_attempt,protected_attempt,strict_protected_t4,combo_line,failure_code,wall_ms,prompts,mulligans,opening_hand,kept_hand,observed_cards,observed_card_events,v2_positive_early_exit,v2_deadline_early_exit,audit) VALUES ({q(cache)},{q('8a1380e5a59986ea3fed143b85f710f9ee3888dc:full99-telemetry-v2')},{q('arch-v140-v142-full99')},{q('telemetry-validation')},{q(os.environ['PROFILE'])},{q(first['deckHash'])},{q(first['deckHash'])},{arr([first['deckHash']])},{q('adversarial')},{q(first['pod'])},{q(first['seed'])},{q(first['seat'])},4,{q('horizon_complete')},NULL,{q(out['naturalWin'])},NULL,NULL,{q(out['attemptT4'])},{q(out['attemptT4'])},{q(out['protectedAttemptT4'])},{q(out['protectedAttemptT4'])},NULL,{q(first.get('failureCode'))},NULL,NULL,NULL,{qjson(opening)},{qjson(kept)},{arr(seen)},{qjson(events)},FALSE,FALSE,{qjson(audit)}) ON CONFLICT (cache_key) DO NOTHING"""
               statements.append(stmt)
-
-          assert len(statements)==8
           api=os.environ['NEON_DATA_API'].rstrip('/')+'/rpc/exec_sim_ingest'
           body=json.dumps({'p_sql':json.dumps(statements)},separators=(',',':'))
-          with tempfile.NamedTemporaryFile('w',delete=False) as f:
-              f.write(body); payload=f.name
+          with tempfile.NamedTemporaryFile('w',delete=False) as f:f.write(body); p=f.name
           try:
-              proc=subprocess.run([
-                  'curl','-sS','--retry','4','--retry-all-errors','-w','\nHTTP_STATUS:%{http_code}\n',
-                  '-X','POST',api,'-H',f"Authorization: Bearer {os.environ['OIDC_TOKEN']}",
-                  '-H','Content-Type: application/json','--data-binary',f'@{payload}'
-              ],text=True,capture_output=True)
-          finally:
-              pathlib.Path(payload).unlink(missing_ok=True)
-          print(proc.stdout,flush=True)
-          if proc.stderr: print(proc.stderr,flush=True)
+              proc=subprocess.run(['curl','-sS','--retry','4','--retry-all-errors','-w','\nHTTP_STATUS:%{http_code}\n','-X','POST',api,'-H',f"Authorization: Bearer {os.environ['OIDC_TOKEN']}",'-H','Content-Type: application/json','--data-binary',f'@{p}'],text=True,capture_output=True)
+          finally:pathlib.Path(p).unlink(missing_ok=True)
+          print(proc.stdout); print(proc.stderr if proc.stderr else '')
           status=int(proc.stdout.rsplit('HTTP_STATUS:',1)[1].strip()) if 'HTTP_STATUS:' in proc.stdout else 0
-          if proc.returncode or not 200 <= status < 300:
-              raise SystemExit(f'Neon insert RPC failed status={status} rc={proc.returncode}')
-          pathlib.Path('/tmp/expected-cache-keys.json').write_text(json.dumps(expected_cache_keys))
-          print(json.dumps({'insertSubmitted':8,'sourceGames':8,'sourceCardRows':792,'cardsPerGame':99}),flush=True)
+          if proc.returncode or not 200<=status<300:raise SystemExit(f'Neon insert RPC failed status={status} rc={proc.returncode}')
+          pathlib.Path('/tmp/full99-neon-keys.json').write_text(json.dumps(keys))
+          print('NEON_FULL99_INSERT='+json.dumps({'databaseGameRowsSubmitted':8,'perCardRecordsSubmitted':792,'cardsPerGame':99}))
           PY
-
       - name: Verify persisted Neon rows and 99-card payloads
         env:
           OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
@@ -182,38 +106,25 @@ jobs:
         run: |
           set -euo pipefail
           python3 - <<'PY'
-          import json, os, subprocess, urllib.parse
-          keys=json.load(open('/tmp/expected-cache-keys.json'))
-          filt='(' + ','.join(keys) + ')'
-          url=os.environ['NEON_DATA_API'].rstrip('/') + '/sim_game_results?select=cache_key,execution_profile,observed_card_events,audit&cache_key=in.' + urllib.parse.quote(filt,safe='(),')
-          proc=subprocess.run([
-              'curl','-sS','--retry','4','--retry-all-errors','-w','\nHTTP_STATUS:%{http_code}\n',
-              '-H',f"Authorization: Bearer {os.environ['OIDC_TOKEN']}",
-              '-H','Accept: application/json',url
-          ],text=True,capture_output=True)
-          print(proc.stdout,flush=True)
-          if proc.stderr: print(proc.stderr,flush=True)
+          import json,os,subprocess,urllib.parse
+          keys=json.load(open('/tmp/full99-neon-keys.json'))
+          filt='('+','.join(keys)+')'
+          url=os.environ['NEON_DATA_API'].rstrip('/')+'/sim_game_results?select=cache_key,execution_profile,observed_card_events,audit&cache_key=in.'+urllib.parse.quote(filt,safe='(),')
+          proc=subprocess.run(['curl','-sS','--retry','4','--retry-all-errors','-w','\nHTTP_STATUS:%{http_code}\n','-H',f"Authorization: Bearer {os.environ['OIDC_TOKEN']}",'-H','Accept: application/json',url],text=True,capture_output=True)
+          print(proc.stdout); print(proc.stderr if proc.stderr else '')
           status=int(proc.stdout.rsplit('HTTP_STATUS:',1)[1].strip()) if 'HTTP_STATUS:' in proc.stdout else 0
-          if proc.returncode or not 200 <= status < 300:
-              raise SystemExit(f'Neon verification GET failed status={status} rc={proc.returncode}')
-          payload=proc.stdout.rsplit('HTTP_STATUS:',1)[0].strip()
-          rows=json.loads(payload)
+          if proc.returncode or not 200<=status<300:raise SystemExit(f'Neon verification GET failed status={status} rc={proc.returncode}')
+          data=proc.stdout.rsplit('HTTP_STATUS:',1)[0].strip(); rows=json.loads(data)
           assert len(rows)==8,(len(rows),rows)
           assert {r['cache_key'] for r in rows}==set(keys)
           assert all(r['execution_profile']==os.environ['PROFILE'] for r in rows)
+          total=0
           for r in rows:
-              events=r['observed_card_events']
-              assert isinstance(events,list) and len(events)==99,(r['cache_key'],len(events) if isinstance(events,list) else type(events))
-              ids=[x['cardIdentity'] for x in events]
-              assert len(set(ids))==99
-              audit=r['audit']
-              assert audit['telemetryComplete'] is True
-              assert audit['registeredCardCount']==99 and audit['perCardRecordCount']==99
-              assert audit['expectedRowsForSourceRun']==792 and audit['actualRowsForSourceRun']==792
-              assert audit['duplicateRows']==0 and not audit['missingCards']
-          print('NEON_FULL99_VERIFIED='+json.dumps({
-              'databaseRows':len(rows),'perGameCardRecords':99,'totalPerCardRecords':sum(len(r['observed_card_events']) for r in rows),
-              'distinctPerGame':[len({x['cardIdentity'] for x in r['observed_card_events']}) for r in rows],
-              'telemetryComplete':all(r['audit']['telemetryComplete'] for r in rows)
-          },sort_keys=True))
+              ev=r['observed_card_events']; assert isinstance(ev,list) and len(ev)==99
+              assert len({x['cardIdentity'] for x in ev})==99
+              a=r['audit']; assert a['telemetryComplete'] is True and a['registeredCardCount']==99 and a['perCardRecordCount']==99
+              assert a['expectedRowsForSourceRun']==792 and a['actualRowsForSourceRun']==792 and a['duplicateRows']==0 and not a['missingCards']
+              total+=len(ev)
+          assert total==792
+          print('NEON_FULL99_VERIFIED='+json.dumps({'databaseGameRows':8,'perCardRecords':792,'cardsPerGame':99,'telemetryComplete':True,'duplicates':0,'missingCards':0},sort_keys=True))
           PY
