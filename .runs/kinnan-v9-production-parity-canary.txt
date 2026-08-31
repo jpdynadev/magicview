@@ -1,6 +1,6 @@
-start=2026-08-31T21:17:00Z
+start=2026-08-31T21:26:00Z
 purpose=component-canary
 entrypoint=python3 engine-tests/run_kinnan_sim.py --purpose component-canary
 qualification=three-anchor deterministic replay plus full99-v3 coverage
-repair=durable fail-closed prompt diagnostics for unresolved chooseCards
+repair=retain raw cleanup discard prompt metadata
 ranking=false
