@@ -181,6 +181,21 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
             and len(set(card_ids)) == len(card_ids)
         ):
             chosen_ids = card_ids
+        elif (
+            isinstance(minimum, int)
+            and not isinstance(minimum, bool)
+            and isinstance(maximum, int)
+            and not isinstance(maximum, bool)
+            and minimum == maximum
+            and minimum > 0
+            and str((prompt_input.get("presentation") or {}).get("title") or "").lower()
+            == "discard"
+        ):
+            chosen = pilot.choose_discard(cards, count=minimum)
+            chosen_ids = [
+                str(card.get("id") or card.get("cardId") or "")
+                for card in chosen
+            ]
         else:
             return None
         return {
