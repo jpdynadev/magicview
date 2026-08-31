@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "kinnan-policy-parity-v1",
+  "pilotVersion": "v8.7.0",
+  "currentPilotCapabilities": [
+    "forge_legality",
+    "basic_mana_payment",
+    "named_counter_presence",
+    "kinnan_basalt_loop",
+    "power_artifact_monolith_loop",
+    "kinnan_grim_forensic_loop",
+    "machine_gods_effigy_devoted_druid_loop"
+  ],
+  "anchors": [
+    {
+      "id": "sterling-topdeck-invitational-2026",
+      "deckPath": "engine-tests/decks/Kinnan_Sterling_TopDeck_Invitational_2026.dck",
+      "event": "TopDeck Invitational 2026",
+      "date": "2026-08-22",
+      "placing": 1,
+      "players": 80,
+      "source": "https://topdeck.gg/deck/topdeck-invitational-2026/vIFmUxrSS9MXudrGipbCepvdYnl1",
+      "requiredCapabilities": [
+        "convoke_creature_mana",
+        "creature_copy_targeting",
+        "pili_pala_combo",
+        "knacksaw_clique_combo",
+        "seedborn_multi_turn_priority",
+        "deadeye_etb_loops",
+        "vannifar_chains",
+        "actual_stack_protection_resolution"
+      ]
+    }
+  ]
+}
