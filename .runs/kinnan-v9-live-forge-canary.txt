@@ -1,5 +1,5 @@
-trigger=2026-08-31T09:08:00Z
-source_commit=5b27662da9ed10c170b93cf47be3466a119ada67
+trigger=2026-08-31T09:20:00Z
+source_commit=dd20a16d2322ed9663fa035e2198710a12f8f624
 purpose=component-canary
 ranking_evidence=false
-goal=submit-selected-action-and-prove-phase-advance
+goal=bounded-action-phase-advance-clean-process-disposal
