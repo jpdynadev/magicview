@@ -93,6 +93,77 @@ def choose_cards(prompt: Mapping[str, Any], candidates: Sequence[Mapping[str, An
     return selected
 
 
+def _selection_card_keep_score(
+    card: Mapping[str, Any],
+    *,
+    horizon_turn: int = 4,
+) -> float:
+    """Score live typed card metadata for retention in hand.
+
+    This stays architecture-neutral: it uses typed roles, mana value, and
+    rules-text capabilities instead of a card-name allowlist.
+    """
+    meta = dict(card)
+    if meta.get("manaValue") is None and meta.get("cmc") is not None:
+        meta["manaValue"] = int(meta["cmc"])
+    text = str(meta.get("text") or "").lower()
+    tags = {str(tag).lower() for tag in meta.get("semanticTags", [])}
+    if "add " in text and "mana" in text:
+        tags.add("mana_source")
+    if "search your library" in text:
+        tags.add("tutor")
+    if "counter target" in text or "destroy target" in text or "return target" in text:
+        tags.add("interaction")
+    if "hexproof" in text:
+        tags.add("protection")
+    if "draw " in text:
+        tags.add("card_advantage")
+    if "untap" in text:
+        tags.add("untapper")
+    if "copy " in text:
+        tags.add("copy_effect")
+    meta["semanticTags"] = sorted(tags)
+    score = architecture_neutral_role_score(
+        SemanticRoleProfile.from_typed_metadata(meta),
+        horizon_turn=horizon_turn,
+    )
+    # Typed engine/connectivity effects not represented in the alpha role
+    # profile still deserve retention credit.
+    if "put any number of creature cards from your hand onto the battlefield" in text:
+        score += 1.5
+    if "have haste" in text or "as though" in text and "had haste" in text:
+        score += 1.0
+    return score
+
+
+def choose_discard(
+    candidates: Sequence[Mapping[str, Any]],
+    *,
+    count: int,
+    horizon_turn: int = 4,
+) -> list[Mapping[str, Any]]:
+    """Choose the lowest keep-value cards for a mandatory discard."""
+    if not isinstance(count, int) or isinstance(count, bool) or count < 0:
+        raise SemanticError("discard count must be a non-negative integer")
+    stable = [
+        card
+        for card in candidates
+        if card.get("id") or card.get("cardId")
+    ]
+    ids = [str(card.get("id") or card.get("cardId")) for card in stable]
+    if len(stable) != len(candidates) or len(set(ids)) != len(ids):
+        raise SemanticError("discard candidates require unique stable card identities")
+    if count > len(stable):
+        raise SemanticError("discard count exceeds typed candidates")
+    return sorted(
+        stable,
+        key=lambda card: (
+            _selection_card_keep_score(card, horizon_turn=horizon_turn),
+            str(card.get("id") or card.get("cardId")),
+        ),
+    )[:count]
+
+
 def record_copy_choice(*, source_card_id: str, copied_object_id: str, as_enters: bool, target_object_id: str | None = None) -> dict[str, Any]:
     return CopyChoice(source_card_id, copied_object_id, as_enters, target_object_id).__dict__.copy()
 
