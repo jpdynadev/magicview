@@ -18,10 +18,10 @@ ROOT = Path(__file__).resolve().parent.parent
 WORKFLOW_DIR = ROOT / ".github" / "workflows"
 CANONICAL = "engine-tests/run_kinnan_sim.py"
 
-# Commands that represent actual game execution rather than aggregation,
-# ingestion, schema validation or semantic unit tests.
+# Match actual Python execution commands only. Bare path mentions in workflow
+# triggers, artifact lists, comments, or documentation are not execution paths.
 LEGACY_EXECUTION = re.compile(
-    r"(?:python(?:3)?\s+)?engine-tests/(?:"
+    r"python(?:3)?\s+engine-tests/(?:"
     r"sim_v2_worker[^\s]*\.py|"
     r"manabrew_pilot_v[0-8](?:\.[0-9]+)?[^\s]*\.py"
     r")"
@@ -55,8 +55,6 @@ def audit(paths: list[Path]) -> list[str]:
                 f"{path.relative_to(ROOT)}: direct legacy simulation command(s) found; "
                 f"route through {CANONICAL}"
             )
-        # Once a workflow adopts the canonical launcher, it may not also retain
-        # a hidden legacy execution branch.
         if CANONICAL in text and legacy:
             failures.append(
                 f"{path.relative_to(ROOT)}: mixes canonical and legacy simulation commands"
