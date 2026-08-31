@@ -8,6 +8,9 @@ on:
       - engine-tests/kinnan_semantics_v9.py
       - engine-tests/kinnan_policy_v9.py
       - engine-tests/manabrew_pilot_v9.py
+      - engine-tests/kinnan_execution_path.py
+      - engine-tests/run_kinnan_sim.py
+      - engine-tests/audit_kinnan_execution_paths.py
       - engine-tests/full99_telemetry_v3_bridge.py
       - engine-tests/build_full99_neon_ingest_v3.py
       - engine-tests/full99_neon_schema_v3.sql
@@ -15,7 +18,7 @@ on:
       - engine-tests/test_kinnan_semantics_v9.py
       - engine-tests/kinnan_policy_parity_manifest_v2.json
       - engine-tests/validate_kinnan_policy_parity_v2.py
-      - .github/workflows/kinnan-v9-semantic-unit-gate.yml
+      - .github/workflows/kinnan*.yml
   workflow_dispatch:
 
 permissions:
@@ -27,9 +30,17 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Compile canonical execution path
+        run: |
+          python3 -m py_compile \
+            engine-tests/kinnan_execution_path.py \
+            engine-tests/run_kinnan_sim.py \
+            engine-tests/audit_kinnan_execution_paths.py
       - name: Run v9 semantic goldens
         run: python3 engine-tests/test_kinnan_semantics_v9.py
       - name: Validate implemented component parity
@@ -38,25 +49,27 @@ jobs:
           python3 engine-tests/validate_kinnan_policy_parity_v2.py \
             --component-only \
             --report engine-tests/results/kinnan-policy-parity-v2-components.json
-      - name: Smoke fail-closed v9 adapter
-        env:
-          KINNAN_V9_ALLOW_CANARY: '1'
-        run: python3 engine-tests/manabrew_pilot_v9.py
-      - name: Assert production ranking remains blocked
+      - name: Run canary through canonical launcher
+        run: python3 engine-tests/run_kinnan_sim.py --purpose component-canary
+      - name: Assert direct production ranking remains fail closed
         run: |
-          python3 - <<'PY'
-          import sys
-          sys.path.insert(0, 'engine-tests')
-          import manabrew_pilot_v9 as p
-          assert p.production_ranking_ready() is False
-          try:
-              p.assert_ranking_ready()
-          except RuntimeError:
-              pass
-          else:
-              raise SystemExit('ranking unexpectedly enabled')
-          print('RANKING_FAIL_CLOSED_OK')
-          PY
+          set +e
+          python3 engine-tests/run_kinnan_sim.py --purpose ranking > /tmp/ranking.out 2>&1
+          rc=$?
+          set -e
+          cat /tmp/ranking.out
+          if [ "$rc" -eq 0 ]; then
+            echo 'ranking unexpectedly enabled'
+            exit 1
+          fi
+          grep -q 'production parity is not ready' /tmp/ranking.out
+          echo RANKING_FAIL_CLOSED_OK
+      - name: Reject changed/new Kinnan workflows that bypass canonical launcher
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: |
+          python3 engine-tests/audit_kinnan_execution_paths.py \
+            --before '${{ github.event.before }}' \
+            --head '${{ github.sha }}'
       - uses: actions/upload-artifact@v4
         with:
           name: kinnan-v9-semantic-unit-${{ github.run_id }}
