@@ -8,6 +8,10 @@ on:
       - engine-tests/kinnan_semantics_v9.py
       - engine-tests/kinnan_policy_v9.py
       - engine-tests/manabrew_pilot_v9.py
+      - engine-tests/full99_telemetry_v3_bridge.py
+      - engine-tests/build_full99_neon_ingest_v3.py
+      - engine-tests/full99_neon_schema_v3.sql
+      - engine-tests/sim_v2_worker_arch_v152_full99.py
       - engine-tests/test_kinnan_semantics_v9.py
       - engine-tests/kinnan_policy_parity_manifest_v2.json
       - engine-tests/validate_kinnan_policy_parity_v2.py
