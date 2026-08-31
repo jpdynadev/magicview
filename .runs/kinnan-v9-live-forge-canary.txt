@@ -1,5 +1,5 @@
-trigger=2026-08-31T09:20:00Z
-source_commit=dd20a16d2322ed9663fa035e2198710a12f8f624
+trigger=2026-08-31T10:23:30Z
+source_commit=11e4c49a97c2b21b5860d37fe919f3aeab798f36
 purpose=component-canary
 ranking_evidence=false
-goal=bounded-action-phase-advance-clean-process-disposal
+goal=exact-registered-card-to-forge-identity-parity
