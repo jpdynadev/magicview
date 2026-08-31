@@ -1,5 +1,5 @@
-trigger=2026-08-31T04:35:45Z
-source_commit=8798dc3ec9d5091cdbc8867fd66babac561549aa
+trigger=2026-08-31T09:08:00Z
+source_commit=5b27662da9ed10c170b93cf47be3466a119ada67
 purpose=component-canary
 ranking_evidence=false
-replay_of_run=33357412203
+goal=submit-selected-action-and-prove-phase-advance
