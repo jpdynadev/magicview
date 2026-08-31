@@ -242,7 +242,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
         exact_kinnan_registration=True,
     )
     report: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-live-forge-canary-v3",
+        "schemaVersion": "kinnan-v9-live-forge-canary-v4",
         "pilotVersion": pilot.PILOT_VERSION,
         "policyVersion": pilot.POLICY_VERSION,
         "purpose": "component-canary",
@@ -343,6 +343,11 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         # trace. This is required to implement non-forced
                         # pilot choices from live identities and metadata.
                         "promptInput": inp,
+                        # Persist the live Forge view used for this decision.
+                        # Full-99 observation extraction must derive zones and
+                        # transitions from engine state, never zero-fill them.
+                        "snapshot": snapshot,
+                        "snapshotHash": _stable_hash(snapshot),
                         "choiceMin": inp.get("min"),
                         "choiceMax": inp.get("max"),
                         "choiceCardIds": [
@@ -530,7 +535,7 @@ def main() -> int:
         report = run_canary(args)
     except Exception as exc:
         report = {
-            "schemaVersion": "kinnan-v9-live-forge-canary-v3",
+            "schemaVersion": "kinnan-v9-live-forge-canary-v4",
             "pilotVersion": pilot.PILOT_VERSION,
             "policyVersion": pilot.POLICY_VERSION,
             "purpose": "component-canary",
