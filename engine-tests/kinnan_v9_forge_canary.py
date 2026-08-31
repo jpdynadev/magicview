@@ -315,20 +315,25 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 raise RuntimeError("timed out before the submitted live action advanced Forge state")
             raise RuntimeError("timed out before a live typed chooseAction prompt")
         finally:
-            if session_id:
-                try:
-                    _rpc(proc, {"command": "endGame", "sessionId": session_id})
-                except Exception:
-                    pass
-            try:
-                _rpc(proc, {"command": "quit"})
-            except Exception:
-                pass
+            disposal_mode = "terminate"
+            disposal_confirmed = False
             try:
                 proc.terminate()
                 proc.wait(timeout=10)
             except Exception:
+                disposal_mode = "kill"
                 proc.kill()
+                proc.wait(timeout=10)
+            disposal_confirmed = proc.poll() is not None
+            report["jvmDisposal"] = {
+                "mode": disposal_mode,
+                "confirmed": disposal_confirmed,
+                "returnCode": proc.returncode,
+            }
+            if not disposal_confirmed:
+                report["status"] = "failed_closed"
+                report["valid"] = False
+                report["error"] = "Forge JVM disposal was not confirmed"
 
 
 def main() -> int:
