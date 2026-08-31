@@ -423,6 +423,13 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
             if submitted_witness is not None:
                 raise RuntimeError("timed out before the submitted live action advanced Forge state")
             raise RuntimeError("timed out before a live typed chooseAction prompt")
+        except Exception as exc:
+            # Preserve the complete live prompt trace before propagating the
+            # fail-closed error to the qualification orchestrator.
+            report["status"] = "failed_closed"
+            report["valid"] = False
+            report["error"] = repr(exc)
+            raise
         finally:
             disposal_mode = "terminate"
             disposal_confirmed = False
@@ -443,6 +450,26 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 report["status"] = "failed_closed"
                 report["valid"] = False
                 report["error"] = "Forge JVM disposal was not confirmed"
+            if not report.get("valid"):
+                # A failed component run is still a durable diagnostic result.
+                # Flush stderr and retain the structured prompt/action trace so
+                # the next semantic repair is evidence-based.
+                stderr_file.flush()
+                stderr_text = (
+                    stderr_path.read_text(errors="replace")
+                    if stderr_path.exists()
+                    else ""
+                )
+                unsupported = _unsupported_card_names(stderr_text)
+                report["cardResolution"] = {
+                    "unsupportedCount": len(unsupported),
+                    "unsupportedRegisteredOrEngineNames": unsupported,
+                    "valid": not unsupported,
+                }
+                args.report.parent.mkdir(parents=True, exist_ok=True)
+                args.report.write_text(
+                    json.dumps(report, indent=2, sort_keys=True) + "\n"
+                )
 
 
 def main() -> int:
