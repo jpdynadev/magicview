@@ -1,4 +1,4 @@
-trigger=2026-08-31T04:24:45Z
-source_commit=9f67e5c88512a84508c07ef7666f9877be508c98
+trigger=2026-08-31T04:31:45Z
+source_commit=8798dc3ec9d5091cdbc8867fd66babac561549aa
 purpose=component-canary
 ranking_evidence=false
