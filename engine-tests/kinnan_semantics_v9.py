@@ -39,6 +39,11 @@ class PaymentKind(str, Enum):
     ADDITIONAL = "additional"
 
 
+class ExilePlayKind(str, Enum):
+    CAST = "cast"
+    PLAY_LAND = "playLand"
+
+
 class OutcomeRole(str, Enum):
     ABSENT_NOT_SEEN = "absent/notSeen"
     MERELY_PRESENT = "merelyPresent"
@@ -309,11 +314,74 @@ class ProtectionCausality:
 
 
 @dataclass(frozen=True)
+class ExilePlayPermission:
+    permission_id: str
+    source_card_id: str
+    exiled_card_id: str
+    controller_id: str
+    granted_turn: int
+    expires_turn: int
+    allow_cast: bool = True
+    allow_land_play: bool = True
+
+    def allows(
+        self,
+        *,
+        card_id: str,
+        player_id: str,
+        turn: int,
+        kind: ExilePlayKind,
+        engine_action_id: str | None,
+    ) -> bool:
+        if not engine_action_id:
+            return False
+        if card_id != self.exiled_card_id or player_id != self.controller_id:
+            return False
+        if not self.granted_turn <= turn <= self.expires_turn:
+            return False
+        return self.allow_cast if kind == ExilePlayKind.CAST else self.allow_land_play
+
+
+@dataclass
+class ExilePermissionLedger:
+    permissions: dict[str, ExilePlayPermission] = field(default_factory=dict)
+
+    def grant(self, permission: ExilePlayPermission) -> None:
+        if not permission.permission_id or not permission.exiled_card_id:
+            raise SemanticError("exile permission requires stable permission and card identities")
+        if permission.expires_turn < permission.granted_turn:
+            raise SemanticError("exile permission cannot expire before it is granted")
+        self.permissions[permission.permission_id] = permission
+
+    def legal_permissions(
+        self,
+        *,
+        card_id: str,
+        player_id: str,
+        turn: int,
+        kind: ExilePlayKind,
+        engine_action_id: str | None,
+    ) -> list[str]:
+        return sorted(
+            pid
+            for pid, permission in self.permissions.items()
+            if permission.allows(
+                card_id=card_id,
+                player_id=player_id,
+                turn=turn,
+                kind=kind,
+                engine_action_id=engine_action_id,
+            )
+        )
+
+
+@dataclass(frozen=True)
 class ResourceDelta:
     mana: int = 0
     tapped_ready_resources: int = 0
     cards: int = 0
     life: int = 0
+    opponent_library_exiled: int = 0
 
 
 @dataclass(frozen=True)
@@ -325,7 +393,7 @@ class ResourceTransform:
     interruption_window: bool = True
 
     def net(self) -> ResourceDelta:
-        return ResourceDelta(mana=self.gain.mana-self.cost.mana, tapped_ready_resources=self.gain.tapped_ready_resources-self.cost.tapped_ready_resources, cards=self.gain.cards-self.cost.cards, life=self.gain.life-self.cost.life)
+        return ResourceDelta(mana=self.gain.mana-self.cost.mana, tapped_ready_resources=self.gain.tapped_ready_resources-self.cost.tapped_ready_resources, cards=self.gain.cards-self.cost.cards, life=self.gain.life-self.cost.life, opponent_library_exiled=self.gain.opponent_library_exiled-self.cost.opponent_library_exiled)
 
 
 @dataclass(frozen=True)
@@ -344,11 +412,11 @@ def prove_repeatable_cycle(line_id: str, transforms: Sequence[ResourceTransform]
     roles = set(available_roles); required: set[str] = set(); net = ResourceDelta()
     for t in transforms:
         required |= set(t.required_roles); d = t.net()
-        net = ResourceDelta(net.mana+d.mana, net.tapped_ready_resources+d.tapped_ready_resources, net.cards+d.cards, net.life+d.life)
+        net = ResourceDelta(net.mana+d.mana, net.tapped_ready_resources+d.tapped_ready_resources, net.cards+d.cards, net.life+d.life, net.opponent_library_exiled+d.opponent_library_exiled)
     if not required.issubset(roles):
         return None
-    nonnegative = all(getattr(net, k) >= 0 for k in ("mana", "tapped_ready_resources", "cards", "life"))
-    productive = any(getattr(net, k) > 0 for k in ("mana", "cards", "life")) or (outlet_role is not None and outlet_role in roles)
+    nonnegative = all(getattr(net, k) >= 0 for k in ("mana", "tapped_ready_resources", "cards", "life", "opponent_library_exiled"))
+    productive = any(getattr(net, k) > 0 for k in ("mana", "cards", "life", "opponent_library_exiled")) or (outlet_role is not None and outlet_role in roles)
     if not (nonnegative and productive):
         return None
     return LineWitness(line_id, tuple(t.transform_id for t in transforms), True, net, tuple(sorted(required)), outlet_role, tuple(essential_card_ids), tuple(involved_card_ids))
