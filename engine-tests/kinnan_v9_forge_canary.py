@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import time
 from pathlib import Path
@@ -21,6 +22,47 @@ import manabrew_pilot_v9 as pilot
 
 HERE = Path(__file__).resolve().parent
 DECK_DIR = HERE / "decks"
+
+# Forge indexes modal double-faced cards by their front face. The exact deck
+# registration remains the full printed name; only the engine lookup key is
+# normalized. Keeping both values is required for full-99 v3 attribution.
+MDFC_SEPARATOR = " // "
+UNSUPPORTED_CARD_RE = re.compile(
+    r'An unsupported card was requested: "([^"]+)"'
+)
+
+
+def _engine_name(registered_name: str) -> str:
+    return registered_name.split(MDFC_SEPARATOR, 1)[0].strip()
+
+
+def _registration_audit(commanders: list[str], cards: list[str]) -> dict[str, Any]:
+    registered_main = cards[len(commanders):]
+    mappings = [
+        {
+            "registeredIndex": index,
+            "registeredCardName": name,
+            "engineCardName": _engine_name(name),
+            "mapped": _engine_name(name) != name,
+        }
+        for index, name in enumerate(registered_main, start=1)
+    ]
+    canonical = {
+        "commanders": commanders,
+        "main": registered_main,
+    }
+    return {
+        "registeredCommanderCount": len(commanders),
+        "registeredMainCount": len(registered_main),
+        "registeredDistinctMainCount": len(set(registered_main)),
+        "registeredDeckSha256": _stable_hash(canonical),
+        "mappedCardCount": sum(1 for item in mappings if item["mapped"]),
+        "registeredToEngine": mappings,
+    }
+
+
+def _unsupported_card_names(stderr_text: str) -> list[str]:
+    return sorted(set(UNSUPPORTED_CARD_RE.findall(stderr_text)))
 
 
 def _parse_dck(path: Path, *, exact_kinnan_registration: bool) -> tuple[list[str], list[str]]:
@@ -59,10 +101,20 @@ def _player(
         DECK_DIR / deck_file,
         exact_kinnan_registration=exact_kinnan_registration,
     )
+    engine_commanders = [_engine_name(card) for card in commanders]
     return {
         "name": name,
-        "commanderNames": commanders,
-        "deck": [{"name": card} for card in cards],
+        "commanderNames": engine_commanders,
+        "deck": [
+            {
+                "name": _engine_name(card),
+                # Unknown JSON fields are ignored by the pinned adapter, but
+                # this keeps exact registration identity alongside lookup
+                # identity in the durable start-game payload.
+                "registeredName": card,
+            }
+            for card in cards
+        ],
         "ai": ai,
     }
 
@@ -105,8 +157,12 @@ def _stable_hash(value: Any) -> str:
 
 
 def run_canary(args: argparse.Namespace) -> dict[str, Any]:
+    kinnan_commanders, kinnan_cards = _parse_dck(
+        DECK_DIR / args.deck,
+        exact_kinnan_registration=True,
+    )
     report: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-live-forge-canary-v2",
+        "schemaVersion": "kinnan-v9-live-forge-canary-v3",
         "pilotVersion": pilot.PILOT_VERSION,
         "policyVersion": pilot.POLICY_VERSION,
         "purpose": "component-canary",
@@ -115,6 +171,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
         "status": "starting",
         "valid": False,
         "promptTrace": [],
+        "registrationAudit": _registration_audit(kinnan_commanders, kinnan_cards),
     }
     stderr_path = args.report.with_suffix(".stderr.log")
     stderr_path.parent.mkdir(parents=True, exist_ok=True)
@@ -352,7 +409,7 @@ def main() -> int:
         report = run_canary(args)
     except Exception as exc:
         report = {
-            "schemaVersion": "kinnan-v9-live-forge-canary-v2",
+            "schemaVersion": "kinnan-v9-live-forge-canary-v3",
             "pilotVersion": pilot.PILOT_VERSION,
             "policyVersion": pilot.POLICY_VERSION,
             "purpose": "component-canary",
@@ -362,6 +419,18 @@ def main() -> int:
             "valid": False,
             "error": repr(exc),
         }
+    stderr_path = args.report.with_suffix(".stderr.log")
+    stderr_text = stderr_path.read_text(errors="replace") if stderr_path.exists() else ""
+    unsupported = _unsupported_card_names(stderr_text)
+    report["cardResolution"] = {
+        "unsupportedCount": len(unsupported),
+        "unsupportedRegisteredOrEngineNames": unsupported,
+        "valid": not unsupported,
+    }
+    if unsupported:
+        report["status"] = "failed_closed"
+        report["valid"] = False
+        report["error"] = "Forge did not resolve every registered deck card"
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
     print(json.dumps(report, sort_keys=True))

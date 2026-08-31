@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/manabrew")
 HOST = ROOT / "forge-harness/src/main/java/forge/harness/host"
+FORGE_RES = ROOT / "forge/forge-gui/res"
 
 
 def replace_once(path: Path, old: str, new: str, label: str) -> None:
@@ -23,6 +24,18 @@ def replace_once(path: Path, old: str, new: str, label: str) -> None:
     if count != 1:
         raise SystemExit(f"repair precondition failed for {label}: expected 1 source block, found {count}")
     path.write_text(text.replace(old, new, 1))
+    print(f"repaired: {label}")
+
+
+def write_exact(path: Path, content: str, label: str) -> None:
+    """Install a pinned upstream resource without silently accepting drift."""
+    if path.exists():
+        if path.read_text() != content:
+            raise SystemExit(f"repair precondition failed for {label}: existing content differs")
+        print(f"already repaired: {label}")
+        return
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
     print(f"repaired: {label}")
 
 
@@ -288,5 +301,42 @@ replace_once(
 # Preserve chooseColor tokens exactly as the pilot submits them. The pinned
 # adapter already reads the chosenColors map key verbatim; rewriting U->Blue or
 # G->Green here breaks Forge prompts whose offered strings are mana symbols.
+
+# The pinned Forge submodule predates HOB, but the registered tournament 99
+# contains The Notary Hobbits. Install only the exact upstream implementation
+# needed by this deck, sourced from Card-Forge/forge commit
+# 68a95407b397cbcec19000a1c60d2950702fc8bd. The script blob is
+# 16b9f2e527097c2a476f13423c68a8fd9d840fc7; the official HOB edition entry is
+# collector 131, rare. This is a semantic backport, not a substitute card.
+write_exact(
+    FORGE_RES / "cardsfolder/t/the_notary_hobbits.txt",
+    '''Name:The Notary Hobbits
+ManaCost:3 G G
+Types:Legendary Creature Halfling Advisor
+PT:1/1
+T:Mode$ ChangesZone | Destination$ Battlefield | ValidCard$ Card.Self+!token | Execute$ TrigToken | TriggerZones$ Battlefield | TriggerDescription$ When CARDNAME enter, if they're not a token, create two tokens that are copies of them, except the tokens aren't legendary.
+SVar:TrigToken:DB$ CopyPermanent | Defined$ TriggeredCardLKICopy | NumCopies$ 2 | NonLegendary$ True
+A:AB$ Mana | Cost$ T | Produced$ C | Amount$ X | SpellDescription$ Add {C} for each Halfling you control.
+SVar:X:Count$Valid Halfling.YouCtrl
+DeckHas:Ability$Token
+DeckHints:Type$Halfling
+Oracle:When The Notary Hobbits enter, if they're not a token, create two tokens that are copies of them, except the tokens aren't legendary.\\n{T}: Add {C} for each Halfling you control.
+''',
+    "pinned upstream The Notary Hobbits card script",
+)
+write_exact(
+    FORGE_RES / "editions/Kinnan Lab HOB.txt",
+    '''[metadata]
+Code=HOB
+Date=2026-08-14
+Name=The Hobbit
+Type=Expansion
+ScryfallCode=HOB
+
+[cards]
+131 R The Notary Hobbits @Jarel Threat
+''',
+    "pinned upstream HOB registration subset",
+)
 
 print("all Manabrew repairs applied successfully")

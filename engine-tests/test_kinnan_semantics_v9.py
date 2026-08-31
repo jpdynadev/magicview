@@ -138,6 +138,33 @@ class Full99BridgeTests(unittest.TestCase):
         with self.assertRaises(ValueError): build_sql([game])
 
 
+class CardRegistrationParityTests(unittest.TestCase):
+    def test_mdfc_lookup_preserves_exact_registered_identity(self):
+        import kinnan_v9_forge_canary as c
+        commanders, cards = c._parse_dck(
+            c.DECK_DIR / "Kinnan_Sterling_TopDeck_Invitational_2026.dck",
+            exact_kinnan_registration=True,
+        )
+        audit = c._registration_audit(commanders, cards)
+        self.assertEqual(audit["registeredMainCount"], 99)
+        self.assertEqual(audit["registeredDistinctMainCount"], 99)
+        self.assertEqual(audit["mappedCardCount"], 5)
+        glasspool = next(
+            row for row in audit["registeredToEngine"]
+            if row["registeredCardName"].startswith("Glasspool Mimic")
+        )
+        self.assertEqual(glasspool["registeredCardName"], "Glasspool Mimic // Glasspool Shore")
+        self.assertEqual(glasspool["engineCardName"], "Glasspool Mimic")
+
+    def test_unsupported_card_log_fails_closed_without_duplicates(self):
+        import kinnan_v9_forge_canary as c
+        stderr = (
+            'An unsupported card was requested: "Missing" from "null".\n'
+            'An unsupported card was requested: "Missing" from "null".\n'
+        )
+        self.assertEqual(c._unsupported_card_names(stderr), ["Missing"])
+
+
 class AdapterTests(unittest.TestCase):
     def test_choose_action_requires_and_uses_stable_action_id(self):
         import manabrew_pilot_v9 as p; snap={"phase":"main1","step":"main1","priorityPlayerId":"player-0"}; c=p.choose_action([{"actionId":"pass","type":"pass"},{"actionId":"mana","type":"activateAbility","isManaAbility":True,"cardTypes":["Creature"],"semanticTags":["mana_source"],"producedMana":{"G":1}}],snap,player_id="player-0"); self.assertEqual(c["actionId"],"mana")
