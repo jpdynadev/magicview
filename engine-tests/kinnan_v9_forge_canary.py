@@ -2,9 +2,10 @@
 """Live Forge protocol canary for the canonical pilot-v9 path.
 
 This is intentionally not a game simulation and never creates ranking evidence.
-It starts the pinned interactive harness, advances only pregame prompts for the
-external Kinnan seat, and stops once a real typed ``chooseAction`` prompt has
-been scored by pilot-v9. Any missing stable identity fails closed.
+It starts the pinned interactive harness, advances pregame prompts for the
+external Kinnan seat, submits one real typed ``chooseAction`` selected by
+pilot-v9, and proves Forge accepted it by reaching a later phase. Any missing
+stable identity or state transition fails closed.
 """
 from __future__ import annotations
 
@@ -105,7 +106,7 @@ def _stable_hash(value: Any) -> str:
 
 def run_canary(args: argparse.Namespace) -> dict[str, Any]:
     report: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-live-forge-canary-v1",
+        "schemaVersion": "kinnan-v9-live-forge-canary-v2",
         "pilotVersion": pilot.PILOT_VERSION,
         "policyVersion": pilot.POLICY_VERSION,
         "purpose": "component-canary",
@@ -166,6 +167,9 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
             session_id = str(start["sessionId"])
             deadline = time.monotonic() + args.max_seconds
             last_prompt_id = None
+            submitted_witness: dict[str, Any] | None = None
+            pre_action_snapshot_hash = ""
+            post_action_snapshot_hash = ""
             while time.monotonic() < deadline:
                 raw_prompt = _rpc(
                     proc,
@@ -196,12 +200,60 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "step": snapshot.get("step"),
                     }
                 )
+                if submitted_witness is not None:
+                    current_snapshot_hash = _stable_hash(snapshot)
+                    if not post_action_snapshot_hash and current_snapshot_hash != pre_action_snapshot_hash:
+                        post_action_snapshot_hash = current_snapshot_hash
+                    submitted_turn = submitted_witness["snapshotTurn"]
+                    submitted_step = submitted_witness["snapshotStep"]
+                    phase_advanced = (
+                        snapshot.get("turn") != submitted_turn
+                        or snapshot.get("step") != submitted_step
+                    )
+                    if post_action_snapshot_hash and phase_advanced:
+                        transition = {
+                            "fromPromptId": submitted_witness["promptId"],
+                            "toPromptId": prompt_id,
+                            "fromTurn": submitted_turn,
+                            "fromStep": submitted_step,
+                            "toTurn": snapshot.get("turn"),
+                            "toStep": snapshot.get("step"),
+                        }
+                        deterministic_witness = {
+                            "action": submitted_witness,
+                            "transition": transition,
+                        }
+                        report.update(
+                            {
+                                "status": "typed_action_applied_and_phase_advanced",
+                                "valid": True,
+                                "typedActionIdsComplete": True,
+                                "witness": submitted_witness,
+                                "transition": transition,
+                                "preActionSnapshotHash": pre_action_snapshot_hash,
+                                "postActionSnapshotHash": post_action_snapshot_hash,
+                                "deterministicWitnessHash": _stable_hash(deterministic_witness),
+                            }
+                        )
+                        return report
                 if prompt_type == "chooseAction":
                     actions = list(inp.get("actions") or [])
                     if not actions:
                         report["promptTrace"][-1]["actionCount"] = 0
                         report["promptTrace"][-1]["forcedPass"] = True
                         report["emptyActionPrompts"] = int(report.get("emptyActionPrompts") or 0) + 1
+                        _submit(
+                            proc,
+                            session_id,
+                            {
+                                "type": "chooseAction",
+                                "output": {"type": "pass", "exhaustStack": False},
+                            },
+                        )
+                        continue
+                    if submitted_witness is not None:
+                        report["promptTrace"][-1]["actionCount"] = len(actions)
+                        report["promptTrace"][-1]["boundedPass"] = True
                         _submit(
                             proc,
                             session_id,
@@ -234,16 +286,24 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "snapshotStep": snapshot.get("step"),
                         "priorityPlayerId": snapshot.get("priorityPlayerId"),
                     }
+                    pre_action_snapshot_hash = _stable_hash(snapshot)
+                    submitted_witness = witness
                     report.update(
                         {
-                            "status": "typed_action_verified",
-                            "valid": True,
+                            "status": "typed_action_submitted",
                             "typedActionIdsComplete": True,
                             "witness": witness,
-                            "deterministicWitnessHash": _stable_hash(witness),
                         }
                     )
-                    return report
+                    _submit(
+                        proc,
+                        session_id,
+                        {
+                            "type": "chooseAction",
+                            "output": {"type": "act", "actionId": chosen_id},
+                        },
+                    )
+                    continue
 
                 answer = _pregame_answer(prompt_type)
                 if answer is None:
@@ -251,6 +311,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         f"unsupported pregame prompt before typed action canary: {prompt_type!r}"
                     )
                 _submit(proc, session_id, answer)
+            if submitted_witness is not None:
+                raise RuntimeError("timed out before the submitted live action advanced Forge state")
             raise RuntimeError("timed out before a live typed chooseAction prompt")
         finally:
             if session_id:
@@ -285,7 +347,7 @@ def main() -> int:
         report = run_canary(args)
     except Exception as exc:
         report = {
-            "schemaVersion": "kinnan-v9-live-forge-canary-v1",
+            "schemaVersion": "kinnan-v9-live-forge-canary-v2",
             "pilotVersion": pilot.PILOT_VERSION,
             "policyVersion": pilot.POLICY_VERSION,
             "purpose": "component-canary",
