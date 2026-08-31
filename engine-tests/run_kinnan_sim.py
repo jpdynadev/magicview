@@ -43,6 +43,29 @@ def _run_module_path(path: Path, forwarded: list[str]) -> int:
         sys.argv = old_argv
 
 
+def _arg_value(args: list[str], name: str, default: str) -> str:
+    try:
+        index = args.index(name)
+    except ValueError:
+        return default
+    return args[index + 1] if index + 1 < len(args) else default
+
+
+def _live_runner(forwarded: list[str]):
+    """Load the same runner the canonical full-99 worker would use.
+
+    This is deliberately checked before Forge starts. When production parity is
+    eventually flipped green, an accidentally retained v8/architecture runner
+    must still fail rather than silently becoming the new production path.
+    """
+    mode = _arg_value(forwarded, "--mode", "screen")
+    if mode == "adversarial":
+        import manabrew_pilot_arch_adv as config
+    else:
+        import manabrew_pilot_arch as config
+    return config.runner
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Canonical pilot-v9 Kinnan simulation launcher",
@@ -71,12 +94,18 @@ def main() -> int:
 
         return int(manabrew_pilot_v9.canary_main())
 
-    # This intentionally fails today. It is the one gate that will open after
-    # live Forge integration, exact anchors, replay and full-99 v3 all clear.
-    assert_ranking_ready()
     forwarded = list(args.worker_args)
     if forwarded and forwarded[0] == "--":
         forwarded = forwarded[1:]
+
+    # Two independent barriers are intentional:
+    # 1) the semantic/anchor/telemetry production manifest must be green;
+    # 2) the actual live runner selected by the worker must identify as v9.
+    # Today barrier (1) fails, so importing the legacy runner is avoided. Once
+    # (1) becomes green, barrier (2) prevents a stale worker composition from
+    # ever producing ranking evidence.
+    assert_ranking_ready()
+    assert_ranking_ready(runner=_live_runner(forwarded))
     return _run_module_path(WORKERS["ranking"], forwarded)
 
 
