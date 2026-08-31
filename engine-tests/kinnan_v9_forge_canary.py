@@ -158,6 +158,38 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
             "type": "chooseBoolean",
             "output": {"type": "decision", "value": False},
         }
+    if prompt_type == "chooseCards":
+        # Match Manabrew protocol v1's forced-choice resolver exactly. An
+        # empty choice is deterministic when max <= 0, and selecting every
+        # offered card is deterministic when min >= the candidate count.
+        # Any genuine choice remains visible to pilot policy and fails closed
+        # here rather than silently changing game semantics.
+        cards = list(prompt_input.get("cards") or [])
+        card_ids = [
+            str(card.get("id") or "") if isinstance(card, dict) else ""
+            for card in cards
+        ]
+        minimum = prompt_input.get("min")
+        maximum = prompt_input.get("max")
+        if isinstance(maximum, int) and not isinstance(maximum, bool) and maximum <= 0:
+            chosen_ids: list[str] = []
+        elif (
+            isinstance(minimum, int)
+            and not isinstance(minimum, bool)
+            and minimum >= len(card_ids)
+            and all(card_ids)
+            and len(set(card_ids)) == len(card_ids)
+        ):
+            chosen_ids = card_ids
+        else:
+            return None
+        return {
+            "type": "chooseCards",
+            "output": {
+                "type": "chooseCardsDecision",
+                "chosenCardIds": chosen_ids,
+            },
+        }
     return None
 
 
@@ -268,6 +300,13 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "presentationTitle": (inp.get("presentation") or {}).get("title"),
                         "confirmLabel": inp.get("confirmLabel"),
                         "denyLabel": inp.get("denyLabel"),
+                        "promptInputHash": _stable_hash(inp),
+                        "choiceMin": inp.get("min"),
+                        "choiceMax": inp.get("max"),
+                        "choiceCardIds": [
+                            str(card.get("id") or "") if isinstance(card, dict) else ""
+                            for card in list(inp.get("cards") or [])
+                        ] if prompt_type == "chooseCards" else [],
                     }
                 )
                 if submitted_witness is not None:
