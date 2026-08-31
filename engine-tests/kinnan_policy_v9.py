@@ -83,3 +83,41 @@ def prove_deadeye_family(*, etb_mana_gain: int, blink_cost: int, available_roles
         outlet_role=outlet_role,
         essential_card_ids=essential_card_ids,
     )
+
+
+def prove_knacksaw_family(
+    *,
+    produced_mana: int,
+    untap_cost: int,
+    cards_exiled_per_cycle: int,
+    available_roles: Iterable[str],
+    essential_card_ids: Sequence[str],
+) -> LineWitness | None:
+    """Prove a repeatable library-exile cycle without inventing play permission."""
+
+    if produced_mana <= 0 or untap_cost < 0 or cards_exiled_per_cycle <= 0:
+        return None
+    transforms = [
+        ResourceTransform(
+            "knacksaw-tap-for-mana",
+            ResourceDelta(tapped_ready_resources=1),
+            ResourceDelta(mana=produced_mana),
+            frozenset({"knacksaw_mana_engine"}),
+        ),
+        ResourceTransform(
+            "knacksaw-untap-exile",
+            ResourceDelta(mana=untap_cost),
+            ResourceDelta(
+                tapped_ready_resources=1,
+                opponent_library_exiled=cards_exiled_per_cycle,
+            ),
+            frozenset({"knacksaw_untap_engine"}),
+        ),
+    ]
+    return prove_repeatable_cycle(
+        "KNACKSAW_LIBRARY_EXILE_FAMILY",
+        transforms,
+        available_roles=available_roles,
+        outlet_role="library_exile_outlet",
+        essential_card_ids=essential_card_ids,
+    )
