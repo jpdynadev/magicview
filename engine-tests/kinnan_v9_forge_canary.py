@@ -301,6 +301,10 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "confirmLabel": inp.get("confirmLabel"),
                         "denyLabel": inp.get("denyLabel"),
                         "promptInputHash": _stable_hash(inp),
+                        # Keep the typed prompt payload in the durable raw
+                        # trace. This is required to implement non-forced
+                        # pilot choices from live identities and metadata.
+                        "promptInput": inp,
                         "choiceMin": inp.get("min"),
                         "choiceMax": inp.get("max"),
                         "choiceCardIds": [
