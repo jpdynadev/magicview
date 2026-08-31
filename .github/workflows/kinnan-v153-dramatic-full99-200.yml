@@ -1,0 +1,279 @@
+name: Kinnan v153 Dramatic Full99 200 Paired
+
+on:
+  push:
+    branches: [agent/kinnan-v153-dramatic-full99-200]
+    paths: [.github/workflows/kinnan-v153-dramatic-full99-200.yml]
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-v153-dramatic-full99-200
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+  SIM_V2_EARLY_SUCCESS: '0'
+  SIM_V2_EXACT_DEADLINE: '0'
+  SIM_V2_TRACE: '0'
+  SIM_V2_CAPTURE_STDERR: '0'
+  SIM_V2_PROFILE: arch-v153-dramatic-full99-200-7000p-240s
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Build repaired runtime and full-99 semantic gate
+        run: |
+          set -euo pipefail
+          sudo apt-get update && sudo apt-get install -y maven
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v153_dramatic_singleton.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          python3 - <<'PY'
+          from pathlib import Path
+          t=Path('engine-tests/manabrew_pilot_arch_adv.py').read_text()
+          assert "runner.PILOT_VERSION = 'arch-aware-v1.40-adversarial'" in t
+          for key in ('F10','F10_DRAMATIC_SINGLETON'):
+              p=Path('engine-tests/decks')/f'Kinnan_ARCH_{key}.dck'
+              lines=p.read_text().splitlines(); start=lines.index('[Main]')+1
+              cards=[x.split(' ',1)[1] for x in lines[start:] if x.strip()]
+              assert len(cards)==99 and len(set(cards))==99,(key,len(cards),len(set(cards)))
+          PY
+          rm -rf /tmp/manabrew && git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF" && git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE" && python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew && node scripts/harness.mjs build
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p gate
+          for SPEC in 'F10:7000100:balanced' 'F10_DRAMATIC_SINGLETON:7000101:mixed'; do
+            VARIANT=${SPEC%%:*}; REST=${SPEC#*:}; SEED=${REST%%:*}; POD=${REST##*:}
+            CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v152_full99.py               /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar               /tmp/manabrew/forge/forge-gui/               --mode adversarial --variant "$VARIANT" --fixed-seat $((SEED % 4)) --seeds "$SEED"               --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1               --xmx 1280m --xms 192m --cache-dir ".sim-cache/v153gate-${GITHUB_RUN_ID}-${VARIANT}"               --retain-traces failures --engine-id "$MANABREW_REF:arch-v153-full99-gate:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:${SEED}"               --exposure-card "Energy Refractor" --exposure-card "Dramatic Reversal"               --output "gate/${VARIANT}.json"
+            python3 - "gate/${VARIANT}.json" "$VARIANT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) else d
+          assert r.get('status') in {'game_over','horizon_complete'},r
+          assert r.get('variant')==sys.argv[2]
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None,r
+          assert r.get('v2SessionCleanupMode')=='discard_jvm_no_rpc',r
+          assert r.get('cardTelemetrySchemaVersion')=='kinnan-full99-card-telemetry-v2',r
+          cov=r.get('cardTelemetryCoverage') or {}
+          assert cov.get('expectedRows')==99 and cov.get('actualRows')==99 and cov.get('distinctCards')==99,cov
+          assert not cov.get('missingCards') and not cov.get('duplicates'),cov
+          assert len(r.get('cardTelemetryRows') or [])==99,r
+          assert r.get('engineId'),r
+          PY
+          done
+          python3 engine-tests/validate_full99_coverage.py 'gate/*.json' --report gate/full99-coverage.json
+          tar -C /tmp/manabrew -czf "$GITHUB_WORKSPACE/manabrew-v153-full99-200.tgz" forge-harness/target/forge-harness-jar-with-dependencies.jar forge/forge-gui
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v153-full99-200-runtime
+          path: |
+            manabrew-v153-full99-200.tgz
+            gate/**
+          compression-level: 0
+          retention-days: 5
+
+  screen:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 420
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        variant: [F10, F10_DRAMATIC_SINGLETON]
+        seat: [0,1,2,3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with: {distribution: temurin, java-version: '21'}
+      - uses: actions/download-artifact@v5
+        with: {name: v153-full99-200-runtime, path: runtime}
+      - name: Run 50 canonical full-99 paired keys
+        env:
+          VARIANT: ${{ matrix.variant }}
+          SEAT: ${{ matrix.seat }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/manabrew out/valid out/attempts
+          tar -C /tmp/manabrew -xzf runtime/manabrew-v153-full99-200.tgz
+          python3 engine-tests/generate_architecture_decks_v2.py
+          python3 engine-tests/generate_v153_dramatic_singleton.py
+          for f in 112_payment_repair 113_payment_scope_fix 114_monolith_affordability_fix 115_monolith_payment_progress_fix 116_replicate_number_fix 117_fourarch_roles 118_kinnan_color_affordability_fix 119_kinnan_colored_payment_priority_fix 120_kinnan_colored_source_assignment_fix 121_kinnan_outer_affordability_fix 122_kinnan_conservative_color_reserve_fix 123_kinnan_failed_payment_step_guard 124_kinnan_payment_cancel_latch 125_kinnan_action_score_cancel_block 126_kinnan_combo_cancel_block 127_shang_legolas_roles 128_shang_spellskite_roles; do python3 engine-tests/apply_arch_v${f}.py; done
+          python3 engine-tests/apply_arch_v140_combo_monolith_affordability.py
+          BASE=$((7001000 + SEAT * 1000))
+          : > "out/${VARIANT}-seat${SEAT}-errors.ndjson"
+          for OFFSET in $(seq 0 49); do
+            SEED=$((BASE + OFFSET)); case $((OFFSET % 4)) in 0) POD=balanced;; 1) POD=turbo;; 2) POD=midrange;; 3) POD=mixed;; esac
+            OK=0
+            for TRY in 1 2 3; do
+              ATT="out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.json"
+              CACHE=".sim-cache/v153-${GITHUB_RUN_ID}-${VARIANT}-s${SEAT}-${SEED}-${POD}-try${TRY}"
+              ENGINE="$MANABREW_REF:arch-v153-full99-200:${GITHUB_RUN_ID}:${GITHUB_SHA}:${VARIANT}:s${SEAT}:${SEED}:${POD}:try${TRY}"
+              set +e
+              CEDH_POD="$POD" python3 engine-tests/sim_v2_worker_arch_v152_full99.py                 /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar                 /tmp/manabrew/forge/forge-gui/                 --mode adversarial --variant "$VARIANT" --fixed-seat "$SEAT" --seeds "$SEED"                 --max-round 4 --max-prompts 7000 --max-seconds 240 --jvm-reuse 1                 --xmx 1280m --xms 192m --cache-dir "$CACHE" --retain-traces failures --engine-id "$ENGINE"                 --exposure-card "Energy Refractor" --exposure-card "Dramatic Reversal" --output "$ATT"                 > "out/attempts/${VARIANT}-s${SEAT}-seed${SEED}-${POD}-try${TRY}.log" 2>&1
+              RC=$?; set -e
+              STATUS=$(python3 - "$ATT" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1])); r=d[0] if isinstance(d,list) and d else d; print(r.get('status','missing'))
+          except Exception: print('missing')
+          PY
+              )
+              if [ "$STATUS" = game_over ] || [ "$STATUS" = horizon_complete ]; then
+                if python3 - "$ATT" "$VARIANT" "$SEAT" "$SEED" "$POD" <<'PY'
+          import json,sys
+          p,v,seat,seed,pod=sys.argv[1:]; d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+          assert r.get('variant')==v and int(r.get('kinnanSeat'))==int(seat) and int(r.get('seed'))==int(seed) and r.get('podProfile')==pod
+          assert r.get('pilotVersion')=='arch-aware-v1.40-adversarial'
+          assert r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None,r
+          assert r.get('v2SessionCleanupMode')=='discard_jvm_no_rpc',r
+          assert r.get('cardTelemetrySchemaVersion')=='kinnan-full99-card-telemetry-v2',r
+          cov=r.get('cardTelemetryCoverage') or {}
+          assert cov.get('expectedRows')==99 and cov.get('actualRows')==99 and cov.get('distinctCards')==99,cov
+          assert not cov.get('missingCards') and not cov.get('duplicates'),cov
+          rows=r.get('cardTelemetryRows') or []
+          assert len(rows)==99 and len({x.get('card') for x in rows})==99,r
+          assert all(x.get('engineId') and x.get('deckHash') and x.get('schemaVersion')=='kinnan-full99-card-telemetry-v2' for x in rows),r
+          assert r.get('engineId') and isinstance(r.get('rawActionTrace'),list),r
+          PY
+                then cp "$ATT" "out/valid/${VARIANT}-s${SEAT}-seed${SEED}.json"; OK=1; break; fi
+              fi
+              printf '{"variant":"%s","seat":%s,"seed":%s,"pod":"%s","try":%s,"status":"%s","rc":%s}\n' "$VARIANT" "$SEAT" "$SEED" "$POD" "$TRY" "$STATUS" "$RC" >> "out/${VARIANT}-seat${SEAT}-errors.ndjson"
+            done
+            [ "$OK" -eq 1 ] || echo "UNRESOLVED $VARIANT $SEAT $SEED $POD" >&2
+          done
+          python3 engine-tests/validate_full99_coverage.py 'out/valid/*.json' --report "out/${VARIANT}-seat${SEAT}-full99-coverage.json"
+          python3 - "$VARIANT" "$SEAT" <<'PY'
+          import glob,json,sys
+          v=sys.argv[1]; seat=int(sys.argv[2]); lo=7001000+seat*1000; hi=lo+49; rows=[]
+          for p in glob.glob(f'out/valid/{v}-s{seat}-seed*.json'):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if lo <= int(r['seed']) <= hi: rows.append(r)
+          keys={(int(r['seed']),int(r['kinnanSeat']),r.get('podProfile')) for r in rows}
+          assert len(rows)==50 and len(keys)==50,(v,seat,len(rows),len(keys))
+          assert sum(len(r.get('cardTelemetryRows') or []) for r in rows)==4950
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v153-${{ matrix.variant }}-seat${{ matrix.seat }}
+          path: out/**
+          if-no-files-found: error
+          retention-days: 5
+
+  aggregate:
+    needs: screen
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: v153-*-seat*
+          path: all
+      - name: Validate global full-99 coverage
+        run: |
+          python3 engine-tests/validate_full99_coverage.py 'all/**/valid/*.json' --report full99-global-coverage.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('full99-global-coverage.json'))
+          assert r['validGames']==400,r
+          assert r['expectedRows']==39600 and r['actualRows']==39600,r
+          assert r['missingCards']==0 and r['coverageValid'] is True,r
+          PY
+      - name: Strict 200 paired aggregate
+        run: |
+          python3 - <<'PY'
+          import collections,glob,json,math,pathlib
+          variants=['F10','F10_DRAMATIC_SINGLETON']; good={'game_over','horizon_complete'}
+          rows={v:[] for v in variants}; errs={v:[] for v in variants}
+          for p in glob.glob('all/**/valid/*.json',recursive=True):
+              d=json.load(open(p)); r=d[0] if isinstance(d,list) else d
+              if r.get('variant') in rows: rows[r['variant']].append(r)
+          for p in glob.glob('all/**/*errors.ndjson',recursive=True):
+              for line in open(p):
+                  try:r=json.loads(line)
+                  except Exception:continue
+                  if r.get('variant') in errs: errs[r['variant']].append(r)
+          key=lambda r:(int(r['seed']),int(r['kinnanSeat']),str(r.get('podProfile')))
+          def valid(r):
+              cov=r.get('cardTelemetryCoverage') or {}; cr=r.get('cardTelemetryRows') or []
+              return r.get('status') in good and r.get('pilotVersion')=='arch-aware-v1.40-adversarial' and r.get('v2SessionCleanup') is True and r.get('v2SessionCleanupError') is None and r.get('v2SessionCleanupMode')=='discard_jvm_no_rpc' and r.get('cardTelemetrySchemaVersion')=='kinnan-full99-card-telemetry-v2' and cov.get('expectedRows')==99 and cov.get('actualRows')==99 and cov.get('distinctCards')==99 and not cov.get('missingCards') and not cov.get('duplicates') and len(cr)==99 and len({x.get('card') for x in cr})==99
+          def metric(r,m):
+              if m=='assembly': return (r.get('firstAssemblyTurn') or 99)<=4
+              if m=='attempt': return (r.get('firstAttemptTurn') or 99)<=4
+              if m=='protected': return bool(r.get('strictProtectedT4'))
+              if m=='win': return bool(r.get('kinnanWon'))
+          def involved(r,card):
+              x=next((x for x in (r.get('cardTelemetryRows') or []) if x.get('card')==card),None)
+              return bool(x and x.get('outcomeAttribution') in {'involved','essential'})
+          maps={v:{key(r):r for r in rows[v] if valid(r)} for v in variants}
+          expected={(7001000+s*1000+off,s,('balanced','turbo','midrange','mixed')[off%4]) for s in range(4) for off in range(50)}
+          assert all(len(rows[v])==200 for v in variants),{v:len(rows[v]) for v in variants}
+          assert all(len(maps[v])==200 for v in variants),{v:len(maps[v]) for v in variants}
+          assert all(set(maps[v])==expected for v in variants),'missing/extra canonical keys'
+          common=sorted(expected)
+          rep={'strictValid':True,'telemetryComplete':True,'telemetrySchemaVersion':'kinnan-full99-card-telemetry-v2','profile':'arch-v153-dramatic-full99-200-7000p-240s','change':{'cuts':['Energy Refractor'],'adds':['Dramatic Reversal']},'cacheReuse':{'compatiblePriorRowsReused':0},'telemetryCoverage':json.load(open('full99-global-coverage.json')),'variants':{},'paired':{},'errorAttempts':{},'changedSlotConditional':{},'cardMetrics':{}}
+          fields=('openingHand','kept','mulliganed','cast','played','activated','used','comboParticipation','protectionParticipation','interactionParticipation','naturalWinPresence','assemblyPresence','attemptPresence','protectedAttemptPresence','packageExecution')
+          for v in variants:
+              xs=list(maps[v].values()); asm=sum(metric(r,'assembly') for r in xs); att=sum(metric(r,'attempt') for r in xs)
+              rep['variants'][v]={'valid':len(xs),'assemblyT4':asm,'attemptT4':att,'protectedT4':sum(metric(r,'protected') for r in xs),'wins':sum(metric(r,'win') for r in xs),'mulligans':sum(int(r.get('mulligans') or 0) for r in xs),'assemblyToAttemptRate':att/asm if asm else None,'failureCodes':dict(collections.Counter(str(r.get('primaryFailureCode') or 'NONE') for r in xs)),'pods':{},'seats':{}}
+              for pod in ('balanced','turbo','midrange','mixed'):
+                  ys=[r for r in xs if r.get('podProfile')==pod]; rep['variants'][v]['pods'][pod]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              for seat in range(4):
+                  ys=[r for r in xs if int(r.get('kinnanSeat'))==seat]; rep['variants'][v]['seats'][str(seat)]={'n':len(ys),'assemblyT4':sum(metric(r,'assembly') for r in ys),'attemptT4':sum(metric(r,'attempt') for r in ys),'protectedT4':sum(metric(r,'protected') for r in ys),'wins':sum(metric(r,'win') for r in ys)}
+              rep['errorAttempts'][v]=dict(collections.Counter(str(r.get('status')) for r in errs[v]))
+              cards={}
+              for game in xs:
+                  for row in game.get('cardTelemetryRows') or []:
+                      c=row['card']; out=cards.setdefault(c,{'registeredGames':0,'involved':0,'essential':0,**{f:0 for f in fields}})
+                      out['registeredGames']+=1
+                      out['involved']+=row.get('outcomeAttribution') in {'involved','essential'}
+                      out['essential']+=row.get('outcomeAttribution')=='essential'
+                      for f in fields: out[f]+=bool(row.get(f))
+              assert len(cards)==99 and all(x['registeredGames']==200 for x in cards.values()),(v,len(cards))
+              rep['cardMetrics'][v]=cards
+          def exact(a,b):
+              n=a+b
+              if not n:return 1.0
+              lo=min(a,b); p=sum(math.comb(n,i) for i in range(lo+1))/(2**n)
+              return min(1.0,2*p)
+          for m in ('assembly','attempt','protected','win'):
+              b=sum(metric(maps['F10'][k],m) for k in common); c=sum(metric(maps['F10_DRAMATIC_SINGLETON'][k],m) for k in common)
+              plus=sum((not metric(maps['F10'][k],m)) and metric(maps['F10_DRAMATIC_SINGLETON'][k],m) for k in common)
+              minus=sum(metric(maps['F10'][k],m) and (not metric(maps['F10_DRAMATIC_SINGLETON'][k],m)) for k in common)
+              rep['paired'][m]={'keys':200,'baseline':b,'challenger':c,'deltaRate':(c-b)/200,'discordantPlus':plus,'discordantMinus':minus,'mcnemarExactP':exact(plus,minus)}
+          for card in ('Energy Refractor','Dramatic Reversal'):
+              ks=[k for k in common if involved(maps['F10'][k],card) or involved(maps['F10_DRAMATIC_SINGLETON'][k],card)]
+              rep['changedSlotConditional'][card]={'keys':len(ks)}
+              for m in ('assembly','attempt','protected','win'):
+                  rep['changedSlotConditional'][card][m]={'baseline':sum(metric(maps['F10'][k],m) for k in ks),'challenger':sum(metric(maps['F10_DRAMATIC_SINGLETON'][k],m) for k in ks)}
+          pathlib.Path('results').mkdir(exist_ok=True)
+          pathlib.Path('results/kinnan-v153-dramatic-full99-200-latest.json').write_text(json.dumps(rep,indent=2,sort_keys=True)+'\n')
+          print(json.dumps(rep,indent=2,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v153-dramatic-full99-200-results
+          path: |
+            results/kinnan-v153-dramatic-full99-200-latest.json
+            full99-global-coverage.json
+          if-no-files-found: error
+          retention-days: 5
