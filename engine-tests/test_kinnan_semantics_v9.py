@@ -28,6 +28,18 @@ class SelectionTests(unittest.TestCase):
         lib=[{"id":"c2","types":["Creature"],"manaValue":2},{"id":"c3","types":["Creature"],"manaValue":3},{"id":"a3","types":["Artifact"],"manaValue":3},{"id":"c4","types":["Creature"],"manaValue":4}]; self.assertEqual([c["id"] for c in vannifar_candidates(2,lib)],["c3"])
 
 
+class ExilePermissionTests(unittest.TestCase):
+    def test_knacksaw_permission_requires_identity_window_and_engine_action(self):
+        ledger=ExilePermissionLedger(); ledger.grant(ExilePlayPermission("perm","clique","exiled","player-0",4,4))
+        self.assertEqual(ledger.legal_permissions(card_id="exiled",player_id="player-0",turn=4,kind=ExilePlayKind.CAST,engine_action_id="cast-1"),["perm"])
+        self.assertEqual(ledger.legal_permissions(card_id="exiled",player_id="player-0",turn=5,kind=ExilePlayKind.CAST,engine_action_id="cast-1"),[])
+        self.assertEqual(ledger.legal_permissions(card_id="exiled",player_id="player-0",turn=4,kind=ExilePlayKind.CAST,engine_action_id=None),[])
+    def test_knacksaw_permission_does_not_apply_to_other_card_or_player(self):
+        ledger=ExilePermissionLedger(); ledger.grant(ExilePlayPermission("perm","clique","exiled","player-0",4,4))
+        self.assertEqual(ledger.legal_permissions(card_id="other",player_id="player-0",turn=4,kind=ExilePlayKind.CAST,engine_action_id="x"),[])
+        self.assertEqual(ledger.legal_permissions(card_id="exiled",player_id="player-1",turn=4,kind=ExilePlayKind.CAST,engine_action_id="x"),[])
+
+
 class SoulbondPriorityTests(unittest.TestCase):
     def test_blink_breaks_soulbond_and_requires_new_object(self):
         s=SoulbondState(); s.pair("deadeye1","drake1"); s.blink("drake1","drake2"); self.assertIsNone(s.partner("deadeye1")); self.assertIsNone(s.partner("drake1"));
@@ -90,6 +102,40 @@ class PolicyFamilyTests(unittest.TestCase):
         import kinnan_policy_v9 as p; self.assertIsNotNone(p.prove_deadeye_family(etb_mana_gain=5,blink_cost=2,available_roles={"soulbond_blink_engine","etb_resource_engine","outlet"},outlet_role="outlet",essential_card_ids=["deadeye","etb"]))
     def test_deadeye_family_negative(self):
         import kinnan_policy_v9 as p; self.assertIsNone(p.prove_deadeye_family(etb_mana_gain=1,blink_cost=2,available_roles={"soulbond_blink_engine","etb_resource_engine","outlet"},outlet_role="outlet",essential_card_ids=["deadeye","etb"]))
+    def test_knacksaw_family_positive_library_exile_cycle(self):
+        import kinnan_policy_v9 as p; w=p.prove_knacksaw_family(produced_mana=2,untap_cost=2,cards_exiled_per_cycle=1,available_roles={"knacksaw_mana_engine","knacksaw_untap_engine","library_exile_outlet"},essential_card_ids=["clique","grant"]); self.assertIsNotNone(w); self.assertEqual(w.net_per_cycle.opponent_library_exiled,1)
+    def test_knacksaw_family_rejects_nonexiling_or_resource_negative_cycle(self):
+        import kinnan_policy_v9 as p; self.assertIsNone(p.prove_knacksaw_family(produced_mana=2,untap_cost=2,cards_exiled_per_cycle=0,available_roles={"knacksaw_mana_engine","knacksaw_untap_engine","library_exile_outlet"},essential_card_ids=["clique"])); self.assertIsNone(p.prove_knacksaw_family(produced_mana=1,untap_cost=2,cards_exiled_per_cycle=1,available_roles={"knacksaw_mana_engine","knacksaw_untap_engine","library_exile_outlet"},essential_card_ids=["clique"]))
+
+
+class Full99BridgeTests(unittest.TestCase):
+    def test_live_v2_rows_bridge_to_exact_stable_v3(self):
+        import tempfile
+        from pathlib import Path
+        from full99_telemetry_v3_bridge import attach_v3
+        with tempfile.TemporaryDirectory() as td:
+            deck=Path(td)/"deck.dck"; deck.write_text("[Commander]\n1 Kinnan, Bonder Prodigy\n\n[Main]\n"+"\n".join(f"1 Card {i}" for i in range(99))+"\n")
+            v2=[]
+            for i in range(99):
+                v2.append({"card":f"Card {i}","openingHand":i==0,"kept":i==0,"mulliganed":False,"firstSeenTurn":1 if i==0 else None,"firstDrawnTurn":None,"zoneChanges":[],"tutored":False,"revealed":False,"cast":False,"played":False,"manaProduced":0,"manaSpent":0,"activated":False,"used":False,"comboParticipation":False,"protectionParticipation":False,"interactionParticipation":False,"attemptPresence":False,"protectedAttemptPresence":False,"naturalWinPresence":False,"packageExecution":False,"outcomeAttribution":"involved" if i==0 else "present"})
+            compact={"variantDeckSha256":"deckhash","engineId":"engine","seed":1,"kinnanSeat":0,"podProfile":"balanced","cardTelemetryRows":v2,"rawActionTrace":[{"seq":1}]}
+            out=attach_v3(compact,{},deck); self.assertTrue(out["telemetryV3Complete"]); self.assertEqual(len(out["cardTelemetryV3Rows"]),99); self.assertEqual(out["cardTelemetryV3Coverage"]["actualRows"],99); self.assertEqual(len(out["registeredCardIdentityMap"]),99)
+    def test_bridge_rejects_partial_v2_rows(self):
+        import tempfile
+        from pathlib import Path
+        from full99_telemetry_v3_bridge import attach_v3
+        with tempfile.TemporaryDirectory() as td:
+            deck=Path(td)/"deck.dck"; deck.write_text("[Commander]\n1 Kinnan, Bonder Prodigy\n\n[Main]\n"+"\n".join(f"1 Card {i}" for i in range(99))+"\n")
+            with self.assertRaises(SemanticError): attach_v3({"variantDeckSha256":"d","cardTelemetryRows":[{"card":"Card 0"}]},{},deck)
+    def test_neon_v3_builder_requires_complete_artifact_and_separates_trace(self):
+        from build_full99_neon_ingest_v3 import build_sql
+        cards=self.cards() if hasattr(self,"cards") else [{"registeredCardId":f"c{i}","cardName":f"Card {i}"} for i in range(99)]
+        rows=build_full99_rows(game_id="g",deck_hash="d",registered_cards=cards,observed_by_card_id={})
+        coverage=validate_full99_coverage(rows,valid_game_ids=["g"],registered_card_ids_by_game={"g":[c["registeredCardId"] for c in cards]})
+        game={"telemetryV3Complete":True,"cardTelemetryV3Coverage":coverage,"cardTelemetryV3Rows":rows,"rawActionTrace":[{"seq":1}],"rawActionTraceHash":"h","rawActionTraceEventCount":1,"engineId":"e","variant":"v","seed":1,"kinnanSeat":0,"podProfile":"balanced","pilotVersion":"p"}
+        sql=build_sql([game]); self.assertIn("sim_game_action_traces_v3",sql); self.assertIn("sim_game_card_telemetry_v3",sql); self.assertEqual(sql.count("kinnan-full99-card-telemetry-v3"),100)
+        game["telemetryV3Complete"]=False
+        with self.assertRaises(ValueError): build_sql([game])
 
 
 class AdapterTests(unittest.TestCase):
