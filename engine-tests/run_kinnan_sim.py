@@ -66,6 +66,13 @@ def _live_runner(forwarded: list[str]):
     return config.runner
 
 
+def _forwarded(worker_args: list[str]) -> list[str]:
+    forwarded = list(worker_args)
+    if forwarded and forwarded[0] == "--":
+        forwarded = forwarded[1:]
+    return forwarded
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Canonical pilot-v9 Kinnan simulation launcher",
@@ -86,17 +93,21 @@ def main() -> int:
 
     # The launcher, not individual workflows, owns path identity.
     os.environ[EXECUTION_PATH_ENV] = CANONICAL_EXECUTION_PATH
+    forwarded = _forwarded(args.worker_args)
 
     if args.purpose == "component-canary":
         assert_component_ready()
         os.environ.setdefault("KINNAN_V9_ALLOW_CANARY", "1")
+        if forwarded:
+            if forwarded[0] != "--live-forge":
+                raise RuntimeError(
+                    "component canary arguments must begin with --live-forge; "
+                    "ranking workers are not available through the canary path"
+                )
+            return _run_module_path(HERE / "kinnan_v9_forge_canary.py", forwarded[1:])
         import manabrew_pilot_v9
 
         return int(manabrew_pilot_v9.canary_main())
-
-    forwarded = list(args.worker_args)
-    if forwarded and forwarded[0] == "--":
-        forwarded = forwarded[1:]
 
     # Two independent barriers are intentional:
     # 1) the semantic/anchor/telemetry production manifest must be green;

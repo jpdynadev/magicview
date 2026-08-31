@@ -1,0 +1,77 @@
+name: Kinnan v9 Live Forge Component Canary
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/kinnan-v153-pilot-v9-semantics
+    paths:
+      - .runs/kinnan-v9-live-forge-canary.txt
+
+concurrency:
+  group: kinnan-v9-live-forge-component-canary
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  MANABREW_REF: 8a1380e5a59986ea3fed143b85f710f9ee3888dc
+
+jobs:
+  live-forge-canary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Maven
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+      - name: Build pinned repaired Forge runtime
+        run: |
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+      - name: Run live protocol probe through canonical launcher
+        run: |
+          mkdir -p engine-tests/results/v9-live-forge-canary
+          python3 engine-tests/run_kinnan_sim.py --purpose component-canary -- \
+            --live-forge \
+            /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
+            /tmp/manabrew/forge/forge-gui/ \
+            --seed 1999000 \
+            --report engine-tests/results/v9-live-forge-canary/report.json
+      - name: Confirm ranking remains fail closed
+        run: |
+          set +e
+          python3 engine-tests/run_kinnan_sim.py --purpose ranking > /tmp/ranking.out 2>&1
+          rc=$?
+          set -e
+          test "$rc" -ne 0
+          grep -q 'production parity is not ready' /tmp/ranking.out
+      - name: Audit canonical workflow entrypoint
+        run: |
+          python3 engine-tests/audit_kinnan_execution_paths.py \
+            --path .github/workflows/kinnan-v9-live-forge-canary.yml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kinnan-v9-live-forge-canary-${{ github.run_id }}
+          path: engine-tests/results/v9-live-forge-canary/**
+          if-no-files-found: error
+          retention-days: 30
