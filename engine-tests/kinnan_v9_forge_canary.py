@@ -143,11 +143,21 @@ def _submit(proc: subprocess.Popen[str], session_id: str, answer: dict[str, Any]
     )
 
 
-def _pregame_answer(prompt_type: str) -> dict[str, Any] | None:
+def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
+    prompt_type = str(prompt_input.get("type") or "")
     if prompt_type in {"revealCards", "diceRolled"}:
         return {"type": prompt_type, "output": {}}
     if prompt_type == "mulligan":
         return {"type": "mulligan", "output": {"type": "mulliganDecision", "keep": True}}
+    if prompt_type == "chooseBoolean":
+        # Match the pinned Manabrew client's deterministic optional-cost
+        # resolver: automatically handled booleans decline. This exact wire
+        # shape is part of protocol v1; accepting without policy context would
+        # silently change game semantics.
+        return {
+            "type": "chooseBoolean",
+            "output": {"type": "decision", "value": False},
+        }
     return None
 
 
@@ -255,6 +265,9 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "promptType": prompt_type,
                         "turn": snapshot.get("turn"),
                         "step": snapshot.get("step"),
+                        "presentationTitle": (inp.get("presentation") or {}).get("title"),
+                        "confirmLabel": inp.get("confirmLabel"),
+                        "denyLabel": inp.get("denyLabel"),
                     }
                 )
                 if submitted_witness is not None:
@@ -362,7 +375,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     )
                     continue
 
-                answer = _pregame_answer(prompt_type)
+                answer = _pregame_answer(inp)
                 if answer is None:
                     raise RuntimeError(
                         f"unsupported pregame prompt before typed action canary: {prompt_type!r}"
