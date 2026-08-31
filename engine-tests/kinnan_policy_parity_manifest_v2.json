@@ -19,9 +19,9 @@
     "freed_pemmins_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["aura_untap_resource_positive"], "negativeGoldens": ["aura_untap_resource_negative"]},
     "monolith_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["monolith_resource_positive"], "negativeGoldens": ["monolith_unaffordable_untap"]},
     "deadeye_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["deadeye_resource_positive"], "negativeGoldens": ["deadeye_resource_negative"]},
-    "knacksaw_cycle": {"componentImplemented": false, "productionSupported": false, "positiveGoldens": [], "negativeGoldens": []},
+    "knacksaw_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["knacksaw_library_exile_cycle", "knacksaw_permission_identity_window"], "negativeGoldens": ["knacksaw_resource_negative_rejected", "knacksaw_permission_wrong_card_player_or_turn_rejected"]},
     "resolved_stack_protection": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["resolved_response_neutralizes_threat"], "negativeGoldens": ["card_available_only_not_protected", "failed_protection_not_protected"]},
-    "full99_v3": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["four_games_396_rows"], "negativeGoldens": ["missing_duplicate_unknown_fail"]},
+    "full99_v3": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["four_games_396_rows", "live_v2_bridge_exact99_stable_identity", "normalized_neon_trace_and_card_sql"], "negativeGoldens": ["missing_duplicate_unknown_fail", "partial_v2_bridge_rejected", "incomplete_neon_ingest_rejected"]},
     "role_symmetry": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["equivalent_semantics_equivalent_score"], "negativeGoldens": ["card_name_not_semantic_feature"]}
   },
   "anchors": {
