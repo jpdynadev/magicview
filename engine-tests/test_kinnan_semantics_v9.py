@@ -233,6 +233,35 @@ class ForgePregamePromptTests(unittest.TestCase):
             },
         )
 
+    def test_optional_selection_uses_protocol_v1_empty_decline(self):
+        import kinnan_v9_forge_canary as c
+        answer = c._pregame_answer({
+            "type": "chooseFromSelection",
+            "minTotal": 0,
+            "maxTotal": 1,
+            "options": [
+                {"label": "Optional pregame effect", "weight": 1, "canRepeat": False},
+            ],
+        })
+        self.assertEqual(
+            answer,
+            {
+                "type": "chooseFromSelection",
+                "output": {
+                    "type": "selectionDecision",
+                    "chosenIndices": [],
+                },
+            },
+        )
+        self.assertIsNone(c._pregame_answer({
+            "type": "chooseFromSelection",
+            "minTotal": 1,
+            "maxTotal": 1,
+            "options": [
+                {"label": "Required mode", "weight": 1, "canRepeat": False},
+            ],
+        }))
+
     def test_cleanup_discard_uses_typed_pilot_keep_value(self):
         import kinnan_v9_forge_canary as c
         answer = c._pregame_answer({
