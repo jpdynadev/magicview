@@ -17,6 +17,7 @@ from typing import Any
 from kinnan_semantics_v9 import FULL99_SCHEMA_VERSION, stable_semantic_hash
 from kinnan_v9_forge_canary import (
     _parse_dck,
+    _semantic_prompt_trace,
     _stable_hash,
     _unsupported_card_names,
     run_canary,
@@ -122,6 +123,8 @@ def _run_once(args: argparse.Namespace, deck: str, seed: int, replay: int) -> di
     result["telemetryV3Complete"] = bool(coverage["valid"])
     result["rawActionTrace"] = list(result.get("promptTrace") or [])
     result["rawActionTraceHash"] = stable_semantic_hash(result["rawActionTrace"])
+    result["semanticActionTrace"] = _semantic_prompt_trace(result["rawActionTrace"])
+    result["semanticActionTraceHash"] = stable_semantic_hash(result["semanticActionTrace"])
     result["valid"] = bool(result.get("valid")) and not unsupported and bool(coverage["valid"])
     result["rankingEvidence"] = False
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -140,7 +143,7 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     summary: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-production-parity-canary-v2",
+        "schemaVersion": "kinnan-v9-production-parity-canary-v3",
         "purpose": "component-canary",
         "rankingEvidence": False,
         "anchors": [],
@@ -155,7 +158,7 @@ def main() -> int:
             first.get("deterministicWitnessHash") == second.get("deterministicWitnessHash")
             and first.get("registrationAudit", {}).get("registeredDeckSha256")
             == second.get("registrationAudit", {}).get("registeredDeckSha256")
-            and first.get("rawActionTraceHash") == second.get("rawActionTraceHash")
+            and first.get("semanticActionTraceHash") == second.get("semanticActionTraceHash")
         )
         anchor_valid = bool(first.get("valid")) and bool(second.get("valid")) and replay_equal
         all_valid = all_valid and anchor_valid
@@ -166,6 +169,15 @@ def main() -> int:
                 "valid": anchor_valid,
                 "deterministicReplay": replay_equal,
                 "witnessHash": first.get("deterministicWitnessHash"),
+                "semanticActionTraceHash": first.get("semanticActionTraceHash"),
+                "rawActionTraceHashes": [
+                    first.get("rawActionTraceHash"),
+                    second.get("rawActionTraceHash"),
+                ],
+                "materialActionEffectConfirmed": bool(
+                    first.get("materialActionEffectConfirmed")
+                    and second.get("materialActionEffectConfirmed")
+                ),
                 "registeredMainCount": first.get("registrationAudit", {}).get("registeredMainCount"),
                 "unsupportedCount": first.get("cardResolution", {}).get("unsupportedCount"),
                 "coverageReplay1": first.get("full99V3Coverage"),
