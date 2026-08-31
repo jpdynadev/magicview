@@ -165,6 +165,27 @@ class CardRegistrationParityTests(unittest.TestCase):
         self.assertEqual(c._unsupported_card_names(stderr), ["Missing"])
 
 
+class ForgePregamePromptTests(unittest.TestCase):
+    def test_choose_boolean_uses_protocol_v1_deterministic_decline(self):
+        import kinnan_v9_forge_canary as c
+        answer = c._pregame_answer({
+            "type": "chooseBoolean",
+            "confirmLabel": "Accept",
+            "denyLabel": "Decline",
+        })
+        self.assertEqual(
+            answer,
+            {
+                "type": "chooseBoolean",
+                "output": {"type": "decision", "value": False},
+            },
+        )
+
+    def test_unknown_pregame_prompt_still_fails_closed(self):
+        import kinnan_v9_forge_canary as c
+        self.assertIsNone(c._pregame_answer({"type": "unknownPrompt"}))
+
+
 class AdapterTests(unittest.TestCase):
     def test_choose_action_requires_and_uses_stable_action_id(self):
         import manabrew_pilot_v9 as p; snap={"phase":"main1","step":"main1","priorityPlayerId":"player-0"}; c=p.choose_action([{"actionId":"pass","type":"pass"},{"actionId":"mana","type":"activateAbility","isManaAbility":True,"cardTypes":["Creature"],"semanticTags":["mana_source"],"producedMana":{"G":1}}],snap,player_id="player-0"); self.assertEqual(c["actionId"],"mana")
