@@ -158,6 +158,29 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
             "type": "chooseBoolean",
             "output": {"type": "decision", "value": False},
         }
+    if prompt_type == "chooseFromSelection":
+        minimum = prompt_input.get("minTotal")
+        maximum = prompt_input.get("maxTotal")
+        if (
+            isinstance(minimum, int)
+            and not isinstance(minimum, bool)
+            and isinstance(maximum, int)
+            and not isinstance(maximum, bool)
+            and minimum == 0
+            and maximum >= 0
+        ):
+            # Protocol v1 represents declining an optional selection with an
+            # empty chosen-index list. This matches v9's deterministic policy
+            # for optional pregame effects and avoids inventing follow-up
+            # costs such as an arbitrary Gemstone Caverns exile.
+            return {
+                "type": "chooseFromSelection",
+                "output": {
+                    "type": "selectionDecision",
+                    "chosenIndices": [],
+                },
+            }
+        return None
     if prompt_type == "chooseCards":
         # Match Manabrew protocol v1's forced-choice resolver exactly. An
         # empty choice is deterministic when max <= 0, and selecting every
