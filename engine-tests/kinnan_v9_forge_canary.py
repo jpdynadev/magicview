@@ -149,15 +149,6 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
         return {"type": prompt_type, "output": {}}
     if prompt_type == "mulligan":
         return {"type": "mulligan", "output": {"type": "mulliganDecision", "keep": True}}
-    if prompt_type == "chooseBoolean":
-        # Match the pinned Manabrew client's deterministic optional-cost
-        # resolver: automatically handled booleans decline. This exact wire
-        # shape is part of protocol v1; accepting without policy context would
-        # silently change game semantics.
-        return {
-            "type": "chooseBoolean",
-            "output": {"type": "decision", "value": False},
-        }
     if prompt_type == "chooseFromSelection":
         minimum = prompt_input.get("minTotal")
         maximum = prompt_input.get("maxTotal")
@@ -236,13 +227,82 @@ def _stable_hash(value: Any) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _material_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Return engine state that cannot change from priority/phase movement alone."""
+    player_fields = (
+        "id", "life", "manaPool", "counters", "status", "commanderDamage",
+        "hasCityBlessing", "ringLevel", "speed",
+    )
+    return {
+        "players": [
+            {key: player.get(key) for key in player_fields}
+            for player in list(snapshot.get("players") or [])
+            if isinstance(player, dict)
+        ],
+        "zones": list(snapshot.get("zones") or []),
+        "stack": list(snapshot.get("stack") or []),
+        "combatAssignments": snapshot.get("combatAssignments"),
+        "gameOver": snapshot.get("gameOver"),
+        "dayTime": snapshot.get("dayTime"),
+    }
+
+
+def _chosen_cost_confirmation(
+    prompt_input: dict[str, Any],
+    witness: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Accept only the cost confirmation caused by the selected typed action."""
+    if not witness or str(prompt_input.get("type") or "") != "chooseBoolean":
+        return None
+    title = str((prompt_input.get("presentation") or {}).get("title") or "").strip()
+    description = str(witness.get("chosenActionDescription") or "").strip()
+    if (
+        not title
+        or not description
+        or not description.casefold().startswith(title.casefold())
+        or str(prompt_input.get("confirmLabel") or "").casefold() != "accept"
+        or str(prompt_input.get("denyLabel") or "").casefold() != "decline"
+    ):
+        return None
+    return {
+        "type": "chooseBoolean",
+        "output": {"type": "decision", "value": True},
+    }
+
+
+def _semantic_prompt_trace(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Preserve decisions while ignoring transient empty-priority sampling."""
+    canonical: list[dict[str, Any]] = []
+    for raw in trace:
+        item = {
+            key: value
+            for key, value in raw.items()
+            if key not in {"snapshot", "snapshotHash"}
+        }
+        if item.get("forcedPass"):
+            item.pop("turn", None)
+            item.pop("step", None)
+        canonical.append(item)
+    return canonical
+
+
+def _submit_traced(
+    report: dict[str, Any],
+    proc: subprocess.Popen[str],
+    session_id: str,
+    answer: dict[str, Any],
+) -> None:
+    report["promptTrace"][-1]["submittedAnswer"] = answer
+    _submit(proc, session_id, answer)
+
+
 def run_canary(args: argparse.Namespace) -> dict[str, Any]:
     kinnan_commanders, kinnan_cards = _parse_dck(
         DECK_DIR / args.deck,
         exact_kinnan_registration=True,
     )
     report: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-live-forge-canary-v4",
+        "schemaVersion": "kinnan-v9-live-forge-canary-v5",
         "pilotVersion": pilot.PILOT_VERSION,
         "policyVersion": pilot.POLICY_VERSION,
         "purpose": "component-canary",
@@ -307,6 +367,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
             submitted_witness: dict[str, Any] | None = None
             pre_action_snapshot_hash = ""
             post_action_snapshot_hash = ""
+            pre_action_material_state_hash = ""
+            post_action_material_state_hash = ""
             while time.monotonic() < deadline:
                 raw_prompt = _rpc(
                     proc,
@@ -358,15 +420,21 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 )
                 if submitted_witness is not None:
                     current_snapshot_hash = _stable_hash(snapshot)
+                    current_material_state_hash = _stable_hash(_material_snapshot(snapshot))
                     if not post_action_snapshot_hash and current_snapshot_hash != pre_action_snapshot_hash:
                         post_action_snapshot_hash = current_snapshot_hash
+                    if (
+                        not post_action_material_state_hash
+                        and current_material_state_hash != pre_action_material_state_hash
+                    ):
+                        post_action_material_state_hash = current_material_state_hash
                     submitted_turn = submitted_witness["snapshotTurn"]
                     submitted_step = submitted_witness["snapshotStep"]
                     phase_advanced = (
                         snapshot.get("turn") != submitted_turn
                         or snapshot.get("step") != submitted_step
                     )
-                    if post_action_snapshot_hash and phase_advanced:
+                    if post_action_material_state_hash and phase_advanced:
                         transition = {
                             "fromPromptId": submitted_witness["promptId"],
                             "toPromptId": prompt_id,
@@ -388,6 +456,12 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                                 "transition": transition,
                                 "preActionSnapshotHash": pre_action_snapshot_hash,
                                 "postActionSnapshotHash": post_action_snapshot_hash,
+                                "preActionMaterialStateHash": pre_action_material_state_hash,
+                                "postActionMaterialStateHash": post_action_material_state_hash,
+                                "materialActionEffectConfirmed": True,
+                                "semanticActionTraceHash": _stable_hash(
+                                    _semantic_prompt_trace(report["promptTrace"])
+                                ),
                                 "deterministicWitnessHash": _stable_hash(deterministic_witness),
                             }
                         )
@@ -398,7 +472,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         report["promptTrace"][-1]["actionCount"] = 0
                         report["promptTrace"][-1]["forcedPass"] = True
                         report["emptyActionPrompts"] = int(report.get("emptyActionPrompts") or 0) + 1
-                        _submit(
+                        _submit_traced(
+                            report,
                             proc,
                             session_id,
                             {
@@ -410,7 +485,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     if submitted_witness is not None:
                         report["promptTrace"][-1]["actionCount"] = len(actions)
                         report["promptTrace"][-1]["boundedPass"] = True
-                        _submit(
+                        _submit_traced(
+                            report,
                             proc,
                             session_id,
                             {
@@ -438,11 +514,15 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "actionCount": len(actions),
                         "actionIds": action_ids,
                         "chosenActionId": chosen_id,
+                        "chosenActionDescription": str(chosen.get("description") or ""),
+                        "chosenActionCost": str(chosen.get("cost") or ""),
+                        "chosenActionCardId": str(chosen.get("cardId") or ""),
                         "snapshotTurn": snapshot.get("turn"),
                         "snapshotStep": snapshot.get("step"),
                         "priorityPlayerId": snapshot.get("priorityPlayerId"),
                     }
                     pre_action_snapshot_hash = _stable_hash(snapshot)
+                    pre_action_material_state_hash = _stable_hash(_material_snapshot(snapshot))
                     submitted_witness = witness
                     report.update(
                         {
@@ -451,7 +531,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                             "witness": witness,
                         }
                     )
-                    _submit(
+                    _submit_traced(
+                        report,
                         proc,
                         session_id,
                         {
@@ -461,14 +542,17 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     )
                     continue
 
-                answer = _pregame_answer(inp)
+                answer = _chosen_cost_confirmation(inp, submitted_witness)
                 if answer is None:
+                    answer = _pregame_answer(inp)
+                if answer is None:
+                    context = "after typed action" if submitted_witness is not None else "before typed action"
                     raise RuntimeError(
-                        f"unsupported pregame prompt before typed action canary: {prompt_type!r}"
+                        f"unsupported prompt {context}: {prompt_type!r}"
                     )
-                _submit(proc, session_id, answer)
+                _submit_traced(report, proc, session_id, answer)
             if submitted_witness is not None:
-                raise RuntimeError("timed out before the submitted live action advanced Forge state")
+                raise RuntimeError("timed out before the submitted action caused material Forge state change and phase advance")
             raise RuntimeError("timed out before a live typed chooseAction prompt")
         except Exception as exc:
             # Preserve the complete live prompt trace before propagating the
