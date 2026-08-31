@@ -1,0 +1,41 @@
+name: Kinnan policy parity gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - agent/kinnan-v152-full99-telemetry-repair
+    paths:
+      - engine-tests/decks/Kinnan_Sterling_TopDeck_Invitational_2026.dck
+      - engine-tests/kinnan_policy_parity_manifest_v1.json
+      - engine-tests/validate_kinnan_policy_parity_v1.py
+      - .github/workflows/kinnan-policy-parity-gate.yml
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Evaluate policy comparability
+        id: parity
+        continue-on-error: true
+        run: |
+          python3 engine-tests/validate_kinnan_policy_parity_v1.py \
+            --manifest engine-tests/kinnan_policy_parity_manifest_v1.json \
+            --root . \
+            --output kinnan-policy-parity-report.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-policy-parity-report
+          path: kinnan-policy-parity-report.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Enforce fail-closed gate
+        if: steps.parity.outcome != 'success'
+        run: |
+          echo 'Policy parity is incomplete; serious ranking compute remains blocked.'
+          exit 1
+
