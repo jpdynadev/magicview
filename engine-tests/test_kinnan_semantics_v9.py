@@ -195,6 +195,59 @@ class ForgePregamePromptTests(unittest.TestCase):
             },
         )
 
+    def test_choose_cards_max_zero_uses_forced_empty_choice(self):
+        import kinnan_v9_forge_canary as c
+        answer = c._pregame_answer({
+            "type": "chooseCards",
+            "min": 0,
+            "max": 0,
+            "cards": [{"id": "ignored"}],
+        })
+        self.assertEqual(
+            answer,
+            {
+                "type": "chooseCards",
+                "output": {
+                    "type": "chooseCardsDecision",
+                    "chosenCardIds": [],
+                },
+            },
+        )
+
+    def test_choose_cards_min_all_uses_forced_all_choice(self):
+        import kinnan_v9_forge_canary as c
+        answer = c._pregame_answer({
+            "type": "chooseCards",
+            "min": 2,
+            "max": 2,
+            "cards": [{"id": "first"}, {"id": "second"}],
+        })
+        self.assertEqual(
+            answer,
+            {
+                "type": "chooseCards",
+                "output": {
+                    "type": "chooseCardsDecision",
+                    "chosenCardIds": ["first", "second"],
+                },
+            },
+        )
+
+    def test_choose_cards_with_real_or_malformed_choice_fails_closed(self):
+        import kinnan_v9_forge_canary as c
+        self.assertIsNone(c._pregame_answer({
+            "type": "chooseCards",
+            "min": 1,
+            "max": 2,
+            "cards": [{"id": "first"}, {"id": "second"}, {"id": "third"}],
+        }))
+        self.assertIsNone(c._pregame_answer({
+            "type": "chooseCards",
+            "min": 2,
+            "max": 2,
+            "cards": [{"id": "same"}, {"id": "same"}],
+        }))
+
     def test_unknown_pregame_prompt_still_fails_closed(self):
         import kinnan_v9_forge_canary as c
         self.assertIsNone(c._pregame_answer({"type": "unknownPrompt"}))
