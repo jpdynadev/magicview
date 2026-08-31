@@ -1,5 +1,5 @@
-trigger=2026-08-31T10:23:30Z
-source_commit=11e4c49a97c2b21b5860d37fe919f3aeab798f36
+trigger=2026-08-31T10:27:00Z
+source_commit=85ef09fc1f6d7386a79d293ce5dc71858fe5042e
 purpose=component-canary
 ranking_evidence=false
-goal=exact-registered-card-to-forge-identity-parity
+goal=replay-exact-registered-card-to-forge-identity-parity
