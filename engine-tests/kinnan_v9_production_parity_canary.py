@@ -140,7 +140,7 @@ def main() -> int:
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
     summary: dict[str, Any] = {
-        "schemaVersion": "kinnan-v9-production-parity-canary-v1",
+        "schemaVersion": "kinnan-v9-production-parity-canary-v2",
         "purpose": "component-canary",
         "rankingEvidence": False,
         "anchors": [],
