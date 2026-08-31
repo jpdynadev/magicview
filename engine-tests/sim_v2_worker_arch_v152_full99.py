@@ -20,6 +20,7 @@ def main() -> int:
 
     from card_telemetry_v1 import install
     from full99_telemetry_v2 import attach
+    from full99_telemetry_v3_bridge import attach_v3
     install(config.runner)
 
     import sim_v2_worker
@@ -31,7 +32,7 @@ def main() -> int:
         item = original(result, exposure_cards)
         item["podProfile"] = os.getenv("CEDH_POD", "balanced") if mode == "adversarial" else "screen"
         item["engineId"] = engine_id
-        return attach(item, result, deck_path)
+        return attach_v3(attach(item, result, deck_path), result, deck_path)
 
     sim_v2_worker.compact_result = compact_full99
     return arch.main()
