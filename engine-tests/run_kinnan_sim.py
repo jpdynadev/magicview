@@ -99,12 +99,16 @@ def main() -> int:
         assert_component_ready()
         os.environ.setdefault("KINNAN_V9_ALLOW_CANARY", "1")
         if forwarded:
-            if forwarded[0] != "--live-forge":
-                raise RuntimeError(
-                    "component canary arguments must begin with --live-forge; "
-                    "ranking workers are not available through the canary path"
+            if forwarded[0] == "--live-forge":
+                return _run_module_path(HERE / "kinnan_v9_forge_canary.py", forwarded[1:])
+            if forwarded[0] == "--production-parity":
+                return _run_module_path(
+                    HERE / "kinnan_v9_production_parity_canary.py", forwarded[1:]
                 )
-            return _run_module_path(HERE / "kinnan_v9_forge_canary.py", forwarded[1:])
+            raise RuntimeError(
+                "component canary arguments must begin with --live-forge or "
+                "--production-parity; ranking workers are not available through the canary path"
+            )
         import manabrew_pilot_v9
 
         return int(manabrew_pilot_v9.canary_main())
