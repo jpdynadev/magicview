@@ -1,0 +1,60 @@
+name: Kinnan v9 Semantic Unit Gate
+
+on:
+  push:
+    branches:
+      - agent/kinnan-v153-pilot-v9-semantics
+    paths:
+      - engine-tests/kinnan_semantics_v9.py
+      - engine-tests/kinnan_policy_v9.py
+      - engine-tests/manabrew_pilot_v9.py
+      - engine-tests/test_kinnan_semantics_v9.py
+      - engine-tests/kinnan_policy_parity_manifest_v2.json
+      - engine-tests/validate_kinnan_policy_parity_v2.py
+      - .github/workflows/kinnan-v9-semantic-unit-gate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run v9 semantic goldens
+        run: python3 engine-tests/test_kinnan_semantics_v9.py
+      - name: Validate implemented component parity
+        run: |
+          mkdir -p engine-tests/results
+          python3 engine-tests/validate_kinnan_policy_parity_v2.py \
+            --component-only \
+            --report engine-tests/results/kinnan-policy-parity-v2-components.json
+      - name: Smoke fail-closed v9 adapter
+        env:
+          KINNAN_V9_ALLOW_CANARY: '1'
+        run: python3 engine-tests/manabrew_pilot_v9.py
+      - name: Assert production ranking remains blocked
+        run: |
+          python3 - <<'PY'
+          import sys
+          sys.path.insert(0, 'engine-tests')
+          import manabrew_pilot_v9 as p
+          assert p.production_ranking_ready() is False
+          try:
+              p.assert_ranking_ready()
+          except RuntimeError:
+              pass
+          else:
+              raise SystemExit('ranking unexpectedly enabled')
+          print('RANKING_FAIL_CLOSED_OK')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: kinnan-v9-semantic-unit-${{ github.run_id }}
+          path: engine-tests/results/kinnan-policy-parity-v2-components.json
+          if-no-files-found: error
