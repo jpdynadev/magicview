@@ -1,4 +1,5 @@
-trigger=2026-08-31T04:31:45Z
+trigger=2026-08-31T04:35:45Z
 source_commit=8798dc3ec9d5091cdbc8867fd66babac561549aa
 purpose=component-canary
 ranking_evidence=false
+replay_of_run=33357412203
