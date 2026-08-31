@@ -233,6 +233,45 @@ class ForgePregamePromptTests(unittest.TestCase):
             },
         )
 
+    def test_cleanup_discard_uses_typed_pilot_keep_value(self):
+        import kinnan_v9_forge_canary as c
+        answer = c._pregame_answer({
+            "type": "chooseCards",
+            "min": 1,
+            "max": 1,
+            "presentation": {"title": "Discard"},
+            "cards": [
+                {
+                    "id": "signet",
+                    "cmc": 2,
+                    "types": ["Artifact"],
+                    "text": "{T}: Add one mana of any color.",
+                },
+                {
+                    "id": "fae",
+                    "cmc": 4,
+                    "types": ["Creature"],
+                    "text": "Flying. You may cast spells as though they had flash.",
+                },
+                {
+                    "id": "archetype",
+                    "cmc": 8,
+                    "types": ["Enchantment", "Creature"],
+                    "text": "Creatures you control have hexproof.",
+                },
+            ],
+        })
+        self.assertEqual(
+            answer,
+            {
+                "type": "chooseCards",
+                "output": {
+                    "type": "chooseCardsDecision",
+                    "chosenCardIds": ["fae"],
+                },
+            },
+        )
+
     def test_choose_cards_with_real_or_malformed_choice_fails_closed(self):
         import kinnan_v9_forge_canary as c
         self.assertIsNone(c._pregame_answer({
