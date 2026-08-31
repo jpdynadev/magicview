@@ -165,6 +165,20 @@ class CardRegistrationParityTests(unittest.TestCase):
         self.assertEqual(c._unsupported_card_names(stderr), ["Missing"])
 
 
+class ProductionParityAnchorTests(unittest.TestCase):
+    def test_all_registered_anchor_files_are_exact_99(self):
+        import kinnan_v9_production_parity_canary as p
+        import kinnan_v9_forge_canary as c
+        for deck in p.ANCHORS:
+            commanders, cards = c._parse_dck(
+                c.DECK_DIR / deck,
+                exact_kinnan_registration=True,
+            )
+            self.assertEqual(len(commanders), 1, deck)
+            self.assertEqual(len(cards) - len(commanders), 99, deck)
+            self.assertEqual(len(set(cards[len(commanders):])), 99, deck)
+
+
 class ForgePregamePromptTests(unittest.TestCase):
     def test_choose_boolean_uses_protocol_v1_deterministic_decline(self):
         import kinnan_v9_forge_canary as c
