@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "kinnan-policy-parity-v2",
+  "pilotVersion": "v9.0.0-semantic-alpha",
+  "policyVersion": "kinnan-policy-v9.0.0-alpha",
+  "rankingReady": false,
+  "implementationSlice": "semantic-foundation-alpha1",
+  "capabilities": {
+    "typed_action_identity": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["stable_action_identity"], "negativeGoldens": ["missing_action_identity_fails_closed"]},
+    "typed_mana_ledger": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["exact_mana_plus_convoke"], "negativeGoldens": ["payment_deficit_fails_closed"]},
+    "convoke_payment": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["convoke_is_payment"], "negativeGoldens": ["convoke_never_produces_mana"]},
+    "creature_mana": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["typed_creature_mana_role"], "negativeGoldens": ["convoke_not_creature_mana"]},
+    "copy_choice": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["copy_choice_not_target"], "negativeGoldens": ["as_enters_target_rejected"]},
+    "search_selection": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["typed_search_constraint"], "negativeGoldens": ["wrong_type_search_rejected"]},
+    "vannifar_chain": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["vannifar_exact_mv_plus_one"], "negativeGoldens": ["vannifar_wrong_mv_rejected"]},
+    "soulbond_blink": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["blink_breaks_soulbond_new_object"], "negativeGoldens": ["blink_same_object_rejected"]},
+    "seedborn_priority": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["priority_at_opponent_end_step"], "negativeGoldens": ["no_priority_during_untap"]},
+    "generic_resource_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["resource_positive_cycle"], "negativeGoldens": ["neutral_or_missing_role_cycle_rejected"]},
+    "pili_pala_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["pili_resource_positive"], "negativeGoldens": ["pili_nonproductive_rejected"]},
+    "freed_pemmins_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["aura_untap_resource_positive"], "negativeGoldens": ["aura_untap_resource_negative"]},
+    "monolith_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["monolith_resource_positive"], "negativeGoldens": ["monolith_unaffordable_untap"]},
+    "deadeye_cycle": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["deadeye_resource_positive"], "negativeGoldens": ["deadeye_resource_negative"]},
+    "knacksaw_cycle": {"componentImplemented": false, "productionSupported": false, "positiveGoldens": [], "negativeGoldens": []},
+    "resolved_stack_protection": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["resolved_response_neutralizes_threat"], "negativeGoldens": ["card_available_only_not_protected", "failed_protection_not_protected"]},
+    "full99_v3": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["four_games_396_rows"], "negativeGoldens": ["missing_duplicate_unknown_fail"]},
+    "role_symmetry": {"componentImplemented": true, "productionSupported": false, "positiveGoldens": ["equivalent_semantics_equivalent_score"], "negativeGoldens": ["card_name_not_semantic_feature"]}
+  },
+  "anchors": {
+    "sterling_topdeck_invitational_2026": {
+      "deckPath": "engine-tests/decks/Kinnan_Sterling_TopDeck_Invitational_2026.dck",
+      "requiredCapabilities": ["typed_action_identity", "typed_mana_ledger", "creature_mana", "copy_choice", "search_selection", "vannifar_chain", "soulbond_blink", "seedborn_priority", "pili_pala_cycle", "knacksaw_cycle", "deadeye_cycle", "resolved_stack_protection", "full99_v3", "role_symmetry"]
+    },
+    "foster_rumble_2026": {
+      "deckPath": "engine-tests/decks/Kinnan_Foster_Rumble_2026.dck",
+      "requiredCapabilities": ["typed_action_identity", "typed_mana_ledger", "creature_mana", "copy_choice", "soulbond_blink", "seedborn_priority", "deadeye_cycle", "freed_pemmins_cycle", "resolved_stack_protection", "full99_v3", "role_symmetry"]
+    },
+    "nado_siege_2026": {
+      "deckPath": "engine-tests/decks/Kinnan_Nado_Siege_2026.dck",
+      "requiredCapabilities": ["typed_action_identity", "typed_mana_ledger", "convoke_payment", "creature_mana", "copy_choice", "search_selection", "monolith_cycle", "resolved_stack_protection", "full99_v3", "role_symmetry"]
+    }
+  }
+}
