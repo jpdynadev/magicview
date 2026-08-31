@@ -10,6 +10,7 @@ on:
       - engine-tests/manabrew_pilot_v9.py
       - engine-tests/kinnan_execution_path.py
       - engine-tests/run_kinnan_sim.py
+      - engine-tests/kinnan_v9_forge_canary.py
       - engine-tests/audit_kinnan_execution_paths.py
       - engine-tests/full99_telemetry_v3_bridge.py
       - engine-tests/build_full99_neon_ingest_v3.py
@@ -40,6 +41,7 @@ jobs:
           python3 -m py_compile \
             engine-tests/kinnan_execution_path.py \
             engine-tests/run_kinnan_sim.py \
+            engine-tests/kinnan_v9_forge_canary.py \
             engine-tests/audit_kinnan_execution_paths.py
       - name: Run v9 semantic goldens
         run: python3 engine-tests/test_kinnan_semantics_v9.py

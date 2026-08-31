@@ -22,7 +22,7 @@ HERE = Path(__file__).resolve().parent
 DECK_DIR = HERE / "decks"
 
 
-def _parse_dck(path: Path) -> tuple[list[str], list[str]]:
+def _parse_dck(path: Path, *, exact_kinnan_registration: bool) -> tuple[list[str], list[str]]:
     section = ""
     commanders: list[str] = []
     main: list[str] = []
@@ -39,13 +39,25 @@ def _parse_dck(path: Path) -> tuple[list[str], list[str]]:
         cards = commanders if section == "[commander]" else main if section == "[main]" else None
         if cards is not None:
             cards.extend([name.split("|", 1)[0].strip()] * int(count_text))
-    if len(commanders) != 1 or len(main) != 99 or len(set(main)) != 99:
-        raise RuntimeError(f"invalid Commander registration: {path}")
+    if exact_kinnan_registration:
+        if len(commanders) != 1 or len(main) != 99 or len(set(main)) != 99:
+            raise RuntimeError(f"invalid exact Kinnan registration: {path}")
+    elif len(commanders) not in {1, 2} or len(commanders) + len(main) != 100:
+        raise RuntimeError(f"invalid opponent Commander registration: {path}")
     return commanders, commanders + main
 
 
-def _player(name: str, deck_file: str, *, ai: bool) -> dict[str, Any]:
-    commanders, cards = _parse_dck(DECK_DIR / deck_file)
+def _player(
+    name: str,
+    deck_file: str,
+    *,
+    ai: bool,
+    exact_kinnan_registration: bool = False,
+) -> dict[str, Any]:
+    commanders, cards = _parse_dck(
+        DECK_DIR / deck_file,
+        exact_kinnan_registration=exact_kinnan_registration,
+    )
     return {
         "name": name,
         "commanderNames": commanders,
@@ -131,7 +143,12 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 "startingLife": 40,
                 "seed": args.seed,
                 "players": [
-                    _player("Kinnan pilot-v9 external", args.deck, ai=False),
+                    _player(
+                        "Kinnan pilot-v9 external",
+                        args.deck,
+                        ai=False,
+                        exact_kinnan_registration=True,
+                    ),
                     _player("RogSi AI", "RogSi_2026.dck", ai=True),
                     _player("Blue Farm AI", "Blue_Farm_2026.dck", ai=True),
                     _player("RogThras AI", "RogThras_2026.dck", ai=True),
