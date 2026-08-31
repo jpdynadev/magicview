@@ -1,5 +1,6 @@
-start=2026-08-31T10:47:00Z
+start=2026-08-31T19:12:30Z
 purpose=component-canary
 entrypoint=python3 engine-tests/run_kinnan_sim.py --purpose component-canary
 qualification=three-anchor deterministic replay plus full99-v3 coverage
+repair=protocol-v1 chooseBoolean deterministic decline
 ranking=false
