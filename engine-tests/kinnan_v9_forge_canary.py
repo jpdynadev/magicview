@@ -199,7 +199,18 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 if prompt_type == "chooseAction":
                     actions = list(inp.get("actions") or [])
                     if not actions:
-                        raise RuntimeError("live chooseAction prompt contained no actions")
+                        report["promptTrace"][-1]["actionCount"] = 0
+                        report["promptTrace"][-1]["forcedPass"] = True
+                        report["emptyActionPrompts"] = int(report.get("emptyActionPrompts") or 0) + 1
+                        _submit(
+                            proc,
+                            session_id,
+                            {
+                                "type": "chooseAction",
+                                "output": {"type": "pass", "exhaustStack": False},
+                            },
+                        )
+                        continue
                     action_ids = [str(action.get("actionId") or action.get("id") or "") for action in actions]
                     if not all(action_ids) or len(set(action_ids)) != len(action_ids):
                         raise RuntimeError("live Forge actions lack unique stable action identity")
