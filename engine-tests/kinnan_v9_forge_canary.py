@@ -556,8 +556,12 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         snapshot.get("turn") != submitted_turn
                         or snapshot.get("step") != submitted_step
                     )
+                    choose_action_ready = (
+                        prompt_type == "chooseAction"
+                        and bool(list(inp.get("actions") or []))
+                    )
                     action_resolution_boundary = (
-                        phase_advanced or prompt_type == "chooseAction"
+                        phase_advanced or choose_action_ready
                     )
                     if post_action_material_state_hash and action_resolution_boundary:
                         transition = {
