@@ -581,4 +581,54 @@ class LiveRevealExtractionTests(unittest.TestCase):
         self.assertFalse(browser_only["revealed"])
 
 
+class PhaseAwareLiveActionTests(unittest.TestCase):
+    def test_mana_action_outside_main_phase_yields_policy_pass(self):
+        import manabrew_pilot_v9 as pilot
+        action = {
+            "id": "tap-land",
+            "type": "activateAbility",
+            "isManaAbility": True,
+            "producedMana": [{"color": "U", "amount": 1}],
+        }
+        chosen = pilot.choose_action(
+            [action],
+            {
+                "step": "upkeep",
+                "priorityPlayerId": "player-0",
+            },
+            player_id="player-0",
+        )
+        self.assertIsNone(chosen)
+
+    def test_main_phase_mana_action_remains_selectable(self):
+        import manabrew_pilot_v9 as pilot
+        action = {
+            "id": "tap-land",
+            "type": "activateAbility",
+            "isManaAbility": True,
+            "producedMana": [{"color": "U", "amount": 1}],
+        }
+        chosen = pilot.choose_action(
+            [action],
+            {
+                "step": "main1",
+                "priorityPlayerId": "player-0",
+            },
+            player_id="player-0",
+        )
+        self.assertEqual(chosen["id"], "tap-land")
+
+    def test_undo_mana_is_never_a_forward_pilot_action(self):
+        import manabrew_pilot_v9 as pilot
+        chosen = pilot.choose_action(
+            [{"id": "undo", "type": "undoMana"}],
+            {
+                "step": "main1",
+                "priorityPlayerId": "player-0",
+            },
+            player_id="player-0",
+        )
+        self.assertIsNone(chosen)
+
+
 if __name__ == "__main__": unittest.main(verbosity=2)
