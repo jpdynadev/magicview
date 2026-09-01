@@ -482,6 +482,7 @@ def _run_once(args: argparse.Namespace, deck: str, seed: int, replay: int) -> di
         seed=seed,
         max_seconds=args.max_seconds,
         horizon_turn=args.horizon_turn,
+        horizon_kinnan_turn=args.horizon_kinnan_turn,
         max_typed_actions=args.max_typed_actions,
         report=report_path,
     )
@@ -525,6 +526,12 @@ def main() -> int:
         type=int,
         default=0,
         help="component observation horizon in global Forge turns",
+    )
+    parser.add_argument(
+        "--horizon-kinnan-turn",
+        type=int,
+        default=0,
+        help="component observation horizon in completed player-0 Kinnan turns",
     )
     parser.add_argument(
         "--max-typed-actions",
