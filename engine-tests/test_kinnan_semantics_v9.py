@@ -186,20 +186,14 @@ class ProductionParityAnchorTests(unittest.TestCase):
 
 
 class ForgePregamePromptTests(unittest.TestCase):
-    def test_choose_boolean_uses_protocol_v1_deterministic_decline(self):
+    def test_unscoped_choose_boolean_fails_closed(self):
         import kinnan_v9_forge_canary as c
         answer = c._pregame_answer({
             "type": "chooseBoolean",
             "confirmLabel": "Accept",
             "denyLabel": "Decline",
         })
-        self.assertEqual(
-            answer,
-            {
-                "type": "chooseBoolean",
-                "output": {"type": "decision", "value": False},
-            },
-        )
+        self.assertIsNone(answer)
 
     def test_choose_cards_max_zero_uses_forced_empty_choice(self):
         import kinnan_v9_forge_canary as c
