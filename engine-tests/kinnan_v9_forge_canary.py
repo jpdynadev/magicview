@@ -357,6 +357,23 @@ def _chosen_action_card_selection(
     }
 
 
+def _pay_mana_cost_answer(
+    prompt_input: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Finalize only an engine-confirmed payment from the live mana pool."""
+    if str(prompt_input.get("type") or "") != "payManaCost":
+        return None
+    if prompt_input.get("canConfirmFromPool") is not True:
+        return None
+    return {
+        "type": "payManaCost",
+        "output": {
+            "type": "pay",
+            "auto": False,
+        },
+    }
+
+
 def _semantic_prompt_trace(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Preserve decisions while ignoring transient empty-priority sampling."""
     canonical: list[dict[str, Any]] = []
@@ -730,6 +747,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 answer = _chosen_cost_confirmation(inp, submitted_witness)
                 if answer is None:
                     answer = _chosen_action_card_selection(inp, submitted_witness)
+                if answer is None:
+                    answer = _pay_mana_cost_answer(inp)
                 if answer is None:
                     answer = _pregame_answer(inp)
                 if answer is None:
