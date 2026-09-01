@@ -149,6 +149,16 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
         return {"type": prompt_type, "output": {}}
     if prompt_type == "mulligan":
         return {"type": "mulligan", "output": {"type": "mulliganDecision", "keep": True}}
+    if prompt_type == "chooseAttackers":
+        # Passing through combat in a component canary is represented by an
+        # empty assignment list. No creature identity or target is invented.
+        return {
+            "type": "chooseAttackers",
+            "output": {
+                "type": "declareAttackers",
+                "assignments": [],
+            },
+        }
     if prompt_type == "chooseFromSelection":
         minimum = prompt_input.get("minTotal")
         maximum = prompt_input.get("maxTotal")
