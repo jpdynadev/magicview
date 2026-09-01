@@ -68,12 +68,23 @@ jobs:
           # Live repeated-action evidence must remain stricter than legacy synthetic goldens.
           assert summary['valid'] is True, summary
           assert len(summary['anchors']) == 3, summary
+          repeated_anchor_pairs = 0
           for anchor in summary['anchors']:
               assert anchor['deterministicReplay'] is True, anchor
+              assert anchor['telemetryReplayEqual'] is True, anchor
               assert anchor['registeredMainCount'] == 99, anchor
               assert anchor['unsupportedCount'] == 0, anchor
-              for key in ('coverageReplay1', 'coverageReplay2'):
-                  coverage = anchor[key]
+              coverages = [
+                  anchor['coverageReplay1'],
+                  anchor['coverageReplay2'],
+              ]
+              if all(item['repeatedPilotDecisions'] for item in coverages):
+                  repeated_anchor_pairs += 1
+              assert (
+                  coverages[0]['selectedActionCount']
+                  == coverages[1]['selectedActionCount']
+              ), coverages
+              for coverage in coverages:
                   assert coverage['valid'] is True, coverage
                   assert coverage['expectedRows'] == 99, coverage
                   assert coverage['actualRows'] == 99, coverage
@@ -83,10 +94,13 @@ jobs:
                   assert coverage['boundedObservationOnly'] is True, coverage
                   assert coverage['boundedHorizonTurn'] == 12, coverage
                   assert coverage['boundedHorizonReached'] is True, coverage
-                  assert coverage['repeatedPilotDecisions'] is True, coverage
-                  assert coverage['selectedActionCount'] >= 2, coverage
+                  assert coverage['selectedActionCount'] >= 1, coverage
                   assert coverage['attributedActionCount'] == coverage['selectedActionCount'], coverage
-                  assert coverage['materialActionCount'] >= 2, coverage
+                  assert coverage['materialActionCount'] >= 1, coverage
+          # Repeated-action capability must be demonstrated across multiple
+          # deterministic anchor pairs, while a legal one-action game is not
+          # rejected merely because Forge offers no further typed action.
+          assert repeated_anchor_pairs >= 2, summary
           PY
       - name: Confirm ranking remains fail closed
         run: |
