@@ -3,6 +3,12 @@ from __future__ import annotations
 import unittest
 
 from kinnan_semantics_v9 import *
+from kinnan_v9_forge_canary import (
+    _chosen_cost_confirmation,
+    _material_snapshot,
+    _semantic_prompt_trace,
+    _stable_hash,
+)
 
 
 class ManaTests(unittest.TestCase):
@@ -330,6 +336,65 @@ class AdapterTests(unittest.TestCase):
     def test_production_ranking_fail_closed(self):
         import manabrew_pilot_v9 as p; self.assertFalse(p.production_ranking_ready());
         with self.assertRaises(RuntimeError): p.assert_ranking_ready()
+
+
+class LiveForgeCausalityTests(unittest.TestCase):
+    def test_material_snapshot_ignores_only_temporal_priority_fields(self):
+        base = {
+            "turn": 1,
+            "step": "main1",
+            "activePlayerId": "player-0",
+            "priorityPlayerId": "player-0",
+            "players": [{"id": "player-0", "life": 40, "manaPool": {"G": 0}}],
+            "zones": [{"ownerId": "player-0", "zone": "hand", "cards": [{"id": "c1"}]}],
+            "stack": [],
+            "combatAssignments": [],
+            "gameOver": False,
+            "dayTime": None,
+        }
+        temporal = dict(base, turn=2, step="draw", activePlayerId="player-1", priorityPlayerId="player-2")
+        self.assertEqual(_stable_hash(_material_snapshot(base)), _stable_hash(_material_snapshot(temporal)))
+
+    def test_material_snapshot_detects_mana_or_zone_effect(self):
+        base = {
+            "players": [{"id": "player-0", "life": 40, "manaPool": {"G": 0}}],
+            "zones": [{"ownerId": "player-0", "zone": "hand", "cards": [{"id": "esg"}]}],
+            "stack": [],
+        }
+        changed = {
+            **base,
+            "players": [{"id": "player-0", "life": 40, "manaPool": {"G": 1}}],
+            "zones": [{"ownerId": "player-0", "zone": "exile", "cards": [{"id": "esg"}]}],
+        }
+        self.assertNotEqual(_stable_hash(_material_snapshot(base)), _stable_hash(_material_snapshot(changed)))
+
+    def test_only_selected_action_cost_confirmation_is_accepted(self):
+        witness = {
+            "chosenActionDescription": "Exile Elvish Spirit Guide from your hand: Add {G}.",
+        }
+        prompt = {
+            "type": "chooseBoolean",
+            "presentation": {"title": "Exile Elvish Spirit Guide from your hand"},
+            "confirmLabel": "Accept",
+            "denyLabel": "Decline",
+        }
+        self.assertTrue(_chosen_cost_confirmation(prompt, witness)["output"]["value"])
+        unrelated = {**prompt, "presentation": {"title": "Pay 2 life"}}
+        self.assertIsNone(_chosen_cost_confirmation(unrelated, witness))
+        self.assertIsNone(_chosen_cost_confirmation(prompt, None))
+
+    def test_semantic_trace_ignores_empty_priority_sampling_only(self):
+        first = [
+            {"promptId": 1, "promptType": "chooseAction", "turn": 1, "step": "main1", "forcedPass": True, "snapshot": {"x": 1}, "snapshotHash": "a"},
+            {"promptId": 2, "promptType": "chooseAction", "turn": 1, "step": "main1", "submittedAnswer": {"output": {"type": "act"}}},
+        ]
+        second = [
+            {"promptId": 1, "promptType": "chooseAction", "turn": 1, "step": "combatBegin", "forcedPass": True, "snapshot": {"x": 2}, "snapshotHash": "b"},
+            {"promptId": 2, "promptType": "chooseAction", "turn": 1, "step": "main1", "submittedAnswer": {"output": {"type": "act"}}},
+        ]
+        self.assertEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
+        second[1]["step"] = "main2"
+        self.assertNotEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
 
 
 if __name__ == "__main__": unittest.main(verbosity=2)
