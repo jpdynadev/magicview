@@ -70,6 +70,32 @@ def _selected_live_actions(witness: dict[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
+def _player_mana_total(snapshot: dict[str, Any]) -> int | None:
+    """Return player-0's live pool total, or None when Forge did not expose it."""
+    for player in list(snapshot.get("players") or []):
+        if not isinstance(player, dict) or player.get("id") != "player-0":
+            continue
+        pool = player.get("manaPool")
+        if isinstance(pool, dict):
+            amounts = [
+                value
+                for value in pool.values()
+                if isinstance(value, int) and not isinstance(value, bool)
+            ]
+            return sum(amounts)
+        if isinstance(pool, list):
+            amounts = [
+                item.get("amount")
+                for item in pool
+                if isinstance(item, dict)
+                and isinstance(item.get("amount"), int)
+                and not isinstance(item.get("amount"), bool)
+            ]
+            return sum(amounts)
+        return None
+    return None
+
+
 def _registered_rows(
     deck_path: Path,
     *,
@@ -285,6 +311,49 @@ def _registered_rows(
                     row["openingHand"] = True
                     row["kept"] = kept_opening
 
+    # Attribute spending only when Forge accepted a payManaCost response and
+    # the immediately following live snapshot shows player-0's pool declined.
+    # Printed mana costs and action descriptions are never used as evidence.
+    observed_mana_payment_count = 0
+    observed_mana_spent_total = 0
+    for index, event in enumerate(trace):
+        if event.get("promptType") != "payManaCost":
+            continue
+        prompt_input = event.get("promptInput") or {}
+        answer = event.get("submittedAnswer") or {}
+        output = answer.get("output") or {}
+        if (
+            prompt_input.get("canConfirmFromPool") is not True
+            or output.get("type") != "pay"
+        ):
+            continue
+        before_total = _player_mana_total(event.get("snapshot") or {})
+        if before_total is None:
+            continue
+        following_snapshot = next(
+            (
+                later.get("snapshot")
+                for later in trace[index + 1:]
+                if isinstance(later.get("snapshot"), dict)
+            ),
+            None,
+        )
+        if following_snapshot is None:
+            continue
+        after_total = _player_mana_total(following_snapshot)
+        if after_total is None or after_total >= before_total:
+            continue
+        card_id = str(prompt_input.get("cardId") or "")
+        registered_name = engine_id_to_registered.get(card_id)
+        if not registered_name:
+            continue
+        spent = before_total - after_total
+        row = rows_by_name[registered_name]
+        row["manaSpent"] += spent
+        row["involved"] = True
+        observed_mana_payment_count += 1
+        observed_mana_spent_total += spent
+
     selected_actions = _selected_live_actions(witness)
     attributed_action_count = 0
     for selected in selected_actions:
@@ -345,6 +414,8 @@ def _registered_rows(
         "duplicates": len(rows) - len(set(ids)),
         "observedSnapshotCount": observed_snapshot_count,
         "observedRevealCount": observed_reveal_count,
+        "observedManaPaymentCount": observed_mana_payment_count,
+        "observedManaSpentTotal": observed_mana_spent_total,
         "observedCardRows": observed_rows,
         "openingHandRows": opening_rows,
         "keptRows": kept_rows,
