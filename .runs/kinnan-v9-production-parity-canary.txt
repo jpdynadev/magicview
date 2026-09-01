@@ -4,3 +4,4 @@ entrypoint=python3 engine-tests/run_kinnan_sim.py --purpose component-canary
 qualification=three-anchor deterministic replay plus snapshot-derived full99-v3 telemetry
 repair=derive opening kept seen zones transitions cast activation and mana from live Forge
 ranking=false
+require deterministic full99 telemetry replay 2026-09-01T03:14:00Z
