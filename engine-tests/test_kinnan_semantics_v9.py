@@ -293,6 +293,40 @@ class ForgePregamePromptTests(unittest.TestCase):
             ],
         }))
 
+    def test_empty_blockers_only_when_every_block_is_optional(self):
+        import kinnan_v9_forge_canary as c
+
+        prompt = {
+            "type": "chooseBlockers",
+            "attackers": [
+                {
+                    "attackerId": "first",
+                    "validBlockerIds": ["blocker"],
+                    "minBlockers": 1,
+                    "mustBeBlocked": False,
+                },
+                {
+                    "attackerId": "second",
+                    "validBlockerIds": ["blocker"],
+                    "minBlockers": 1,
+                    "mustBeBlocked": False,
+                },
+            ],
+            "availableBlockerIds": ["blocker"],
+        }
+        self.assertEqual(
+            c._pregame_answer(prompt),
+            {
+                "type": "chooseBlockers",
+                "output": {
+                    "type": "declareBlockers",
+                    "assignments": [],
+                },
+            },
+        )
+        prompt["attackers"][0]["mustBeBlocked"] = True
+        self.assertIsNone(c._pregame_answer(prompt))
+
     def test_cleanup_discard_uses_typed_pilot_keep_value(self):
         import kinnan_v9_forge_canary as c
         answer = c._pregame_answer({
