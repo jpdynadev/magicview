@@ -10,3 +10,4 @@ run repeated pilot v9 decisions 2026-09-01T06:13:00Z
 run staged selected-action cost confirmation repair 2026-09-01T07:12:00Z
 run templated CARDNAME cost confirmation repair 2026-09-01T08:10:00Z
 run deterministic live search choice repair 2026-09-01T09:12:00Z
+run tutor attribution and legal repeated-action gate 2026-09-01T10:12:00Z
