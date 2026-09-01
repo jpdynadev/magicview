@@ -236,6 +236,20 @@ def _registered_rows(
     return rows, coverage
 
 
+def _canonical_telemetry_hash(rows: list[dict[str, Any]]) -> str:
+    """Compare replay observations while excluding replay-local prompt identity."""
+    canonical: list[dict[str, Any]] = []
+    for raw in rows:
+        row = dict(raw)
+        row.pop("replay", None)
+        row["zoneChanges"] = [
+            {key: value for key, value in change.items() if key != "promptId"}
+            for change in list(row.get("zoneChanges") or [])
+        ]
+        canonical.append(row)
+    return stable_semantic_hash(canonical)
+
+
 def _run_once(args: argparse.Namespace, deck: str, seed: int, replay: int) -> dict[str, Any]:
     report_path = args.output_dir / f"{Path(deck).stem}.replay{replay}.json"
     ns = SimpleNamespace(
@@ -297,11 +311,19 @@ def main() -> int:
         seed = args.seed + index
         first = _run_once(args, deck, seed, 1)
         second = _run_once(args, deck, seed, 2)
+        first_telemetry_hash = _canonical_telemetry_hash(
+            list(first.get("full99V3Rows") or [])
+        )
+        second_telemetry_hash = _canonical_telemetry_hash(
+            list(second.get("full99V3Rows") or [])
+        )
+        telemetry_replay_equal = first_telemetry_hash == second_telemetry_hash
         replay_equal = (
             first.get("deterministicWitnessHash") == second.get("deterministicWitnessHash")
             and first.get("registrationAudit", {}).get("registeredDeckSha256")
             == second.get("registrationAudit", {}).get("registeredDeckSha256")
             and first.get("semanticActionTraceHash") == second.get("semanticActionTraceHash")
+            and telemetry_replay_equal
         )
         anchor_valid = bool(first.get("valid")) and bool(second.get("valid")) and replay_equal
         all_valid = all_valid and anchor_valid
@@ -313,6 +335,11 @@ def main() -> int:
                 "deterministicReplay": replay_equal,
                 "witnessHash": first.get("deterministicWitnessHash"),
                 "semanticActionTraceHash": first.get("semanticActionTraceHash"),
+                "telemetryReplayEqual": telemetry_replay_equal,
+                "canonicalTelemetryHashes": [
+                    first_telemetry_hash,
+                    second_telemetry_hash,
+                ],
                 "rawActionTraceHashes": [
                     first.get("rawActionTraceHash"),
                     second.get("rawActionTraceHash"),
