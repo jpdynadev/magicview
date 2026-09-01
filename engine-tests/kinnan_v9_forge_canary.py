@@ -256,10 +256,25 @@ def _chosen_cost_confirmation(
         return None
     title = str((prompt_input.get("presentation") or {}).get("title") or "").strip()
     description = str(witness.get("chosenActionDescription") or "").strip()
+    cost = str(witness.get("chosenActionCost") or "").strip()
+    title_folded = title.casefold()
+    cost_clauses = {
+        clause.strip().casefold()
+        for clause in cost.split(",")
+        if clause.strip()
+    }
+    # Forge stages compound activation costs as separate Accept/Decline
+    # prompts. Accept a stage only when its complete title is either the
+    # beginning of the selected action text or an exact comma-delimited cost
+    # clause from that same live action. This admits prompts such as
+    # Polluted Delta's "Pay 1 life" while unrelated booleans still fail closed.
+    matches_selected_action = (
+        bool(description)
+        and description.casefold().startswith(title_folded)
+    ) or title_folded in cost_clauses
     if (
         not title
-        or not description
-        or not description.casefold().startswith(title.casefold())
+        or not matches_selected_action
         or str(prompt_input.get("confirmLabel") or "").casefold() != "accept"
         or str(prompt_input.get("denyLabel") or "").casefold() != "decline"
     ):
