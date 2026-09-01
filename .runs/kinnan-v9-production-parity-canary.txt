@@ -17,3 +17,4 @@ run tutor attribution and legal repeated-action gate 2026-09-01T10:12:00Z
 2026-09-01T13:30:00Z validate engine-confirmed mana pool payment
 2026-09-01T13:36:00Z validate confirmed payment and empty combat assignment
 2026-09-01T14:16:00Z validate observed mana-spent attribution
+2026-09-01T15:08:00Z validate deterministic payment gate at 16-action depth
