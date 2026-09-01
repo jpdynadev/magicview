@@ -6,3 +6,4 @@ repair=derive opening kept seen zones transitions cast activation and mana from 
 ranking=false
 require deterministic full99 telemetry replay 2026-09-01T03:14:00Z
 run bounded T4 observation gate 2026-09-01T04:09:00Z
+run repeated pilot v9 decisions 2026-09-01T06:13:00Z
