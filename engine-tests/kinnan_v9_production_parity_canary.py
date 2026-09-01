@@ -31,17 +31,24 @@ ANCHORS = (
 )
 
 
-def _selected_live_action(witness: dict[str, Any]) -> dict[str, Any] | None:
-    chosen_id = str((witness.get("witness") or {}).get("chosenActionId") or "")
-    chosen_prompt = (witness.get("witness") or {}).get("promptId")
+def _selected_live_actions(witness: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return every typed action actually submitted to Forge."""
+    selected: list[dict[str, Any]] = []
     for event in list(witness.get("promptTrace") or []):
-        if event.get("promptId") != chosen_prompt:
+        answer = event.get("submittedAnswer") or {}
+        output = answer.get("output") or {}
+        if event.get("promptType") != "chooseAction" or output.get("type") != "act":
             continue
-        for action in list((event.get("promptInput") or {}).get("actions") or []):
-            action_id = str(action.get("id") or action.get("actionId") or "")
-            if action_id == chosen_id:
-                return action
-    return None
+        chosen_id = str(output.get("actionId") or "")
+        matches = [
+            action
+            for action in list((event.get("promptInput") or {}).get("actions") or [])
+            if str(action.get("id") or action.get("actionId") or "") == chosen_id
+        ]
+        if len(matches) != 1:
+            raise RuntimeError("submitted typed action lacks one exact live action payload")
+        selected.append(matches[0])
+    return selected
 
 
 def _registered_rows(
@@ -172,25 +179,31 @@ def _registered_rows(
                     row["openingHand"] = True
                     row["kept"] = kept_opening
 
-    selected = _selected_live_action(witness)
-    selected_action_attributed = False
-    if selected is not None:
+    selected_actions = _selected_live_actions(witness)
+    attributed_action_count = 0
+    for selected in selected_actions:
         card_id = str(selected.get("cardId") or "")
         registered_name = engine_id_to_registered.get(card_id)
-        if registered_name:
-            row = rows_by_name[registered_name]
-            action_type = str(selected.get("type") or "")
-            row["cast"] = action_type == "cast"
-            row["played"] = action_type in {"cast", "play"}
-            row["activated"] = action_type == "activateAbility"
-            row["used"] = row["cast"] or row["played"] or row["activated"]
-            row["involved"] = row["used"]
-            for mana in list(selected.get("producedMana") or []):
-                color = str(mana.get("color") or "")
-                amount = mana.get("amount")
-                if color and isinstance(amount, int) and not isinstance(amount, bool):
-                    row["manaProduced"][color] = int(row["manaProduced"].get(color) or 0) + amount
-            selected_action_attributed = row["used"]
+        if not registered_name:
+            continue
+        row = rows_by_name[registered_name]
+        action_type = str(selected.get("type") or "")
+        row["cast"] = row["cast"] or action_type == "cast"
+        row["played"] = row["played"] or action_type in {"cast", "play"}
+        row["activated"] = row["activated"] or action_type == "activateAbility"
+        row["used"] = row["cast"] or row["played"] or row["activated"]
+        row["involved"] = row["involved"] or row["used"]
+        for mana in list(selected.get("producedMana") or []):
+            color = str(mana.get("color") or "")
+            amount = mana.get("amount")
+            if color and isinstance(amount, int) and not isinstance(amount, bool):
+                row["manaProduced"][color] = int(row["manaProduced"].get(color) or 0) + amount
+        if row["used"]:
+            attributed_action_count += 1
+    selected_action_attributed = (
+        bool(selected_actions)
+        and attributed_action_count == len(selected_actions)
+    )
 
     rows = [rows_by_name[card] for card in main]
     names = [row["registeredCardName"] for row in rows]
@@ -228,7 +241,11 @@ def _registered_rows(
         "observedCardRows": observed_rows,
         "openingHandRows": opening_rows,
         "keptRows": kept_rows,
+        "selectedActionCount": len(selected_actions),
+        "attributedActionCount": attributed_action_count,
         "selectedActionAttributed": selected_action_attributed,
+        "materialActionCount": int(witness.get("materialActionCount") or 0),
+        "repeatedPilotDecisions": bool(witness.get("repeatedPilotDecisions")),
         "materialActionEffectConfirmed": bool(witness.get("materialActionEffectConfirmed")),
         "boundedObservationOnly": bounded_horizon_turn > 0,
         "boundedHorizonTurn": bounded_horizon_turn if bounded_horizon_turn > 0 else None,
@@ -265,6 +282,7 @@ def _run_once(args: argparse.Namespace, deck: str, seed: int, replay: int) -> di
         seed=seed,
         max_seconds=args.max_seconds,
         horizon_turn=args.horizon_turn,
+        max_typed_actions=args.max_typed_actions,
         report=report_path,
     )
     result = run_canary(ns)
@@ -306,7 +324,13 @@ def main() -> int:
         "--horizon-turn",
         type=int,
         default=0,
-        help="pass-only observation horizon in global Forge turns; component evidence only",
+        help="component observation horizon in global Forge turns",
+    )
+    parser.add_argument(
+        "--max-typed-actions",
+        type=int,
+        default=1,
+        help="maximum repeated pilot-v9 typed actions before pass-only continuation",
     )
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
