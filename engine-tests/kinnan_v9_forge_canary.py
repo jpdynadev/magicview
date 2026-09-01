@@ -159,6 +159,23 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
                 "assignments": [],
             },
         }
+    if prompt_type == "chooseBlockers":
+        attackers = list(prompt_input.get("attackers") or [])
+        if attackers and all(
+            isinstance(attacker, dict)
+            and attacker.get("mustBeBlocked") is False
+            for attacker in attackers
+        ):
+            # Protocol v1 omits creatures left back. Empty assignments are a
+            # legal deterministic pass only when no attacker must be blocked.
+            return {
+                "type": "chooseBlockers",
+                "output": {
+                    "type": "declareBlockers",
+                    "assignments": [],
+                },
+            }
+        return None
     if prompt_type == "chooseFromSelection":
         minimum = prompt_input.get("minTotal")
         maximum = prompt_input.get("maxTotal")
