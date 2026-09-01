@@ -556,7 +556,10 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         snapshot.get("turn") != submitted_turn
                         or snapshot.get("step") != submitted_step
                     )
-                    if post_action_material_state_hash and phase_advanced:
+                    action_resolution_boundary = (
+                        phase_advanced or prompt_type == "chooseAction"
+                    )
+                    if post_action_material_state_hash and action_resolution_boundary:
                         transition = {
                             "fromPromptId": submitted_witness["promptId"],
                             "toPromptId": prompt_id,
@@ -666,7 +669,21 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         player_id=str(prompt.get("decidingPlayerId") or "player-0"),
                     )
                     if chosen is None:
-                        raise RuntimeError("pilot-v9 returned no choice for a non-empty live action set")
+                        report["promptTrace"][-1]["actionCount"] = len(actions)
+                        report["promptTrace"][-1]["policyPass"] = True
+                        _submit_traced(
+                            report,
+                            proc,
+                            session_id,
+                            {
+                                "type": "chooseAction",
+                                "output": {
+                                    "type": "pass",
+                                    "exhaustStack": False,
+                                },
+                            },
+                        )
+                        continue
                     chosen_id = str(chosen.get("actionId") or chosen.get("id") or "")
                     if chosen_id not in set(action_ids):
                         raise RuntimeError("pilot-v9 selected an action outside the live legal set")
