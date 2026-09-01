@@ -383,6 +383,36 @@ def _chosen_cost_confirmation(
     }
 
 
+def _chosen_optional_entry_payment(
+    prompt_input: dict[str, Any],
+    witness: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Decline only the selected land's explicit optional ETB life payment."""
+    if not witness or str(prompt_input.get("type") or "") != "chooseBoolean":
+        return None
+    presentation = prompt_input.get("presentation") or {}
+    title = str(presentation.get("title") or "").strip()
+    text = str(presentation.get("text") or "").strip()
+    action_label = str(witness.get("chosenActionLabel") or "").strip()
+    action_type = str(witness.get("chosenActionType") or "").strip()
+    if (
+        action_type not in {"cast", "play"}
+        or not action_label.casefold().startswith("play ")
+        or not re.fullmatch(r"Pay [1-9][0-9]* \{LIFE\}\?", title)
+        or text.casefold() != 'otherwise: "enters tapped."'
+        or str(prompt_input.get("confirmLabel") or "").casefold() != "pay"
+        or str(prompt_input.get("denyLabel") or "").casefold() != "decline"
+    ):
+        return None
+    # The prompt itself is authoritative evidence of an optional ETB payment.
+    # Component qualification declines it deterministically; no printed card
+    # text, life total, or strategic ranking policy is inferred.
+    return {
+        "type": "chooseBoolean",
+        "output": {"type": "decision", "value": False},
+    }
+
+
 def _chosen_action_card_selection(
     prompt_input: dict[str, Any],
     witness: dict[str, Any] | None,
@@ -827,6 +857,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         "actionCount": len(actions),
                         "actionIds": action_ids,
                         "chosenActionId": chosen_id,
+                        "chosenActionLabel": str(chosen.get("label") or ""),
+                        "chosenActionType": str(chosen.get("type") or ""),
                         "chosenActionDescription": str(chosen.get("description") or ""),
                         "chosenActionCost": str(chosen.get("cost") or ""),
                         "chosenActionCardId": str(chosen.get("cardId") or ""),
@@ -858,6 +890,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     continue
 
                 answer = _chosen_cost_confirmation(inp, submitted_witness)
+                if answer is None:
+                    answer = _chosen_optional_entry_payment(inp, submitted_witness)
                 if answer is None:
                     answer = _chosen_action_card_selection(inp, submitted_witness)
                 if answer is None:
