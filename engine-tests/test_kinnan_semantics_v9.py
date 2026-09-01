@@ -6,6 +6,7 @@ from pathlib import Path
 from kinnan_semantics_v9 import *
 from kinnan_v9_forge_canary import (
     _chosen_cost_confirmation,
+    _chosen_optional_entry_payment,
     _kinnan_horizon_reached,
     _material_snapshot,
     _semantic_prompt_trace,
@@ -326,6 +327,47 @@ class ForgePregamePromptTests(unittest.TestCase):
         )
         prompt["attackers"][0]["mustBeBlocked"] = True
         self.assertIsNone(c._pregame_answer(prompt))
+
+    def test_optional_land_entry_life_payment_declines_only_exact_prompt(self):
+        witness = {
+            "chosenActionLabel": "Play Garden of Freyalise",
+            "chosenActionType": "cast",
+        }
+        prompt = {
+            "type": "chooseBoolean",
+            "confirmLabel": "Pay",
+            "denyLabel": "Decline",
+            "presentation": {
+                "title": "Pay 3 {LIFE}?",
+                "text": 'otherwise: "enters tapped."',
+            },
+        }
+        self.assertEqual(
+            _chosen_optional_entry_payment(prompt, witness),
+            {
+                "type": "chooseBoolean",
+                "output": {"type": "decision", "value": False},
+            },
+        )
+
+        for changed_witness, changed_prompt in (
+            ({**witness, "chosenActionLabel": "Cast Some Spell"}, prompt),
+            ({**witness, "chosenActionType": "activateAbility"}, prompt),
+            (witness, {**prompt, "confirmLabel": "Accept"}),
+            (
+                witness,
+                {
+                    **prompt,
+                    "presentation": {
+                        "title": "Pay 3 {LIFE}?",
+                        "text": "Choose a different optional effect.",
+                    },
+                },
+            ),
+        ):
+            self.assertIsNone(
+                _chosen_optional_entry_payment(changed_prompt, changed_witness)
+            )
 
     def test_cleanup_discard_uses_typed_pilot_keep_value(self):
         import kinnan_v9_forge_canary as c
