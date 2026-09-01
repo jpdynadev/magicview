@@ -365,6 +365,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
             deadline = time.monotonic() + args.max_seconds
             last_prompt_id = None
             submitted_witness: dict[str, Any] | None = None
+            action_witnesses: list[dict[str, Any]] = []
             pre_action_snapshot_hash = ""
             post_action_snapshot_hash = ""
             pre_action_material_state_hash = ""
@@ -418,6 +419,40 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         ] if prompt_type == "chooseCards" else [],
                     }
                 )
+                horizon_turn = int(getattr(args, "horizon_turn", 0) or 0)
+                horizon_reached_without_pending_action = (
+                    horizon_turn > 0
+                    and submitted_witness is None
+                    and bool(action_witnesses)
+                    and all(item.get("materialEffectConfirmed") for item in action_witnesses)
+                    and isinstance(snapshot.get("turn"), int)
+                    and snapshot.get("turn") >= horizon_turn
+                )
+                if horizon_reached_without_pending_action:
+                    deterministic_witness = {
+                        "actions": action_witnesses,
+                        "horizonTurn": horizon_turn,
+                    }
+                    report.update(
+                        {
+                            "status": "repeated_actions_applied_and_horizon_reached",
+                            "valid": True,
+                            "typedActionIdsComplete": True,
+                            "witness": action_witnesses[0],
+                            "actionWitnesses": action_witnesses,
+                            "materialActionCount": len(action_witnesses),
+                            "materialActionEffectConfirmed": True,
+                            "boundedObservationOnly": True,
+                            "repeatedPilotDecisions": len(action_witnesses) > 1,
+                            "horizonTurn": horizon_turn,
+                            "horizonReached": True,
+                            "semanticActionTraceHash": _stable_hash(
+                                _semantic_prompt_trace(report["promptTrace"])
+                            ),
+                            "deterministicWitnessHash": _stable_hash(deterministic_witness),
+                        }
+                    )
+                    return report
                 if submitted_witness is not None:
                     current_snapshot_hash = _stable_hash(snapshot)
                     current_material_state_hash = _stable_hash(_material_snapshot(snapshot))
@@ -443,9 +478,11 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                             "toTurn": snapshot.get("turn"),
                             "toStep": snapshot.get("step"),
                         }
+                        submitted_witness["materialEffectConfirmed"] = True
+                        submitted_witness["transition"] = transition
                         deterministic_witness = {
-                            "action": submitted_witness,
-                            "transition": transition,
+                            "actions": action_witnesses,
+                            "horizonTurn": int(getattr(args, "horizon_turn", 0) or 0),
                         }
                         horizon_turn = int(getattr(args, "horizon_turn", 0) or 0)
                         horizon_reached = (
@@ -464,7 +501,9 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                                 ),
                                 "valid": horizon_reached,
                                 "typedActionIdsComplete": True,
-                                "witness": submitted_witness,
+                                "witness": action_witnesses[0],
+                                "actionWitnesses": action_witnesses,
+                                "materialActionCount": len(action_witnesses),
                                 "transition": transition,
                                 "preActionSnapshotHash": pre_action_snapshot_hash,
                                 "postActionSnapshotHash": post_action_snapshot_hash,
@@ -472,6 +511,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                                 "postActionMaterialStateHash": post_action_material_state_hash,
                                 "materialActionEffectConfirmed": True,
                                 "boundedObservationOnly": horizon_turn > 0,
+                                "repeatedPilotDecisions": len(action_witnesses) > 1,
                                 "horizonTurn": horizon_turn if horizon_turn > 0 else None,
                                 "horizonReached": horizon_reached,
                                 "semanticActionTraceHash": _stable_hash(
@@ -482,12 +522,31 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         )
                         if horizon_reached:
                             return report
+                        submitted_witness = None
+                        pre_action_snapshot_hash = ""
+                        post_action_snapshot_hash = ""
+                        pre_action_material_state_hash = ""
+                        post_action_material_state_hash = ""
                 if prompt_type == "chooseAction":
                     actions = list(inp.get("actions") or [])
                     if not actions:
                         report["promptTrace"][-1]["actionCount"] = 0
                         report["promptTrace"][-1]["forcedPass"] = True
                         report["emptyActionPrompts"] = int(report.get("emptyActionPrompts") or 0) + 1
+                        _submit_traced(
+                            report,
+                            proc,
+                            session_id,
+                            {
+                                "type": "chooseAction",
+                                "output": {"type": "pass", "exhaustStack": False},
+                            },
+                        )
+                        continue
+                    max_typed_actions = int(getattr(args, "max_typed_actions", 1) or 1)
+                    if submitted_witness is None and len(action_witnesses) >= max_typed_actions:
+                        report["promptTrace"][-1]["actionCount"] = len(actions)
+                        report["promptTrace"][-1]["maxActionPass"] = True
                         _submit_traced(
                             report,
                             proc,
@@ -540,11 +599,13 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     pre_action_snapshot_hash = _stable_hash(snapshot)
                     pre_action_material_state_hash = _stable_hash(_material_snapshot(snapshot))
                     submitted_witness = witness
+                    action_witnesses.append(witness)
                     report.update(
                         {
                             "status": "typed_action_submitted",
                             "typedActionIdsComplete": True,
-                            "witness": witness,
+                            "witness": action_witnesses[0],
+                            "actionWitnesses": action_witnesses,
                         }
                     )
                     _submit_traced(
@@ -633,7 +694,13 @@ def main() -> int:
         "--horizon-turn",
         type=int,
         default=0,
-        help="continue pass-only observation until this global Forge turn; component evidence only",
+        help="continue component observation until this global Forge turn",
+    )
+    parser.add_argument(
+        "--max-typed-actions",
+        type=int,
+        default=1,
+        help="maximum pilot-v9 typed actions before pass-only continuation",
     )
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
