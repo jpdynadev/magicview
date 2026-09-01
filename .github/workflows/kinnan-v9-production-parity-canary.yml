@@ -55,6 +55,7 @@ jobs:
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             --seed 2999000 \
+            --horizon-turn 12 \
             --output-dir engine-tests/results/v9-production-parity
       - name: Verify full-99 v3 component coverage
         run: |
@@ -77,6 +78,9 @@ jobs:
                   assert coverage['distinctRegisteredCards'] == 99, coverage
                   assert coverage['duplicates'] == 0, coverage
                   assert coverage['missingCards'] == [], coverage
+                  assert coverage['boundedObservationOnly'] is True, coverage
+                  assert coverage['boundedHorizonTurn'] == 12, coverage
+                  assert coverage['boundedHorizonReached'] is True, coverage
           PY
       - name: Confirm ranking remains fail closed
         run: |
