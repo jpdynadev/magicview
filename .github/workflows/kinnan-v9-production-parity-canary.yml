@@ -55,7 +55,7 @@ jobs:
             /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar \
             /tmp/manabrew/forge/forge-gui/ \
             --seed 2999000 \
-            --horizon-turn 12 \
+            --horizon-kinnan-turn 4 \
             --max-typed-actions 16 \
             --output-dir engine-tests/results/v9-production-parity
       - name: Verify full-99 v3 component coverage
@@ -104,7 +104,9 @@ jobs:
                   assert coverage['duplicates'] == 0, coverage
                   assert coverage['missingCards'] == [], coverage
                   assert coverage['boundedObservationOnly'] is True, coverage
-                  assert coverage['boundedHorizonTurn'] == 12, coverage
+                  assert coverage['boundedHorizonTurn'] is None, coverage
+                  assert coverage['boundedKinnanTurn'] == 4, coverage
+                  assert coverage['observedKinnanTurnCount'] >= 4, coverage
                   assert coverage['boundedHorizonReached'] is True, coverage
                   assert coverage['selectedActionCount'] >= 1, coverage
                   assert coverage['attributedActionCount'] == coverage['selectedActionCount'], coverage
