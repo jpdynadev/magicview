@@ -1,6 +1,6 @@
-start=2026-08-31T22:10:00Z
+start=2026-09-01T01:11:30Z
 purpose=component-canary
 entrypoint=python3 engine-tests/run_kinnan_sim.py --purpose component-canary
-qualification=three-anchor deterministic replay plus full99-v3 coverage
-repair=persist live Forge snapshots for observed full99-v3 extraction
+qualification=three-anchor semantic replay plus material action causality
+repair=context-bound typed cost confirmation and material state transition gate
 ranking=false
