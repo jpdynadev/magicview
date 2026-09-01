@@ -391,4 +391,66 @@ class LiveForgeCausalityTests(unittest.TestCase):
         self.assertNotEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
 
 
+class LiveFull99ExtractionTests(unittest.TestCase):
+    def test_snapshot_rows_preserve_99_and_observed_semantics(self):
+        import kinnan_v9_forge_canary as canary
+        import kinnan_v9_production_parity_canary as parity
+        deck = canary.DECK_DIR / parity.ANCHORS[0]
+        commanders, cards = canary._parse_dck(deck, exact_kinnan_registration=True)
+        opening = cards[len(commanders):len(commanders) + 7]
+        hand = [
+            {"id": f"engine-{index}", "identity": {"name": canary._engine_name(name)}}
+            for index, name in enumerate(opening)
+        ]
+        witness = {
+            "materialActionEffectConfirmed": True,
+            "witness": {"promptId": 2, "chosenActionId": "prompt-action-0"},
+            "promptTrace": [
+                {
+                    "promptId": 1,
+                    "promptType": "mulligan",
+                    "submittedAnswer": {"output": {"keep": True}},
+                    "snapshot": {
+                        "turn": 0,
+                        "step": "untap",
+                        "zones": [{"ownerId": "player-0", "zone": "hand", "cards": hand}],
+                    },
+                },
+                {
+                    "promptId": 2,
+                    "promptType": "chooseAction",
+                    "promptInput": {
+                        "actions": [{
+                            "id": "prompt-action-0",
+                            "cardId": "engine-0",
+                            "type": "cast",
+                        }],
+                    },
+                    "snapshot": {
+                        "turn": 1,
+                        "step": "main1",
+                        "zones": [{"ownerId": "player-0", "zone": "hand", "cards": hand}],
+                    },
+                },
+            ],
+        }
+        rows, coverage = parity._registered_rows(
+            deck, seed=7, replay=1, witness=witness
+        )
+        self.assertEqual(len(rows), 99)
+        self.assertTrue(coverage["valid"])
+        self.assertEqual(coverage["openingHandRows"], 7)
+        self.assertEqual(coverage["keptRows"], 7)
+        self.assertEqual(coverage["observedCardRows"], 7)
+        self.assertTrue(coverage["selectedActionAttributed"])
+        first = next(row for row in rows if row["registeredCardName"] == opening[0])
+        self.assertTrue(first["openingHand"])
+        self.assertTrue(first["kept"])
+        self.assertTrue(first["cast"])
+        self.assertTrue(first["played"])
+        unseen = next(row for row in rows if row["registeredCardName"] not in opening)
+        self.assertFalse(unseen["present"])
+        self.assertEqual(unseen["zones"], [])
+
+
 if __name__ == "__main__": unittest.main(verbosity=2)
