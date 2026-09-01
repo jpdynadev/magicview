@@ -21,3 +21,4 @@ run tutor attribution and legal repeated-action gate 2026-09-01T10:12:00Z
 2026-09-01T16:16:00Z validate player-specific end-of-Kinnan-T4 horizon
 2026-09-01T17:11:00Z validate repaired player-specific horizon forwarding
 2026-09-01T18:12:00Z validate identical required modal through true Kinnan T4
+2026-09-01T19:13:00Z validate optional blocking pass through true Kinnan T4
