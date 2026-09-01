@@ -447,10 +447,22 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                             "action": submitted_witness,
                             "transition": transition,
                         }
+                        horizon_turn = int(getattr(args, "horizon_turn", 0) or 0)
+                        horizon_reached = (
+                            horizon_turn <= 0
+                            or (
+                                isinstance(snapshot.get("turn"), int)
+                                and snapshot.get("turn") >= horizon_turn
+                            )
+                        )
                         report.update(
                             {
-                                "status": "typed_action_applied_and_phase_advanced",
-                                "valid": True,
+                                "status": (
+                                    "typed_action_applied_and_horizon_reached"
+                                    if horizon_reached
+                                    else "typed_action_applied_bounded_observation_continuing"
+                                ),
+                                "valid": horizon_reached,
                                 "typedActionIdsComplete": True,
                                 "witness": submitted_witness,
                                 "transition": transition,
@@ -459,13 +471,17 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                                 "preActionMaterialStateHash": pre_action_material_state_hash,
                                 "postActionMaterialStateHash": post_action_material_state_hash,
                                 "materialActionEffectConfirmed": True,
+                                "boundedObservationOnly": horizon_turn > 0,
+                                "horizonTurn": horizon_turn if horizon_turn > 0 else None,
+                                "horizonReached": horizon_reached,
                                 "semanticActionTraceHash": _stable_hash(
                                     _semantic_prompt_trace(report["promptTrace"])
                                 ),
                                 "deterministicWitnessHash": _stable_hash(deterministic_witness),
                             }
                         )
-                        return report
+                        if horizon_reached:
+                            return report
                 if prompt_type == "chooseAction":
                     actions = list(inp.get("actions") or [])
                     if not actions:
@@ -613,6 +629,12 @@ def main() -> int:
     )
     parser.add_argument("--seed", type=int, default=1999000)
     parser.add_argument("--max-seconds", type=int, default=90)
+    parser.add_argument(
+        "--horizon-turn",
+        type=int,
+        default=0,
+        help="continue pass-only observation until this global Forge turn; component evidence only",
+    )
     parser.add_argument("--report", type=Path, required=True)
     args = parser.parse_args()
     try:
