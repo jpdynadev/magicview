@@ -453,4 +453,132 @@ class LiveFull99ExtractionTests(unittest.TestCase):
         self.assertEqual(unseen["zones"], [])
 
 
+class LiveRevealExtractionTests(unittest.TestCase):
+    def test_exact_player_reveal_is_attributed_without_library_view_false_positive(self):
+        import kinnan_v9_forge_canary as canary
+        import kinnan_v9_production_parity_canary as parity
+
+        deck = canary.DECK_DIR / parity.ANCHORS[0]
+        commanders, cards = canary._parse_dck(
+            deck, exact_kinnan_registration=True
+        )
+        main = cards[len(commanders):]
+        opening = main[:7]
+        revealed_name = main[7]
+        browser_only_name = main[8]
+        hand = [
+            {
+                "id": f"engine-{index}",
+                "identity": {"name": canary._engine_name(name)},
+            }
+            for index, name in enumerate(opening)
+        ]
+        witness = {
+            "materialActionEffectConfirmed": True,
+            "promptTrace": [
+                {
+                    "promptId": 1,
+                    "promptType": "mulligan",
+                    "submittedAnswer": {"output": {"keep": True}},
+                    "snapshot": {
+                        "turn": 0,
+                        "step": "untap",
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 2,
+                    "promptType": "revealCards",
+                    "turn": 1,
+                    "step": "main1",
+                    "promptInput": {
+                        "ownerPlayerId": "player-view-0",
+                        "zone": "library",
+                        "cards": [
+                            {
+                                "id": "browser-only",
+                                "identity": {
+                                    "name": canary._engine_name(browser_only_name)
+                                },
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 3,
+                    "promptType": "revealCards",
+                    "turn": 1,
+                    "step": "main1",
+                    "promptInput": {
+                        "ownerPlayerId": "player-0",
+                        "zone": "library",
+                        "cards": [
+                            {
+                                "id": "revealed-card",
+                                "identity": {
+                                    "name": canary._engine_name(revealed_name)
+                                },
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 4,
+                    "promptType": "chooseAction",
+                    "promptInput": {
+                        "actions": [
+                            {
+                                "id": "prompt-action-0",
+                                "cardId": "engine-0",
+                                "type": "cast",
+                            }
+                        ],
+                    },
+                    "submittedAnswer": {
+                        "output": {
+                            "type": "act",
+                            "actionId": "prompt-action-0",
+                        }
+                    },
+                    "snapshot": {
+                        "turn": 1,
+                        "step": "main1",
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+            ],
+        }
+        rows, coverage = parity._registered_rows(
+            deck, seed=8, replay=1, witness=witness
+        )
+        revealed = next(
+            row for row in rows
+            if row["registeredCardName"] == revealed_name
+        )
+        browser_only = next(
+            row for row in rows
+            if row["registeredCardName"] == browser_only_name
+        )
+        self.assertTrue(coverage["valid"])
+        self.assertEqual(coverage["observedRevealCount"], 1)
+        self.assertTrue(revealed["present"])
+        self.assertTrue(revealed["revealed"])
+        self.assertTrue(revealed["involved"])
+        self.assertEqual(revealed["zones"], ["library"])
+        self.assertFalse(browser_only["present"])
+        self.assertFalse(browser_only["revealed"])
+
+
 if __name__ == "__main__": unittest.main(verbosity=2)
