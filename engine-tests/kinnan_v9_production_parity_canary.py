@@ -203,6 +203,8 @@ def _registered_rows(
         and len(set(names)) == 99
         and len(set(ids)) == 99
     )
+    bounded_horizon_turn = int(witness.get("horizonTurn") or 0)
+    bounded_horizon_reached = bool(witness.get("horizonReached"))
     semantic_valid = (
         observed_snapshot_count > 0
         and opening_rows == 7
@@ -210,6 +212,7 @@ def _registered_rows(
         and observed_rows >= 7
         and selected_action_attributed
         and bool(witness.get("materialActionEffectConfirmed"))
+        and (bounded_horizon_turn <= 0 or bounded_horizon_reached)
     )
     coverage = {
         "schemaVersion": FULL99_SCHEMA_VERSION,
@@ -227,6 +230,9 @@ def _registered_rows(
         "keptRows": kept_rows,
         "selectedActionAttributed": selected_action_attributed,
         "materialActionEffectConfirmed": bool(witness.get("materialActionEffectConfirmed")),
+        "boundedObservationOnly": bounded_horizon_turn > 0,
+        "boundedHorizonTurn": bounded_horizon_turn if bounded_horizon_turn > 0 else None,
+        "boundedHorizonReached": bounded_horizon_reached,
         "structuralValid": structural_valid,
         "semanticValid": semantic_valid,
         "valid": structural_valid and semantic_valid,
@@ -258,6 +264,7 @@ def _run_once(args: argparse.Namespace, deck: str, seed: int, replay: int) -> di
         deck=deck,
         seed=seed,
         max_seconds=args.max_seconds,
+        horizon_turn=args.horizon_turn,
         report=report_path,
     )
     result = run_canary(ns)
@@ -295,6 +302,12 @@ def main() -> int:
     parser.add_argument("forge_home")
     parser.add_argument("--seed", type=int, default=2999000)
     parser.add_argument("--max-seconds", type=int, default=120)
+    parser.add_argument(
+        "--horizon-turn",
+        type=int,
+        default=0,
+        help="pass-only observation horizon in global Forge turns; component evidence only",
+    )
     parser.add_argument("--output-dir", type=Path, required=True)
     args = parser.parse_args()
     args.output_dir.mkdir(parents=True, exist_ok=True)
