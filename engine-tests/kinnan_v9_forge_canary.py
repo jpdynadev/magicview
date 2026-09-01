@@ -473,16 +473,62 @@ def _chosen_action_card_selection(
 def _pay_mana_cost_answer(
     prompt_input: dict[str, Any],
 ) -> dict[str, Any] | None:
-    """Finalize only an engine-confirmed payment from the live mana pool."""
+    """Take one exact engine-offered payment step or finalize a funded cost."""
     if str(prompt_input.get("type") or "") != "payManaCost":
         return None
-    if prompt_input.get("canConfirmFromPool") is not True:
+    if prompt_input.get("canConfirmFromPool") is True:
+        return {
+            "type": "payManaCost",
+            "output": {
+                "type": "pay",
+                "auto": False,
+            },
+        }
+
+    mana_cost = str(prompt_input.get("manaCost") or "")
+    required_colors = set(re.findall(r"\{([WUBRGC])\}", mana_cost))
+    candidates: list[tuple[int, int, str]] = []
+    seen_ids: set[str] = set()
+    for action in list(prompt_input.get("actions") or []):
+        if not isinstance(action, dict) or action.get("isManaAbility") is not True:
+            continue
+        action_id = str(action.get("id") or "")
+        produced = list(action.get("producedMana") or [])
+        colors: set[str] = set()
+        valid_production = bool(produced)
+        for item in produced:
+            color = str(item.get("color") or "") if isinstance(item, dict) else ""
+            amount = item.get("amount") if isinstance(item, dict) else None
+            if (
+                color not in {"W", "U", "B", "R", "G", "C"}
+                or not isinstance(amount, int)
+                or isinstance(amount, bool)
+                or amount <= 0
+            ):
+                valid_production = False
+                break
+            colors.add(color)
+        if not action_id or action_id in seen_ids or not valid_production:
+            continue
+        seen_ids.add(action_id)
+        # Prefer a currently required color, then a simple tap ability. The
+        # engine remains authoritative: only an exact action ID it offered is
+        # echoed, and it will reissue the prompt before any final payment.
+        candidates.append(
+            (
+                0 if colors & required_colors else 1,
+                0 if str(action.get("cost") or "").strip() == "{T}" else 1,
+                action_id,
+            )
+        )
+    if not candidates:
         return None
+    action_id = min(candidates)[2]
     return {
         "type": "payManaCost",
         "output": {
-            "type": "pay",
-            "auto": False,
+            "type": "act",
+            "actionId": action_id,
         },
     }
 
