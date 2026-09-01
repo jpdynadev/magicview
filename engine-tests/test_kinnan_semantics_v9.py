@@ -255,12 +255,41 @@ class ForgePregamePromptTests(unittest.TestCase):
                 },
             },
         )
+        duplicate_mode = {
+            "label": "Venom Blast — Artifacts and creatures your opponents control enter tapped.",
+            "weight": 1,
+            "canRepeat": False,
+        }
+        self.assertEqual(
+            c._pregame_answer({
+                "type": "chooseFromSelection",
+                "minTotal": 1,
+                "maxTotal": 1,
+                "options": [duplicate_mode, dict(duplicate_mode)],
+            }),
+            {
+                "type": "chooseFromSelection",
+                "output": {
+                    "type": "selectionDecision",
+                    "chosenIndices": [0],
+                },
+            },
+        )
         self.assertIsNone(c._pregame_answer({
             "type": "chooseFromSelection",
             "minTotal": 1,
             "maxTotal": 1,
             "options": [
                 {"label": "Required mode", "weight": 1, "canRepeat": False},
+            ],
+        }))
+        self.assertIsNone(c._pregame_answer({
+            "type": "chooseFromSelection",
+            "minTotal": 1,
+            "maxTotal": 1,
+            "options": [
+                {"label": "Mode A", "weight": 1, "canRepeat": False},
+                {"label": "Mode B", "weight": 1, "canRepeat": False},
             ],
         }))
 
