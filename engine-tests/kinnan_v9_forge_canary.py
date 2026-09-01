@@ -258,20 +258,35 @@ def _chosen_cost_confirmation(
     description = str(witness.get("chosenActionDescription") or "").strip()
     cost = str(witness.get("chosenActionCost") or "").strip()
     title_folded = title.casefold()
-    cost_clauses = {
+    cost_clauses = [
         clause.strip().casefold()
         for clause in cost.split(",")
         if clause.strip()
-    }
+    ]
+    description_folded = description.casefold()
+    template_clause_match = any(
+        re.fullmatch(
+            re.escape(clause).replace(re.escape("cardname"), r".+?"),
+            title_folded,
+        )
+        for clause in cost_clauses
+        if "cardname" in clause
+    )
     # Forge stages compound activation costs as separate Accept/Decline
-    # prompts. Accept a stage only when its complete title is either the
-    # beginning of the selected action text or an exact comma-delimited cost
-    # clause from that same live action. This admits prompts such as
-    # Polluted Delta's "Pay 1 life" while unrelated booleans still fail closed.
-    matches_selected_action = (
-        bool(description)
-        and description.casefold().startswith(title_folded)
-    ) or title_folded in cost_clauses
+    # prompts and substitutes the live card name for CARDNAME. Accept a stage
+    # only when its complete title is present in the selected action text and
+    # exactly matches either a literal cost clause or that clause's CARDNAME
+    # template. Unrelated booleans continue to fail closed.
+    matches_selected_action = bool(description) and (
+        description_folded.startswith(title_folded)
+        or (
+            title_folded in description_folded
+            and (
+                title_folded in cost_clauses
+                or template_clause_match
+            )
+        )
+    )
     if (
         not title
         or not matches_selected_action
