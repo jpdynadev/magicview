@@ -12,3 +12,4 @@ run templated CARDNAME cost confirmation repair 2026-09-01T08:10:00Z
 run deterministic live search choice repair 2026-09-01T09:12:00Z
 run tutor attribution and legal repeated-action gate 2026-09-01T10:12:00Z
 2026-09-01T12:09:00Z validate exact live reveal attribution
+2026-09-01T13:09:00Z validate phase-aware same-phase action chaining
