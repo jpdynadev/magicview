@@ -49,10 +49,21 @@ def semantic_action_score(action: Mapping[str, Any], snapshot: Mapping[str, Any]
         return float("-inf")
     score = architecture_neutral_role_score(SemanticRoleProfile.from_typed_metadata(_typed_card_meta(action)), horizon_turn=horizon_turn)
     atype = str(action.get("type") or "").lower()
-    if atype in {"pass", "passpriority"}: score -= 0.25
-    elif atype in {"playland", "play_land"}: score += 1.0
-    elif atype in {"activateability", "activate_ability"} and action.get("isManaAbility"): score += 0.5
-    elif atype in {"castspell", "cast_spell"}: score += 0.35
+    step = str(snapshot.get("step") or snapshot.get("phase") or "").lower()
+    if atype in {"pass", "passpriority"}:
+        score -= 0.25
+    elif atype in {"undomana", "undo_mana"}:
+        # Forge exposes undoMana as a reversible UI affordance, not a forward
+        # pilot decision. Never consume a typed-action budget by selecting it.
+        score -= 100.0
+    elif atype in {"playland", "play_land"}:
+        score += 1.0
+    elif atype in {"activateability", "activate_ability"} and action.get("isManaAbility"):
+        # Floating mana in upkeep/combat/end step without a witnessed response
+        # window only strands the resource before the next main phase.
+        score += 0.5 if step in {"main1", "main2"} else -2.0
+    elif atype in {"castspell", "cast_spell", "cast"}:
+        score += 0.35
     if action.get("lineWitnessId"): score += 10.0
     if action.get("resolvesThreatToLineId"): score += 8.0
     return score
@@ -64,7 +75,30 @@ def choose_action(actions: Sequence[Mapping[str, Any]], snapshot: Mapping[str, A
     stable = [a for a in actions if a.get("actionId") or a.get("id")]
     if not stable:
         raise SemanticError("typed action identity missing for every legal action")
-    return sorted(stable, key=lambda a: (semantic_action_score(a, snapshot, player_id=player_id, horizon_turn=horizon_turn), str(a.get("actionId") or a.get("id"))), reverse=True)[0]
+    ranked = sorted(
+        stable,
+        key=lambda a: (
+            semantic_action_score(
+                a,
+                snapshot,
+                player_id=player_id,
+                horizon_turn=horizon_turn,
+            ),
+            str(a.get("actionId") or a.get("id")),
+        ),
+        reverse=True,
+    )
+    best = ranked[0]
+    # The protocol's pass action is implicit in live chooseAction prompts.
+    # Return None when every explicit action is worse than passing.
+    if semantic_action_score(
+        best,
+        snapshot,
+        player_id=player_id,
+        horizon_turn=horizon_turn,
+    ) <= -0.25:
+        return None
+    return best
 
 
 def classify_selection_prompt(prompt: Mapping[str, Any]) -> SelectionKind:
