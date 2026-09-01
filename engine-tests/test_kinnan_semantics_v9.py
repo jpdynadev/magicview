@@ -5,6 +5,7 @@ import unittest
 from kinnan_semantics_v9 import *
 from kinnan_v9_forge_canary import (
     _chosen_cost_confirmation,
+    _kinnan_horizon_reached,
     _material_snapshot,
     _semantic_prompt_trace,
     _stable_hash,
@@ -389,6 +390,45 @@ class LiveForgeCausalityTests(unittest.TestCase):
         self.assertEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
         second[1]["step"] = "main2"
         self.assertNotEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
+
+
+class KinnanTurnHorizonTests(unittest.TestCase):
+    def test_global_turn_twelve_is_not_kinnan_turn_four(self):
+        observed: set[int] = set()
+        snapshots = [
+            {"turn": 1, "step": "upkeep", "activePlayerId": "player-3"},
+            {"turn": 2, "step": "upkeep", "activePlayerId": "player-0"},
+            {"turn": 6, "step": "upkeep", "activePlayerId": "player-0"},
+            {"turn": 10, "step": "endOfTurn", "activePlayerId": "player-0"},
+            {"turn": 12, "step": "upkeep", "activePlayerId": "player-2"},
+        ]
+        for snapshot in snapshots:
+            self.assertFalse(
+                _kinnan_horizon_reached(snapshot, observed, 4)
+            )
+        self.assertEqual(observed, {2, 6, 10})
+        self.assertFalse(
+            _kinnan_horizon_reached(
+                {
+                    "turn": 14,
+                    "step": "upkeep",
+                    "activePlayerId": "player-0",
+                },
+                observed,
+                4,
+            )
+        )
+        self.assertTrue(
+            _kinnan_horizon_reached(
+                {
+                    "turn": 14,
+                    "step": "endOfTurn",
+                    "activePlayerId": "player-0",
+                },
+                observed,
+                4,
+            )
+        )
 
 
 class LiveFull99ExtractionTests(unittest.TestCase):
