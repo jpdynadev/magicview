@@ -181,6 +181,29 @@ def _pregame_answer(prompt_input: dict[str, Any]) -> dict[str, Any] | None:
                     "chosenIndices": [],
                 },
             }
+        options = list(prompt_input.get("options") or [])
+        if (
+            isinstance(minimum, int)
+            and not isinstance(minimum, bool)
+            and isinstance(maximum, int)
+            and not isinstance(maximum, bool)
+            and minimum == maximum == 1
+            and len(options) > 1
+            and all(isinstance(option, dict) for option in options)
+            and all(option == options[0] for option in options[1:])
+        ):
+            # Forge can emit duplicate mandatory replacement-effect modes
+            # without source IDs (for example two byte-identical Venom Blast
+            # entries). No observable policy distinction exists, so choose
+            # the first canonical index. Distinct or singleton required modes
+            # remain fail-closed.
+            return {
+                "type": "chooseFromSelection",
+                "output": {
+                    "type": "selectionDecision",
+                    "chosenIndices": [0],
+                },
+            }
         return None
     if prompt_type == "chooseCards":
         # Match Manabrew protocol v1's forced-choice resolver exactly. An
