@@ -147,7 +147,45 @@ def _registered_rows(
     engine_id_to_registered: dict[str, str] = {}
     previous_zone_by_engine_id: dict[str, str] = {}
     observed_snapshot_count = 0
+    observed_reveal_count = 0
     for event in trace:
+        # A non-empty revealCards event owned by player-0 is direct Forge
+        # evidence that an exact registered main-deck card was revealed. Empty
+        # startup warnings, opponent reveals, and player-view library browsers
+        # are deliberately excluded.
+        if event.get("promptType") == "revealCards":
+            prompt_input = event.get("promptInput") or {}
+            reveal_cards = list(prompt_input.get("cards") or [])
+            if prompt_input.get("ownerPlayerId") == "player-0" and reveal_cards:
+                reveal_zone = str(prompt_input.get("zone") or "")
+                for revealed_card in reveal_cards:
+                    if not isinstance(revealed_card, dict):
+                        continue
+                    identity = revealed_card.get("identity") or {}
+                    registered_name = engine_to_registered.get(
+                        str(identity.get("name") or "")
+                    )
+                    if not registered_name:
+                        continue
+                    engine_id = str(revealed_card.get("id") or "")
+                    if not engine_id:
+                        raise RuntimeError(
+                            "live player-0 reveal lacks stable engine card identity"
+                        )
+                    engine_id_to_registered[engine_id] = registered_name
+                    row = rows_by_name[registered_name]
+                    row["present"] = True
+                    row["revealed"] = True
+                    row["involved"] = True
+                    turn = event.get("turn")
+                    if row["firstSeenTurn"] is None and isinstance(turn, int):
+                        row["firstSeenTurn"] = turn
+                    if reveal_zone and reveal_zone not in row["zones"]:
+                        row["zones"].append(reveal_zone)
+                    if reveal_zone and engine_id not in previous_zone_by_engine_id:
+                        previous_zone_by_engine_id[engine_id] = reveal_zone
+                    observed_reveal_count += 1
+
         # A submitted library-search choice is direct live evidence that the
         # selected registered card was tutored. Record the hidden library
         # origin before the following snapshot exposes its destination.
@@ -306,6 +344,7 @@ def _registered_rows(
         "missingCards": [],
         "duplicates": len(rows) - len(set(ids)),
         "observedSnapshotCount": observed_snapshot_count,
+        "observedRevealCount": observed_reveal_count,
         "observedCardRows": observed_rows,
         "openingHandRows": opening_rows,
         "keptRows": kept_rows,
