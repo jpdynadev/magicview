@@ -9,6 +9,7 @@ from kinnan_v9_forge_canary import (
     _chosen_optional_entry_payment,
     _kinnan_horizon_reached,
     _material_snapshot,
+    _pay_mana_cost_answer,
     _semantic_prompt_trace,
     _stable_hash,
 )
@@ -368,6 +369,70 @@ class ForgePregamePromptTests(unittest.TestCase):
             self.assertIsNone(
                 _chosen_optional_entry_payment(changed_prompt, changed_witness)
             )
+
+    def test_pay_mana_cost_uses_exact_engine_action_then_confirms(self):
+        prompt = {
+            "type": "payManaCost",
+            "manaCost": "{1}{U}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "tap:tropical:green",
+                    "isManaAbility": True,
+                    "cost": "{T}",
+                    "producedMana": [{"color": "G", "amount": 1}],
+                },
+                {
+                    "id": "tap:tropical:blue",
+                    "isManaAbility": True,
+                    "cost": "{T}",
+                    "producedMana": [{"color": "U", "amount": 1}],
+                },
+                {
+                    "id": "tap:pollinator:blue",
+                    "isManaAbility": True,
+                    "cost": "{T}, Tap an untapped Permanent you control",
+                    "producedMana": [{"color": "U", "amount": 1}],
+                },
+            ],
+        }
+        self.assertEqual(
+            _pay_mana_cost_answer(prompt),
+            {
+                "type": "payManaCost",
+                "output": {
+                    "type": "act",
+                    "actionId": "tap:tropical:blue",
+                },
+            },
+        )
+        prompt["canConfirmFromPool"] = True
+        self.assertEqual(
+            _pay_mana_cost_answer(prompt),
+            {
+                "type": "payManaCost",
+                "output": {"type": "pay", "auto": False},
+            },
+        )
+
+    def test_pay_mana_cost_rejects_malformed_or_invented_actions(self):
+        self.assertIsNone(_pay_mana_cost_answer({
+            "type": "payManaCost",
+            "manaCost": "{1}{U}",
+            "canConfirmFromPool": False,
+            "actions": [
+                {
+                    "id": "bad",
+                    "isManaAbility": True,
+                    "producedMana": [{"color": "U", "amount": 0}],
+                },
+                {
+                    "id": "not-mana",
+                    "isManaAbility": False,
+                    "producedMana": [{"color": "U", "amount": 1}],
+                },
+            ],
+        }))
 
     def test_cleanup_discard_uses_typed_pilot_keep_value(self):
         import kinnan_v9_forge_canary as c
