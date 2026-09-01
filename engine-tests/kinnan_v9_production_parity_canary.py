@@ -392,6 +392,10 @@ def _registered_rows(
         and len(set(ids)) == 99
     )
     bounded_horizon_turn = int(witness.get("horizonTurn") or 0)
+    bounded_kinnan_turn = int(witness.get("horizonKinnanTurn") or 0)
+    observed_kinnan_turn_count = int(
+        witness.get("observedKinnanTurnCount") or 0
+    )
     bounded_horizon_reached = bool(witness.get("horizonReached"))
     semantic_valid = (
         observed_snapshot_count > 0
@@ -400,7 +404,17 @@ def _registered_rows(
         and observed_rows >= 7
         and selected_action_attributed
         and bool(witness.get("materialActionEffectConfirmed"))
-        and (bounded_horizon_turn <= 0 or bounded_horizon_reached)
+        and (
+            (
+                bounded_horizon_turn <= 0
+                and bounded_kinnan_turn <= 0
+            )
+            or bounded_horizon_reached
+        )
+        and (
+            bounded_kinnan_turn <= 0
+            or observed_kinnan_turn_count >= bounded_kinnan_turn
+        )
     )
     coverage = {
         "schemaVersion": FULL99_SCHEMA_VERSION,
@@ -425,8 +439,16 @@ def _registered_rows(
         "materialActionCount": int(witness.get("materialActionCount") or 0),
         "repeatedPilotDecisions": bool(witness.get("repeatedPilotDecisions")),
         "materialActionEffectConfirmed": bool(witness.get("materialActionEffectConfirmed")),
-        "boundedObservationOnly": bounded_horizon_turn > 0,
-        "boundedHorizonTurn": bounded_horizon_turn if bounded_horizon_turn > 0 else None,
+        "boundedObservationOnly": (
+            bounded_horizon_turn > 0 or bounded_kinnan_turn > 0
+        ),
+        "boundedHorizonTurn": (
+            bounded_horizon_turn if bounded_horizon_turn > 0 else None
+        ),
+        "boundedKinnanTurn": (
+            bounded_kinnan_turn if bounded_kinnan_turn > 0 else None
+        ),
+        "observedKinnanTurnCount": observed_kinnan_turn_count,
         "boundedHorizonReached": bounded_horizon_reached,
         "structuralValid": structural_valid,
         "semanticValid": semantic_valid,
