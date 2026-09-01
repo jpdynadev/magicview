@@ -148,6 +148,55 @@ def _registered_rows(
     previous_zone_by_engine_id: dict[str, str] = {}
     observed_snapshot_count = 0
     for event in trace:
+        # A submitted library-search choice is direct live evidence that the
+        # selected registered card was tutored. Record the hidden library
+        # origin before the following snapshot exposes its destination.
+        if event.get("promptType") == "chooseCards":
+            prompt_input = event.get("promptInput") or {}
+            presentation = prompt_input.get("presentation") or {}
+            answer = event.get("submittedAnswer") or {}
+            output = answer.get("output") or {}
+            chosen_ids = list(output.get("chosenCardIds") or [])
+            library_search = "library" in str(
+                presentation.get("description") or ""
+            ).casefold()
+            if library_search and output.get("type") == "chooseCardsDecision":
+                candidates = {
+                    str(card.get("id") or ""): card
+                    for card in list(prompt_input.get("cards") or [])
+                    if isinstance(card, dict) and card.get("id")
+                }
+                for chosen_id_raw in chosen_ids:
+                    chosen_id = str(chosen_id_raw or "")
+                    candidate = candidates.get(chosen_id)
+                    identity = (candidate or {}).get("identity") or {}
+                    registered_name = engine_to_registered.get(
+                        str(identity.get("name") or "")
+                    )
+                    if not chosen_id or not registered_name:
+                        raise RuntimeError(
+                            "submitted library search choice lacks exact registered identity"
+                        )
+                    engine_id_to_registered[chosen_id] = registered_name
+                    row = rows_by_name[registered_name]
+                    row["present"] = True
+                    row["tutored"] = True
+                    row["involved"] = True
+                    turn = event.get("turn")
+                    if row["firstSeenTurn"] is None and isinstance(turn, int):
+                        row["firstSeenTurn"] = turn
+                    if "library" not in row["zones"]:
+                        row["zones"].append("library")
+                    if previous_zone_by_engine_id.get(chosen_id) != "library":
+                        row["zoneChanges"].append({
+                            "fromZone": previous_zone_by_engine_id.get(chosen_id),
+                            "toZone": "library",
+                            "turn": turn,
+                            "step": event.get("step"),
+                            "promptId": event.get("promptId"),
+                        })
+                        previous_zone_by_engine_id[chosen_id] = "library"
+
         snapshot = event.get("snapshot")
         if not isinstance(snapshot, dict):
             continue
