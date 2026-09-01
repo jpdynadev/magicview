@@ -56,6 +56,7 @@ jobs:
             /tmp/manabrew/forge/forge-gui/ \
             --seed 2999000 \
             --horizon-turn 12 \
+            --max-typed-actions 8 \
             --output-dir engine-tests/results/v9-production-parity
       - name: Verify full-99 v3 component coverage
         run: |
@@ -81,6 +82,10 @@ jobs:
                   assert coverage['boundedObservationOnly'] is True, coverage
                   assert coverage['boundedHorizonTurn'] == 12, coverage
                   assert coverage['boundedHorizonReached'] is True, coverage
+                  assert coverage['repeatedPilotDecisions'] is True, coverage
+                  assert coverage['selectedActionCount'] >= 2, coverage
+                  assert coverage['attributedActionCount'] == coverage['selectedActionCount'], coverage
+                  assert coverage['materialActionCount'] >= 2, coverage
           PY
       - name: Confirm ranking remains fail closed
         run: |
