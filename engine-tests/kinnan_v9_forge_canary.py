@@ -300,6 +300,63 @@ def _chosen_cost_confirmation(
     }
 
 
+def _chosen_action_card_selection(
+    prompt_input: dict[str, Any],
+    witness: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Resolve a library selection caused by the currently selected action."""
+    if not witness or str(prompt_input.get("type") or "") != "chooseCards":
+        return None
+    title = str((prompt_input.get("presentation") or {}).get("title") or "").strip()
+    description = str(witness.get("chosenActionDescription") or "").strip()
+    cards = list(prompt_input.get("cards") or [])
+    minimum = prompt_input.get("min")
+    maximum = prompt_input.get("max")
+    if (
+        not title
+        or title.casefold() not in description.casefold()
+        or "search your library" not in description.casefold()
+        or not cards
+        or not isinstance(minimum, int)
+        or isinstance(minimum, bool)
+        or not isinstance(maximum, int)
+        or isinstance(maximum, bool)
+        or minimum < 0
+        or maximum < 1
+    ):
+        return None
+    pilot_prompt = {
+        "input": {
+            **prompt_input,
+            "selectionKind": "search",
+            "mayFailToFind": minimum == 0,
+        }
+    }
+    chosen = pilot.choose_cards(
+        pilot_prompt,
+        cards,
+        desired_roles=("mana_source",),
+    )
+    chosen_ids = [
+        str(card.get("id") or card.get("cardId") or "")
+        for card in chosen
+    ]
+    if (
+        not chosen_ids
+        or len(chosen_ids) > maximum
+        or any(not card_id for card_id in chosen_ids)
+        or len(set(chosen_ids)) != len(chosen_ids)
+    ):
+        return None
+    return {
+        "type": "chooseCards",
+        "output": {
+            "type": "chooseCardsDecision",
+            "chosenCardIds": chosen_ids,
+        },
+    }
+
+
 def _semantic_prompt_trace(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Preserve decisions while ignoring transient empty-priority sampling."""
     canonical: list[dict[str, Any]] = []
@@ -650,6 +707,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     continue
 
                 answer = _chosen_cost_confirmation(inp, submitted_witness)
+                if answer is None:
+                    answer = _chosen_action_card_selection(inp, submitted_witness)
                 if answer is None:
                     answer = _pregame_answer(inp)
                 if answer is None:
