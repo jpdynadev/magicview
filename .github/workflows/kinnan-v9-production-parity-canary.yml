@@ -56,7 +56,7 @@ jobs:
             /tmp/manabrew/forge/forge-gui/ \
             --seed 2999000 \
             --horizon-turn 12 \
-            --max-typed-actions 8 \
+            --max-typed-actions 16 \
             --output-dir engine-tests/results/v9-production-parity
       - name: Verify full-99 v3 component coverage
         run: |
@@ -69,6 +69,7 @@ jobs:
           assert summary['valid'] is True, summary
           assert len(summary['anchors']) == 3, summary
           repeated_anchor_pairs = 0
+          observed_payment_anchor_pairs = 0
           for anchor in summary['anchors']:
               assert anchor['deterministicReplay'] is True, anchor
               assert anchor['telemetryReplayEqual'] is True, anchor
@@ -80,6 +81,17 @@ jobs:
               ]
               if all(item['repeatedPilotDecisions'] for item in coverages):
                   repeated_anchor_pairs += 1
+              if all(item['observedManaPaymentCount'] > 0 for item in coverages):
+                  observed_payment_anchor_pairs += 1
+                  assert (
+                      coverages[0]['observedManaPaymentCount']
+                      == coverages[1]['observedManaPaymentCount']
+                  ), coverages
+                  assert (
+                      coverages[0]['observedManaSpentTotal']
+                      == coverages[1]['observedManaSpentTotal']
+                      > 0
+                  ), coverages
               assert (
                   coverages[0]['selectedActionCount']
                   == coverages[1]['selectedActionCount']
@@ -101,6 +113,7 @@ jobs:
           # deterministic anchor pairs, while a legal one-action game is not
           # rejected merely because Forge offers no further typed action.
           assert repeated_anchor_pairs >= 2, summary
+          assert observed_payment_anchor_pairs >= 2, summary
           PY
       - name: Confirm ranking remains fail closed
         run: |
