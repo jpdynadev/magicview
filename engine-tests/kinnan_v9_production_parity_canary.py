@@ -48,7 +48,26 @@ def _selected_live_actions(witness: dict[str, Any]) -> list[dict[str, Any]]:
         if len(matches) != 1:
             raise RuntimeError("submitted typed action lacks one exact live action payload")
         selected.append(matches[0])
-    return selected
+    if selected:
+        return selected
+
+    # Synthetic component goldens created before submitted answers were
+    # persisted retain one selected-action witness. Keep that test adapter
+    # compatible without using it for live multi-action evidence.
+    legacy = witness.get("witness") or {}
+    chosen_id = str(legacy.get("chosenActionId") or "")
+    chosen_prompt = legacy.get("promptId")
+    for event in list(witness.get("promptTrace") or []):
+        if event.get("promptId") != chosen_prompt:
+            continue
+        matches = [
+            action
+            for action in list((event.get("promptInput") or {}).get("actions") or [])
+            if str(action.get("id") or action.get("actionId") or "") == chosen_id
+        ]
+        if len(matches) == 1:
+            return matches
+    return []
 
 
 def _registered_rows(
