@@ -817,7 +817,7 @@ class PhaseAwareLiveActionTests(unittest.TestCase):
 
 class ProductionParityCliContractTests(unittest.TestCase):
     def test_player_specific_horizon_is_parsed_and_forwarded(self):
-        source = (ROOT / "kinnan_v9_production_parity_canary.py").read_text()
+        source = (Path(__file__).resolve().parent / "kinnan_v9_production_parity_canary.py").read_text()
         self.assertIn('"--horizon-kinnan-turn"', source)
         self.assertIn(
             "horizon_kinnan_turn=args.horizon_kinnan_turn",
