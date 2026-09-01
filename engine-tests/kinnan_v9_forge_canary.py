@@ -257,6 +257,39 @@ def _material_snapshot(snapshot: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _kinnan_horizon_reached(
+    snapshot: dict[str, Any],
+    observed_turns: set[int],
+    target_kinnan_turn: int,
+) -> bool:
+    """Track player-0 turns and close only after that player's target turn."""
+    turn = snapshot.get("turn")
+    active_player_id = snapshot.get("activePlayerId")
+    if (
+        active_player_id == "player-0"
+        and isinstance(turn, int)
+        and not isinstance(turn, bool)
+        and turn > 0
+    ):
+        observed_turns.add(turn)
+    if target_kinnan_turn <= 0 or len(observed_turns) < target_kinnan_turn:
+        return False
+    last_kinnan_turn = max(observed_turns)
+    step = str(snapshot.get("step") or "")
+    return bool(
+        (
+            active_player_id == "player-0"
+            and turn == last_kinnan_turn
+            and step == "endOfTurn"
+        )
+        or (
+            isinstance(turn, int)
+            and not isinstance(turn, bool)
+            and turn > last_kinnan_turn
+        )
+    )
+
+
 def _chosen_cost_confirmation(
     prompt_input: dict[str, Any],
     witness: dict[str, Any] | None,
@@ -484,6 +517,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
             post_action_snapshot_hash = ""
             pre_action_material_state_hash = ""
             post_action_material_state_hash = ""
+            observed_kinnan_turns: set[int] = set()
             while time.monotonic() < deadline:
                 raw_prompt = _rpc(
                     proc,
@@ -534,18 +568,39 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     }
                 )
                 horizon_turn = int(getattr(args, "horizon_turn", 0) or 0)
-                horizon_reached_without_pending_action = (
+                horizon_kinnan_turn = int(
+                    getattr(args, "horizon_kinnan_turn", 0) or 0
+                )
+                kinnan_horizon_reached = _kinnan_horizon_reached(
+                    snapshot,
+                    observed_kinnan_turns,
+                    horizon_kinnan_turn,
+                )
+                global_horizon_reached = bool(
                     horizon_turn > 0
+                    and isinstance(snapshot.get("turn"), int)
+                    and snapshot.get("turn") >= horizon_turn
+                )
+                horizon_enabled = horizon_turn > 0 or horizon_kinnan_turn > 0
+                horizon_reached = bool(
+                    (horizon_kinnan_turn > 0 and kinnan_horizon_reached)
+                    or (
+                        horizon_kinnan_turn <= 0
+                        and global_horizon_reached
+                    )
+                )
+                horizon_reached_without_pending_action = (
+                    horizon_enabled
+                    and horizon_reached
                     and submitted_witness is None
                     and bool(action_witnesses)
                     and all(item.get("materialEffectConfirmed") for item in action_witnesses)
-                    and isinstance(snapshot.get("turn"), int)
-                    and snapshot.get("turn") >= horizon_turn
                 )
                 if horizon_reached_without_pending_action:
                     deterministic_witness = {
                         "actions": action_witnesses,
                         "horizonTurn": horizon_turn,
+                        "horizonKinnanTurn": horizon_kinnan_turn,
                     }
                     report.update(
                         {
@@ -558,7 +613,13 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                             "materialActionEffectConfirmed": True,
                             "boundedObservationOnly": True,
                             "repeatedPilotDecisions": len(action_witnesses) > 1,
-                            "horizonTurn": horizon_turn,
+                            "horizonTurn": horizon_turn if horizon_turn > 0 else None,
+                            "horizonKinnanTurn": (
+                                horizon_kinnan_turn
+                                if horizon_kinnan_turn > 0
+                                else None
+                            ),
+                            "observedKinnanTurnCount": len(observed_kinnan_turns),
                             "horizonReached": True,
                             "semanticActionTraceHash": _stable_hash(
                                 _semantic_prompt_trace(report["promptTrace"])
@@ -603,24 +664,20 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         submitted_witness["transition"] = transition
                         deterministic_witness = {
                             "actions": action_witnesses,
-                            "horizonTurn": int(getattr(args, "horizon_turn", 0) or 0),
+                            "horizonTurn": horizon_turn,
+                            "horizonKinnanTurn": horizon_kinnan_turn,
                         }
-                        horizon_turn = int(getattr(args, "horizon_turn", 0) or 0)
-                        horizon_reached = (
-                            horizon_turn <= 0
-                            or (
-                                isinstance(snapshot.get("turn"), int)
-                                and snapshot.get("turn") >= horizon_turn
-                            )
+                        action_horizon_reached = (
+                            not horizon_enabled or horizon_reached
                         )
                         report.update(
                             {
                                 "status": (
                                     "typed_action_applied_and_horizon_reached"
-                                    if horizon_reached
+                                    if action_horizon_reached
                                     else "typed_action_applied_bounded_observation_continuing"
                                 ),
-                                "valid": horizon_reached,
+                                "valid": action_horizon_reached,
                                 "typedActionIdsComplete": True,
                                 "witness": action_witnesses[0],
                                 "actionWitnesses": action_witnesses,
@@ -631,17 +688,23 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                                 "preActionMaterialStateHash": pre_action_material_state_hash,
                                 "postActionMaterialStateHash": post_action_material_state_hash,
                                 "materialActionEffectConfirmed": True,
-                                "boundedObservationOnly": horizon_turn > 0,
+                                "boundedObservationOnly": horizon_enabled,
                                 "repeatedPilotDecisions": len(action_witnesses) > 1,
                                 "horizonTurn": horizon_turn if horizon_turn > 0 else None,
-                                "horizonReached": horizon_reached,
+                                "horizonKinnanTurn": (
+                                    horizon_kinnan_turn
+                                    if horizon_kinnan_turn > 0
+                                    else None
+                                ),
+                                "observedKinnanTurnCount": len(observed_kinnan_turns),
+                                "horizonReached": action_horizon_reached,
                                 "semanticActionTraceHash": _stable_hash(
                                     _semantic_prompt_trace(report["promptTrace"])
                                 ),
                                 "deterministicWitnessHash": _stable_hash(deterministic_witness),
                             }
                         )
-                        if horizon_reached:
+                        if action_horizon_reached:
                             return report
                         submitted_witness = None
                         pre_action_snapshot_hash = ""
@@ -834,6 +897,12 @@ def main() -> int:
         type=int,
         default=0,
         help="continue component observation until this global Forge turn",
+    )
+    parser.add_argument(
+        "--horizon-kinnan-turn",
+        type=int,
+        default=0,
+        help="continue through the end of this player-0 turn",
     )
     parser.add_argument(
         "--max-typed-actions",
