@@ -61,7 +61,7 @@ def semantic_action_score(action: Mapping[str, Any], snapshot: Mapping[str, Any]
     elif atype in {"activateability", "activate_ability"} and action.get("isManaAbility"):
         # Floating mana in upkeep/combat/end step without a witnessed response
         # window only strands the resource before the next main phase.
-        score += 0.5 if step in {"main1", "main2"} else -2.0
+        score += 0.5 if step in {"main1", "main2"} else -4.0
     elif atype in {"castspell", "cast_spell", "cast"}:
         score += 0.35
     if action.get("lineWitnessId"): score += 10.0
