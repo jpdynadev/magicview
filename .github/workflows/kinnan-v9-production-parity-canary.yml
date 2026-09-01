@@ -65,6 +65,7 @@ jobs:
           from pathlib import Path
           root = Path('engine-tests/results/v9-production-parity')
           summary = json.loads((root / 'summary.json').read_text())
+          # Live repeated-action evidence must remain stricter than legacy synthetic goldens.
           assert summary['valid'] is True, summary
           assert len(summary['anchors']) == 3, summary
           for anchor in summary['anchors']:
