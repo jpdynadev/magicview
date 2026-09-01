@@ -453,6 +453,150 @@ class LiveFull99ExtractionTests(unittest.TestCase):
         self.assertEqual(unseen["zones"], [])
 
 
+class LiveManaPaymentExtractionTests(unittest.TestCase):
+    def test_confirmed_pool_depletion_is_attributed_to_exact_card(self):
+        import kinnan_v9_forge_canary as canary
+        import kinnan_v9_production_parity_canary as parity
+
+        deck = canary.DECK_DIR / parity.ANCHORS[0]
+        commanders, cards = canary._parse_dck(
+            deck, exact_kinnan_registration=True
+        )
+        opening = cards[len(commanders):len(commanders) + 7]
+        hand = [
+            {
+                "id": f"engine-{index}",
+                "identity": {"name": canary._engine_name(name)},
+            }
+            for index, name in enumerate(opening)
+        ]
+        witness = {
+            "materialActionEffectConfirmed": True,
+            "promptTrace": [
+                {
+                    "promptId": 1,
+                    "promptType": "mulligan",
+                    "submittedAnswer": {"output": {"keep": True}},
+                    "snapshot": {
+                        "turn": 0,
+                        "step": "untap",
+                        "players": [
+                            {"id": "player-0", "manaPool": {"U": 0}}
+                        ],
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 2,
+                    "promptType": "chooseAction",
+                    "promptInput": {
+                        "actions": [
+                            {
+                                "id": "cast-card",
+                                "cardId": "engine-0",
+                                "type": "cast",
+                            }
+                        ],
+                    },
+                    "submittedAnswer": {
+                        "output": {"type": "act", "actionId": "cast-card"}
+                    },
+                    "snapshot": {
+                        "turn": 1,
+                        "step": "main1",
+                        "players": [
+                            {"id": "player-0", "manaPool": {"U": 2}}
+                        ],
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 3,
+                    "promptType": "payManaCost",
+                    "promptInput": {
+                        "cardId": "engine-0",
+                        "canConfirmFromPool": True,
+                    },
+                    "submittedAnswer": {
+                        "output": {"type": "pay", "auto": False}
+                    },
+                    "snapshot": {
+                        "turn": 1,
+                        "step": "main1",
+                        "players": [
+                            {"id": "player-0", "manaPool": {"U": 2}}
+                        ],
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+                {
+                    "promptId": 4,
+                    "promptType": "chooseAction",
+                    "promptInput": {"actions": []},
+                    "snapshot": {
+                        "turn": 1,
+                        "step": "main1",
+                        "players": [
+                            {"id": "player-0", "manaPool": {"U": 0}}
+                        ],
+                        "zones": [
+                            {
+                                "ownerId": "player-0",
+                                "zone": "hand",
+                                "cards": hand,
+                            }
+                        ],
+                    },
+                },
+            ],
+        }
+        rows, coverage = parity._registered_rows(
+            deck, seed=9, replay=1, witness=witness
+        )
+        paid = next(
+            row for row in rows
+            if row["registeredCardName"] == opening[0]
+        )
+        self.assertTrue(coverage["valid"])
+        self.assertEqual(coverage["observedManaPaymentCount"], 1)
+        self.assertEqual(coverage["observedManaSpentTotal"], 2)
+        self.assertEqual(paid["manaSpent"], 2)
+        self.assertTrue(paid["involved"])
+
+    def test_unconfirmed_or_non_depleting_pool_is_not_inferred(self):
+        import kinnan_v9_production_parity_canary as parity
+
+        self.assertEqual(
+            parity._player_mana_total(
+                {"players": [{"id": "player-0", "manaPool": {"U": 2, "G": 1}}]}
+            ),
+            3,
+        )
+        self.assertIsNone(
+            parity._player_mana_total(
+                {"players": [{"id": "player-1", "manaPool": {"U": 2}}]}
+            )
+        )
+
+
 class LiveRevealExtractionTests(unittest.TestCase):
     def test_exact_player_reveal_is_attributed_without_library_view_false_positive(self):
         import kinnan_v9_forge_canary as canary
