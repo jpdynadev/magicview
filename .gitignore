@@ -9,4 +9,9 @@ coverage
 data/scryfall
 npm-debug.log*
 *.tsbuildinfo
+engine-tests/local-runs/
+engine-tests/.sim-cache/
+__pycache__/
+*.pyc
+engine-tests/results/local-*.json
 

@@ -8,6 +8,7 @@ Ranking remains blocked until pilot-v9 is production integrated.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import os
 import runpy
 import sys
@@ -49,6 +50,61 @@ def _arg_value(args: list[str], name: str, default: str) -> str:
     except ValueError:
         return default
     return args[index + 1] if index + 1 < len(args) else default
+
+
+def _pop_option(args: list[str], name: str) -> tuple[list[str], str | None]:
+    forwarded = list(args)
+    try:
+        index = forwarded.index(name)
+    except ValueError:
+        return forwarded, None
+    if index + 1 >= len(forwarded):
+        raise RuntimeError(f"{name} requires a value")
+    value = forwarded[index + 1]
+    del forwarded[index:index + 2]
+    return forwarded, value
+
+
+def validate_submitted_deck(path: Path) -> tuple[str, list[str]]:
+    """Validate the strict input boundary required by full-99 v3 telemetry."""
+    section = ""
+    commanders: list[str] = []
+    main: list[str] = []
+    for number, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            section = line.lower()
+            continue
+        if section not in {"[commander]", "[main]"}:
+            raise RuntimeError(f"{path}:{number}: card outside [Commander]/[Main]")
+        try:
+            count_text, name = line.split(" ", 1)
+            count = int(count_text)
+        except (ValueError, TypeError) as exc:
+            raise RuntimeError(f"{path}:{number}: expected '<count> <card name>'") from exc
+        name = name.split("|", 1)[0].strip()
+        if count <= 0 or not name:
+            raise RuntimeError(f"{path}:{number}: invalid card row")
+        target = commanders if section == "[commander]" else main
+        target.extend([name] * count)
+    if commanders != ["Kinnan, Bonder Prodigy"]:
+        raise RuntimeError("submitted deck must have exactly one Kinnan, Bonder Prodigy commander")
+    if len(main) != 99 or len(set(main)) != 99:
+        raise RuntimeError("submitted deck must have exactly 99 unique main-deck cards")
+    return hashlib.sha256(path.read_bytes()).hexdigest(), main
+
+
+def _register_submitted_deck(runner, forwarded: list[str], deck_file: str | None) -> None:
+    if deck_file is None:
+        return
+    variant = _arg_value(forwarded, "--variant", "")
+    if not variant:
+        raise RuntimeError("--deck-file requires --variant")
+    path = Path(deck_file).resolve(strict=True)
+    validate_submitted_deck(path)
+    runner.VARIANT_FILES[variant] = str(path)
 
 
 def _live_runner(forwarded: list[str]):
@@ -94,6 +150,7 @@ def main() -> int:
     # The launcher, not individual workflows, owns path identity.
     os.environ[EXECUTION_PATH_ENV] = CANONICAL_EXECUTION_PATH
     forwarded = _forwarded(args.worker_args)
+    forwarded, deck_file = _pop_option(forwarded, "--deck-file")
 
     if args.purpose == "component-canary":
         assert_component_ready()
@@ -120,7 +177,9 @@ def main() -> int:
     # (1) becomes green, barrier (2) prevents a stale worker composition from
     # ever producing ranking evidence.
     assert_ranking_ready()
-    assert_ranking_ready(runner=_live_runner(forwarded))
+    live_runner = _live_runner(forwarded)
+    _register_submitted_deck(live_runner, forwarded, deck_file)
+    assert_ranking_ready(runner=live_runner)
     return _run_module_path(WORKERS["ranking"], forwarded)
 
 

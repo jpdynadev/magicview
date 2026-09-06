@@ -1,9 +1,12 @@
 import fs from 'node:fs';
 import { neon } from '@neondatabase/serverless';
 
-// Temporary throwaway Neon project used only as a result bus for this isolated
-// engine-test branch. The project is deleted immediately after diagnostics are read.
-const url = process.env.FORGE_RESULT_DATABASE_URL || 'postgresql://neondb_owner:npg_rOoWzTHv35Cb@ep-muddy-shadow-af24ktw5-pooler.c-2.us-west-2.aws.neon.tech/neondb?channel_binding=require&sslmode=require';
+const url = process.env.FORGE_RESULT_DATABASE_URL;
+
+if (!url) {
+  console.error('FORGE_RESULT_DATABASE_URL is required to publish Forge diagnostics.');
+  process.exit(2);
+}
 
 const summaryPath = 'public/engine-tests/summary.txt';
 const launcherPath = 'public/engine-tests/launcher.txt';
