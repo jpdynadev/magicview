@@ -24,6 +24,34 @@ full-99 v3 results to Neon.
 - The local runner always executes `run_kinnan_sim.py --purpose ranking`. It
   cannot bypass the repository's policy-parity and live-runner gates.
 
+Nonlinear decks may include a typed `planningContext` in the experiment
+configuration. The scheduler supplies semantic roles and branches explicitly;
+the worker never derives a line from card names or rules text. For example:
+
+```json
+{
+  "planningContext": {
+    "availableRoles": ["mana_engine"],
+    "witnessedLineIds": [],
+    "threatenedLineIds": [],
+    "branches": [
+      {
+        "planId": "primary-loop",
+        "requiredRoles": ["mana_engine", "untapper", "outlet"],
+        "orderedRoles": ["mana_engine", "untapper", "outlet"],
+        "priority": 10,
+        "fallback": false,
+        "blocked": false,
+        "loopWitnessId": "primary-loop-proof"
+      }
+    ]
+  }
+}
+```
+
+The context is strictly bounded, validated at every process boundary, included
+in cache identity, and verified again when results are ingested.
+
 ## One-time database setup
 
 Review and apply `engine-tests/full99_neon_schema_v3.sql` and then
