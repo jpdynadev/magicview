@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable, Sequence
+import math
+from typing import Any, Iterable, Mapping, Sequence
 
 from kinnan_semantics_v9 import LineWitness, ResourceDelta, ResourceTransform, SemanticRoleProfile, architecture_neutral_role_score, prove_repeatable_cycle
 
@@ -46,6 +47,192 @@ class PlanCandidate:
     roles: tuple[str, ...]
     score: float
     witness: LineWitness | None = None
+
+
+MAX_PLAN_BRANCHES = 32
+MAX_PLAN_ROLES = 16
+
+
+@dataclass(frozen=True)
+class PlanBranch:
+    """A typed, architecture-neutral route through a non-linear win plan.
+
+    ``required_roles`` describes the pieces the route ultimately needs, while
+    ``ordered_roles`` describes only the portion whose order matters.  Tutors
+    remain actions rather than virtual combo pieces: a tutor advances a branch
+    only when its typed ``searchableRoles`` can find a currently missing role.
+    """
+
+    plan_id: str
+    required_roles: frozenset[str]
+    ordered_roles: tuple[str, ...] = ()
+    priority: float = 0.0
+    fallback: bool = False
+    blocked: bool = False
+    loop_witness_id: str | None = None
+
+
+@dataclass(frozen=True)
+class PlanningState:
+    available_roles: frozenset[str]
+    branches: tuple[PlanBranch, ...]
+    witnessed_line_ids: frozenset[str] = frozenset()
+    threatened_line_ids: frozenset[str] = frozenset()
+
+
+@dataclass(frozen=True)
+class PlanAssessment:
+    plan_id: str
+    score_adjustment: float
+    advanced_roles: tuple[str, ...]
+    missing_roles: tuple[str, ...]
+    completes_route: bool
+    protects_route: bool
+
+
+def _role_set(value: Any, *, field_name: str) -> frozenset[str]:
+    if value is None:
+        return frozenset()
+    if not isinstance(value, (list, tuple, set, frozenset)):
+        raise ValueError(f"{field_name} must be a role sequence")
+    roles = tuple(str(role).strip().lower() for role in value)
+    if any(not role for role in roles) or len(roles) > MAX_PLAN_ROLES:
+        raise ValueError(f"{field_name} contains invalid or excessive roles")
+    return frozenset(roles)
+
+
+def _id_set(value: Any, *, field_name: str) -> frozenset[str]:
+    if value is None:
+        return frozenset()
+    if not isinstance(value, (list, tuple, set, frozenset)):
+        raise ValueError(f"{field_name} must be an identity sequence")
+    identities = tuple(str(identity).strip() for identity in value)
+    if any(not identity for identity in identities) or len(identities) > MAX_PLAN_BRANCHES:
+        raise ValueError(f"{field_name} contains invalid or excessive identities")
+    return frozenset(identities)
+
+
+def planning_state_from_mapping(value: Mapping[str, Any] | None) -> PlanningState | None:
+    """Parse an optional live planning context, failing closed when malformed."""
+
+    if value is None:
+        return None
+    raw_branches = value.get("branches") or []
+    if not isinstance(raw_branches, list) or len(raw_branches) > MAX_PLAN_BRANCHES:
+        raise ValueError("planning branches must be a bounded list")
+    branches: list[PlanBranch] = []
+    plan_ids: set[str] = set()
+    for raw in raw_branches:
+        if not isinstance(raw, Mapping):
+            raise ValueError("planning branch must be an object")
+        plan_id = str(raw.get("planId") or "").strip()
+        if not plan_id:
+            raise ValueError("planning branch requires planId")
+        if plan_id in plan_ids:
+            raise ValueError(f"duplicate planning branch {plan_id}")
+        plan_ids.add(plan_id)
+        ordered = tuple(str(role).strip().lower() for role in (raw.get("orderedRoles") or ()))
+        if any(not role for role in ordered) or len(ordered) > MAX_PLAN_ROLES:
+            raise ValueError("orderedRoles contains invalid or excessive roles")
+        required = _role_set(raw.get("requiredRoles"), field_name="requiredRoles") | frozenset(ordered)
+        if not required or len(required) > MAX_PLAN_ROLES:
+            raise ValueError("planning branch requires at least one semantic role")
+        priority = float(raw.get("priority") or 0.0)
+        if not math.isfinite(priority) or abs(priority) > 100.0:
+            raise ValueError("planning branch priority must be finite and bounded")
+        branches.append(PlanBranch(
+            plan_id=plan_id,
+            required_roles=required,
+            ordered_roles=ordered,
+            priority=priority,
+            fallback=bool(raw.get("fallback", False)),
+            blocked=bool(raw.get("blocked", False)),
+            loop_witness_id=str(raw["loopWitnessId"]) if raw.get("loopWitnessId") else None,
+        ))
+    return PlanningState(
+        available_roles=_role_set(value.get("availableRoles"), field_name="availableRoles"),
+        branches=tuple(branches),
+        witnessed_line_ids=_id_set(value.get("witnessedLineIds"), field_name="witnessedLineIds"),
+        threatened_line_ids=_id_set(value.get("threatenedLineIds"), field_name="threatenedLineIds"),
+    )
+
+
+def assess_plan_action(action: Mapping[str, Any], state: PlanningState) -> PlanAssessment | None:
+    """Score one legal action against all viable branches without lookahead.
+
+    The search is deliberately bounded to the current legal action set and the
+    declared branches.  It never invents a tutor target, loop witness, future
+    draw, or protection event that the engine has not exposed.
+    """
+
+    action_roles = (
+        _role_set(action.get("semanticTags"), field_name="semanticTags")
+        | _role_set(action.get("providesRoles"), field_name="providesRoles")
+    )
+    searchable_roles = _role_set(action.get("searchableRoles"), field_name="searchableRoles")
+    is_tutor = "tutor" in action_roles or "search" in action_roles
+    resolves = str(action.get("resolvesThreatToLineId") or action.get("protectsLineId") or "")
+
+    primary_viable = any(not branch.blocked and not branch.fallback for branch in state.branches)
+    assessments: list[PlanAssessment] = []
+    for branch in state.branches:
+        if branch.blocked or (branch.fallback and primary_viable):
+            continue
+        missing_before = branch.required_roles - state.available_roles
+        direct = action_roles & missing_before
+        tutored = searchable_roles & missing_before if is_tutor else frozenset()
+        advanced = direct | tutored
+
+        next_ordered = next(
+            (role for role in branch.ordered_roles if role not in state.available_roles),
+            None,
+        )
+        out_of_order = bool(
+            next_ordered
+            and (action_roles & frozenset(branch.ordered_roles))
+            and next_ordered not in advanced
+        )
+        protects = branch.plan_id in state.threatened_line_ids and resolves == branch.plan_id
+        remaining = missing_before - advanced
+        witness_ready = (
+            branch.loop_witness_id is None
+            or branch.loop_witness_id in state.witnessed_line_ids
+            or str(action.get("lineWitnessId") or "") == branch.loop_witness_id
+        )
+        supplies_witness = bool(
+            branch.loop_witness_id
+            and str(action.get("lineWitnessId") or "") == branch.loop_witness_id
+            and branch.loop_witness_id not in state.witnessed_line_ids
+        )
+        completes = not remaining and witness_ready and bool(advanced or supplies_witness)
+
+        adjustment = branch.priority
+        adjustment += 5.0 * len(direct) + 3.5 * len(tutored - direct)
+        if next_ordered and next_ordered in advanced:
+            adjustment += 3.0
+        if out_of_order:
+            adjustment -= 6.0
+        if not remaining and not witness_ready:
+            # Co-presence is not proof of a repeatable line.
+            adjustment -= 8.0
+        if completes:
+            adjustment += 12.0
+        if branch.plan_id in state.threatened_line_ids:
+            adjustment += 20.0 if protects else -5.0
+        if branch.fallback:
+            adjustment -= 1.0
+        if advanced or protects or completes:
+            assessments.append(PlanAssessment(
+                plan_id=branch.plan_id,
+                score_adjustment=adjustment,
+                advanced_roles=tuple(sorted(advanced)),
+                missing_roles=tuple(sorted(remaining)),
+                completes_route=completes,
+                protects_route=protects,
+            ))
+    if not assessments:
+        return None
+    return max(assessments, key=lambda item: (item.score_adjustment, item.plan_id))
 
 
 def score_card_metadata(meta: dict, *, horizon_turn: int = 4) -> float:

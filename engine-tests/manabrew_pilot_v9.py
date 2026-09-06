@@ -66,6 +66,11 @@ def semantic_action_score(action: Mapping[str, Any], snapshot: Mapping[str, Any]
         score += 0.35
     if action.get("lineWitnessId"): score += 10.0
     if action.get("resolvesThreatToLineId"): score += 8.0
+    planning_state = policy.planning_state_from_mapping(snapshot.get("planningContext"))
+    if planning_state is not None:
+        assessment = policy.assess_plan_action(action, planning_state)
+        if assessment is not None:
+            score += assessment.score_adjustment
     return score
 
 

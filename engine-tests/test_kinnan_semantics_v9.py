@@ -504,6 +504,126 @@ class AdapterTests(unittest.TestCase):
         with self.assertRaises(RuntimeError): p.assert_ranking_ready()
 
 
+class BranchAwarePlannerTests(unittest.TestCase):
+    @staticmethod
+    def snapshot(branches, *, available=(), threatened=(), witnessed=()):
+        return {
+            "phase": "main1",
+            "step": "main1",
+            "priorityPlayerId": "player-0",
+            "planningContext": {
+                "availableRoles": list(available),
+                "threatenedLineIds": list(threatened),
+                "witnessedLineIds": list(witnessed),
+                "branches": branches,
+            },
+        }
+
+    def test_selects_action_for_closest_alternate_route(self):
+        import manabrew_pilot_v9 as pilot
+        snapshot = self.snapshot([
+            {"planId": "route-a", "requiredRoles": ["engine-a", "outlet-a"]},
+            {"planId": "route-b", "requiredRoles": ["engine-b", "outlet-b"]},
+        ], available=["engine-b"])
+        chosen = pilot.choose_action([
+            {"id": "route-a-engine", "type": "cast", "providesRoles": ["engine-a"]},
+            {"id": "route-b-outlet", "type": "cast", "providesRoles": ["outlet-b"]},
+        ], snapshot, player_id="player-0")
+        self.assertEqual(chosen["id"], "route-b-outlet")
+
+    def test_tutor_advances_only_an_explicitly_searchable_branch(self):
+        import manabrew_pilot_v9 as pilot
+        snapshot = self.snapshot([
+            {"planId": "creature-route", "requiredRoles": ["mana-engine", "untapper"]},
+        ], available=["mana-engine"])
+        chosen = pilot.choose_action([
+            {"id": "blind-tutor", "type": "cast", "semanticTags": ["tutor"], "searchableRoles": ["outlet"]},
+            {"id": "typed-tutor", "type": "cast", "semanticTags": ["tutor"], "searchableRoles": ["untapper"]},
+        ], snapshot, player_id="player-0")
+        self.assertEqual(chosen["id"], "typed-tutor")
+
+    def test_board_dependent_ordering_prefers_next_missing_role(self):
+        import manabrew_pilot_v9 as pilot
+        snapshot = self.snapshot([{
+            "planId": "ordered-route",
+            "requiredRoles": ["haste-enabler", "tap-engine", "outlet"],
+            "orderedRoles": ["haste-enabler", "tap-engine", "outlet"],
+        }])
+        chosen = pilot.choose_action([
+            {"id": "premature-engine", "type": "cast", "providesRoles": ["tap-engine"]},
+            {"id": "haste-first", "type": "cast", "providesRoles": ["haste-enabler"]},
+        ], snapshot, player_id="player-0")
+        self.assertEqual(chosen["id"], "haste-first")
+
+    def test_loop_completion_requires_matching_witness(self):
+        import kinnan_policy_v9 as policy
+        state = policy.planning_state_from_mapping({
+            "availableRoles": ["engine"],
+            "branches": [{
+                "planId": "loop-route",
+                "requiredRoles": ["engine", "untapper"],
+                "loopWitnessId": "positive-cycle",
+            }],
+        })
+        unwitnessed = policy.assess_plan_action({"id": "u", "providesRoles": ["untapper"]}, state)
+        witnessed = policy.assess_plan_action({"id": "w", "providesRoles": ["untapper"], "lineWitnessId": "positive-cycle"}, state)
+        self.assertFalse(unwitnessed.completes_route)
+        self.assertTrue(witnessed.completes_route)
+        self.assertGreater(witnessed.score_adjustment, unwitnessed.score_adjustment)
+
+    def test_already_complete_route_does_not_reward_unrelated_action(self):
+        import kinnan_policy_v9 as policy
+        state = policy.planning_state_from_mapping({
+            "availableRoles": ["engine", "outlet"],
+            "branches": [{
+                "planId": "complete-route",
+                "requiredRoles": ["engine", "outlet"],
+            }],
+        })
+        self.assertIsNone(policy.assess_plan_action(
+            {"id": "unrelated", "semanticTags": ["card_advantage"]},
+            state,
+        ))
+
+    def test_explicit_protection_of_threatened_route_preempts_progress(self):
+        import manabrew_pilot_v9 as pilot
+        snapshot = self.snapshot([{
+            "planId": "live-route",
+            "requiredRoles": ["engine", "outlet"],
+        }], available=["engine"], threatened=["live-route"])
+        chosen = pilot.choose_action([
+            {"id": "advance", "type": "cast", "providesRoles": ["outlet"]},
+            {"id": "protect", "type": "cast", "semanticTags": ["protection"], "resolvesThreatToLineId": "live-route"},
+        ], snapshot, player_id="player-0")
+        self.assertEqual(chosen["id"], "protect")
+
+    def test_fallback_route_activates_when_primary_is_explicitly_blocked(self):
+        import manabrew_pilot_v9 as pilot
+        snapshot = self.snapshot([
+            {"planId": "primary", "requiredRoles": ["primary-engine"], "blocked": True},
+            {"planId": "fallback", "requiredRoles": ["value-engine"], "fallback": True},
+        ])
+        chosen = pilot.choose_action([
+            {"id": "unrelated", "type": "cast", "semanticTags": ["card_advantage"]},
+            {"id": "fallback", "type": "cast", "providesRoles": ["value-engine"]},
+        ], snapshot, player_id="player-0")
+        self.assertEqual(chosen["id"], "fallback")
+
+    def test_planning_context_is_bounded_and_rejects_malformed_roles(self):
+        import kinnan_policy_v9 as policy
+        with self.assertRaises(ValueError):
+            policy.planning_state_from_mapping({
+                "branches": [{"planId": "x", "requiredRoles": "not-a-list"}],
+            })
+        with self.assertRaises(ValueError):
+            policy.planning_state_from_mapping({
+                "branches": [
+                    {"planId": str(index), "requiredRoles": ["x"]}
+                    for index in range(policy.MAX_PLAN_BRANCHES + 1)
+                ],
+            })
+
+
 class LiveForgeCausalityTests(unittest.TestCase):
     def test_material_snapshot_ignores_only_temporal_priority_fields(self):
         base = {
