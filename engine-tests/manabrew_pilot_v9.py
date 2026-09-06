@@ -203,6 +203,16 @@ def choose_discard(
     )[:count]
 
 
+def choose_cost_permanents(
+    candidates: Sequence[Mapping[str, Any]],
+    *,
+    count: int,
+    horizon_turn: int = 4,
+) -> list[Mapping[str, Any]]:
+    """Spend the lowest typed opportunity-cost permanents from a legal set."""
+    return choose_discard(candidates, count=count, horizon_turn=horizon_turn)
+
+
 def _copy_kind(value: Any) -> CopyKind:
     folded = str(value or "permanent").replace("_", "").replace("-", "").casefold()
     aliases = {

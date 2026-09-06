@@ -533,6 +533,79 @@ def _pay_mana_cost_answer(
     }
 
 
+def _chosen_payment_card_selection(
+    prompt_input: dict[str, Any],
+    previous_trace: dict[str, Any] | None,
+    witness: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Resolve a card cost staged by the exact prior mana-payment action."""
+    if (
+        not witness
+        or not previous_trace
+        or str(prompt_input.get("type") or "") != "chooseCards"
+        or str(previous_trace.get("promptType") or "") != "payManaCost"
+    ):
+        return None
+    prior_input = previous_trace.get("promptInput") or {}
+    prior_answer = previous_trace.get("submittedAnswer") or {}
+    selected_id = str(((prior_answer.get("output") or {}).get("actionId") or ""))
+    if not selected_id or str((prior_answer.get("output") or {}).get("type") or "") != "act":
+        return None
+    matching = [
+        action for action in list(prior_input.get("actions") or [])
+        if isinstance(action, dict)
+        and str(action.get("id") or action.get("actionId") or "") == selected_id
+    ]
+    if len(matching) != 1:
+        return None
+    payment_action = matching[0]
+    clauses = [part.strip().casefold() for part in str(payment_action.get("cost") or "").split(",")]
+    has_tap_object_cost = any(
+        clause.startswith("tap an untapped ") and clause.endswith(" you control")
+        for clause in clauses
+    )
+    presentation = prompt_input.get("presentation") or {}
+    if (
+        not has_tap_object_cost
+        or str(presentation.get("description") or "").strip().casefold() != "tap for cost"
+        or str(presentation.get("title") or "").strip().casefold()
+        != str(payment_action.get("description") or "").strip().casefold()
+    ):
+        return None
+    minimum = prompt_input.get("min")
+    maximum = prompt_input.get("max")
+    cards = [card for card in list(prompt_input.get("cards") or []) if isinstance(card, dict)]
+    if (
+        not isinstance(minimum, int)
+        or isinstance(minimum, bool)
+        or not isinstance(maximum, int)
+        or isinstance(maximum, bool)
+        or minimum <= 0
+        or minimum != maximum
+        or len(cards) < minimum
+    ):
+        return None
+    try:
+        chosen = pilot.choose_cost_permanents(cards, count=minimum)
+    except SemanticError:
+        return None
+    chosen_ids = [str(card.get("id") or card.get("cardId") or "") for card in chosen]
+    if len(chosen_ids) != minimum or any(not card_id for card_id in chosen_ids):
+        return None
+    witness.setdefault("stagedPaymentSelections", []).append({
+        "paymentActionId": selected_id,
+        "cost": str(payment_action.get("cost") or ""),
+        "chosenCardIds": chosen_ids,
+    })
+    return {
+        "type": "chooseCards",
+        "output": {
+            "type": "chooseCardsDecision",
+            "chosenCardIds": chosen_ids,
+        },
+    }
+
+
 def _chosen_action_copy_followup(
     prompt_input: dict[str, Any],
     witness: dict[str, Any] | None,
@@ -1037,6 +1110,9 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                     answer = _chosen_optional_entry_payment(inp, submitted_witness)
                 if answer is None:
                     answer = _chosen_action_copy_followup(inp, submitted_witness)
+                if answer is None:
+                    previous_trace = report["promptTrace"][-2] if len(report["promptTrace"]) >= 2 else None
+                    answer = _chosen_payment_card_selection(inp, previous_trace, submitted_witness)
                 if answer is None:
                     answer = _chosen_action_card_selection(inp, submitted_witness)
                 if answer is None:

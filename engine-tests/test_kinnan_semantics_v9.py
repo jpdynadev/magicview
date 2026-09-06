@@ -8,6 +8,7 @@ from kinnan_v9_forge_canary import (
     _chosen_action_copy_followup,
     _chosen_cost_confirmation,
     _chosen_optional_entry_payment,
+    _chosen_payment_card_selection,
     _kinnan_horizon_reached,
     _material_snapshot,
     _pay_mana_cost_answer,
@@ -475,6 +476,49 @@ class ForgePregamePromptTests(unittest.TestCase):
                 },
             ],
         }))
+
+    def test_staged_mana_ability_tap_cost_uses_exact_prior_action(self):
+        prompt = {
+            "type": "chooseCards", "min": 1, "max": 1,
+            "presentation": {"title": "Gene Pollinator", "description": "Tap for cost"},
+            "cards": [
+                {"id": "mastermind", "types": ["Creature"], "cmc": 2, "text": "Flying"},
+                {"id": "fetch", "types": ["Land"], "cmc": 0, "text": "{T}, Sacrifice this: Search your library."},
+            ],
+        }
+        prior = {
+            "promptType": "payManaCost",
+            "promptInput": {"actions": [{
+                "id": "tap:pollinator:0:U",
+                "description": "Gene Pollinator",
+                "cost": "{T}, Tap an untapped Permanent you control",
+                "type": "activateManaAbility",
+            }]},
+            "submittedAnswer": {"output": {"type": "act", "actionId": "tap:pollinator:0:U"}},
+        }
+        witness = {"chosenActionId": "cast:floodcaller"}
+        answer = _chosen_payment_card_selection(prompt, prior, witness)
+        self.assertEqual(answer["output"]["chosenCardIds"], ["mastermind"])
+        self.assertEqual(witness["stagedPaymentSelections"][0]["paymentActionId"], "tap:pollinator:0:U")
+
+    def test_staged_payment_selection_fails_closed_without_exact_causality(self):
+        prompt = {
+            "type": "chooseCards", "min": 1, "max": 1,
+            "presentation": {"title": "Other source", "description": "Tap for cost"},
+            "cards": [{"id": "candidate", "types": ["Creature"]}],
+        }
+        prior = {
+            "promptType": "payManaCost",
+            "promptInput": {"actions": [{
+                "id": "pay", "description": "Gene Pollinator",
+                "cost": "{T}, Tap an untapped Permanent you control",
+            }]},
+            "submittedAnswer": {"output": {"type": "act", "actionId": "pay"}},
+        }
+        self.assertIsNone(_chosen_payment_card_selection(prompt, prior, {"chosenActionId": "cast"}))
+        prior["submittedAnswer"]["output"]["actionId"] = "invented"
+        prompt["presentation"]["title"] = "Gene Pollinator"
+        self.assertIsNone(_chosen_payment_card_selection(prompt, prior, {"chosenActionId": "cast"}))
 
     def test_cleanup_discard_uses_typed_pilot_keep_value(self):
         import kinnan_v9_forge_canary as c
