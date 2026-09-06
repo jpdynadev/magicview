@@ -27,7 +27,19 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+from kinnan_planning_context import (  # noqa: E402
+    load_planning_context_env,
+    planning_context_hash,
+)
+
 COMPLETED = {"game_over", "horizon_complete"}
+
+
+def install_worker_planning_context(runner: Any) -> dict[str, Any] | None:
+    """Load the canonical launcher's validated strategy into the ranking runner."""
+    context = load_planning_context_env()
+    runner._V9_PLANNING_CONTEXT = context
+    return context
 
 
 class _NullStderr:
@@ -226,6 +238,7 @@ def cache_key(
     seed: int,
     seat: int,
     max_round: int,
+    planning_context_sha256: str | None = None,
 ) -> str:
     payload = {
         "engine": engine_id,
@@ -239,7 +252,8 @@ def cache_key(
         "seed": seed,
         "seat": seat,
         "maxRound": max_round,
-        "schema": 4,
+        "planningContextSha256": planning_context_sha256,
+        "schema": 5,
     }
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
@@ -284,6 +298,12 @@ def main() -> int:
         import manabrew_pilot_precision as config
 
     runner = config.runner
+    planning_context = install_worker_planning_context(runner)
+    planning_context_sha256 = (
+        planning_context_hash(planning_context)
+        if planning_context is not None
+        else None
+    )
     if args.variant not in runner.VARIANT_FILES:
         raise SystemExit(f"unknown variant {args.variant}; known={sorted(runner.VARIANT_FILES)}")
 
@@ -321,6 +341,7 @@ def main() -> int:
                 seed=seed,
                 seat=args.fixed_seat,
                 max_round=args.max_round,
+                planning_context_sha256=planning_context_sha256,
             )
             cache_path = cache_dir / f"{key}.json"
             if cache_path.exists():
@@ -365,6 +386,7 @@ def main() -> int:
                 "seatDeckSha256s": seat_deck_hashes,
                 "optimizerId": optimizer_id,
                 "executionProfile": execution_profile,
+                "planningContextSha256": planning_context_sha256,
             })
             cache_path.write_text(json.dumps(item, separators=(",", ":")))
             results.append(item)

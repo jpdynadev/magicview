@@ -19,6 +19,11 @@ from pathlib import Path
 from typing import Any
 
 import manabrew_pilot_v9 as pilot
+from kinnan_planning_context import (
+    load_planning_context_env,
+    planning_context_hash,
+    validate_planning_context,
+)
 
 HERE = Path(__file__).resolve().parent
 DECK_DIR = HERE / "decks"
@@ -766,7 +771,20 @@ def _submit_traced(
     _submit(proc, session_id, answer)
 
 
+def _decision_snapshot(
+    forge_snapshot: dict[str, Any],
+    planning_context: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Merge validated queued strategy into a copy of raw Forge state."""
+    if planning_context is None:
+        return forge_snapshot
+    decision = dict(forge_snapshot)
+    decision["planningContext"] = validate_planning_context(planning_context)
+    return decision
+
+
 def run_canary(args: argparse.Namespace) -> dict[str, Any]:
+    planning_context = load_planning_context_env()
     kinnan_commanders, kinnan_cards = _parse_dck(
         DECK_DIR / args.deck,
         exact_kinnan_registration=True,
@@ -782,6 +800,10 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
         "valid": False,
         "promptTrace": [],
         "registrationAudit": _registration_audit(kinnan_commanders, kinnan_cards),
+        "planningContextSource": "queued-experiment" if planning_context else None,
+        "planningContextSha256": (
+            planning_context_hash(planning_context) if planning_context else None
+        ),
     }
     stderr_path = args.report.with_suffix(".stderr.log")
     stderr_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1082,7 +1104,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         raise RuntimeError("live Forge actions lack unique stable action identity")
                     chosen = pilot.choose_action(
                         actions,
-                        snapshot,
+                        _decision_snapshot(snapshot, planning_context),
                         player_id=str(prompt.get("decidingPlayerId") or "player-0"),
                     )
                     if chosen is None:

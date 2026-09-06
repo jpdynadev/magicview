@@ -23,6 +23,12 @@ from kinnan_execution_path import (  # noqa: E402
     assert_component_ready,
     assert_ranking_ready,
 )
+from kinnan_planning_context import (  # noqa: E402
+    PLANNING_CONTEXT_ENV,
+    load_planning_context_file,
+    planning_context_json,
+)
+from kinnan_semantics_v9 import SemanticError  # noqa: E402
 
 WORKERS = {
     # Full-99 v3 is the only forward ranking worker. It composes the repaired
@@ -107,6 +113,19 @@ def _register_submitted_deck(runner, forwarded: list[str], deck_file: str | None
     runner.VARIANT_FILES[variant] = str(path)
 
 
+def _install_planning_context_file(planning_context_file: str | None) -> dict | None:
+    """Validate the CLI boundary and expose canonical JSON to the worker."""
+    if planning_context_file is None:
+        os.environ.pop(PLANNING_CONTEXT_ENV, None)
+        return None
+    try:
+        context = load_planning_context_file(planning_context_file)
+    except (OSError, SemanticError, ValueError) as exc:
+        raise RuntimeError(f"invalid --planning-context-file: {exc}") from exc
+    os.environ[PLANNING_CONTEXT_ENV] = planning_context_json(context)
+    return context
+
+
 def _live_runner(forwarded: list[str]):
     """Load the same runner the canonical full-99 worker would use.
 
@@ -151,6 +170,11 @@ def main() -> int:
     os.environ[EXECUTION_PATH_ENV] = CANONICAL_EXECUTION_PATH
     forwarded = _forwarded(args.worker_args)
     forwarded, deck_file = _pop_option(forwarded, "--deck-file")
+    forwarded, planning_context_file = _pop_option(
+        forwarded,
+        "--planning-context-file",
+    )
+    _install_planning_context_file(planning_context_file)
 
     if args.purpose == "component-canary":
         assert_component_ready()

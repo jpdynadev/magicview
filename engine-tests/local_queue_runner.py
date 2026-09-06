@@ -28,6 +28,8 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 
 from run_kinnan_sim import validate_submitted_deck  # noqa: E402
+from kinnan_planning_context import planning_context_json  # noqa: E402
+from kinnan_semantics_v9 import SemanticError  # noqa: E402
 
 
 class QueueError(RuntimeError):
@@ -154,6 +156,20 @@ def _int_config(config: dict[str, Any], key: str, default: int, low: int, high: 
     return value
 
 
+def _write_planning_context(config: dict[str, Any], directory: Path) -> Path | None:
+    """Materialize only a validated, explicitly queued planning payload."""
+    if "planningContext" not in config:
+        return None
+    try:
+        payload = planning_context_json(config["planningContext"])
+    except (SemanticError, TypeError, ValueError) as exc:
+        raise NeedsPilot(f"queued planningContext is unsupported: {exc}") from exc
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / "planning-context.json"
+    path.write_text(payload, encoding="utf-8")
+    return path
+
+
 @dataclass
 class Heartbeat:
     api: NeonDataApi
@@ -200,6 +216,14 @@ def execute_shard(spec: dict[str, Any], heartbeat: Heartbeat) -> list[dict[str, 
     if requested <= 0 or seed_end - seed_start + 1 != requested:
         raise QueueError("shard seed range must exactly match requested_games")
 
+    run_dir = HERE / "local-runs" / shard_id
+    planning_context_path = _write_planning_context(config, run_dir)
+    expected_planning_context_sha256 = (
+        hashlib.sha256(planning_context_path.read_bytes()).hexdigest()
+        if planning_context_path is not None
+        else None
+    )
+
     jar = os.environ.get("MANABREW_HARNESS_JAR", "")
     forge_home = os.environ.get("MANABREW_FORGE_HOME", "")
     if not jar or not Path(jar).is_file():
@@ -207,7 +231,6 @@ def execute_shard(spec: dict[str, Any], heartbeat: Heartbeat) -> list[dict[str, 
     if not forge_home or not Path(forge_home).is_dir():
         raise QueueError("MANABREW_FORGE_HOME must name the Forge GUI directory")
 
-    run_dir = HERE / "local-runs" / shard_id
     run_dir.mkdir(parents=True, exist_ok=True)
     deck_path = _write_submitted_deck(spec, run_dir)
     output = run_dir / "results.json"
@@ -231,6 +254,8 @@ def execute_shard(spec: dict[str, Any], heartbeat: Heartbeat) -> list[dict[str, 
         raise QueueError("experiment config engineId or MANABREW_REF is required")
     if deck_path is not None:
         command.extend(["--deck-file", str(deck_path)])
+    if planning_context_path is not None:
+        command.extend(["--planning-context-file", str(planning_context_path)])
 
     env = os.environ.copy()
     env["CEDH_POD"] = str(spec["pod"])
@@ -263,6 +288,8 @@ def execute_shard(spec: dict[str, Any], heartbeat: Heartbeat) -> list[dict[str, 
             raise QueueError("worker result lacks complete full-99 v3 telemetry")
         if item.get("variantDeckSha256") != spec.get("deck_sha256"):
             raise QueueError("worker result deck hash does not match the queued variant")
+        if item.get("planningContextSha256") != expected_planning_context_sha256:
+            raise QueueError("worker result planning context does not match the queued experiment")
     return results
 
 
