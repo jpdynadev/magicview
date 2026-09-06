@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.sim_game_card_telemetry_v3 (
   zone_changes jsonb NOT NULL DEFAULT '[]'::jsonb,
   tutored boolean NOT NULL DEFAULT false,
   revealed boolean NOT NULL DEFAULT false,
-  cast boolean NOT NULL DEFAULT false,
+  "cast" boolean NOT NULL DEFAULT false,
   played boolean NOT NULL DEFAULT false,
   mana_produced jsonb NOT NULL DEFAULT '{}'::jsonb,
   mana_spent integer NOT NULL DEFAULT 0,
@@ -62,4 +62,3 @@ SELECT t.game_id, t.engine_id, t.deck_hash, t.variant, t.seed, t.seat, t.pod,
 FROM public.sim_game_action_traces_v3 t
 LEFT JOIN public.sim_game_card_telemetry_v3 c USING (game_id)
 GROUP BY t.game_id, t.engine_id, t.deck_hash, t.variant, t.seed, t.seat, t.pod;
-
