@@ -1,0 +1,120 @@
+name: Kinnan local runner fallback
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: kinnan-local-runner-fallback
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  FALLBACK_STALE_SECONDS: '1200'
+
+jobs:
+  fallback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/local-kinnan-pipeline
+
+      - name: Check ranking readiness and local runner health
+        id: gate
+        env:
+          NEON_DATA_API: ${{ secrets.NEON_DATA_API }}
+          NEON_DATA_API_TOKEN: ${{ secrets.NEON_DATA_API_TOKEN }}
+          MANABREW_REF: ${{ secrets.MANABREW_REF }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'run_fallback=false' >> "$GITHUB_OUTPUT"
+
+          ranking_ready="$(python3 - <<'PY'
+          import json
+          from pathlib import Path
+          manifest = json.loads(Path('engine-tests/kinnan_policy_parity_manifest_v2.json').read_text())
+          print('true' if manifest.get('rankingReady') else 'false')
+          PY
+          )"
+          if [[ "$ranking_ready" != 'true' ]]; then
+            echo 'rankingReady=false; fallback will not touch Neon or run compute.'
+            exit 0
+          fi
+
+          for name in NEON_DATA_API NEON_DATA_API_TOKEN MANABREW_REF; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Required fallback secret $name is not configured." >&2
+              exit 1
+            fi
+          done
+
+          response="$(curl --fail --silent --show-error \
+            -X POST "${NEON_DATA_API%/}/rpc/sim_fallback_eligible" \
+            -H "Authorization: Bearer $NEON_DATA_API_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -H 'Accept: application/json' \
+            --data "{\"p_stale_seconds\":${FALLBACK_STALE_SECONDS}}")"
+          eligible="$(python3 -c 'import json,sys; value=json.load(sys.stdin); print("true" if value is True or value == [True] else "false")' <<<"$response")"
+          if [[ "$eligible" != 'true' ]]; then
+            echo 'Local runner is healthy or no eligible queue work exists.'
+            exit 0
+          fi
+
+          echo 'run_fallback=true' >> "$GITHUB_OUTPUT"
+          echo 'Local heartbeat is stale and eligible work exists; enabling one lease-aware fallback worker.'
+
+      - uses: actions/setup-java@v5
+        if: steps.gate.outputs.run_fallback == 'true'
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.run_fallback == 'true'
+        with:
+          node-version: '22'
+
+      - name: Install Maven
+        if: steps.gate.outputs.run_fallback == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y maven
+
+      - name: Build pinned repaired Forge runtime
+        if: steps.gate.outputs.run_fallback == 'true'
+        env:
+          MANABREW_REF: ${{ secrets.MANABREW_REF }}
+        run: |
+          set -euo pipefail
+          git init /tmp/manabrew
+          cd /tmp/manabrew
+          git remote add origin https://github.com/witchesofthehill/manabrew.git
+          git fetch --depth 1 origin "$MANABREW_REF"
+          git checkout --detach FETCH_HEAD
+          git submodule update --init --recursive --depth 1
+          cd "$GITHUB_WORKSPACE"
+          python3 engine-tests/apply_manabrew_repairs.py /tmp/manabrew
+          cd /tmp/manabrew
+          node scripts/harness.mjs build
+
+      - name: Run one canonical leased shard
+        if: steps.gate.outputs.run_fallback == 'true'
+        env:
+          NEON_DATA_API: ${{ secrets.NEON_DATA_API }}
+          NEON_DATA_API_TOKEN: ${{ secrets.NEON_DATA_API_TOKEN }}
+          MANABREW_REF: ${{ secrets.MANABREW_REF }}
+          MANABREW_HARNESS_JAR: /tmp/manabrew/forge-harness/target/forge-harness-jar-with-dependencies.jar
+          MANABREW_FORGE_HOME: /tmp/manabrew/forge/forge-gui
+          KINNAN_RUNNER_KIND: github
+          KINNAN_REPO_SHA: ${{ github.sha }}
+        run: |
+          python3 engine-tests/local_queue_runner_safe.py \
+            --max-shards 1 \
+            --lease-seconds 300 \
+            --runner-id "github-${GITHUB_RUN_ID}"
