@@ -35,11 +35,13 @@ if (-not $DryRun -and -not $UseWsl) {
 }
 
 $runnerArguments = @(
-  (Join-Path $repoRoot "engine-tests\local_queue_runner.py"),
+  (Join-Path $repoRoot "engine-tests\local_queue_runner_safe.py"),
   "--max-shards", $MaxShards,
   "--lease-seconds", $LeaseSeconds
 )
 if ($DryRun) { $runnerArguments += "--dry-run" }
+
+$env:KINNAN_RUNNER_KIND = "local"
 
 if ($UseWsl) {
   if ($repoRoot -notmatch '^([A-Za-z]):\\(.*)$') {
@@ -48,13 +50,15 @@ if ($UseWsl) {
   $drive = $Matches[1].ToLowerInvariant()
   $relativeRoot = $Matches[2].Replace('\', '/')
   $repoRootWsl = "/mnt/$drive/$relativeRoot"
-  $wslRunner = "$repoRootWsl/engine-tests/local_queue_runner.py"
+  $wslRunner = "$repoRootWsl/engine-tests/local_queue_runner_safe.py"
   $wslEnvironment = @(
     "NEON_DATA_API=$env:NEON_DATA_API",
     "NEON_DATA_API_TOKEN=$env:NEON_DATA_API_TOKEN",
     "MANABREW_REF=$env:MANABREW_REF",
     "MANABREW_HARNESS_JAR=$WslHarnessJar",
-    "MANABREW_FORGE_HOME=$WslForgeHome"
+    "MANABREW_FORGE_HOME=$WslForgeHome",
+    "KINNAN_RUNNER_KIND=local",
+    "KINNAN_REPO_SHA=$env:KINNAN_REPO_SHA"
   )
   if (-not $DryRun) {
     $missing = @("NEON_DATA_API", "NEON_DATA_API_TOKEN", "MANABREW_REF" |
