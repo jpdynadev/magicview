@@ -12,6 +12,7 @@ from kinnan_v9_forge_canary import (
     _kinnan_horizon_reached,
     _material_snapshot,
     _pay_mana_cost_answer,
+    _semantic_action_witnesses,
     _semantic_prompt_trace,
     _stable_hash,
 )
@@ -835,6 +836,60 @@ class LiveForgeCausalityTests(unittest.TestCase):
         self.assertEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
         second[1]["step"] = "main2"
         self.assertNotEqual(_semantic_prompt_trace(first), _semantic_prompt_trace(second))
+
+    def test_semantic_trace_ignores_only_no_action_and_passive_sampling(self):
+        action = {
+            "promptId": 40,
+            "promptType": "chooseAction",
+            "turn": 4,
+            "step": "main1",
+            "promptInput": {"actions": [{"id": "cast-kinnan", "type": "cast"}]},
+            "submittedAnswer": {"output": {"type": "act", "actionId": "cast-kinnan"}},
+        }
+        sampled = [
+            {
+                "promptId": 38,
+                "promptType": "chooseAction",
+                "forcedPass": True,
+                "promptInput": {"actions": []},
+                "submittedAnswer": {"output": {"type": "pass", "exhaustStack": False}},
+            },
+            {
+                "promptId": 39,
+                "promptType": "revealCards",
+                "submittedAnswer": {"type": "revealCards", "output": {}},
+            },
+            action,
+        ]
+        direct = [{**action, "promptId": 99}]
+        self.assertEqual(_semantic_prompt_trace(sampled), _semantic_prompt_trace(direct))
+        changed = [{**action, "submittedAnswer": {"output": {"type": "act", "actionId": "other"}}}]
+        self.assertNotEqual(_semantic_prompt_trace(direct), _semantic_prompt_trace(changed))
+
+    def test_action_witness_normalization_only_removes_prompt_ids(self):
+        first = [{
+            "promptId": 10,
+            "chosenActionId": "mana-action",
+            "chosenActionCardId": "bird",
+            "snapshotTurn": 4,
+            "snapshotStep": "main1",
+            "transition": {
+                "fromPromptId": 10,
+                "toPromptId": 11,
+                "fromTurn": 4,
+                "toTurn": 4,
+                "fromStep": "main1",
+                "toStep": "main1",
+            },
+        }]
+        second = [{
+            **first[0],
+            "promptId": 20,
+            "transition": {**first[0]["transition"], "fromPromptId": 20, "toPromptId": 23},
+        }]
+        self.assertEqual(_semantic_action_witnesses(first), _semantic_action_witnesses(second))
+        second[0]["chosenActionId"] = "different-action"
+        self.assertNotEqual(_semantic_action_witnesses(first), _semantic_action_witnesses(second))
 
 
 class KinnanTurnHorizonTests(unittest.TestCase):

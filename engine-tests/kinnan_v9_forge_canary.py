@@ -704,17 +704,54 @@ def _chosen_action_copy_followup(
 
 
 def _semantic_prompt_trace(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Preserve decisions while ignoring transient empty-priority sampling."""
+    """Hash consequential decisions, not replay-local prompt sampling.
+
+    Forge may expose a different number of empty/pass priority windows and
+    passive reveal/dice acknowledgements while reaching the same seeded state.
+    Those events submit no action or choice. Retained events still include the
+    ordered prompt type, complete prompt input, submitted answer and stable
+    action/card identities, so any consequential decision change remains a
+    deterministic-replay failure.
+    """
     canonical: list[dict[str, Any]] = []
     for raw in trace:
+        answer = raw.get("submittedAnswer") or {}
+        output = answer.get("output") or {}
+        passive_ack = (
+            raw.get("promptType") in {"revealCards", "diceRolled"}
+            and answer.get("type") == raw.get("promptType")
+            and output == {}
+        )
+        no_action_pass = (
+            raw.get("promptType") == "chooseAction"
+            and any(
+                raw.get(flag)
+                for flag in ("forcedPass", "policyPass", "boundedPass", "maxActionPass")
+            )
+            and (not answer or output.get("type") == "pass")
+        )
+        if passive_ack or no_action_pass:
+            continue
         item = {
             key: value
             for key, value in raw.items()
-            if key not in {"snapshot", "snapshotHash"}
+            if key not in {"snapshot", "snapshotHash", "promptId"}
         }
-        if item.get("forcedPass"):
-            item.pop("turn", None)
-            item.pop("step", None)
+        canonical.append(item)
+    return canonical
+
+
+def _semantic_action_witnesses(actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Remove replay-local prompt IDs without weakening ordered action proof."""
+    canonical: list[dict[str, Any]] = []
+    for raw in actions:
+        item = dict(raw)
+        item.pop("promptId", None)
+        if isinstance(item.get("transition"), dict):
+            transition = dict(item["transition"])
+            transition.pop("fromPromptId", None)
+            transition.pop("toPromptId", None)
+            item["transition"] = transition
         canonical.append(item)
     return canonical
 
@@ -884,7 +921,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 )
                 if horizon_reached_without_pending_action:
                     deterministic_witness = {
-                        "actions": action_witnesses,
+                        "actions": _semantic_action_witnesses(action_witnesses),
                         "horizonTurn": horizon_turn,
                         "horizonKinnanTurn": horizon_kinnan_turn,
                     }
@@ -949,7 +986,7 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                         submitted_witness["materialEffectConfirmed"] = True
                         submitted_witness["transition"] = transition
                         deterministic_witness = {
-                            "actions": action_witnesses,
+                            "actions": _semantic_action_witnesses(action_witnesses),
                             "horizonTurn": horizon_turn,
                             "horizonKinnanTurn": horizon_kinnan_turn,
                         }
