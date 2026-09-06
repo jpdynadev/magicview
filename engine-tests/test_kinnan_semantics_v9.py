@@ -5,6 +5,7 @@ from pathlib import Path
 
 from kinnan_semantics_v9 import *
 from kinnan_v9_forge_canary import (
+    _chosen_action_copy_followup,
     _chosen_cost_confirmation,
     _chosen_optional_entry_payment,
     _kinnan_horizon_reached,
@@ -36,6 +37,47 @@ class SelectionTests(unittest.TestCase):
         c=SelectionConstraint(SelectionKind.SEARCH,required_types=frozenset({"creature"}),exact_mana_value=3); self.assertTrue(c.validate([{"id":"x","types":["Creature"],"manaValue":3}])); self.assertFalse(c.validate([{"id":"x","types":["Artifact"],"manaValue":3}]))
     def test_vannifar_exact_plus_one(self):
         lib=[{"id":"c2","types":["Creature"],"manaValue":2},{"id":"c3","types":["Creature"],"manaValue":3},{"id":"a3","types":["Artifact"],"manaValue":3},{"id":"c4","types":["Creature"],"manaValue":4}]; self.assertEqual([c["id"] for c in vannifar_candidates(2,lib)],["c3"])
+
+    def test_spell_copy_inherits_targets_and_x(self):
+        choice = CopyChoice(
+            "copy-source",
+            "spell-on-stack",
+            False,
+            "spell-on-stack",
+            CopyKind.SPELL,
+            ("target-a",),
+            (),
+            False,
+            7,
+        )
+        self.assertEqual(choice.effective_target_ids, ("target-a",))
+        self.assertEqual(choice.effective_x_value, 7)
+
+    def test_copy_preserves_repeated_target_identity_from_distinct_target_clauses(self):
+        choice = CopyChoice(
+            "copy-source", "spell", False, "spell", CopyKind.SPELL,
+            ("same-object", "same-object"),
+        )
+        self.assertEqual(choice.effective_target_ids, ("same-object", "same-object"))
+
+    def test_copy_cannot_retarget_or_change_x_without_engine_semantics(self):
+        with self.assertRaises(SemanticError):
+            CopyChoice("source", "spell", False, None, CopyKind.SPELL, ("a",), ("b",))
+        with self.assertRaises(SemanticError):
+            CopyChoice("source", "spell", False, None, CopyKind.SPELL, (), (), False, 3, 4)
+
+    def test_copied_activated_and_triggered_abilities_are_stack_copies(self):
+        activated = CopyChoice("rings", "ability-a", False, "ability-a", CopyKind.ACTIVATED_ABILITY)
+        triggered = CopyChoice("strionic", "ability-t", False, "ability-t", CopyKind.TRIGGERED_ABILITY)
+        self.assertEqual(activated.copy_kind, CopyKind.ACTIVATED_ABILITY)
+        self.assertEqual(triggered.copy_kind, CopyKind.TRIGGERED_ABILITY)
+        with self.assertRaises(SemanticError):
+            CopyChoice("rings", "ability-a", True, None, CopyKind.ACTIVATED_ABILITY)
+
+    def test_targeted_token_copy_is_not_misclassified_as_clone_replacement(self):
+        token_copy = CopyChoice("maker", "creature", False, "creature", CopyKind.PERMANENT)
+        self.assertFalse(token_copy.as_enters)
+        self.assertEqual(token_copy.target_object_id, "creature")
 
 
 class ExilePermissionTests(unittest.TestCase):
@@ -502,6 +544,74 @@ class AdapterTests(unittest.TestCase):
     def test_production_ranking_fail_closed(self):
         import manabrew_pilot_v9 as p; self.assertFalse(p.production_ranking_ready());
         with self.assertRaises(RuntimeError): p.assert_ranking_ready()
+
+    def test_clone_prompt_chooses_engine_candidate_and_records_non_target_choice(self):
+        witness = {
+            "chosenActionDescription": "You may have this enter as a copy of a creature.",
+            "chosenActionCardId": "clone-card",
+        }
+        answer = _chosen_action_copy_followup({
+            "type": "chooseCards",
+            "copyKind": "permanent",
+            "selectionKind": "copy",
+            "min": 1,
+            "max": 1,
+            "cards": [
+                {"id": "bear", "types": ["Creature"], "manaValue": 2},
+                {"id": "engine", "types": ["Creature"], "manaValue": 2, "semanticTags": ["mana_source"]},
+            ],
+        }, witness)
+        self.assertEqual(answer["output"]["chosenCardIds"], ["engine"])
+        copy_choice = witness["copyChoices"][0]
+        self.assertEqual(copy_choice["copied_object_id"], "engine")
+        self.assertIsNone(copy_choice["target_object_id"])
+        self.assertTrue(copy_choice["as_enters"])
+
+    def test_spell_copy_witness_preserves_original_targets_and_x(self):
+        import manabrew_pilot_v9 as p
+        chosen, witness = p.choose_copy_object({
+            "type": "chooseCards",
+            "copyKind": "spell",
+            "targetObjectId": "stack-spell",
+            "originalTargetIds": ["opponent"],
+            "originalXValue": 5,
+        }, [{"id": "stack-spell", "objectKind": "spell"}], source_card_id="copy-effect")
+        self.assertEqual(chosen["id"], "stack-spell")
+        self.assertFalse(witness["as_enters"])
+        self.assertEqual(witness["copy_kind"], "spell")
+        self.assertEqual(witness["effective_target_ids"], ("opponent",))
+        self.assertEqual(witness["effective_x_value"], 5)
+
+    def test_untyped_copy_object_fails_closed_instead_of_assuming_permanent(self):
+        import manabrew_pilot_v9 as p
+        with self.assertRaises(SemanticError):
+            p.choose_copy_object(
+                {"type": "chooseCards"},
+                [{"id": "unknown-object"}],
+                source_card_id="copy-effect",
+            )
+
+    def test_copy_x_prompt_uses_engine_original_and_never_raw_maximum(self):
+        witness = {"chosenActionDescription": "Copy target spell.", "chosenActionCardId": "copy-effect"}
+        answer = _chosen_action_copy_followup({
+            "type": "chooseNumber", "copyKind": "spell", "min": 0,
+            "max": 2147483647, "originalXValue": 3,
+        }, witness)
+        self.assertEqual(answer["output"]["chosenNumber"], 3)
+        self.assertIsNone(_chosen_action_copy_followup({
+            "type": "chooseNumber", "copyKind": "spell", "min": 0, "max": 2147483647,
+        }, witness))
+
+    def test_copied_object_keeps_original_targets(self):
+        target = {"type": "card", "id": "target-a"}
+        witness = {"chosenActionDescription": "Copy this ability; you may choose new targets.", "chosenActionCardId": "copy-effect"}
+        answer = _chosen_action_copy_followup({
+            "type": "chooseBoardTargets", "copyKind": "triggeredAbility",
+            "minTargets": 1, "maxTargets": 1,
+            "candidates": [target, {"type": "card", "id": "target-b"}],
+            "originalTargets": [target], "mayChooseNewTargets": True,
+        }, witness)
+        self.assertEqual(answer["output"]["chosen"], [target])
 
 
 class BranchAwarePlannerTests(unittest.TestCase):

@@ -24,7 +24,7 @@ CAPABILITIES: dict[str, Capability] = {
     "typed_mana_ledger": Capability("typed_mana_ledger", True, "Source-aware mana production and exact payment attribution.", ("actionId", "cardId", "abilityId")),
     "convoke_payment": Capability("convoke_payment", True, "Convoke is payment, never mana production."),
     "creature_mana": Capability("creature_mana", True, "Creature mana uses typed mana-ability metadata."),
-    "copy_choice": Capability("copy_choice", True, "Copy choices are distinct from targets."),
+    "copy_choice": Capability("copy_choice", True, "Permanent, spell and ability copies preserve typed object identity, targets and X; as-enters copy choices are not targets.", ("copyKind", "copiedObjectId")),
     "search_selection": Capability("search_selection", True, "Search/reveal/target/copy selections are distinct."),
     "vannifar_chain": Capability("vannifar_chain", True, "Prime Speaker Vannifar searches exactly MV+1 creatures."),
     "soulbond_blink": Capability("soulbond_blink", True, "Blink creates a new object and breaks/reforms soulbond."),

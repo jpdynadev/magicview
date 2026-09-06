@@ -12,7 +12,7 @@ import os
 from typing import Any, Mapping, Sequence
 
 import kinnan_policy_v9 as policy
-from kinnan_semantics_v9 import CopyChoice, SelectionConstraint, SelectionKind, SemanticError, SemanticRoleProfile, architecture_neutral_role_score, priority_available
+from kinnan_semantics_v9 import CopyChoice, CopyKind, SelectionConstraint, SelectionKind, SemanticError, SemanticRoleProfile, architecture_neutral_role_score, priority_available
 
 PILOT_VERSION = "v9.0.0-semantic-alpha"
 POLICY_VERSION = policy.POLICY_VERSION
@@ -203,8 +203,88 @@ def choose_discard(
     )[:count]
 
 
-def record_copy_choice(*, source_card_id: str, copied_object_id: str, as_enters: bool, target_object_id: str | None = None) -> dict[str, Any]:
-    return CopyChoice(source_card_id, copied_object_id, as_enters, target_object_id).__dict__.copy()
+def _copy_kind(value: Any) -> CopyKind:
+    folded = str(value or "permanent").replace("_", "").replace("-", "").casefold()
+    aliases = {
+        "permanent": CopyKind.PERMANENT,
+        "spell": CopyKind.SPELL,
+        "activatedability": CopyKind.ACTIVATED_ABILITY,
+        "triggeredability": CopyKind.TRIGGERED_ABILITY,
+    }
+    if folded not in aliases:
+        raise SemanticError(f"unsupported typed copy kind {value!r}")
+    return aliases[folded]
+
+
+def record_copy_choice(
+    *,
+    source_card_id: str,
+    copied_object_id: str,
+    copy_kind: str | CopyKind = CopyKind.PERMANENT,
+    as_enters: bool | None = None,
+    target_object_id: str | None = None,
+    original_target_ids: Sequence[str] = (),
+    chosen_target_ids: Sequence[str] = (),
+    may_choose_new_targets: bool = False,
+    original_x_value: int | None = None,
+    copied_x_value: int | None = None,
+) -> dict[str, Any]:
+    kind = copy_kind if isinstance(copy_kind, CopyKind) else _copy_kind(copy_kind)
+    choice = CopyChoice(
+        source_card_id=source_card_id,
+        copied_object_id=copied_object_id,
+        copy_kind=kind,
+        as_enters=kind == CopyKind.PERMANENT if as_enters is None else as_enters,
+        target_object_id=target_object_id,
+        original_target_ids=tuple(str(x) for x in original_target_ids),
+        chosen_target_ids=tuple(str(x) for x in chosen_target_ids),
+        may_choose_new_targets=may_choose_new_targets,
+        original_x_value=original_x_value,
+        copied_x_value=copied_x_value,
+    )
+    result = choice.__dict__.copy()
+    result["copy_kind"] = choice.copy_kind.value
+    result["effective_target_ids"] = choice.effective_target_ids
+    result["effective_x_value"] = choice.effective_x_value
+    return result
+
+
+def choose_copy_object(
+    prompt: Mapping[str, Any],
+    candidates: Sequence[Mapping[str, Any]],
+    *,
+    source_card_id: str,
+    desired_roles: Sequence[str] = (),
+) -> tuple[Mapping[str, Any], dict[str, Any]]:
+    """Choose one engine-authorized object and emit an auditable copy witness."""
+    inp = prompt.get("input") or prompt
+    if not candidates:
+        raise SemanticError("copy prompt has no engine-authorized candidates")
+    copy_prompt = {"input": {**inp, "selectionKind": "copy", "min": 1, "max": 1}}
+    chosen = choose_cards(copy_prompt, candidates, desired_roles=desired_roles)
+    if len(chosen) != 1:
+        raise SemanticError("copy prompt must resolve to exactly one object")
+    copied = chosen[0]
+    copied_id = str(copied.get("id") or copied.get("cardId") or "")
+    raw_kind = inp.get("copyKind") or copied.get("copyKind") or copied.get("objectKind")
+    if raw_kind is None and (inp.get("asEnters") is True or str(copied.get("zone") or "").casefold() == "battlefield"):
+        raw_kind = "permanent"
+    if raw_kind is None:
+        raise SemanticError("copy candidate requires typed permanent, spell, or ability kind")
+    kind = _copy_kind(raw_kind)
+    original_targets = tuple(str(x) for x in (inp.get("originalTargetIds") or copied.get("targetIds") or ()))
+    copied_x = inp.get("originalXValue", copied.get("xValue"))
+    typed_as_enters = inp.get("asEnters")
+    witness = record_copy_choice(
+        source_card_id=source_card_id,
+        copied_object_id=copied_id,
+        copy_kind=kind,
+        as_enters=typed_as_enters if isinstance(typed_as_enters, bool) else None,
+        target_object_id=str(inp.get("targetObjectId")) if inp.get("targetObjectId") else None,
+        original_target_ids=original_targets,
+        original_x_value=copied_x,
+    )
+    return copied, witness
 
 
 def canary_main() -> int:

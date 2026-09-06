@@ -30,6 +30,13 @@ class SelectionKind(str, Enum):
     CHOOSE = "choose"
 
 
+class CopyKind(str, Enum):
+    PERMANENT = "permanent"
+    SPELL = "spell"
+    ACTIVATED_ABILITY = "activatedAbility"
+    TRIGGERED_ABILITY = "triggeredAbility"
+
+
 class PaymentKind(str, Enum):
     MANA = "mana"
     CONVOKE = "convoke"
@@ -213,10 +220,39 @@ class CopyChoice:
     copied_object_id: str
     as_enters: bool = True
     target_object_id: str | None = None
+    copy_kind: CopyKind = CopyKind.PERMANENT
+    original_target_ids: tuple[str, ...] = ()
+    chosen_target_ids: tuple[str, ...] = ()
+    may_choose_new_targets: bool = False
+    original_x_value: int | None = None
+    copied_x_value: int | None = None
 
     def __post_init__(self) -> None:
+        if not self.source_card_id or not self.copied_object_id:
+            raise SemanticError("copy choice requires stable source and copied-object identities")
+        if not isinstance(self.as_enters, bool):
+            raise SemanticError("copy as-enters flag must be boolean")
+        if self.copy_kind != CopyKind.PERMANENT and self.as_enters:
+            raise SemanticError("spell and ability copies are stack copies, not as-enters choices")
         if self.as_enters and self.target_object_id is not None:
             raise SemanticError("as-enters copy choice must not be recorded as a target")
+        if self.chosen_target_ids and not self.may_choose_new_targets and self.chosen_target_ids != self.original_target_ids:
+            raise SemanticError("copied object cannot change targets without engine permission")
+        for label, value in (("original", self.original_x_value), ("copied", self.copied_x_value)):
+            if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
+                raise SemanticError(f"{label} X value must be a non-negative integer")
+        if self.copied_x_value is not None and self.original_x_value is None:
+            raise SemanticError("copied X value requires the engine's original X value")
+        if self.original_x_value is not None and self.copied_x_value not in (None, self.original_x_value):
+            raise SemanticError("a copied spell or ability must preserve the original X value")
+
+    @property
+    def effective_target_ids(self) -> tuple[str, ...]:
+        return self.chosen_target_ids or self.original_target_ids
+
+    @property
+    def effective_x_value(self) -> int | None:
+        return self.original_x_value if self.copied_x_value is None else self.copied_x_value
 
 
 def vannifar_candidates(sacrificed_mana_value: int, library: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:

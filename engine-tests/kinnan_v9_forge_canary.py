@@ -533,6 +533,103 @@ def _pay_mana_cost_answer(
     }
 
 
+def _chosen_action_copy_followup(
+    prompt_input: dict[str, Any],
+    witness: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    """Resolve only engine-typed follow-ups to a selected copy action.
+
+    Forge supplies the legal candidate set. The pilot selects within that set
+    and records copy kind, inherited targets, and inherited X rather than
+    reconstructing copiable values from card text.
+    """
+    if not witness:
+        return None
+    prompt_type = str(prompt_input.get("type") or "")
+    title = str((prompt_input.get("presentation") or {}).get("title") or "")
+    description = str(witness.get("chosenActionDescription") or "")
+    typed_kind = prompt_input.get("copyKind")
+    selection_kind = str(prompt_input.get("selectionKind") or "").casefold()
+    copy_context = bool(typed_kind) or "copy" in selection_kind or "copy" in title.casefold() or "copy" in description.casefold()
+    if not copy_context:
+        return None
+    source_card_id = str(witness.get("chosenActionCardId") or "")
+    if not source_card_id:
+        return None
+
+    if prompt_type == "chooseCards":
+        cards = [card for card in list(prompt_input.get("cards") or []) if isinstance(card, dict)]
+        if not cards:
+            return None
+        chosen, copy_witness = pilot.choose_copy_object(
+            prompt_input,
+            cards,
+            source_card_id=source_card_id,
+            desired_roles=("mana_source", "untapper", "outlet"),
+        )
+        copied_id = str(chosen.get("id") or chosen.get("cardId") or "")
+        witness.setdefault("copyChoices", []).append(copy_witness)
+        return {
+            "type": "chooseCards",
+            "output": {
+                "type": "chooseCardsDecision",
+                "chosenCardIds": [copied_id],
+            },
+        }
+
+    if prompt_type == "chooseNumber":
+        # Copies inherit X. Never maximize an unbounded numeric prompt or
+        # invent a new X value; answer only when Forge exposes the original.
+        original_x = prompt_input.get("originalXValue")
+        if not isinstance(original_x, int) or isinstance(original_x, bool) or original_x < 0:
+            return None
+        minimum = prompt_input.get("min", prompt_input.get("minimum", 0))
+        maximum = prompt_input.get("max", prompt_input.get("maximum", original_x))
+        if (
+            not isinstance(minimum, int)
+            or isinstance(minimum, bool)
+            or not isinstance(maximum, int)
+            or isinstance(maximum, bool)
+            or not minimum <= original_x <= maximum
+        ):
+            return None
+        witness.setdefault("copyInheritedXValues", []).append(original_x)
+        return {
+            "type": "chooseNumber",
+            "output": {"type": "numberDecision", "chosenNumber": original_x},
+        }
+
+    if prompt_type == "chooseBoardTargets":
+        # A copied spell/ability keeps its targets unless its effect explicitly
+        # permits new ones. Keeping the original is deterministic and remains
+        # legal only when every original target is in Forge's candidate set.
+        candidates = list(prompt_input.get("candidates") or [])
+        original = list(prompt_input.get("originalTargets") or [])
+        minimum = prompt_input.get("minTargets", 0)
+        maximum = prompt_input.get("maxTargets", len(original))
+        if (
+            not original
+            or not isinstance(minimum, int)
+            or isinstance(minimum, bool)
+            or not isinstance(maximum, int)
+            or isinstance(maximum, bool)
+            or not minimum <= len(original) <= maximum
+            or any(target not in candidates for target in original)
+        ):
+            return None
+        witness.setdefault("copyTargetChoices", []).append({
+            "copyKind": typed_kind,
+            "keptOriginalTargets": original,
+            "mayChooseNewTargets": bool(prompt_input.get("mayChooseNewTargets", False)),
+        })
+        return {
+            "type": "chooseBoardTargets",
+            "output": {"type": "boardTargets", "chosen": original},
+        }
+
+    return None
+
+
 def _semantic_prompt_trace(trace: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Preserve decisions while ignoring transient empty-priority sampling."""
     canonical: list[dict[str, Any]] = []
@@ -938,6 +1035,8 @@ def run_canary(args: argparse.Namespace) -> dict[str, Any]:
                 answer = _chosen_cost_confirmation(inp, submitted_witness)
                 if answer is None:
                     answer = _chosen_optional_entry_payment(inp, submitted_witness)
+                if answer is None:
+                    answer = _chosen_action_copy_followup(inp, submitted_witness)
                 if answer is None:
                     answer = _chosen_action_card_selection(inp, submitted_witness)
                 if answer is None:
