@@ -5,6 +5,10 @@ param(
   [ValidateRange(60, 3600)]
   [int]$LeaseSeconds = 300,
   [string]$Python = "python",
+  [switch]$UseWsl,
+  [string]$WslDistribution = "Ubuntu",
+  [string]$WslHarnessJar = "/root/manabrew-kinnan/forge-harness/target/forge-harness-jar-with-dependencies.jar",
+  [string]$WslForgeHome = "/root/manabrew-kinnan/forge/forge-gui",
   [switch]$DryRun
 )
 
@@ -17,7 +21,7 @@ $required = @(
   "MANABREW_HARNESS_JAR",
   "MANABREW_FORGE_HOME"
 )
-if (-not $DryRun) {
+if (-not $DryRun -and -not $UseWsl) {
   $missing = @($required | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
   if ($missing.Count -gt 0) {
     throw "Missing required environment variables: $($missing -join ', ')"
@@ -36,6 +40,43 @@ $runnerArguments = @(
   "--lease-seconds", $LeaseSeconds
 )
 if ($DryRun) { $runnerArguments += "--dry-run" }
+
+if ($UseWsl) {
+  if ($repoRoot -notmatch '^([A-Za-z]):\\(.*)$') {
+    throw "WSL mode requires a repository on a Windows drive: $repoRoot"
+  }
+  $drive = $Matches[1].ToLowerInvariant()
+  $relativeRoot = $Matches[2].Replace('\', '/')
+  $repoRootWsl = "/mnt/$drive/$relativeRoot"
+  $wslRunner = "$repoRootWsl/engine-tests/local_queue_runner.py"
+  $wslEnvironment = @(
+    "NEON_DATA_API=$env:NEON_DATA_API",
+    "NEON_DATA_API_TOKEN=$env:NEON_DATA_API_TOKEN",
+    "MANABREW_REF=$env:MANABREW_REF",
+    "MANABREW_HARNESS_JAR=$WslHarnessJar",
+    "MANABREW_FORGE_HOME=$WslForgeHome"
+  )
+  if (-not $DryRun) {
+    $missing = @("NEON_DATA_API", "NEON_DATA_API_TOKEN", "MANABREW_REF" |
+      Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) })
+    if ($missing.Count -gt 0) {
+      throw "Missing required environment variables: $($missing -join ', ')"
+    }
+    & wsl.exe -d $WslDistribution -- test -f $WslHarnessJar
+    if ($LASTEXITCODE -ne 0) { throw "WSL harness JAR does not exist: $WslHarnessJar" }
+    & wsl.exe -d $WslDistribution -- test -d $WslForgeHome
+    if ($LASTEXITCODE -ne 0) { throw "WSL Forge home does not exist: $WslForgeHome" }
+  }
+  $wslArguments = @("-d", $WslDistribution, "--", "env") + $wslEnvironment +
+    @("python3", $wslRunner, "--max-shards", $MaxShards, "--lease-seconds", $LeaseSeconds)
+  if ($DryRun) { $wslArguments += "--dry-run" }
+  & wsl.exe @wslArguments
+  if ($LASTEXITCODE -ne 0) {
+    throw "Local Kinnan WSL queue runner failed with exit code $LASTEXITCODE"
+  }
+  return
+}
+
 & $Python @runnerArguments
 if ($LASTEXITCODE -ne 0) {
   throw "Local Kinnan queue runner failed with exit code $LASTEXITCODE"

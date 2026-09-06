@@ -66,7 +66,17 @@ From PowerShell:
 ```powershell
 .\scripts\run-local-kinnan-queue.ps1 -DryRun
 .\scripts\run-local-kinnan-queue.ps1 -MaxShards 1
+.\scripts\run-local-kinnan-queue.ps1 -UseWsl -DryRun
+.\scripts\run-local-kinnan-queue.ps1 -UseWsl -MaxShards 1
 ```
+
+`-UseWsl` is the configured path on this workstation. It runs Python, Java, and
+Forge inside Ubuntu while the scheduler itself remains local to Windows. The
+default cached runtime is `/root/manabrew-kinnan`; override `-WslHarnessJar`
+and `-WslForgeHome` if the cache is moved. Keep the three non-path settings
+(`NEON_DATA_API`, `NEON_DATA_API_TOKEN`, and `MANABREW_REF`) in the Windows
+account environment; the launcher passes them to the WSL process without
+writing them to the repository.
 
 Dry-run mode executes the semantic suite and canonical component canary, prints
 which environment variables are configured plus the current `rankingReady`
@@ -75,7 +85,7 @@ value, and makes zero database calls.
 Windows Task Scheduler can run `pwsh.exe` with:
 
 ```text
--NoProfile -File C:\path\to\magicview\scripts\run-local-kinnan-queue.ps1 -MaxShards 4
+-NoProfile -File C:\path\to\magicview\scripts\run-local-kinnan-queue.ps1 -UseWsl -MaxShards 4
 ```
 
 Use a dedicated Windows account, set “Do not start a new instance” for overlap,
